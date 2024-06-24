@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.22">
 <title>Deployment to Kubernetes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -667,72 +668,62 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>setup-scdf-repo.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[scdf-type] (oss, pro)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel-import-secret.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;secret-name&gt; &lt;namespace&gt; [secret-namespace] [--import</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>Creates the namespace and installs the relevant Carvel package and credentials. If the optional <em>scdf-type</em> is not provided the environmental variable <code>SCDF_TYPE</code> will be used.</p>
+<p>--placeholder]</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-prometheus-proxy.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;host&gt; &lt;port&gt; [step]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[--placeholder] Creates place holder secret in namespace. [--import] Creates <code>SecretImport</code> for secretgen-controller.</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">setup-scdf-repo.sh</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default <code>step</code> is 10s</p>
+<p>[scdf-type] (oss, pro)</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-database.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;app&gt; &lt;database&gt; &lt;url&gt; &lt;username/secret-name&gt;  [password/secret-username-key] [secret-password-key]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Creates the namespace and installs the relevant Carvel package and credentials. If the optional <em>scdf-type</em> is not provided the environmental variable <code>SCDF_TYPE</code> will be used.</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">configure-prometheus-proxy.sh</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>If only <em>secret-name</em> is provided then <em>secret-username-key</em> defaults to <code>username</code> and <em>secret-password-key</em> defaults to <code>password</code>.</p>
-</div>
-<div class="paragraph">
-<p>The following 3 combinations are allowed after the <em>url</em>:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>&lt;secret-name&gt;</p>
-</li>
-<li>
-<p>&lt;secret-name&gt; &lt;username-key&gt;
-&lt;password-key&gt;</p>
-</li>
-<li>
-<p>&lt;username&gt; &lt;password&gt;</p>
-</li>
-</ul>
+<p>&lt;host&gt; &lt;port&gt; [step]</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deploy-scdf.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default <code>step</code> is 10s</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">configure-database.sh</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>Deploys the application using the package and <code>scdf-values.yml</code> in the current directory.
-The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
+<p>&lt;app&gt; &lt;database&gt; &lt;url&gt; &lt;username/secret-name&gt;  [password/secret-username-key] [secret-password-key]</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update-scdf.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>If only <em>secret-name</em> is provided then <em>secret-username-key</em> defaults to <code>username</code> and <em>secret-password-key</em> defaults to <code>password</code>.</code></p>
+<p class="tableblock"><code>The following 3 combinations are allowed after the <em>url</em>:</code></p>
+<p class="tableblock"><code>* &lt;secret-name&gt;
+* &lt;secret-name&gt; &lt;username-key&gt;
+&lt;password-key&gt;
+* &lt;username&gt; &lt;password&gt;</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">deploy-scdf.sh</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Deploys the application using the package and <code>scdf-values.yml</code> in the current directory.
+The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">update-scdf.sh</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Updated the deployed application using a modified values file.
+The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">export-dataflow-ip.sh</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>Updated the deployed application using a modified values file.
-The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
+<p>N/A</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>export-dataflow-ip.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Will print the URL to access dataflow. If you use <code>source ./export-dataflow-ip.sh</code> it will export <code>DATAFLOW_URL</code> to be used by <code>register-apps.sh</code></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">register-apps.sh</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>Will print the URL to access dataflow. If you use <code>source ./export-dataflow-ip.sh</code> it will export <code>DATAFLOW_URL</code> to be used by <code>register-apps.sh</code></p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register-apps.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;broker&gt; [stream-application-version]</p></td>
-<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p><em>broker</em> must be one of rabbit or kafka.
-<em>stream-application-version</em> is optional and will install the latest version. The latest version is 2021.1.2</p>
+<p>&lt;broker&gt; [stream-application-version]</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -786,6 +777,9 @@ The following steps will provide help.</p>
 </ul>
 </div>
 <div class="paragraph">
+<p><em>*The best option to ensure using the type and version of package intended is to modify <code>deploy/versions.yaml</code>*</em></p>
+</div>
+<div class="paragraph">
 <p>The environmental variables can also be configured manually to override the values.</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
@@ -811,6 +805,11 @@ The following steps will provide help.</p>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>DATAFLOW_VERSION</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Version of Spring Cloud Data Flow</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">2.11.2</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DATAFLOW_PRO_VERSION</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Version of Spring Cloud Data Flow Pro</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.6.1</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>SKIPPER_VERSION</code></p></td>
@@ -844,6 +843,18 @@ The following steps will provide help.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The above environmental variables should only be provided if different from the default in <code>deploy/versions.yaml</code>
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_prepare_configuration_file">Prepare Configuration file</h4>
@@ -873,7 +884,7 @@ The following steps will provide help.</p>
 <pre class="CodeRay highlight"><code data-lang="shell"># When deploying SCDF Pro.
 export TANZU_DOCKER_USERNAME=&quot;&lt;tanzu-net-username&gt;&quot;
 export TANZU_DOCKER_PASSWORD=&quot;&lt;tanzu-net-password&gt;&quot;
-docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.tanzu.vmware.com
+docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.packages.broadcom.com
 
 # Always required to ensure you don't experience rate limiting with Docker HUB
 export DOCKER_HUB_USERNAME=&quot;&lt;docker-hub-username&gt;&quot;
@@ -1239,8 +1250,8 @@ export DOCKER_EMAIL=&lt;email-of-docker-use&gt;</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">export DATAFLOW_VERSION=2.11.4-SNAPSHOT
-export SKIPPER_VERSION=2.11.4-SNAPSHOT</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">export DATAFLOW_VERSION=2.11.3-SNAPSHOT
+export SKIPPER_VERSION=2.11.3-SNAPSHOT</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1465,7 +1476,7 @@ Please report any errors with the scripts along with detail information about th
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-12-19 16:46:52 +0200
+Last updated 2024-04-11 13:22:15 +0200
 </div>
 </div>
 <script>
