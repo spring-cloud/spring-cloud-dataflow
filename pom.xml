@@ -76,8 +76,7 @@
 		<module>spring-cloud-dataflow-server</module>
 		<module>spring-cloud-dataflow-tasklauncher</module>
 		<module>spring-cloud-dataflow-single-step-batch-job</module>
-<!--		TODO: Boot3x followup -->
-<!--		<module>spring-cloud-dataflow-composed-task-runner</module>-->
+		<module>spring-cloud-dataflow-composed-task-runner</module>
 		<module>spring-cloud-dataflow-test</module>
 		<module>spring-cloud-dataflow-dependencies</module>
 		<module>spring-cloud-dataflow-classic-docs</module>

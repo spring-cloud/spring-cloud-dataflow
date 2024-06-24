@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,12 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersIncrementer;
 import org.springframework.batch.core.Step;
-import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.builder.FlowJobBuilder;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
@@ -65,7 +66,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 	private TaskExecutor taskExecutor;
 
 	@Autowired
-	private JobBuilderFactory jobBuilderFactory;
+	private JobRepository jobRepository;
 
 	@Autowired
 	private TaskNameResolver taskNameResolver;
@@ -105,9 +106,8 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 		taskParser.parse().accept(composedRunnerVisitor);
 
 		this.visitorDeque = composedRunnerVisitor.getFlow();
-
-		FlowJobBuilder builder = this.jobBuilderFactory
-				.get(this.taskNameResolver.getTaskName())
+		JobBuilder jobBuilder = new JobBuilder(this.taskNameResolver.getTaskName(), jobRepository);
+		FlowJobBuilder builder = jobBuilder
 				.start(this.flowBuilder
 						.start(createFlow())
 						.end())

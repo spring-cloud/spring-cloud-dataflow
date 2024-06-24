@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,6 +39,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.beans.factory.BeanCreationException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -46,6 +48,10 @@ import org.springframework.cloud.dataflow.composedtaskrunner.configuration.Compo
 import org.springframework.cloud.task.batch.configuration.TaskBatchAutoConfiguration;
 import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -379,8 +385,10 @@ public class ComposedRunnerVisitorTests {
 		setupContextForGraph(argsForCtx.toArray(new String[0]));
 	}
 
-	private void setupContextForGraph(String[] args) {
-		this.applicationContext = SpringApplication.run(new Class[]{ComposedRunnerVisitorConfiguration.class,
+	private void setupContextForGraph(String[] args) throws RuntimeException{
+		this.applicationContext = SpringApplication.
+			run(new Class[]{ ComposedRunnerVisitorTestsConfiguration.class,
+				ComposedRunnerVisitorConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class,
 				EmbeddedDataSourceConfiguration.class,
 				BatchAutoConfiguration.class,
@@ -403,7 +411,7 @@ public class ComposedRunnerVisitorTests {
 		if(isCTR) {
 			assertThat(jobExecution.getJobParameters().getParameters().get("ctr.id")).isNotNull();
 		} else {
-			assertThat(jobExecution.getJobParameters().getParameters().get("run.id")).isEqualTo(new JobParameter(1L));
+			assertThat(jobExecution.getJobParameters().getParameters().get("run.id")).isEqualTo(new JobParameter(1L, Long.class));
 		}
 		return jobExecution.getStepExecutions();
 	}
@@ -417,6 +425,16 @@ public class ComposedRunnerVisitorTests {
 	private void verifyExceptionThrown(String message, String graph) {
 		Throwable exception = assertThrows(BeanCreationException.class, () -> setupContextForGraph(graph));
 		assertThat(exception.getCause().getCause().getMessage()).isEqualTo(message);
+	}
+
+	@Configuration
+	public static class ComposedRunnerVisitorTestsConfiguration  {
+		@Autowired
+		DataSource dataSource;
+		@Bean
+		public PlatformTransactionManager transactionManager() {
+			return new JdbcTransactionManager(dataSource);
+		}
 	}
 
 }

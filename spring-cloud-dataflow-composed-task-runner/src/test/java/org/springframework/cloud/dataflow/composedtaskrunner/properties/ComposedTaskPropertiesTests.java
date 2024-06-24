@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,12 +127,12 @@ public class ComposedTaskPropertiesTests {
 	@Test
 	public void testAssignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
 		this.contextRunner
-				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=POST")
+				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=client_secret_post")
 				.withUserConfiguration(Config1.class).run((context) -> {
 					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
 					assertThat(properties.getOauth2ClientCredentialsClientAuthenticationMethod())
 							.withFailMessage("The OAuth2 client credentials client authentication method couldn't be assigned correctly.")
-							.isEqualTo(ClientAuthenticationMethod.POST);
+							.isEqualTo(ClientAuthenticationMethod.CLIENT_SECRET_POST);
 				});
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +35,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -44,12 +45,14 @@ import org.springframework.transaction.interceptor.TransactionAttribute;
  * @author Ilayaperumal Gopinathan
  */
 @Configuration
-@EnableBatchProcessing
 @EnableConfigurationProperties(ComposedTaskProperties.class)
 public class ComposedRunnerVisitorConfiguration {
 
 	@Autowired
-	private StepBuilderFactory steps;
+	private JobRepository jobRepository;
+
+	@Autowired
+	private PlatformTransactionManager transactionManager;
 
 	@Autowired
 	private ComposedTaskProperties composedTaskProperties;
@@ -173,26 +176,28 @@ public class ComposedRunnerVisitorConfiguration {
 
 	private Step createTaskletStepWithListener(final String taskName,
 			StepExecutionListener stepExecutionListener) {
-		return this.steps.get(taskName)
+		StepBuilder stepBuilder = new StepBuilder(taskName, jobRepository);
+		return stepBuilder
 				.tasklet(new Tasklet() {
 					@Override
 					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 						return RepeatStatus.FINISHED;
 					}
-				})
+				}, this.transactionManager)
 				.transactionAttribute(getTransactionAttribute())
 				.listener(stepExecutionListener)
 				.build();
 	}
 
 	private Step createTaskletStep(final String taskName) {
-		return this.steps.get(taskName)
+		StepBuilder stepBuilder = new StepBuilder(taskName, jobRepository);
+		return stepBuilder
 				.tasklet(new Tasklet() {
 					@Override
 					public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 						return RepeatStatus.FINISHED;
 					}
-				})
+				}, transactionManager)
 				.transactionAttribute(getTransactionAttribute())
 				.build();
 	}

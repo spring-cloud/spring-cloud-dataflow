@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,18 +31,21 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.core.Base64Utils;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.core.env.Environment;
 import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.interceptor.DefaultTransactionAttribute;
 import org.springframework.transaction.interceptor.TransactionAttribute;
@@ -74,13 +77,16 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 	private List<String> arguments = new ArrayList<>();
 
 	@Autowired
-	private StepBuilderFactory steps;
+	private JobRepository jobRepository;
+
+	@Autowired
+	private PlatformTransactionManager transactionManager;
 
 	@Autowired
 	private StepExecutionListener composedTaskStepExecutionListener;
 
 	@Autowired
-	private TaskExplorerContainer taskExplorerContainer;
+	private TaskExplorer taskExplorer;
 
 	@Autowired
 	private TaskProperties taskProperties;
@@ -133,7 +139,7 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 		TaskLauncherTasklet taskLauncherTasklet = new TaskLauncherTasklet(
 				this.clientRegistrations,
 				this.clientCredentialsTokenResponseClient,
-				this.taskExplorerContainer.get(this.taskNameId),
+				this.taskExplorer,
 				this.composedTaskPropertiesFromEnv,
 				this.taskName,
 				taskProperties,
@@ -168,9 +174,9 @@ public class ComposedTaskRunnerStepFactory implements FactoryBean<Step> {
 
 		taskLauncherTasklet.setProperties(propertiesToUse);
 		logger.debug("Properties to use {}", propertiesToUse);
-
-		return this.steps.get(this.taskName)
-				.tasklet(taskLauncherTasklet)
+		StepBuilder stepBuilder = new StepBuilder(this.taskName, this.jobRepository);
+		return stepBuilder
+				.tasklet(taskLauncherTasklet, this.transactionManager)
 				.transactionAttribute(getTransactionAttribute())
 				.listener(this.composedTaskStepExecutionListener)
 				.build();

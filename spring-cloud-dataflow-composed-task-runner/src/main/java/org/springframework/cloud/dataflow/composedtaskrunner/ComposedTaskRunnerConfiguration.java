@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,34 +17,21 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.batch.core.configuration.annotation.BatchConfigurer;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
-import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
-import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.cloud.task.listener.TaskExecutionListener;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;
-import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configures the Job that will execute the Composed Task Execution.
@@ -52,13 +39,11 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@EnableBatchProcessing
 @EnableTask
 @EnableConfigurationProperties(ComposedTaskProperties.class)
 @Configuration
 @Import(org.springframework.cloud.dataflow.composedtaskrunner.StepBeanDefinitionRegistrar.class)
 public class ComposedTaskRunnerConfiguration {
-	private final static Logger logger = LoggerFactory.getLogger(ComposedTaskRunnerConfiguration.class);
 
 	@Bean
 	public TaskExecutionListener taskExecutionListener() {
@@ -66,54 +51,8 @@ public class ComposedTaskRunnerConfiguration {
 	}
 
 	@Bean
-	public StepExecutionListener composedTaskStepExecutionListener(TaskExplorerContainer taskExplorerContainer) {
-		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener(taskExplorerContainer);
-	}
-
-	@Bean
-	TaskExplorerContainer taskExplorerContainer(TaskExplorer taskExplorer, DataSource dataSource, ComposedTaskProperties properties, Environment env) {
-		Map<String, TaskExplorer> explorers = new HashMap<>();
-		String ctrName = env.getProperty("spring.cloud.task.name");
-		if (!StringUtils.hasText(ctrName)) {
-			throw new IllegalStateException("spring.cloud.task.name property must have a value.");
-		}
-		TaskParser parser = new TaskParser("ctr", properties.getGraph(), false, true);
-		StepBeanDefinitionRegistrar.TaskAppsMapCollector collector = new StepBeanDefinitionRegistrar.TaskAppsMapCollector();
-		parser.parse().accept(collector);
-		Set<String> taskNames = collector.getTaskApps().keySet();
-		logger.debug("taskExplorerContainer:taskNames:{}", taskNames);
-		for (String taskName : taskNames) {
-			addTaskExplorer(dataSource, properties, env, explorers, taskName);
-			String appName = taskName.replace(ctrName + "-", "");
-			addTaskExplorer(dataSource, properties, env, explorers, appName);
-			if(taskName.length() > ctrName.length()) {
-				String shortTaskName = taskName.substring(ctrName.length() + 1);
-				addTaskExplorer(dataSource, properties, env, explorers, shortTaskName);
-			}
-		}
-		return new TaskExplorerContainer(explorers, taskExplorer);
-	}
-
-	private static void addTaskExplorer(
-			DataSource dataSource,
-			ComposedTaskProperties properties,
-			Environment env,
-			Map<String, TaskExplorer> explorers,
-			String taskName
-	) {
-		logger.debug("addTaskExplorer:{}", taskName);
-		String propertyName = String.format("app.%s.spring.cloud.task.tablePrefix", taskName);
-		String prefix = properties.getComposedTaskAppProperties().get(propertyName);
-		if (prefix == null) {
-			prefix = env.getProperty(propertyName);
-		}
-		if (prefix != null) {
-			TaskExecutionDaoFactoryBean factoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, prefix);
-			logger.debug("taskExplorerContainer:adding:{}:{}", taskName, prefix);
-			explorers.put(taskName, new SimpleTaskExplorer(factoryBean));
-		} else {
-			logger.warn("Cannot find {} in {} ", propertyName, properties.getComposedTaskAppProperties());
-		}
+	public StepExecutionListener composedTaskStepExecutionListener(TaskExplorer taskExplorer) {
+		return new org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskStepExecutionListener(taskExplorer);
 	}
 
 	@Bean
@@ -128,25 +67,21 @@ public class ComposedTaskRunnerConfiguration {
 		taskExecutor.setMaxPoolSize(properties.getSplitThreadMaxPoolSize());
 		taskExecutor.setKeepAliveSeconds(properties.getSplitThreadKeepAliveSeconds());
 		taskExecutor.setAllowCoreThreadTimeOut(
-				properties.isSplitThreadAllowCoreThreadTimeout());
+			properties.isSplitThreadAllowCoreThreadTimeout());
 		taskExecutor.setQueueCapacity(properties.getSplitThreadQueueCapacity());
 		taskExecutor.setWaitForTasksToCompleteOnShutdown(
-				properties.isSplitThreadWaitForTasksToCompleteOnShutdown());
+			properties.isSplitThreadWaitForTasksToCompleteOnShutdown());
 		return taskExecutor;
 	}
 
+	/**
+	 * Provides the {@link JobRepository} that is configured to be used by the composed task runner.
+	 */
 	@Bean
-	public BatchConfigurer getComposedBatchConfigurer(
-			BatchProperties properties,
-			DataSource dataSource,
-			TransactionManagerCustomizers transactionManagerCustomizers,
-			ComposedTaskProperties composedTaskProperties
-	) {
-		return new ComposedBatchConfigurer(
-				properties,
-				dataSource,
-				transactionManagerCustomizers,
-				composedTaskProperties
-		);
+	public BeanPostProcessor jobRepositoryBeanPostProcessor(PlatformTransactionManager transactionManager,
+															DataSource incrementerDataSource,
+															ComposedTaskProperties composedTaskProperties) {
+		return new JobRepositoryBeanPostProcessor(transactionManager, incrementerDataSource, composedTaskProperties);
 	}
+
 }

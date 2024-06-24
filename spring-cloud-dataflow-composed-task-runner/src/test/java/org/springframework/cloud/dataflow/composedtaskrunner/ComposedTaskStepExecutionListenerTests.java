@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
-import java.util.Collections;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,10 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -40,7 +37,6 @@ import static org.mockito.Mockito.when;
  */
 public class ComposedTaskStepExecutionListenerTests {
 
-	private TaskExplorerContainer taskExplorerContainer;
 	private TaskExplorer taskExplorer;
 
 	private StepExecution stepExecution;
@@ -50,16 +46,15 @@ public class ComposedTaskStepExecutionListenerTests {
 	@BeforeEach
 	public void setup() {
 		this.taskExplorer = mock(TaskExplorer.class);
-		this.taskExplorerContainer = new TaskExplorerContainer(Collections.emptyMap(), taskExplorer);
 		this.stepExecution = getStepExecution();
-		this.taskListener = new ComposedTaskStepExecutionListener(this.taskExplorerContainer);
+		this.taskListener = new ComposedTaskStepExecutionListener(taskExplorer);
 	}
 
 	@Test
 	public void testSuccessfulRun() {
 		TaskExecution taskExecution = getDefaultTaskExecution(0, null);
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
-		populateExecutionContext(taskExecution.getTaskName(),111L, SchemaVersionTarget.defaultTarget().getName());
+		populateExecutionContext(taskExecution.getTaskName(),111L);
 		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(ExitStatus.COMPLETED);
 	}
 
@@ -69,7 +64,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		TaskExecution taskExecution = getDefaultTaskExecution(0,
 				expectedTaskStatus.getExitCode());
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
-		populateExecutionContext(taskExecution.getTaskName(), 111L, SchemaVersionTarget.defaultTarget().getName());
+		populateExecutionContext(taskExecution.getTaskName(), 111L);
 
 		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(expectedTaskStatus);
 	}
@@ -80,7 +75,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		TaskExecution taskExecution = getDefaultTaskExecution(1,
 				expectedTaskStatus.getExitCode());
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
-		populateExecutionContext(taskExecution.getTaskName(), 111L, SchemaVersionTarget.defaultTarget().getName());
+		populateExecutionContext(taskExecution.getTaskName(), 111L);
 
 		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(expectedTaskStatus);
 	}
@@ -89,7 +84,7 @@ public class ComposedTaskStepExecutionListenerTests {
 	public void testFailedRun() {
 		TaskExecution taskExecution = getDefaultTaskExecution(1, null);
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
-		populateExecutionContext(taskExecution.getTaskName(), 111L, SchemaVersionTarget.defaultTarget().getName());
+		populateExecutionContext(taskExecution.getTaskName(), 111L);
 
 		assertThat(this.taskListener.afterStep(this.stepExecution)).isEqualTo(ExitStatus.FAILED);
 	}
@@ -110,10 +105,9 @@ public class ComposedTaskStepExecutionListenerTests {
 		return new StepExecution(STEP_NAME, jobExecution);
 	}
 
-	private void populateExecutionContext(String taskName, Long taskExecutionId, String schemaTarget) {
+	private void populateExecutionContext(String taskName, Long taskExecutionId) {
 		this.stepExecution.getExecutionContext().put("task-name", taskName);
 		this.stepExecution.getExecutionContext().put("task-execution-id", taskExecutionId);
-		this.stepExecution.getExecutionContext().put("schema-target", schemaTarget);
 	}
 
 	private TaskExecution getDefaultTaskExecution (int exitCode,
@@ -122,7 +116,7 @@ public class ComposedTaskStepExecutionListenerTests {
 		taskExecution.setTaskName("test-ctr");
 		taskExecution.setExitMessage(exitMessage);
 		taskExecution.setExitCode(exitCode);
-		taskExecution.setEndTime(new Date());
+		taskExecution.setEndTime(LocalDateTime.now());
 		return taskExecution;
 	}
 }
