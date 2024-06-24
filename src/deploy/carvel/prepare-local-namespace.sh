@@ -38,13 +38,15 @@ kubectl create serviceaccount "$SA" --namespace $NS
 
 $SCDIR/add-local-registry-secret.sh scdfmetadata docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 $SCDIR/add-local-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
-
+patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"}]}'
 
 if [ "$SCDF_TYPE" = "pro" ]; then
-    check_env TANZU_DOCKER_USERNAME
-    check_env TANZU_DOCKER_PASSWORD
-    $SCDIR/add-local-registry-secret.sh reg-creds-dev-registry dev.registry.tanzu.vmware.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
-    patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name": "reg-creds-dev-registry"}]}'
-else
-    patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"}]}'
+    if [ "$TANZU_DOCKER_USERNAME" = "" ]; then
+        echo "Cannot find TANZU_DOCKER_USERNAME"
+    else
+        check_env TANZU_DOCKER_PASSWORD
+        $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry registry.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
+        $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry spring-scdf-docker-virtual.usw1.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
+        patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dev-registry"}]}'
+    fi
 fi

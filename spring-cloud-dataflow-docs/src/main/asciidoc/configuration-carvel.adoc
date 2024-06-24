@@ -53,7 +53,7 @@ These scripts assume you are connected to a Kubernetes cluster and `kubectl` is 
 
 | carvel-import-secret.sh
 | <secret-name> <namespace> [secret-namespace] [--import|--placeholder]
-| [--plarholder] Creates place holder secret in namespace. [--import] Creates `SecretImport` for secretgen-controller.
+| [--placeholder] Creates place holder secret in namespace. [--import] Creates `SecretImport` for secretgen-controller.
 
 | setup-scdf-repo.sh
 | [scdf-type] (oss, pro)
@@ -186,7 +186,7 @@ Login to docker and optionally registry.tanzu.vmware.com for Spring Cloud Data F
 # When deploying SCDF Pro.
 export TANZU_DOCKER_USERNAME="<tanzu-net-username>"
 export TANZU_DOCKER_PASSWORD="<tanzu-net-password>"
-docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.tanzu.vmware.com
+docker login --username $TANZU_DOCKER_USERNAME --password $TANZU_DOCKER_PASSWORD registry.packages.broadcom.com
 
 # Always required to ensure you don't experience rate limiting with Docker HUB
 export DOCKER_HUB_USERNAME="<docker-hub-username>"
