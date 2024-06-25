@@ -148,8 +148,10 @@ public class JobExecutionController {
 	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Void> restartJobExecution(
-			@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException {
-		taskJobService.restartJobExecution(jobExecutionId);
+			@PathVariable("executionId") long jobExecutionId,
+			@RequestParam(value = "useJsonJobParameters", required = false) Boolean useJsonJobParameters
+	) throws NoSuchJobExecutionException {
+		taskJobService.restartJobExecution(jobExecutionId, useJsonJobParameters);
 		return ResponseEntity.ok().build();
 	}
 
@@ -188,7 +190,7 @@ public class JobExecutionController {
 					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("stop"));
 				}
 				if (!taskJobExecution.getJobExecution().getStatus().equals(BatchStatus.COMPLETED)) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("restart"));
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), false)).withRel("restart"));
 				}
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
 				throw new RuntimeException(e);

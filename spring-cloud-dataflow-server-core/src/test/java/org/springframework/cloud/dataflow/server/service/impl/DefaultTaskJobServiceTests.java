@@ -160,8 +160,19 @@ public class DefaultTaskJobServiceTests {
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
+		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param=testparam,java.lang.String,true");
+	}
 
-		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param=testparam,java.lang.String");
+	@Test
+	public void testRestartWithJsonParameters() throws Exception {
+		createBaseLaunchers();
+		initializeJobs(true);
+
+		this.taskJobService.restartJobExecution(jobInstanceCount, true);
+		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
+		verify(this.taskLauncher, times(1)).launch(argument.capture());
+		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
+		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param={\"value\":\"testparam\",\"type\":\"java.lang.String\",\"identifying\":\"true\"}");
 	}
 
 	@Test
@@ -184,7 +195,7 @@ public class DefaultTaskJobServiceTests {
 		final ArgumentCaptor<AppDeploymentRequest> argument = ArgumentCaptor.forClass(AppDeploymentRequest.class);
 		verify(this.taskLauncher, times(1)).launch(argument.capture());
 		AppDeploymentRequest appDeploymentRequest = argument.getAllValues().get(0);
-		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param=testparam,java.lang.String");
+		assertThat(appDeploymentRequest.getCommandlineArguments()).contains("identifying.param=testparam,java.lang.String,true");
 	}
 
 	private void initializeJobs(boolean insertTaskExecutionMetadata)

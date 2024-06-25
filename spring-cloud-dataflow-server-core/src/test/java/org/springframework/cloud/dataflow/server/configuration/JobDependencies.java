@@ -297,14 +297,16 @@ public class JobDependencies {
 			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
-			LauncherRepository launcherRepository
+			LauncherRepository launcherRepository,
+			TaskConfigurationProperties taskConfigurationProperties
 	) {
 		return new DefaultTaskJobService(
 				jobService,
 				taskExplorer,
 				taskDefinitionRepository,
 				taskExecutionService,
-				launcherRepository);
+				launcherRepository,
+			taskConfigurationProperties);
 	}
 
 	@Bean
