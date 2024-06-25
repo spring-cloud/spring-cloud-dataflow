@@ -188,13 +188,22 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecutionWithJobProperties() throws Exception {
 		MvcResult result = mockMvc.perform(get("/jobs/executions/10").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.executionId", is(10)))
 			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
 			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
 		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true");
 		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"java.lang.String\"");
+	}
+
+	@Test
+	public void testGetExecutionWithJobPropertiesOverrideJobParam() throws Exception {
+		MvcResult result = mockMvc.perform(get("/jobs/executions/10?useJsonJobParameters=true").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.executionId", is(10)))
+			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
+			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
+		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true", "\"type\":\"java.lang.String\"");
 	}
 
 	@Test
@@ -214,8 +223,6 @@ public class JobExecutionControllerTests {
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInRelativeOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x followup Until we implement the paging capabilities this tests is disabled.")
 	@Test
 	public void testGetAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions"));
@@ -233,8 +240,6 @@ public class JobExecutionControllerTests {
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)));
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x followup Until we implement the paging capabilities this tests is disabled.")
 	@Test
 	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(

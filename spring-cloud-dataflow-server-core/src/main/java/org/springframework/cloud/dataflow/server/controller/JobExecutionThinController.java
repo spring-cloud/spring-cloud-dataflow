@@ -216,7 +216,8 @@ public class JobExecutionThinController {
 					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("stop"));
 				}
 				if (taskJobExecution.getJobExecution().getEndTime() != null && !taskJobExecution.getJobExecution().isRunning()) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("restart"));
+					// In this case we use null for the useJsonJobParameters parameter so we use the configured job parameter serialization method specified by dataflow.
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), null)).withRel("restart"));
 				}
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
 				throw new RuntimeException(e);
