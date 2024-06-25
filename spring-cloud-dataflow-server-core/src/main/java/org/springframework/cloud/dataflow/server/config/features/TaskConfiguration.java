@@ -272,13 +272,14 @@ public class TaskConfiguration {
 				DataflowTaskExplorer taskExplorer,
 				TaskDefinitionRepository taskDefinitionRepository,
 				TaskExecutionService taskExecutionService,
-				LauncherRepository launcherRepository) {
+				LauncherRepository launcherRepository, TaskConfigurationProperties taskConfigurationProperties) {
 			return new DefaultTaskJobService(
 					service,
 					taskExplorer,
 					taskDefinitionRepository,
 					taskExecutionService,
-					launcherRepository
+					launcherRepository,
+				taskConfigurationProperties
 			);
 		}
 	}

@@ -188,7 +188,17 @@ public class JobExecutionControllerTests {
 	@Test
 	public void testGetExecutionWithJobProperties() throws Exception {
 		MvcResult result = mockMvc.perform(get("/jobs/executions/10").accept(MediaType.APPLICATION_JSON))
-			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.executionId", is(10)))
+			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
+			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
+		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true");
+		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"java.lang.String\"");
+	}
+
+	@Test
+	public void testGetExecutionWithJobPropertiesOverrideJobParam() throws Exception {
+		MvcResult result = mockMvc.perform(get("/jobs/executions/10?useJsonJobParameters=true").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.executionId", is(10)))
 			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
