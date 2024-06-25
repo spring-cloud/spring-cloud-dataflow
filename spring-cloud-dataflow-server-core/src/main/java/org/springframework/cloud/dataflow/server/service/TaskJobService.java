@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
