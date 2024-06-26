@@ -70,10 +70,10 @@
 		<module>spring-cloud-dataflow-shell</module>
 		<module>spring-cloud-dataflow-shell-core</module>
 		<module>spring-cloud-dataflow-completion</module>
-<!--		<module>spring-cloud-skipper</module>-->
+		<module>spring-cloud-skipper</module>
 		<module>spring-cloud-starter-dataflow-server</module>
 		<module>spring-cloud-starter-dataflow-ui</module>
-<!--		<module>spring-cloud-dataflow-server</module>-->
+		<module>spring-cloud-dataflow-server</module>
 		<module>spring-cloud-dataflow-tasklauncher</module>
 		<module>spring-cloud-dataflow-single-step-batch-job</module>
 		<module>spring-cloud-dataflow-composed-task-runner</module>

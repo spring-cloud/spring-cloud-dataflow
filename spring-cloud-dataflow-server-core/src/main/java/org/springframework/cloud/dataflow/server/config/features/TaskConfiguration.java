@@ -279,7 +279,7 @@ public class TaskConfiguration {
 					taskDefinitionRepository,
 					taskExecutionService,
 					launcherRepository,
-				taskConfigurationProperties
+					taskConfigurationProperties
 			);
 		}
 	}

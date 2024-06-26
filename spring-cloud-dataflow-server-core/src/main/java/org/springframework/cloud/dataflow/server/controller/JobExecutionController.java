@@ -148,11 +148,11 @@ public class JobExecutionController {
 	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Void> restartJobExecution(
-			@PathVariable("executionId") long jobExecutionId,
-			@RequestParam(value = "useJsonJobParameters", required = false) Boolean useJsonJobParameters
-	) throws NoSuchJobExecutionException {
-		taskJobService.restartJobExecution(jobExecutionId, useJsonJobParameters);
-		return ResponseEntity.ok().build();
+		@PathVariable("executionId") long jobExecutionId,
+		@RequestParam(value = "useJsonJobParameters", required = false) Boolean useJsonJobParameters)
+		throws NoSuchJobExecutionException {
+			taskJobService.restartJobExecution(jobExecutionId, useJsonJobParameters);
+			return ResponseEntity.ok().build();
 	}
 
 	/**
@@ -190,7 +190,8 @@ public class JobExecutionController {
 					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("stop"));
 				}
 				if (!taskJobExecution.getJobExecution().getStatus().equals(BatchStatus.COMPLETED)) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), false)).withRel("restart"));
+					// In this case we use null for the useJsonJobParameters parameter, so we use the configured job parameter serialization method specified by dataflow.
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), null)).withRel("restart"));
 				}
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
 				throw new RuntimeException(e);
