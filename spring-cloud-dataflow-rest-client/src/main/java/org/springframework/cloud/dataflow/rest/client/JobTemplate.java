@@ -118,6 +118,14 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
+	public void executionRestart(long id, Boolean useJsonJobParameters) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionLink.expand(id).getHref()).queryParam("restart", "true")
+			.queryParam("useJsonJobParameters", useJsonJobParameters);
+
+		restTemplate.put(builder.toUriString(), null);
+	}
+
+	@Override
 	public PagedModel<JobExecutionThinResource> executionThinList() {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(thinExecutionsLink.getHref()).queryParam("size", "2000");
 		return restTemplate.getForObject(builder.toUriString(), JobExecutionThinResource.Page.class);
