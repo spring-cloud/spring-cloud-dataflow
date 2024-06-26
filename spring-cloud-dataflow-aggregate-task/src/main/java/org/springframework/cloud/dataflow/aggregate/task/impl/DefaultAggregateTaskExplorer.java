@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -254,21 +255,36 @@ public class DefaultAggregateTaskExplorer implements AggregateTaskExplorer {
 		Assert.notNull(taskExplorer, "Expected TaskExplorer for " + schemaTarget);
 		return taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecutionId);
 	}
-
+	private static void add(Map<String, Set<String>> setMap, String key, String value) {
+		Set<String> set = setMap.computeIfAbsent(key, (v) -> new HashSet<>());
+		set.add(value);
+	}
 	@Override
 	public List<AggregateTaskExecution> getLatestTaskExecutionsByTaskNames(String... taskNames) {
 		List<AggregateTaskExecution> result = new ArrayList<>();
+		Map<String, Set<String>> targetToTaskNames = new HashMap<>();
+		Map<String, String> taskNamePlatform = new HashMap<>();
 		for (String taskName : taskNames) {
 			SchemaVersionTarget target = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 			String platformName = getPlatformName(taskName);
 			Assert.notNull(target, "Expected to find SchemaVersionTarget for " + taskName);
-			TaskExplorer taskExplorer = taskExplorers.get(target.getName());
-			Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target.getName());
-			List<AggregateTaskExecution> taskExecutions = taskExplorer.getLatestTaskExecutionsByTaskNames(taskNames)
+			add(targetToTaskNames, target.getName(), taskName);
+			if(platformName != null) {
+				taskNamePlatform.put(taskName, platformName);
+			}
+		}
+		for(String target : targetToTaskNames.keySet()) {
+			Set<String> tasks = targetToTaskNames.get(target);
+			if(!tasks.isEmpty()) {
+				TaskExplorer taskExplorer = taskExplorers.get(target);
+				Assert.notNull(taskExplorer, "Expected TaskExplorer for " + target);
+				List<AggregateTaskExecution> taskExecutions = taskExplorer
+					.getLatestTaskExecutionsByTaskNames(tasks.toArray(new String[0]))
 					.stream()
-					.map(execution -> aggregateExecutionSupport.from(execution, target.getName(), platformName))
+					.map(execution -> aggregateExecutionSupport.from(execution, target, taskNamePlatform.get(execution.getTaskName())))
 					.collect(Collectors.toList());
-			result.addAll(taskExecutions);
+				result.addAll(taskExecutions);
+			}
 		}
 		return result;
 	}
