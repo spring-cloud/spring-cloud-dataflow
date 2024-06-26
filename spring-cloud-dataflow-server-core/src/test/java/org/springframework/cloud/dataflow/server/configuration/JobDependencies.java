@@ -306,7 +306,7 @@ public class JobDependencies {
 				taskDefinitionRepository,
 				taskExecutionService,
 				launcherRepository,
-			taskConfigurationProperties);
+				taskConfigurationProperties);
 	}
 
 	@Bean

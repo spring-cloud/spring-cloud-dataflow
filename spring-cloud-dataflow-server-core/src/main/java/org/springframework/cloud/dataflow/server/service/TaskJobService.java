@@ -115,8 +115,11 @@ public interface TaskJobService {
 	 * deemed restartable. Otherwise, a {@link JobNotRestartableException} is being thrown.
 	 *
 	 * @param jobExecutionId The id of the JobExecution to restart.
-	 * @param useJsonJobParameters serialize job parameters to the command line using the format provided by {@code JsonJobParametersConverter} if set to true.
-	 * else the system will use {@link TaskConfigurationProperties#isUseJsonJobParameters()} to determine the {@link org.springframework.batch.core.JobParameter} serializer.
+	 * @param useJsonJobParameters if set to true, dataflow will serialize job parameters to the command line using the
+	 *                                format provided by {@code JsonJobParametersConverter}.
+	 *                                If set to false dataflow will use {@code DefaultParametersConverter}.
+	 *                                If null dataflow  will use {@link TaskConfigurationProperties#isUseJsonJobParameters()}
+	 *                                to determine the {@link org.springframework.batch.core.JobParameter} serializer.
 	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
 	 *                                     exist.
 	 */

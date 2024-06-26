@@ -19,6 +19,9 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.converter.DefaultJobParametersConverter;
 
+/**
+ * Provides methods to serialize a Spring Batch {@link JobParameter} to the Spring Batch's default format.
+ */
 public class ScdfDefaultJobParametersConverter extends DefaultJobParametersConverter implements ScdfJobParametersConverter {
 
 	public ScdfDefaultJobParametersConverter() {

@@ -18,6 +18,9 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.converter.JsonJobParametersConverter;
 
+/**
+ * Provides methods to serialize a Spring Batch {@link JobParameter} to JSON.
+ */
 public class ScdfJsonJobParametersConverter extends JsonJobParametersConverter implements ScdfJobParametersConverter {
 
 	public ScdfJsonJobParametersConverter() {
