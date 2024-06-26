@@ -35,6 +35,8 @@ public class SecurityInfo {
 
 	private List<String> roles = new ArrayList<>(0);
 
+	private List<String> clientRegistrations = new ArrayList<>(0);
+
 	/**
 	 * Default constructor for serialization frameworks.
 	 */
@@ -83,6 +85,18 @@ public class SecurityInfo {
 
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
+	}
+
+	/**
+	 *
+	 * @return List of all available client registrations
+	 */
+	public List<String> getClientRegistrations() {
+		return clientRegistrations;
+	}
+
+	public void setClientRegistrations(List<String> clientRegistrations) {
+		this.clientRegistrations = clientRegistrations;
 	}
 
 	/**

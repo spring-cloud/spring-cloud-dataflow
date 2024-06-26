@@ -16,7 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.controller.security;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.cloud.common.security.support.SecurityStateBean;
 import org.springframework.cloud.dataflow.rest.resource.security.SecurityInfoResource;
 import org.springframework.hateoas.server.ExposesResourceFor;
@@ -25,6 +32,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -52,8 +60,11 @@ public class SecurityController {
 	@Value("${security.oauth2.client.client-id:#{null}}")
 	private String oauthClientId;
 
-	public SecurityController(SecurityStateBean securityStateBean) {
+	private OAuth2ClientProperties oAuth2ClientProperties;
+
+	public SecurityController(SecurityStateBean securityStateBean, @Nullable OAuth2ClientProperties oAuth2ClientProperties) {
 		this.securityStateBean = securityStateBean;
+		this.oAuth2ClientProperties = oAuth2ClientProperties;
 	}
 
 	/**
@@ -74,18 +85,25 @@ public class SecurityController {
 
 		if (authenticationEnabled && SecurityContextHolder.getContext() != null) {
 			final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			if (!(authentication instanceof AnonymousAuthenticationToken)) {
+			if (!(authentication instanceof AnonymousAuthenticationToken) && authentication != null) {
 				securityInfo.setAuthenticated(authentication.isAuthenticated());
 				securityInfo.setUsername(authentication.getName());
 
 				for (GrantedAuthority authority : authentication.getAuthorities()) {
 					securityInfo.addRole(authority.getAuthority());
 				}
+			}
 
+			// Apply all client registrations to security infos which are based on authorization_code
+			if(oAuth2ClientProperties != null) {
+				List<String> authorizationCodeBasedClientRegistrations = oAuth2ClientProperties.getRegistration()
+						.entrySet()
+						.stream()
+						.filter(entry -> AuthorizationGrantType.AUTHORIZATION_CODE.getValue().equals(entry.getValue().getAuthorizationGrantType()))
+						.map(Map.Entry::getKey).collect(Collectors.toList());
+				securityInfo.setClientRegistrations(authorizationCodeBasedClientRegistrations);
 			}
 		}
-
 		return securityInfo;
 	}
-
 }
