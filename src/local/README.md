@@ -9,6 +9,11 @@ Downloads all applications needed by `create-containers.sh` from Maven repositor
 
 *If the timestamp of snapshots matches the download will be skipped.*
 
+On macOs, install GNU coreutils, for example, using his [Homebrew Formulae](https://formulae.brew.sh/formula/coreutils). Add the **gnubin** directory to your `PATH`.
+
+    # brew install coreutils
+    # export PATH=/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH
+
 Usage: `download-apps.sh [version]`
 * `version` is the dataflow-server version like `2.10.3`. Default is `2.11.3-SNAPSHOT`
 
