@@ -108,6 +108,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("foo", new JobParameter("FOO", String.class, false));
 		jobParameterMap.put("bar", new JobParameter("BAR", String.class, true));
+		jobParameterMap.put("baz", new JobParameter("55", Long.class, true));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution;
 		for (int i = 0; i < jobExecutionCount; i++) {
@@ -135,7 +136,6 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 3, "Start Time ");
 		checkCell(table, 0, 4, "Step Execution Count ");
 		checkCell(table, 0, 5, "Definition Status ");
-
  	 	}
 
 	@Test
@@ -156,7 +156,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Job Execution Detail by Id");
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals("Number of expected rows returned from the table is incorrect", 18,
+		assertEquals("Number of expected rows returned from the table is incorrect", 19,
 				table.getModel().getRowCount());
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
@@ -175,16 +175,28 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, rowNumber++, 0, "Exit Message ");
 		checkCell(table, rowNumber++, 0, "Definition Status ");
 		checkCell(table, rowNumber++, 0, "Job Parameters ");
-		int paramRowOne = rowNumber++;
-		int paramRowTwo = rowNumber++;
-		boolean jobParamsPresent = false;
-		if ((table.getModel().getValue(paramRowOne, 0).equals("-foo(java.lang.String) ")
-				&& table.getModel().getValue(paramRowTwo, 0).equals("bar(java.lang.String) "))
-				|| (table.getModel().getValue(paramRowOne, 0).equals("bar(java.lang.String) ")
-						&& table.getModel().getValue(paramRowTwo, 0).equals("-foo(java.lang.String) "))) {
-			jobParamsPresent = true;
+		int paramRowOne = rowNumber;
+
+		assertTrue("the table did not contain the correct job parameters for job parameter value foo",
+			checkModelColumn(paramRowOne, table, "-foo(java.lang.String) "));
+
+		assertTrue("the table did not contain the correct job parameters for job parameter value bar",
+			checkModelColumn(paramRowOne, table, "bar(java.lang.String) "));
+
+		assertTrue("the table did not contain the correct job parameters for job parameter value baz",
+			checkModelColumn(paramRowOne, table, "baz(java.lang.Long) "));
+
+	}
+
+	private boolean checkModelColumn(int rowNumber, Table table, String value) {
+		boolean result = false;
+		int paramRowNumber = rowNumber;
+		if (table.getModel().getValue(paramRowNumber++, 0).equals(value) ||
+			table.getModel().getValue(paramRowNumber++, 0).equals(value) ||
+			table.getModel().getValue(paramRowNumber, 0).equals(value)) {
+			result = true;
 		}
-		assertTrue("the table did not contain the correct job parameters ", jobParamsPresent);
+		return result;
 	}
 
 	@Test
@@ -198,10 +210,9 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 3, "Status ");
 		checkCell(table, 0, 4, "Job Parameters ");
 		boolean isValidCell = false;
-		if (table.getModel().getValue(1, 4).equals("-foo={value=FOO, type=class java.lang.String, identifying=false},java.lang.String,true\n" +
-			"bar={value=BAR, type=class java.lang.String, identifying=true},java.lang.String,true")
-				|| table.getModel().getValue(1, 4).equals("bar={value=BAR, type=class java.lang.String, identifying=true},java.lang.String,true\n" +
-			"-foo={value=FOO, type=class java.lang.String, identifying=false},java.lang.String,true")) {
+		if (table.getModel().getValue(1, 4).toString().contains("-foo={value=FOO, type=class java.lang.String, identifying=false},java.lang.String,true") &&
+			table.getModel().getValue(1, 4).toString().contains("bar={value=BAR, type=class java.lang.String, identifying=true},java.lang.String,true") &&
+			table.getModel().getValue(1, 4).toString().contains("baz=55,java.lang.Long,true")) {
 			isValidCell = true;
 		}
 		assertTrue("Job Parameters does match expected.", isValidCell);
