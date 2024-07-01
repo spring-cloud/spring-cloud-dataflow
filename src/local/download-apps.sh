@@ -37,8 +37,8 @@ function download_deps() {
     echo "Dependency: groupId: $GROUP_ID, artifactId: $ARTIFACT_ID, version: $VERSION"
     TS=
     if [ "$INC_VER" == "true" ]; then
-        DEP_PATH="${DEP//\:/\/}"
-        META_DATA="$URL/${GROUP_ID//\./\/}/$ARTIFACT_ID/$VERSION/maven-metadata.xml"
+        DEP_PATH="${DEP//\://}"
+        META_DATA="$URL/${GROUP_ID//\.//}/$ARTIFACT_ID/$VERSION/maven-metadata.xml"
         echo "Reading $META_DATA"
         rm -f ./maven-metadata.xml
         wget -q -O maven-metadata.xml "$META_DATA"
@@ -66,11 +66,11 @@ function download_deps() {
             echo "Error extracting extension. Exit code $RC"
             exit $RC
         fi
-        SOURCE="$URL/${GROUP_ID//\./\/}/$ARTIFACT_ID/$VERSION/${ARTIFACT_ID}-${VAL}.${EXT}"
+        SOURCE="$URL/${GROUP_ID//\.//}/$ARTIFACT_ID/$VERSION/${ARTIFACT_ID}-${VAL}.${EXT}"
 
     else
         EXT="jar"
-        SOURCE="$URL/${GROUP_ID//\./\/}/$ARTIFACT_ID/$VERSION/${ARTIFACT_ID}-${VERSION}.${EXT}"
+        SOURCE="$URL/${GROUP_ID//\.//}/$ARTIFACT_ID/$VERSION/${ARTIFACT_ID}-${VERSION}.${EXT}"
     fi
     mkdir -p $TARGET
     TARGET_FILE="${TARGET}/${ARTIFACT_ID}-${VERSION}.${EXT}"
@@ -97,12 +97,12 @@ function download_deps() {
 
 set -e
 APPS=("spring-cloud-dataflow-server" "spring-cloud-dataflow-composed-task-runner" "spring-cloud-dataflow-single-step-batch-job" "spring-cloud-dataflow-shell")
-for app in ${APPS[@]}; do
+for app in "${APPS[@]}"; do
     APP_PATH="$app/target"
     download_deps "org.springframework.cloud:$app:$VER" "$ROOT_DIR/$APP_PATH"
 done
 TS_APPS=("spring-cloud-dataflow-tasklauncher-sink-kafka" "spring-cloud-dataflow-tasklauncher-sink-rabbit")
-for app in ${TS_APPS[@]}; do
+for app in "${TS_APPS[@]}"; do
     APP_PATH="spring-cloud-dataflow-tasklauncher/$app/target"
     download_deps "org.springframework.cloud:$app:$VER" $ROOT_DIR/$APP_PATH
 done
