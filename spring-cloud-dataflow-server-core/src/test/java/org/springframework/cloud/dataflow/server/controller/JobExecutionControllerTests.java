@@ -224,8 +224,6 @@ public class JobExecutionControllerTests {
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInRelativeOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x followup Until we implement the paging capabilities this tests is disabled.")
 	@Test
 	public void testGetAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions"));
@@ -243,8 +241,6 @@ public class JobExecutionControllerTests {
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)));
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x followup Until we implement the paging capabilities this tests is disabled.")
 	@Test
 	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(
