@@ -16,9 +16,12 @@
 
 package org.springframework.cloud.dataflow.rest.support.jackson;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 
 /**
@@ -27,9 +30,12 @@ import org.springframework.batch.core.JobParameters;
  * @author Gunnar Hillert
  * @since 1.0
  */
-@JsonIgnoreProperties("empty")
+@JsonIgnoreProperties({"empty", "identifyingParameters"})
 public abstract class JobParametersJacksonMixIn {
 
 	@JsonProperty
 	abstract boolean isEmpty();
+
+	@JsonProperty
+	abstract Map<String, JobParameter<?>> getIdentifyingParameters();
 }

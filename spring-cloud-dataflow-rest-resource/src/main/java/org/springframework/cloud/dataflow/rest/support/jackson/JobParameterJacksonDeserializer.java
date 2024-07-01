@@ -51,7 +51,7 @@ public class JobParameterJacksonDeserializer extends JsonDeserializer<JobParamet
 
 		JobParameter jobParameter;
 		//TODO: Boot3x followup Verify that Job Parameters setup properly for Batch 5
-		if (!type.isEmpty() && !type.equalsIgnoreCase("STRING")) {
+		if (!type.isEmpty() && !type.equalsIgnoreCase("java.lang.String")) {
 			if ("DATE".equalsIgnoreCase(type)) {
 				jobParameter = new JobParameter(LocalDateTime.parse(value), LocalDateTime.class,  identifying);
 			}

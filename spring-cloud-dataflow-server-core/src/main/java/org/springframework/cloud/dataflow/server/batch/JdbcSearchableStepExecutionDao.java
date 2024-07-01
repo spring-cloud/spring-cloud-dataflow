@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -201,8 +202,11 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 		public StepExecution mapRow(ResultSet rs, int rowNum) throws SQLException {
 			StepExecution stepExecution = new StepExecution(rs.getString(2), null);
 			stepExecution.setId(rs.getLong(1));
-			stepExecution.setStartTime(rs.getTimestamp(3).toLocalDateTime());
-			stepExecution.setEndTime(rs.getTimestamp(4).toLocalDateTime());
+			Timestamp startTimeStamp = rs.getTimestamp(3);
+			Timestamp endTimeStamp = rs.getTimestamp(4);
+
+			stepExecution.setStartTime((startTimeStamp == null) ? null : startTimeStamp.toLocalDateTime());
+			stepExecution.setEndTime((endTimeStamp == null) ? null : endTimeStamp.toLocalDateTime());
 			stepExecution.setStatus(BatchStatus.valueOf(rs.getString(5)));
 			stepExecution.setCommitCount(rs.getInt(6));
 			stepExecution.setReadCount(rs.getInt(7));
