@@ -43,6 +43,16 @@ public interface JobOperations {
 	void executionRestart(long id);
 
 	/**
+	 * Restarts a job by id
+	 *
+	 * @param id job execution id
+	 * @param useJsonJobParameters if true {@link org.springframework.batch.core.JobParameters} will be serialized to JSON.
+	 *                             Default is {@code Null} which will serialize the {@link org.springframework.batch.core.JobParameters}
+	 *                             to the default specified in SCDF's configuration.
+	 */
+	void executionRestart(long id, Boolean useJsonJobParameters);
+
+	/**
 	 * @return the list job executions without step executions known to the system.
 	 */
 	PagedModel<JobExecutionThinResource> executionThinList();

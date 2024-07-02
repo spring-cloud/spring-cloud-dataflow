@@ -64,7 +64,7 @@ public class StepExecutionProgressInfo {
 		if (startTime == null) {
 			startTime = LocalDateTime.now();
 		}
-		duration = Duration.between(startTime, endTime).get(ChronoUnit.MILLIS);
+		duration = Duration.between(startTime, endTime).get(ChronoUnit.NANOS);
 		percentageComplete = calculatePercentageComplete();
 	}
 

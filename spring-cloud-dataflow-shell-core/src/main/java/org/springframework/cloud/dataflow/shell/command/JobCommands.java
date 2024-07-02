@@ -107,8 +107,17 @@ public class JobCommands {
 	@ShellMethod(key = EXECUTION_RESTART, value = "Restart a failed job by jobExecutionId")
 	@ShellMethodAvailability("availableWithViewRole")
 	public String executionRestart(
-			@ShellOption(help = "the job execution id") long id) {
-		jobOperations().executionRestart(id);
+			@ShellOption(help = "the job executiond id") long id,
+			@ShellOption(value = "--useJsonJobParameters",
+				help = "boolean value serialize job parameter as Json.  " +
+					"Default is null, meaning SCDF default will be used.",
+				defaultValue = ShellOption.NULL) String useJsonJobParameters) {
+		if(useJsonJobParameters == null) {
+			jobOperations().executionRestart(id);
+		}
+		else {
+			jobOperations().executionRestart(id, Boolean.valueOf(useJsonJobParameters));
+		}
 		return String.format("Restart request has been sent for job execution '%s'", id);
 	}
 

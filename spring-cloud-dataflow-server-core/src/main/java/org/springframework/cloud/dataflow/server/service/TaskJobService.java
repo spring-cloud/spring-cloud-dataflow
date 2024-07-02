@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.service;
 
 import java.util.Date;
-import java.util.List;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
@@ -31,6 +30,7 @@ import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -99,14 +99,31 @@ public interface TaskJobService {
 	JobInstanceExecutions getJobInstance(long id) throws NoSuchJobInstanceException, NoSuchJobException;
 
 	/**
-	 * Restarts a {@link JobExecution} IF the respective {@link JobExecution} is actually
+	 * Restarts a {@link JobExecution} if the respective {@link JobExecution} is actually
 	 * deemed restartable. Otherwise a {@link JobNotRestartableException} is being thrown.
+	 * The system will use {@link TaskConfigurationProperties#isUseJsonJobParameters()} to
+	 * determine the {@link org.springframework.batch.core.JobParameter} serializer.
 	 *
 	 * @param jobExecutionId The id of the JobExecution to restart.
 	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
 	 *                                     exist.
 	 */
 	void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
+
+	/**
+	 * Restarts a {@link JobExecution} if the respective {@link JobExecution} is actually
+	 * deemed restartable. Otherwise, a {@link JobNotRestartableException} is being thrown.
+	 *
+	 * @param jobExecutionId The id of the JobExecution to restart.
+	 * @param useJsonJobParameters if set to true, dataflow will serialize job parameters to the command line using the
+	 *                                format provided by {@code JsonJobParametersConverter}.
+	 *                                If set to false dataflow will use {@code DefaultParametersConverter}.
+	 *                                If null dataflow  will use {@link TaskConfigurationProperties#isUseJsonJobParameters()}
+	 *                                to determine the {@link org.springframework.batch.core.JobParameter} serializer.
+	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
+	 *                                     exist.
+	 */
+	void restartJobExecution(long jobExecutionId, Boolean useJsonJobParameters) throws NoSuchJobExecutionException;
 
 	/**
 	 * Requests a {@link JobExecution} to stop.
