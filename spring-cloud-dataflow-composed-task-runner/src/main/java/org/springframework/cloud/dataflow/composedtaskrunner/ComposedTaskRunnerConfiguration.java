@@ -17,9 +17,14 @@
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +38,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
+import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.task.configuration.EnableTask;
 import org.springframework.cloud.task.listener.TaskExecutionListener;
 import org.springframework.cloud.task.repository.TaskExplorer;
@@ -102,17 +108,25 @@ public class ComposedTaskRunnerConfiguration {
 			String taskName
 	) {
 		logger.debug("addTaskExplorer:{}", taskName);
-		String propertyName = String.format("app.%s.spring.cloud.task.tablePrefix", taskName);
-		String prefix = properties.getComposedTaskAppProperties().get(propertyName);
-		if (prefix == null) {
-			prefix = env.getProperty(propertyName);
-		}
+		List<String> propertyNames = new ArrayList<>();
+		propertyNames.add(String.format("app.%s.spring.cloud.task.tablePrefix", taskName));
+		propertyNames.add(String.format("app.%s.spring.cloud.task.table-prefix", taskName));
+		propertyNames.add(String.format("app.%s.spring.cloud.task.tableprefix", taskName));
+		Map<String, String> taskDeploymentProperties =
+			DeploymentPropertiesUtils.parse(properties.getComposedTaskProperties());
+		String prefix = propertyNames.stream()
+			.map(propertyName -> {
+				String prefixOfComposedTaskProperties = taskDeploymentProperties.get(propertyName);
+				return prefixOfComposedTaskProperties == null ? env.getProperty(propertyName) : prefixOfComposedTaskProperties;
+			})
+			.filter(Objects::nonNull)
+			.findFirst().orElse(null);
 		if (prefix != null) {
 			TaskExecutionDaoFactoryBean factoryBean = new MultiSchemaTaskExecutionDaoFactoryBean(dataSource, prefix);
-			logger.debug("taskExplorerContainer:adding:{}:{}", taskName, prefix);
+			logger.info("taskExplorerContainer:adding:{}:{}", taskName, prefix);
 			explorers.put(taskName, new SimpleTaskExplorer(factoryBean));
 		} else {
-			logger.warn("Cannot find {} in {} ", propertyName, properties.getComposedTaskAppProperties());
+			logger.warn("Cannot find {} in {} ", propertyNames, properties.getComposedTaskAppProperties());
 		}
 	}
 

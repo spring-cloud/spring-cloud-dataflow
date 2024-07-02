@@ -21,6 +21,7 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -29,6 +30,8 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
@@ -53,6 +56,7 @@ import static org.mockito.Mockito.verify;
 		StepBeanDefinitionRegistrar.class})
 @TestPropertySource(properties = {"graph=AAA && BBB && CCC", "max-wait-time=1000", "spring.cloud.task.name=foo"})
 @EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+@ExtendWith(OutputCaptureExtension.class)
 public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Autowired
@@ -69,7 +73,7 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration() throws Exception {
+	public void testComposedConfiguration(CapturedOutput outputCapture) throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
 		TaskletStep ctrStep = context.getBean("AAA_0", TaskletStep.class);
@@ -85,5 +89,10 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 				Collections.emptyMap(),
 				Arrays.asList("--spring.cloud.task.parent-execution-id=1", "--spring.cloud.task.parent-schema-target=boot2")
 		);
+
+		String logEntries = outputCapture.toString();
+		assertThat(logEntries).contains("Cannot find [app.AAA.spring.cloud.task.tablePrefix, " +
+			"app.AAA.spring.cloud.task.table-prefix, app.AAA.spring.cloud.task.tableprefix]");
+		assertThat(logEntries).doesNotContain("taskExplorerContainer:adding:");
 	}
 }
