@@ -26,6 +26,9 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build UAA Test Image
         shell: bash
+        env:
+          ARTIFACTORY_USERNAME: ${{ secret.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PASSWORD: ${{ secret.ARTIFACTORY_PASSWORD }}
         run: ./src/docker/uaa/build-all
       - name: Publish Test Image
         shell: bash
