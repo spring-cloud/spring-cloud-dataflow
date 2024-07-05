@@ -24,10 +24,8 @@ jobs:
         env:
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
-        run: |
-          pushd ./src/docker/uaa
-          ./build-uaa
-          popd
+        working-directory: ./src/docker/uaa
+        run: ./build-uaa
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login dockerhub
@@ -38,6 +36,6 @@ jobs:
       - name: Publish Test Image
         uses: docker/build-push-action@v6
         with:
-          context: src/docker/uaa
+          context: ./src/docker/uaa
           push: true
           tags: spring-cloud/scdf-uaa-test:4.32

@@ -1,13 +1,19 @@
 #!/bin/bash
-set -e
-if [ ! -d uaa ]; then
-  git clone --branch 4.32.0 https://github.com/cloudfoundry/uaa.git
+VERSION=4.32.0
+set +e
+if [ ! -d ./uaa ]; then
+  git clone --branch $VERSION --depth 1 -q https://github.com/cloudfoundry/uaa.git
 fi
 HAS_CRED=$(grep -c -F "credentials" uaa/settings.gradle)
 if ((HAS_CRED == 0)); then
   cat ./build-script.gradle.fragment >> uaa/settings.gradle
 fi
-pushd uaa
-  ./gradlew clean :cloudfoundry-identity-uaa:assemble
+if [ ! -d ./uaa ]; then
+  echo "Expected folder ./uaa in $(pwd)"
+  exit 2
+fi
+set -e
+pushd ./uaa
+  ./gradlew --console plain clean :cloudfoundry-identity-uaa:assemble
 popd
-cp uaa/uaa/build/libs/cloudfoundry-identity-uaa-*.war ./cloudfoundry-identity-uaa.war
+cp ./uaa/uaa/build/libs/cloudfoundry-identity-uaa-${VERSION}.war ./cloudfoundry-identity-uaa.war
