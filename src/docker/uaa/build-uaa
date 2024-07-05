@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 if [ ! -d uaa ]; then
   git clone --branch 4.32.0 https://github.com/cloudfoundry/uaa.git
 fi
@@ -7,6 +8,6 @@ if ((HAS_CRED == 0)); then
   cat ./build-script.gradle.fragment >> uaa/settings.gradle
 fi
 pushd uaa
-  ./gradlew clean build -x test
+  ./gradlew clean :cloudfoundry-identity-uaa:assemble
 popd
 cp uaa/uaa/build/libs/cloudfoundry-identity-uaa-*.war ./cloudfoundry-identity-uaa.war
