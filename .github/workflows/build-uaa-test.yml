@@ -38,4 +38,4 @@ jobs:
         with:
           context: ./src/docker/uaa
           push: true
-          tags: spring-cloud/scdf-uaa-test:4.32
+          tags: springcloud/scdf-uaa-test:4.32
