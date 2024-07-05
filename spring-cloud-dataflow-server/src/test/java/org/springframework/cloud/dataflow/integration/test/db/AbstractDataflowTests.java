@@ -90,7 +90,7 @@ public abstract class AbstractDataflowTests {
 	);
 
 	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(
-		ClusterContainer.from(TagNames.UAA_4_32, "projects.registry.vmware.com/scdf/uaa-test:4.32", TagNames.UAA)
+		ClusterContainer.from(TagNames.UAA_4_32, "spring-cloud/scdf-uaa-test:4.32", TagNames.UAA)
 	);
 
 	@Autowired
