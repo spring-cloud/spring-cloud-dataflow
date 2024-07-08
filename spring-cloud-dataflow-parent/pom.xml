@@ -18,7 +18,7 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.34</spring-framework.version>
+		<spring-framework.version>5.3.37</spring-framework.version>
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-cloud-dataflow-ui.version>3.4.5-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
