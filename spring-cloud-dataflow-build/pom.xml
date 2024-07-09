@@ -22,7 +22,7 @@
 		<docs.main>${project.artifactId}</docs.main>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.34</spring-framework.version>
+		<spring-framework.version>5.3.37</spring-framework.version>
 		<spring-cloud.version>2021.0.9</spring-cloud.version>
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-shell.version>2.1.15</spring-shell.version>
