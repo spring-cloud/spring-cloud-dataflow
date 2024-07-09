@@ -26,7 +26,7 @@
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-shell.version>2.1.13</spring-shell.version>
 		<commons-text.version>1.10.0</commons-text.version>
-		<testcontainers.version>1.19.7</testcontainers.version>
+		<testcontainers.version>1.19.8</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
 		<tomcat.version>9.0.90</tomcat.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
@@ -39,7 +39,7 @@
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
-		<commons-compress.version>1.26.2</commons-compress.version>
+		<commons-compress.version>1.26.1</commons-compress.version>
 		<commons-io.version>2.15.1</commons-io.version>
 		<postgresql.version>42.7.2</postgresql.version>
 		<prometheus-rsocket.version>1.5.2</prometheus-rsocket.version>
