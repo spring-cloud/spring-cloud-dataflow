@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.22">
+<meta name="generator" content="Asciidoctor 2.0.23">
 <title>Deployment to Kubernetes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -669,61 +669,78 @@ Some of these utilities are not installed in macOS or *nix by default but will b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>carvel-import-secret.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;secret-name&gt; &lt;namespace&gt; [secret-namespace] [--import</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;secret-name&gt; &lt;namespace&gt; [secret-namespace] [--import|--placeholder]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>--placeholder]</p>
+<p>Creates an import secret, placeholder or import using secretgen-controller.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>[--placeholder] Creates place holder secret in namespace. [--import] Creates <code>SecretImport</code> for secretgen-controller.</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">setup-scdf-repo.sh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>setup-scdf-repo.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[scdf-type] (oss, pro)</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>[scdf-type] (oss, pro)</p>
+<p>Creates the namespace and installs the relevant Carvel package and credentials. If the optional <em>scdf-type</em> is not provided the environmental variable <code>SCDF_TYPE</code> will be used.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Creates the namespace and installs the relevant Carvel package and credentials. If the optional <em>scdf-type</em> is not provided the environmental variable <code>SCDF_TYPE</code> will be used.</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">configure-prometheus-proxy.sh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-prometheus-proxy.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;host&gt; &lt;port&gt; [step]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>&lt;host&gt; &lt;port&gt; [step]</p>
+<p>Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default <code>step</code> is 10s</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Configures Spring Boot Actuator properties for Data Flow, Skipper, Streams and Tasks. Default <code>step</code> is 10s</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">configure-database.sh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>configure-database.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;app&gt; &lt;database&gt; &lt;url&gt; &lt;username/secret-name&gt;  [password/secret-username-key] [secret-password-key]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>&lt;app&gt; &lt;database&gt; &lt;url&gt; &lt;username/secret-name&gt;  [password/secret-username-key] [secret-password-key]</p>
+<p>If only <em>secret-name</em> is provided then <em>secret-username-key</em> defaults to <code>username</code> and <em>secret-password-key</em> defaults to <code>password</code>.</p>
+</div>
+<div class="paragraph">
+<p>The following 3 combinations are allowed after the <em>url</em>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>&lt;secret-name&gt;</p>
+</li>
+<li>
+<p>&lt;secret-name&gt; &lt;username-key&gt;
+&lt;password-key&gt;</p>
+</li>
+<li>
+<p>&lt;username&gt; &lt;password&gt;</p>
+</li>
+</ul>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>If only <em>secret-name</em> is provided then <em>secret-username-key</em> defaults to <code>username</code> and <em>secret-password-key</em> defaults to <code>password</code>.</code></p>
-<p class="tableblock"><code>The following 3 combinations are allowed after the <em>url</em>:</code></p>
-<p class="tableblock"><code>* &lt;secret-name&gt;
-* &lt;secret-name&gt; &lt;username-key&gt;
-&lt;password-key&gt;
-* &lt;username&gt; &lt;password&gt;</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">deploy-scdf.sh</p></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Deploys the application using the package and <code>scdf-values.yml</code> in the current directory.
-The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">update-scdf.sh</p></td>
-<td class="tableblock halign-left valign-top"><div class="content"></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Updated the deployed application using a modified values file.
-The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">export-dataflow-ip.sh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>deploy-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>N/A</p>
+<p>Deploys the application using the package and <code>scdf-values.yml</code> in the current directory.
+The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
 </div></div></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Will print the URL to access dataflow. If you use <code>source ./export-dataflow-ip.sh</code> it will export <code>DATAFLOW_URL</code> to be used by <code>register-apps.sh</code></code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">register-apps.sh</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>update-scdf.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">[app-name]</p></td>
 <td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
-<p>&lt;broker&gt; [stream-application-version]</p>
+<p>Updated the deployed application using a modified values file.
+The default <em>app-name</em> is <code>scdf-${SCDF_TYPE}</code>.</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>export-dataflow-ip.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">N/A</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Will print the URL to access dataflow. If you use <code>source ./export-dataflow-ip.sh</code> it will export <code>DATAFLOW_URL</code> to be used by <code>register-apps.sh</code></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>register-apps.sh</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">&lt;broker&gt; [stream-application-version]</p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p><em>broker</em> must be one of rabbit or kafka.
+<em>stream-application-version</em> is optional and will install the latest version. The latest version is 2021.1.2</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -977,6 +994,19 @@ This script updates <code>scdf-values.yml</code> with the correct secret name.
 </div>
 <div class="sect2">
 <h3 id="_deploy_spring_cloud_data_flow">Deploy Spring Cloud Data Flow</h3>
+<div class="paragraph">
+<p>You can configure the before <code>register-apps.sh</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>STREAM_APPS_RT_VERSION</code> Stream Apps Release Train Version. <em>Default is 2022.0.0</em>.</p>
+</li>
+<li>
+<p><code>STREAM_APPS_VERSION</code> Stream Apps Version. <em>Default is 4.0.0</em>.</p>
+</li>
+</ul>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="shell">./carvel/deploy-scdf.sh
@@ -1003,7 +1033,7 @@ source ./carvel/export-dataflow-ip.sh
 <p>All the examples assume you have cloned the <code>spring-cloud-dataflow</code> repository and are executing the scripts from <code>deploy/k8s</code>.</p>
 </div>
 <div class="paragraph">
-<p>On macOS you may need to install <code>realpath</code> from <a href="https://ports.macports.org/port/realpath/">Macports</a> or <code>brew install realpath</code></p>
+<p>On macOS, you may need to install <code>realpath</code> from <a href="https://ports.macports.org/port/realpath/">Macports</a> or <code>brew install realpath</code></p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1165,7 +1195,7 @@ Delete existing Minikube installation if you have any. <code>minikube delete</co
 <div class="sect4">
 <h5 id="_tmc_or_gke_cluster_in_cloud">TMC or GKE Cluster in Cloud</h5>
 <div class="paragraph">
-<p>The cluster must exist before use and you should use the relevant cli to login before executing <code>source ./k8s/use-gke.sh</code></p>
+<p>The cluster must exist before use, and you should use the relevant cli to login before executing <code>source ./k8s/use-gke.sh</code></p>
 </div>
 </div>
 <div class="sect4">
@@ -1250,12 +1280,25 @@ export DOCKER_EMAIL=&lt;email-of-docker-use&gt;</code></pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="shell">export DATAFLOW_VERSION=2.11.3-SNAPSHOT
-export SKIPPER_VERSION=2.11.3-SNAPSHOT</code></pre>
+<pre class="CodeRay highlight"><code data-lang="shell">export DATAFLOW_VERSION=2.11.4-SNAPSHOT
+export SKIPPER_VERSION=2.11.4-SNAPSHOT</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>Before you can install SCDF you will need to pull the following images to ensure they are present for uploading to the k8s cluster.</p>
+</div>
+<div class="paragraph">
+<p>You can configure the before <code>pull-app-images</code> and <code>install-scdf</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>STREAM_APPS_RT_VERSION</code> Stream Apps Release Train Version. <em>Default is 2022.0.0</em>.</p>
+</li>
+<li>
+<p><code>STREAM_APPS_VERSION</code> Stream Apps Version. <em>Default is 4.0.0</em>.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>Use:</p>
@@ -1433,7 +1476,7 @@ You can now execute scripts from <code>./shell</code> to deploy some simple stre
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/export-http-url.sh</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Export the url of an http source of a specific flow by name to <code>HTTP_APP_URL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Export the url of the http source of a specific flow by name to <code>HTTP_APP_URL</code></p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>./k8s/install-scdf.sh</code></p></td>
