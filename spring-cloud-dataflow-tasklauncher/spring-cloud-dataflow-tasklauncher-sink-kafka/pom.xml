@@ -44,7 +44,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
+					<image>
+						<name>springcloud/${project.artifactId}:${project.version}</name>
+					</image>
 				</configuration>
 				<executions>
 					<execution>

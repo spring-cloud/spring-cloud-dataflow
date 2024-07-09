@@ -134,7 +134,9 @@
 					</execution>
 				</executions>
 				<configuration>
-					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
+					<image>
+						<name>springcloud/${project.artifactId}:${project.version}</name>
+					</image>
 				</configuration>
 			</plugin>
 			<plugin>
