@@ -1134,6 +1134,11 @@ The following example shows how you can configure an Init Container for an appli
 [source,options=nowrap]
 ----
 deployer.<application>.kubernetes.initContainer={containerName: 'test', imageName: 'busybox:latest', commands: ['sh', '-c', 'echo hello']}
+# alternative for multiple init containers
+deployer.<application>.kubernetes.initContainers=[{containerName:'test',imageName:'busybox:latest',commands:['sh','-c','echo hello']},{containerName:'test2',imageName:'busybox:latest',commands:['sh','-c','echo world']}]
+# multiple containers can be created inidividually
+deployer.<application>.kubernetes.initContainers[0]={containerName:'test',imageName:'busybox:latest',commands:['sh','-c','echo hello']}
+deployer.<application>.kubernetes.initContainers[1]={containerName:'test2',imageName:'busybox:latest',commands:['sh','-c','echo world']}
 ----
 ====
 
