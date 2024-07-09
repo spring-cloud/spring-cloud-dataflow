@@ -62,14 +62,15 @@ case "$K8S_DRIVER" in
         docker push localhost:32000/$IMAGE
         ;;
     *)
-        MINIKUBE_JSON=$(minikube image ls --format json | jq -c --arg image $IMAGE '.[] | {id: .id, image: .repoTags[0]} | select(.image | contains($image))')
+        MINIKUBE_RAW_JSON=$(minikube image ls --format json)
+        MINIKUBE_JSON=$(echo "$MINIKUBE_RAW_JSON" | jq -c --arg image $IMAGE '.[] | {id: .id, image: .repoTags[0]} | select(.image | endswith($image))')
         if [ "$MINIKUBE_JSON" != "" ]; then
             MINIKUBE_SHA="sha256:$(echo $MINIKUBE_JSON | jq -r '.id')"
-            if [ "$MINIKUBE_SHA" = "$DOCKER_SHA" ]; then
+            if [ "$MINIKUBE_SHA" != "$DOCKER_SHA" ]; then
+                echo "Image: $IMAGE, docker $DOCKER_SHA, minikube $MINIKUBE_SHA"
+            else
                 echo "$IMAGE already uploaded"
                 exit 0
-            else
-                echo "Image: $IMAGE, docker $DOCKER_SHA, minikube $MINIKUBE_SHA"
             fi
         fi
         echo "Loading $IMAGE to minikube"

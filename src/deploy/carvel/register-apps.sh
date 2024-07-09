@@ -34,7 +34,7 @@ if [ "$TYPE" = "" ]; then
     TYPE=docker
 fi
 if [ "$1" != "" ]; then
-    STREAM_APPS_VERSION=$1
+    STREAM_APPS_RT_VERSION=$1
 fi
 
 if [ "$BROKER" == "kafka" ]; then
@@ -44,25 +44,25 @@ else
     BROKER_NAME=rabbitmq
 fi
 
-if [ "$STREAM_APPS_VERSION" = "" ]; then
+if [ "$STREAM_APPS_RT_VERSION" = "" ]; then
     STREAM_URI="https://dataflow.spring.io/$BROKER_NAME-${TYPE}-latest"
-elif [[ "$STREAM_APPS_VERSION" = *"SNAPSHOT"* ]]; then
-    STREAM_APPS_DL_VERSION=$STREAM_APPS_VERSION
-    META_DATA="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/maven-metadata.xml"
+elif [[ "$STREAM_APPS_RT_VERSION" = *"SNAPSHOT"* ]]; then
+    STREAM_APPS_DL_VERSION=$STREAM_APPS_RT_VERSION
+    META_DATA="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_RT_VERSION}/maven-metadata.xml"
     echo "Downloading $META_DATA"
     curl -o maven-metadata.xml -s $META_DATA
     DL_TS=$(xmllint --xpath "/metadata/versioning/snapshot/timestamp/text()" maven-metadata.xml | sed 's/\.//')
     STREAM_APPS_DL_VERSION=$(xmllint --xpath "/metadata/versioning/snapshotVersions/snapshotVersion[extension/text() = 'pom' and updated/text() = '$DL_TS']/value/text()" maven-metadata.xml)
-    STREAM_URI="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+    STREAM_URI="https://repo.spring.io/snapshot/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_RT_VERSION}/stream-applications-descriptor-${STREAM_APPS_DL_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
 else
     REL_TYPE=
-    if [[ "$STREAM_APPS_VERSION" = *"-M"* ]] || [[ "$STREAM_APPS_VERSION" = *"-RC"* ]]; then
+    if [[ "$STREAM_APPS_RT_VERSION" = *"-M"* ]] || [[ "$STREAM_APPS_RT_VERSION" = *"-RC"* ]]; then
         REL_TYPE=milestone
     fi
     if [ "$REL_TYPE" != "" ]; then
-        STREAM_URI="https://repo.spring.io/$REL_TYPE/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+        STREAM_URI="https://repo.spring.io/$REL_TYPE/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_RT_VERSION}/stream-applications-descriptor-${STREAM_APPS_RT_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
     else
-        STREAM_URI="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_VERSION}/stream-applications-descriptor-${STREAM_APPS_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
+        STREAM_URI="https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/stream-applications-descriptor/${STREAM_APPS_RT_VERSION}/stream-applications-descriptor-${STREAM_APPS_RT_VERSION}.stream-apps-${BROKER_NAME}-${TYPE}"
     fi
 fi
 if [ "$DATAFLOW_URL" = "" ]; then
