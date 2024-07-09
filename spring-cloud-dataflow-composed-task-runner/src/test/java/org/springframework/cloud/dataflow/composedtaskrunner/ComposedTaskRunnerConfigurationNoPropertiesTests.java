@@ -91,8 +91,10 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 		);
 
 		String logEntries = outputCapture.toString();
-		assertThat(logEntries).contains("Cannot find [app.AAA.spring.cloud.task.tablePrefix, " +
-			"app.AAA.spring.cloud.task.table-prefix, app.AAA.spring.cloud.task.tableprefix]");
+		assertThat(logEntries).contains("Cannot find [app.AAA.spring.cloud.task.table-prefix, " +
+			"app.AAA.spring.cloud.task.table_prefix, app.AAA.spring.cloud.task.tablePrefix, " +
+			"app.AAA.spring.cloud.task.tableprefix, app.AAA.spring.cloud.task.TABLE-PREFIX, " +
+			"app.AAA.spring.cloud.task.TABLE_PREFIX, app.AAA.spring.cloud.task.TABLEPREFIX]");
 		assertThat(logEntries).doesNotContain("taskExplorerContainer:adding:");
 	}
 }

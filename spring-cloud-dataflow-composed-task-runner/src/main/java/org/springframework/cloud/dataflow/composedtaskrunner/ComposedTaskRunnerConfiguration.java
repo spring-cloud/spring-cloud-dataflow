@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +34,7 @@ import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
+import org.springframework.cloud.dataflow.core.RelaxedNames;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
@@ -109,14 +108,17 @@ public class ComposedTaskRunnerConfiguration {
 	) {
 		logger.debug("addTaskExplorer:{}", taskName);
 		List<String> propertyNames = new ArrayList<>();
-		propertyNames.add(String.format("app.%s.spring.cloud.task.tablePrefix", taskName));
-		propertyNames.add(String.format("app.%s.spring.cloud.task.table-prefix", taskName));
-		propertyNames.add(String.format("app.%s.spring.cloud.task.tableprefix", taskName));
+		RelaxedNames relaxedNames = RelaxedNames.forCamelCase("tablePrefix");
+		relaxedNames.forEach(tablePrefix -> propertyNames.add(
+			String.format("app.%s.spring.cloud.task.%s", taskName, tablePrefix)));
 		Map<String, String> taskDeploymentProperties =
 			DeploymentPropertiesUtils.parse(properties.getComposedTaskProperties());
 		String prefix = propertyNames.stream()
 			.map(propertyName -> {
 				String prefixOfComposedTaskProperties = taskDeploymentProperties.get(propertyName);
+				if(prefixOfComposedTaskProperties == null) {
+					prefixOfComposedTaskProperties = properties.getComposedTaskAppProperties().get(propertyName);
+				}
 				return prefixOfComposedTaskProperties == null ? env.getProperty(propertyName) : prefixOfComposedTaskProperties;
 			})
 			.filter(Objects::nonNull)
