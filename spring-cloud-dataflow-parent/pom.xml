@@ -36,21 +36,21 @@
 		<tomcat.version>9.0.90</tomcat.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
-		<netty.version>4.1.109.Final</netty.version>
-		<reactor-bom.version>2020.0.43</reactor-bom.version>
+		<netty.version>4.1.111.Final</netty.version>
+		<reactor-bom.version>2020.0.45</reactor-bom.version>
 		<rsocket.version>1.1.4</rsocket.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
-		<nimbus-jose-jwt.version>9.37.2</nimbus-jose-jwt.version>
+		<nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
 		<commons-compress.version>1.26.1</commons-compress.version>
 		<commons-io.version>2.15.1</commons-io.version>
-		<jackson-bom.version>2.17.1</jackson-bom.version>
+		<jackson-bom.version>2.17.2</jackson-bom.version>
 		<json-unit.version>2.11.1</json-unit.version>
 		<findbugs.version>3.0.2</findbugs.version>
 		<joda-time.version>2.10.6</joda-time.version>
 		<aws-java-sdk-ecr.version>1.12.676</aws-java-sdk-ecr.version>
-		<testcontainers.version>1.19.7</testcontainers.version>
+		<testcontainers.version>1.19.8</testcontainers.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
 		<stream-applications.version>3.2.1</stream-applications.version>
 		<wavefront-spring-boot-bom.version>2.3.4</wavefront-spring-boot-bom.version>
