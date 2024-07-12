@@ -4,6 +4,30 @@ info:
     description: "@project.name@"
     version: "@project.version@"
 spring:
+  cloud:
+    dataflow:
+      version-info:
+        dependency-fetch:
+          enabled: false
+        dependencies:
+          spring-cloud-dataflow-server:
+            name: Spring Cloud Dataflow
+            version: "@project.version@"
+          spring-cloud-dataflow-dashboard:
+            name: Spring Cloud Dataflow UI
+            version: "@spring-cloud-dataflow-ui.version@"
+          spring-cloud-dataflow-core:
+            name: Spring Cloud Data Flow Core
+            version: "@dataflow.version@"
+          spring-cloud-dataflow-implementation:
+            name: ${info.app.name}
+            version: "@dataflow.version@"
+          spring-cloud-dataflow-shell:
+            name: Spring Cloud Data Flow Shell
+            version: "@dataflow.version@"
+            url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar"
+            checksum-sha1-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha1"
+            checksum-sha256-url: "{repository}/org/springframework/cloud/spring-cloud-dataflow-shell/{version}/spring-cloud-dataflow-shell-{version}.jar.sha256"
   jpa:
     hibernate:
       ddl-auto: none
