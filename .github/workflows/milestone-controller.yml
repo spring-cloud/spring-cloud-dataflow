@@ -32,7 +32,7 @@ jobs:
               "workflow_dispatch": {
                 "owner": "spring-cloud",
                 "repo": "spring-cloud-deployer",
-                "ref": "2.9.x",
+                "ref": "main",
                 "workflow": "milestone-worker.yml"
               }
             },
