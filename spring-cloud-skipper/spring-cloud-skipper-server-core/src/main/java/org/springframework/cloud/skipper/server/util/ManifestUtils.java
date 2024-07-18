@@ -152,7 +152,7 @@ public class ManifestUtils {
 		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 		dumperOptions.setPrettyFlow(true);
 		dumperOptions.setSplitLines(false);
-		return new Yaml(new ValueTypeRepresenter(), dumperOptions);
+		return new Yaml(new SafeConstructor(new LoaderOptions()), new ValueTypeRepresenter(), dumperOptions);
 	}
 
 	private static class ValueTypeRepresenter extends Representer {

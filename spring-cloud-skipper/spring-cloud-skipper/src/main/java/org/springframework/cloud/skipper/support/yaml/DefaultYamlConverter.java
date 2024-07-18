@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * Default implementation of a {@link YamlConverter}.
@@ -127,7 +129,7 @@ public class DefaultYamlConverter implements YamlConverter {
 		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		options.setPrettyFlow(true);
 
-		Yaml yaml = new Yaml(options);
+		Yaml yaml = new Yaml(new SafeConstructor(), new Representer(options), options);
 		String output = yaml.dump(object);
 		return new YamlConversionResult(status, output);
 	}
