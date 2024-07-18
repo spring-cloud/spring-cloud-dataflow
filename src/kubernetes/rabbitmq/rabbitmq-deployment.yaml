@@ -15,16 +15,12 @@ spec:
         app: rabbitmq
     spec:
       containers:
-        - image: rabbitmq:3.8-management
-          name: rabbitmq
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: LANG
-              value: en_US.utf8
-            - name: LC_ALL
-              value: en_US.utf8
-            - name: JDK_JAVA_OPTIONS
-              value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
-          ports:
-            - containerPort: 5672
-            - containerPort: 15672
+      - image: rabbitmq:3.6.10
+        name: rabbitmq
+        env:
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
+        ports:
+        - containerPort: 5672

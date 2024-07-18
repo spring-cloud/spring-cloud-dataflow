@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-common-security-config</artifactId>
-		<version>2.11.4-SNAPSHOT</version>
+		<version>2.11.4</version>
 	</parent>
 	<artifactId>spring-cloud-common-security-config-core</artifactId>
 	<name>spring-cloud-common-security-config-core</name>

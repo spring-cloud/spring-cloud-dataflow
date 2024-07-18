@@ -25,12 +25,12 @@ spec:
             - name: rsocket
               containerPort: 7001
           resources:
+            limits:
+              cpu: 1.0
+              memory: 2048Mi
             requests:
-              cpu: 1500m
-              memory: 1Gi
-          env:
-            - name: LOGGING_LEVEL_IO_MICROMETER
-              value: DEBUG
+              cpu: 0.5
+              memory: 1024Mi
       securityContext:
         fsGroup: 2000
         runAsNonRoot: true

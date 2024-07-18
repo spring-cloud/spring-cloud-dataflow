@@ -40,14 +40,8 @@ services:
       - SPRING_CLOUD_DATAFLOW_TASK_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
 
       # Override the CTR form maven to docker
-      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}${BP_JVM_VERSION:-}
+      - SPRING_CLOUD_DATAFLOW_TASK_COMPOSEDTASKRUNNER_URI=docker://springcloud/spring-cloud-dataflow-composed-task-runner:${DATAFLOW_VERSION:-@project.version@}${BP_JVM_VERSION:-}
       - SPRING_CLOUD_DATAFLOW_SERVER_URI=${DATAFLOW_URI:-http://dataflow-server:9393}
-    entrypoint: >
-      /bin/sh -c "
-         apt-get update && apt-get install --no-install-recommends -y wget &&
-         wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
-         tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
-         mv /tmp/docker/docker /usr/local/bin && /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -61,12 +55,6 @@ services:
       # in the docker-compose.yaml#skipper-server. Tip: you can change the APPS_PORT_RANGE instead.
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_LOW=20200
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_DOCKER_PORTRANGE_HIGH=61000
-    entrypoint: >
-      /bin/sh -c "
-         apt-get update && apt-get install --no-install-recommends -y wget &&
-         wget --no-check-certificate -P /tmp/ https://get.docker.com/builds/Linux/x86_64/docker-latest.tgz &&
-         tar -xvf /tmp/docker-latest.tgz --directory /tmp/ &&
-         mv /tmp/docker/docker /usr/local/bin && /cnb/process/web"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
@@ -76,8 +64,8 @@ services:
     command: >
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';               
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}' --no-check-certificate --post-data='uri=docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-2.11.3-SNAPSHOT}${BP_JVM_VERSION:-}';
+        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate --post-data='uri=${STREAM_APPS_URI:-https://dataflow.spring.io/kafka-docker-latest&force=true}';
+                wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/sink/dataflow-tasklauncher/${DATAFLOW_VERSION:-@project.version@}' --no-check-certificate --post-data='uri=docker:springcloud/spring-cloud-dataflow-tasklauncher-sink-kafka:${DATAFLOW_VERSION:-@project.version@}${BP_JVM_VERSION:-}';
         echo 'Docker Stream apps imported'"
 
   app-import-task:
@@ -85,6 +73,4 @@ services:
       /bin/sh -c "
         ./wait-for-it.sh -t 360 dataflow-server:9393;
         wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps' --no-check-certificate  --post-data='uri=${TASK_APPS_URI:-https://dataflow.spring.io/task-docker-latest&force=true}';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/timestamp3' --no-check-certificate --post-data='bootVersion=3&uri=docker:springcloudtask/timestamp-task:3.0.0';
-        wget -qO- '${DATAFLOW_URI:-http://dataflow-server:9393}/apps/timestamp-batch3' --no-check-certificate --post-data='bootVersion=3&uri=docker:springcloudtask/timestamp-batch-task:3.0.0';
         echo 'Docker Task apps imported'"
