@@ -35,7 +35,7 @@ spec:
               memory: 1Gi
           volumeMounts:
             - name: data
-              mountPath: /var/lib/mariadb
+              mountPath: /var/lib/mysql
           args:
             - "--ignore-db-dir=lost+found"
             - "--character-set-server=utf8mb4"
