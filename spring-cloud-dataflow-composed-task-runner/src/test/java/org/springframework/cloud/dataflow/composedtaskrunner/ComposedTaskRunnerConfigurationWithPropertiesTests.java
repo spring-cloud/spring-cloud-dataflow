@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,6 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		List<String> args = new ArrayList<>(2);
 		args.add("--baz=boo --foo=bar");
 		args.add("--spring.cloud.task.parent-execution-id=1");
-		args.add("--spring.cloud.task.parent-schema-target=boot2");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		verify(taskOperations).launch("ComposedTest-AAA", props, args);
 	}

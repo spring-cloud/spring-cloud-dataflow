@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,32 @@ package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import javax.sql.DataSource;
 
-import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.StepExecutionListener;
-import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
+import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.task.configuration.TaskConfigurer;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExplorer;
+import org.springframework.cloud.task.repository.TaskNameResolver;
 import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -49,7 +55,12 @@ import static org.mockito.Mockito.mock;
  * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {org.springframework.cloud.dataflow.composedtaskrunner.ComposedTaskRunnerStepFactoryTests.StepFactoryConfiguration.class})
+@ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
+	DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
+	ComposedTaskRunnerConfiguration.class,
+	StepBeanDefinitionRegistrar.class})
+@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
+@TestPropertySource(properties = {"graph=FOOBAR","max-wait-time=1000", "increment-instance-enabled=true", "spring.cloud.task.name=footest"})
 public class ComposedTaskRunnerStepFactoryTests {
 
 	@Autowired
@@ -59,7 +70,7 @@ public class ComposedTaskRunnerStepFactoryTests {
 	public void testStep() throws Exception {
 		Step step = stepFactory.getObject();
 		assertThat(step).isNotNull();
-		assertThat(step.getName()).isEqualTo("FOOBAR");
+		assertThat(step.getName()).isEqualTo("FOOBAR_0");
 		assertThat(step.getStartLimit()).isEqualTo(Integer.MAX_VALUE);
 	}
 
@@ -73,12 +84,6 @@ public class ComposedTaskRunnerStepFactoryTests {
 		public TaskOperations taskOperations;
 
 		@Bean
-		public TaskExplorerContainer taskExplorerContainer() {
-			TaskExplorer taskExplorer = mock(TaskExplorer.class);
-			return new TaskExplorerContainer(Collections.emptyMap(), taskExplorer);
-		}
-
-		@Bean
 		public ComposedTaskProperties composedTaskProperties() {
 			return new ComposedTaskProperties();
 		}
@@ -89,8 +94,8 @@ public class ComposedTaskRunnerStepFactoryTests {
 		}
 
 		@Bean
-		public StepBuilderFactory steps() {
-			return new StepBuilderFactory(mock(JobRepository.class), mock(PlatformTransactionManager.class));
+		public StepBuilder steps() {
+			return new StepBuilder("foo", mock(JobRepository.class));
 		}
 
 		@Bean
@@ -115,12 +120,12 @@ public class ComposedTaskRunnerStepFactoryTests {
 				public DataSource getTaskDataSource() {
 					return mock(DataSource.class);
 				}
-			};
-		}
 
-		@Bean
-		public ComposedTaskRunnerStepFactory stepFactory(TaskProperties taskProperties) {
-			return new ComposedTaskRunnerStepFactory(new ComposedTaskProperties(), "FOOBAR", "BAR");
+				@Override
+				public TaskNameResolver getTaskNameResolver() {
+					return new SimpleTaskNameResolver();
+				}
+			};
 		}
 	}
 }
