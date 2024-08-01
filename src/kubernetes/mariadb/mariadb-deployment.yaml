@@ -1,3 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-configmap
+data:
+  primary.sql: |
+    CREATE DATABASE IF NOT EXISTS dataflow;
+    CREATE DATABASE IF NOT EXISTS skipper;
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,12 +44,17 @@ spec:
               memory: 1Gi
           volumeMounts:
             - name: data
-              mountPath: /var/lib/mariadb
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
           args:
             - "--ignore-db-dir=lost+found"
             - "--character-set-server=utf8mb4"
             - "--collation-server=utf8mb4_unicode_ci"
       volumes:
+        - name: initdb
+          configMap:
+            name: mariadb-configmap
         - name: data
           persistentVolumeClaim:
             claimName: mariadb
