@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,11 +30,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
@@ -80,6 +84,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		Thread.sleep(2000);
 		taskBatchDao = applicationContext.getBean(TaskBatchDao.class);
 		jobRepository = applicationContext.getBean(JobRepository.class);
+		taskExecutionDao = applicationContext.getBean(TaskExecutionDao.class);
 
 		taskExecutionIds.add(createSampleJob(JOB_NAME_ORIG, 1));
 		taskExecutionIds.add(createSampleJob(JOB_NAME_FOO, 1));
@@ -94,30 +99,28 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		}
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
-		final String TASK_EXECUTION_FORMAT = "DELETE FROM task_execution WHERE task_execution_id = %d";
-		final String TASK_BATCH_FORMAT = "DELETE FROM task_task_batch WHERE task_execution_id = %d";
-
-		for (Long id : taskExecutionIds) {
-			template.execute(String.format(TASK_BATCH_FORMAT, id));
-			template.execute(String.format(TASK_EXECUTION_FORMAT, id));
-		}
 	}
 
 	private static long createSampleJob(String jobName, int jobExecutionCount)
 		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
-		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
-		jobInstances.add(instance);
 		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<>(), null);
+
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
-		jobParameterMap.put("foo", new JobParameter("FOO", String.class, true));
-		jobParameterMap.put("bar", new JobParameter("BAR", String.class, false));
+		jobParameterMap.put("foo", new JobParameter("FOO", String.class, false));
+		jobParameterMap.put("bar", new JobParameter("BAR", String.class, true));
+		jobParameterMap.put("baz", new JobParameter("55", Long.class, true));
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
 		JobExecution jobExecution;
 		for (int i = 0; i < jobExecutionCount; i++) {
 			jobExecution = jobRepository.createJobExecution(jobName, jobParameters);
+			JobInstance instance = jobExecution.getJobInstance();
+			jobInstances.add(instance);
 			taskBatchDao.saveRelationship(taskExecution, jobExecution);
 			StepExecution stepExecution = new StepExecution("foobar", jobExecution);
 			jobRepository.add(stepExecution);
+			jobExecution.setStatus(BatchStatus.FAILED);
+			jobExecution.setExitStatus(ExitStatus.FAILED);
+			jobRepository.update(jobExecution);
 		}
 		return taskExecution.getExecutionId();
 	}
@@ -133,7 +136,6 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 3, "Start Time ");
 		checkCell(table, 0, 4, "Step Execution Count ");
 		checkCell(table, 0, 5, "Definition Status ");
-
  	 	}
 
 	@Test
@@ -152,10 +154,9 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	@Test
 	public void testViewExecution() {
 		logger.info("Retrieve Job Execution Detail by Id");
-
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals("Number of expected rows returned from the table is incorrect", 18,
+		assertEquals("Number of expected rows returned from the table is incorrect", 19,
 				table.getModel().getRowCount());
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
@@ -174,22 +175,33 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, rowNumber++, 0, "Exit Message ");
 		checkCell(table, rowNumber++, 0, "Definition Status ");
 		checkCell(table, rowNumber++, 0, "Job Parameters ");
-		int paramRowOne = rowNumber++;
-		int paramRowTwo = rowNumber++;
-		boolean jobParamsPresent = false;
-		if ((table.getModel().getValue(paramRowOne, 0).equals("foo(STRING) ")
-				&& table.getModel().getValue(paramRowTwo, 0).equals("-bar(STRING) "))
-				|| (table.getModel().getValue(paramRowOne, 0).equals("-bar(STRING) ")
-						&& table.getModel().getValue(paramRowTwo, 0).equals("foo(STRING) "))) {
-			jobParamsPresent = true;
+		int paramRowOne = rowNumber;
+
+		assertTrue("the table did not contain the correct job parameters for job parameter value foo",
+			checkModelColumn(paramRowOne, table, "-foo(java.lang.String) "));
+
+		assertTrue("the table did not contain the correct job parameters for job parameter value bar",
+			checkModelColumn(paramRowOne, table, "bar(java.lang.String) "));
+
+		assertTrue("the table did not contain the correct job parameters for job parameter value baz",
+			checkModelColumn(paramRowOne, table, "baz(java.lang.Long) "));
+
+	}
+
+	private boolean checkModelColumn(int rowNumber, Table table, String value) {
+		boolean result = false;
+		int paramRowNumber = rowNumber;
+		if (table.getModel().getValue(paramRowNumber++, 0).equals(value) ||
+			table.getModel().getValue(paramRowNumber++, 0).equals(value) ||
+			table.getModel().getValue(paramRowNumber, 0).equals(value)) {
+			result = true;
 		}
-		assertTrue("the table did not contain the correct job parameters ", jobParamsPresent);
+		return result;
 	}
 
 	@Test
 	public void testViewInstance() {
 		logger.info("Retrieve Job Instance Detail by Id");
-
 		Table table = getTable(job().instanceDisplay(jobInstances.get(0).getInstanceId()));
 		verifyColumnNumber(table, 5);
 		checkCell(table, 0, 0, "Name ");
@@ -198,8 +210,9 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 3, "Status ");
 		checkCell(table, 0, 4, "Job Parameters ");
 		boolean isValidCell = false;
-		if (table.getModel().getValue(1, 4).equals("foo=FOO,-bar=BAR")
-				|| table.getModel().getValue(1, 4).equals("-bar=BAR,foo=FOO")) {
+		if (table.getModel().getValue(1, 4).toString().contains("-foo={value=FOO, type=class java.lang.String, identifying=false},java.lang.String,true") &&
+			table.getModel().getValue(1, 4).toString().contains("bar={value=BAR, type=class java.lang.String, identifying=true},java.lang.String,true") &&
+			table.getModel().getValue(1, 4).toString().contains("baz=55,java.lang.Long,true")) {
 			isValidCell = true;
 		}
 		assertTrue("Job Parameters does match expected.", isValidCell);
