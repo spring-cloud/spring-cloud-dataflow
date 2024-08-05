@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +35,9 @@ public class DockerComposeExecutable implements Executable {
 	private static final DockerCommandLocations DOCKER_COMPOSE_LOCATIONS = new DockerCommandLocations(
 			System.getenv("DOCKER_COMPOSE_LOCATION"),
 			"/usr/local/bin/docker-compose",
-			"/usr/bin/docker-compose"
+			"/usr/bin/docker-compose",
+			"/usr/local/bin/docker",
+			"/usr/bin/docker"
 	);
 
 	private static String defaultDockerComposePath() {
@@ -52,13 +55,18 @@ public class DockerComposeExecutable implements Executable {
 
 			@Override
 			public String commandName() {
-				return "docker-compose";
+				File file = new File(defaultDockerComposePath());
+				return file.getName().equals("docker-compose") ? "docker-compose" : "docker";
 			}
 
 			@Override
 			public Process execute(String... commands) throws IOException {
 				List<String> args = new ArrayList<>();
-				args.add(defaultDockerComposePath());
+				String dockerComposePath = defaultDockerComposePath();
+				args.add(dockerComposePath);
+				if(commandName().equals("docker")) {
+					args.add("compose");
+				}
 				args.addAll(Arrays.asList(commands));
 				log.debug("execute:{}", args);
 				return new ProcessBuilder(args).redirectErrorStream(true).start();
@@ -98,7 +106,8 @@ public class DockerComposeExecutable implements Executable {
 
 	@Override
 	public final String commandName() {
-		return "docker-compose";
+		File file = new File(defaultDockerComposePath());
+		return file.getName().equals("docker-compose") ? "docker-compose" : "docker";
 	}
 
 	protected String dockerComposePath() {
@@ -110,7 +119,11 @@ public class DockerComposeExecutable implements Executable {
 		DockerForMacHostsIssue.issueWarning();
 
 		List<String> args = new ArrayList<>();
-		args.add(dockerComposePath());
+		String dockerComposePath = dockerComposePath();
+		args.add(dockerComposePath);
+		if(commandName().equals("docker")) {
+			args.add("compose");
+		}
 		// if a single option is provided that starts with - skips the file commands.
 		if (commands.length > 1 || commands[0].charAt(0) != '-') {
 			args.addAll(projectName().constructComposeFileCommand());
