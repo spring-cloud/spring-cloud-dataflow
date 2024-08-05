@@ -8,7 +8,7 @@ services:
       - |
         SPRING_APPLICATION_JSON=
         {
-          "management.metrics.export.influx":{
+          "management.influx.metrics.export":{
               "enabled":true,
               "db":"myinfluxdb",
               "uri":"http://influxdb:8086"
@@ -29,4 +29,3 @@ services:
     container_name: grafana
     ports:
       - '3000:3000'
-

@@ -20,8 +20,6 @@ The naming of the metrics registry-specific properties differ as follows:
 * `2.x`: `management.metrics.export.prometheus.enabled=true`
 * `3.x`: `management.prometheus.metrics.export.enabled=true`
 
-NOTE: One exception to this rule is the Prometheus RSocket Proxy which still runs on Spring Boot `2.x` and therefore expects the properties in the `management.metrics.export.prometheus.rsocket.*` format.
-
 Be sure that you use the `2.x` format when configuring `2.x` based stream apps and the `3.x` format when configuring `3.x` based stream apps.
 
 ===== Dataflow Metrics Property Replication
