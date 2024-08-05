@@ -29,7 +29,7 @@
 		<nimbus-jose-jwt.version>9.39.3</nimbus-jose-jwt.version>
 		<snappy-java.version>1.1.10.5</snappy-java.version>
 		<commons-compress.version>1.26.2</commons-compress.version>
-		<prometheus-rsocket.version>1.6.0-SNAPSHOT</prometheus-rsocket.version>
+		<prometheus-rsocket.version>2.0.0-M1</prometheus-rsocket.version>
 		<java-cfenv.version>2.3.0</java-cfenv.version>
 		<spring-cloud-services-starter-config-client.version>3.5.4</spring-cloud-services-starter-config-client.version>
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
