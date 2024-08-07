@@ -210,6 +210,7 @@ public class ContainerImageRestTemplateFactory {
 		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		mediaTypeList.add(MediaType.TEXT_PLAIN);
+		mediaTypeList.add(MediaType.parseMediaType("binary/octet-stream")); // quay.io responds with binary/octet-stream instead of application/octet-stream
 		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);
 
 		return restTemplateBuilder
