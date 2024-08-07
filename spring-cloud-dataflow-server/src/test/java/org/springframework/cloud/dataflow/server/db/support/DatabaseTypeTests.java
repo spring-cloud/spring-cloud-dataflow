@@ -92,6 +92,8 @@ class DatabaseTypeTests {
 	}
 
 	@Nested
+	@EnabledIfEnvironmentVariable(named = "ENABLE_ORACLE", matches = "true", disabledReason = "Container is too big")
+	@Tag("ORACLE")
 	class OracleDatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
 	}
 
