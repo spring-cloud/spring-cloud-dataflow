@@ -106,70 +106,74 @@ jobs:
     outputs:
       version: ${{ env.spring_cloud_dataflow_version }}
   database-tests:
-    build:
-      if: github.repository_owner == 'spring-cloud'
-      runs-on: ubuntu-latest
+    if: github.repository_owner == 'spring-cloud'
+    runs-on: ubuntu-latest
+    strategy:
       matrix:
         db: [ 'ORACLE', 'DB2' ]
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/cache@v3
-          with:
-            path: ~/.m2/repository
-            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-            restore-keys: |
-              ${{ runner.os }}-m2-${{ matrix.db }}
-        - uses: actions/setup-java@v3
-          with:
-            java-version: '8'
-            distribution: 'liberica'
-        - uses: jvalkeal/setup-maven@v1
-          with:
-            maven-version: 3.8.8
-            maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-        #     jfrog cli
-        - name: Login dockerhub
-          uses: docker/login-action@v3
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
-        - name: Configure JFrog Cli
-          run: |
-            jfrog rt mvnc \
-              --server-id-resolve=repo.spring.io \
-              --server-id-deploy=repo.spring.io \
-              --repo-resolve-releases=libs-milestone \
-              --repo-resolve-snapshots=libs-snapshot \
-              --repo-deploy-releases=libs-release-local \
-              --repo-deploy-snapshots=libs-snapshot-local
-        - uses: ./.github/actions/install-xmlutils
-        - name: Test
-          shell: bash
-          timeout-minutes: 75
-          run: |                        
-            jfrog rt mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
-            export ENABLE_${{ matrix.db }}=true
-            jfrog rt mvn test -s .settings.xml -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
-        - name: Test Report
-          uses: dorny/test-reporter@v1
-          if: ${{ success() || failure() }}
-          with:
-            name: Unit Tests
-            path: '**/surefire-reports/*.xml'
-            reporter: java-junit
-            list-tests: failed
-        - name: Capture Test Results
-          if: ${{ always() }}
-          uses: actions/upload-artifact@v3
-          with:
-            name: test-results
-            path: '**/target/surefire-reports/**/*.*'
-            retention-days: 7
-            if-no-files-found: ignore
-        #     clean m2 cache
-        - name: Clean cache
-          run: |
-            find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-m2-${{ matrix.db }}
+    - uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'liberica'
+    - uses: jvalkeal/setup-maven@v1
+      with:
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.46.4
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+    - name: Login dockerhub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Configure JFrog Cli
+      run: |
+        jfrog rt mvnc \
+          --server-id-resolve=repo.spring.io \
+          --server-id-deploy=repo.spring.io \
+          --repo-resolve-releases=libs-milestone \
+          --repo-resolve-snapshots=libs-snapshot \
+          --repo-deploy-releases=libs-release-local \
+          --repo-deploy-snapshots=libs-snapshot-local
+    - uses: ./.github/actions/install-xmlutils
+    - name: Test
+      shell: bash
+      timeout-minutes: 75
+      run: |                        
+        jfrog rt mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
+        export ENABLE_${{ matrix.db }}=true
+        jfrog rt mvn test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: ${{ success() || failure() }}
+      with:
+        name: Unit Tests
+        path: '**/surefire-reports/*.xml'
+        reporter: java-junit
+        list-tests: failed
+    - name: Capture Test Results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: '**/target/surefire-reports/**/*.*'
+        retention-days: 7
+        if-no-files-found: ignore
+    #     clean m2 cache
+    - name: Clean cache
+      run: |
+        find ~/.m2/repository -type d -name '*SNAPSHOT' | xargs rm -fr
 
   images:
     name: Build and Publish Images
