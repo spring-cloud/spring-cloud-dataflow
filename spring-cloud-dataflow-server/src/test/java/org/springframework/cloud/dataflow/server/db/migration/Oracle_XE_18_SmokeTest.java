@@ -15,6 +15,9 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+
 import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSupport;
 
 /**
@@ -23,5 +26,7 @@ import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSuppor
  * @author Corneil du Plessis
  * @author Chris Bono
  */
+@EnabledIfEnvironmentVariable(named = "ENABLE_ORACLE", matches = "true", disabledReason = "Container is too big")
+@Tag("ORACLE")
 public class Oracle_XE_18_SmokeTest extends AbstractSmokeTest implements Oracle_XE_18_ContainerSupport {
 }

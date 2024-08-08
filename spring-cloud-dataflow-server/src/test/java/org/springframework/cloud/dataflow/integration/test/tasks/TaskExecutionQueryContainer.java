@@ -228,7 +228,8 @@ public class TaskExecutionQueryContainer {
 	static class PostgreSQL_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
 			implements PostgreSQL_14_ContainerSupport {
 	}
-
+	@EnabledIfEnvironmentVariable(named = "ENABLE_ORACLE", matches = "true", disabledReason = "Container is too big")
+	@Tag("ORACLE")
 	static class Oracle_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
 			implements Oracle_XE_18_ContainerSupport {
 	}
