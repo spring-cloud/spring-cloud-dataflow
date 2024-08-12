@@ -7,9 +7,9 @@ metadata:
 data:
   application.yaml: |-
     management:
-      metrics:
-        export:
-          prometheus:
+      prometheus:
+        metrics:
+          export:
             enabled: true
             rsocket:
               enabled: true
@@ -36,4 +36,3 @@ data:
         driverClassName: org.mariadb.jdbc.Driver
         testOnBorrow: true
         validationQuery: "SELECT 1"
-        
