@@ -300,11 +300,11 @@ describe('servers', () => {
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED',
+          name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED',
           value: 'true'
         }),
         expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED',
+          name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED',
           value: 'true'
         })
       ])
@@ -454,8 +454,8 @@ describe('servers', () => {
     expect(envs).toBeTruthy();
     expect(envs).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED', value: 'true' }),
-        expect.objectContaining({ name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED', value: 'true' })
+        expect.objectContaining({ name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED', value: 'true' }),
+        expect.objectContaining({ name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED', value: 'true' })
       ])
     );
   });
