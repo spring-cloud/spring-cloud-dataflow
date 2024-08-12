@@ -45,9 +45,9 @@ config: #@ data.values.scdf.skipper.config
 #@overlay/match-child-defaults missing_ok=True
 config:
   management:
-    metrics:
-      export:
-        prometheus:
+    prometheus:
+      metrics:
+        export:
           enabled: true
           rsocket:
             enabled: true
