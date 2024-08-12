@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 function set_properties() {
     PREFIX=$1
-    yq "${PREFIX}.management.metrics.export.prometheus.rsocket.host=\"$HOST\"" -i ./scdf-values.yml
+    yq "${PREFIX}.micrometer.prometheus.rsocket.host=\"$HOST\"" -i ./scdf-values.yml
     yq "${PREFIX}.management.metrics.export.prometheus.pushgateway.base-url=\"http://$HOST:$PORT\"" -i ./scdf-values.yml
     yq "${PREFIX}.management.metrics.export.prometheus.pushgateway.enabled=true" -i ./scdf-values.yml
     yq "${PREFIX}.management.metrics.export.prometheus.pushgateway.shutdown-operation=\"PUSH\"" -i ./scdf-values.yml
