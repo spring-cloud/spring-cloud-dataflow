@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -34,6 +35,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.rest.Version;
@@ -105,6 +107,23 @@ public class DataflowTemplateTests {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		DataFlowTemplate.prepareObjectMapper(objectMapper);
 		assertCorrectMixins(objectMapper);
+	}
+
+	@Test
+	public void testJobParameters() throws JsonProcessingException {
+		final ObjectMapper objectMapper = new ObjectMapper();
+		JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
+		jobParametersBuilder.addString("foo", "foo");
+		jobParametersBuilder.addString("bar", "bar");
+
+		JobParameters jobParameters = jobParametersBuilder.toJobParameters();
+		DataFlowTemplate.prepareObjectMapper(objectMapper);
+		assertCorrectMixins(objectMapper);
+		String jobParametersSerialized = objectMapper.writeValueAsString(jobParameters);
+		jobParameters = objectMapper.readValue(jobParametersSerialized, JobParameters.class);
+		assertEquals(jobParameters.getParameter("foo").getValue(), "foo");
+		assertEquals(jobParameters.getParameter("bar").getValue(), "bar");
+		assertEquals(jobParameters.getParameters().size(), 2);
 	}
 
 	@Test
