@@ -1,4 +1,3 @@
-version: '3'
 # Configuration environment variables:
 # - DATAFLOW_VERSION and SKIPPER_VERSION specify what DataFlow and Skipper image versions to use.
 # - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-register.
@@ -21,7 +20,7 @@ version: '3'
 services:
   dataflow-server:
     user: root
-    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-2.11.2-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-dataflow-server:${DATAFLOW_VERSION:-3.0.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: dataflow-server
     ports:
       - "9393:9393"
@@ -64,7 +63,7 @@ services:
 
   skipper-server:
     user: root
-    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-2.11.2-SNAPSHOT}${BP_JVM_VERSION:-}
+    image: springcloud/spring-cloud-skipper-server:${SKIPPER_VERSION:-3.0.0-SNAPSHOT}${BP_JVM_VERSION:-}
     container_name: skipper-server
     ports:
       - "7577:7577"

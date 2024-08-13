@@ -77,8 +77,6 @@ public abstract class TagNames {
 
 	public static final String SKIPPER_main = "skipper_main";
 
-	public static final String DATAFLOW = "dataflow";
-
 	public static final String DATAFLOW_2_7 = "dataflow_2_7";
 
 	public static final String DATAFLOW_2_8 = "dataflow_2_8";
