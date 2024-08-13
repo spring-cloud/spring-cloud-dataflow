@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -284,32 +283,17 @@ public class DefaultTaskJobService implements TaskJobService {
 	 */
 	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters,
 		Boolean useJsonJobParameters) {
-		List<String> result = new ArrayList<>(taskExecutionArgs);
-		Map<String, JobParameter<?>> jobParametersMap = jobParameters.getParameters();
-		ScdfJobParametersConverter scdfJobParametersConverter;
 		if (useJsonJobParameters == null) {
 			useJsonJobParameters = taskConfigurationProperties.isUseJsonJobParameters();
 		}
-		if(useJsonJobParameters) {
-			scdfJobParametersConverter = new ScdfJsonJobParametersConverter();
-		}
-		else {
-			scdfJobParametersConverter = new ScdfDefaultJobParametersConverter();
-		}
-		for (String key : jobParametersMap.keySet()) {
-			if (!key.startsWith("-")) {
-				boolean existsFlag = false;
-				for (String arg : taskExecutionArgs) {
-					if (arg.startsWith(key)) {
-						existsFlag = true;
-						break;
-					}
-				}
-				if (!existsFlag) {
-					result.add(key + "=" + scdfJobParametersConverter.deserializeJobParameter(jobParametersMap.get(key)));
-				}
-			}
-		}
+		var jobParamsConverter = useJsonJobParameters ? new ScdfJsonJobParametersConverter()
+			: new ScdfDefaultJobParametersConverter();
+		List<String> result = new ArrayList<>(taskExecutionArgs);
+		jobParameters.getParameters().entrySet().stream()
+			.filter((e) -> !e.getKey().startsWith("-"))
+			.filter((e) -> taskExecutionArgs.stream().noneMatch((arg) -> arg.startsWith(e.getKey())))
+			.map((e) -> e.getKey() + "=" + jobParamsConverter.deserializeJobParameter(e.getValue()))
+			.forEach(result::add);
 		return result;
 	}
 
