@@ -64,7 +64,8 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_10, DATAFLOW_IMAGE_PREFIX + "2.10.3"),
-		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.3")
+		ClusterContainer.from(TagNames.DATAFLOW_2_11, DATAFLOW_IMAGE_PREFIX + "2.11.4"),
+		ClusterContainer.from(TagNames.DATAFLOW_3_0, DATAFLOW_IMAGE_PREFIX + "3.0.0")
 	);
 
 	public final static List<ClusterContainer> SKIPPER_CONTAINERS = Arrays.asList(
@@ -72,7 +73,8 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
 		ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
 		ClusterContainer.from(TagNames.SKIPPER_2_9, SKIPPER_IMAGE_PREFIX + "2.9.3"),
-		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.3")
+		ClusterContainer.from(TagNames.SKIPPER_2_11, SKIPPER_IMAGE_PREFIX + "2.11.4"),
+		ClusterContainer.from(TagNames.SKIPPER_3_0, SKIPPER_IMAGE_PREFIX + "3.0.0")
 	);
 
 	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(

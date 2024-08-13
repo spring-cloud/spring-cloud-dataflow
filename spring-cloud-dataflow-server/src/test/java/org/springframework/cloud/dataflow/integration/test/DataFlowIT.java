@@ -1314,8 +1314,6 @@ public class DataFlowIT {
 		assertThat(taskBuilder.allTasks()).isEmpty();
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x followup Wait for composed Task runner to be ported to 3.x")
 	@Test
 	void multipleComposedTaskWithArguments() {
 		logger.info("task-multiple-composed-task-with-arguments-test");

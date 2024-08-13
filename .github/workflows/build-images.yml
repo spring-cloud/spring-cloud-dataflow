@@ -81,7 +81,7 @@ jobs:
         shell: bash
         env:
           TAG: ${{ needs.prepare.outputs.version }}
-          DEFAULT_JDK: '11'
+          DEFAULT_JDK: '17'
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
           DELETE_TAGS: ${{ inputs.delete-tags }}
