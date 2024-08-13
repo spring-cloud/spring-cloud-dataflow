@@ -54,6 +54,7 @@ public class JobParameterJacksonDeserializer extends JsonDeserializer<JobParamet
 			try {
 				jobParameter = new JobParameter(value, Class.forName(type), identifying);
 			} catch (ClassNotFoundException e) {
+				logger.warn("JobParameter type %s is not supported by DataFlow.  Verify type is valid or in classpath.".formatted(type) );
 				throw new IllegalArgumentException("JobParameter type %s is not supported by DataFlow".formatted(type), e);
 			}
 		}
