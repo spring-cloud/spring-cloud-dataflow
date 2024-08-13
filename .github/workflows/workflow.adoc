@@ -1,0 +1,71 @@
+= Workflow Reference
+
+This README serves as a guide to the GitHub Action workflows included in this repository.
+It outlines the purpose and functionality of each workflow, detailing their role in the CI and release processes.
+Additionally, this document provides an overview of the scripts and actions utilized in these workflows, offering insights into how they work together in SCDF's CI/CD pipeline.
+
+This document is a work in progress, and as various workflows are updated, the documentation will be revised to reflect both existing and new behaviors.
+
+
+== Building Docker Images and pushing the containers to DockerHub
+.This diagram shows the flow of execution of how workflows create Docker imges.
+```
+┌─────────────────────────┐
+│                         │
+│                         │
+│build-snapshot-worker.yml┼────┐
+│                         │    │
+│                         │    │
+└─────────────────────────┘    │
+┌─────────────────────────┐    │
+│                         │    │
+│                         │    │
+│     ci-images.yml       ┼────┤     ┌─────────────────────────┐         ┌─────────────────────────┐
+│                         │    │     │                         │         │                         │
+│                         │    │     │                         │         │                         │
+└─────────────────────────┘    ├────►│     build-images.yml    ┼────────►│      build-image.sh     │
+┌─────────────────────────┐    │     │                         │         │                         │
+│                         │    │     │                         │         │                         │
+│                         │    │     └───────────┬─────────────┘         └─────────────────────────┘
+│         ci.yml          ┼────┤                 │
+│                         │    │                 │
+│                         │    │     ┌───────────┴─────────────┐
+└─────────────────────────┘    │     │                         │       
+┌─────────────────────────┐    │     │                         │
+│                         │    │     │       images.json       │
+│                         │    │     │                         │
+│    release-worker.yml   ┼────┘     │                         │
+│                         │          └─────────────────────────┘
+│                         │
+└─────────────────────────┘                                                                                                                                                 
+```
+
+Part of the release and CI process involves creating and pushing images to a registry (such as DockerHub) for the Dataflow server, Skipper server, CTR app, and other components.
+This process is managed by the `build-images` (build-images.yml)  workflow. While the `build-images` workflow is typically not run independently, it is invoked by other workflows that handle CI builds and releases.
+The `build-images` workflow determines which images to create based on the `images.json` file.
+This file contains metadata on the primary SCDF components that need to have an associated image.
+Each entry specifies the location (directory) where the jar can be found, jar name, and image name for each artifact that will be used to construct the image.
+For each entry in the `images.json` file, the workflow calls the `build-image.sh` script, which retrieves the jar, builds the image, and then pushes it to the registry.
+
+SCDF also provides images for external applications that support some of the optional features that are offered by dataflow.
+These include Grafana and Prometheus local.
+These images are created and pushed using the docker/build-push-action@v2 action.
+
+=== Scripts used to build images
+As mentioned above, the `build-image.sh` script is responsible for building the specified image based on the parameters provided and then pushing the image to Dockerhub.
+This script uses Paketo to build an image for each of the supported Java versions using the corresponding jar file.
+The resulting image name will look something like `spring-cloud-dataflow-server:3.0.0-SNAPSHOT-jdk17`.
+Additionally, the script creates a default image using the default Java version as specified by the `DEFAULT_JDK` environment variable.
+
+The format for running the `build-image.sh` is as follows:
+[source, bash]
+```
+bash
+./build-image.sh <directory containing the jar> <The name of the image to create> <name of the jar>
+```
+
+There is an optional `DEFAULT_JDK` environment variable that allows you to set the JDK version for the default image created.
+If not the script will set it to its current setting (which as of the writing of this document is `17`).
+
+NOTE: When new releases of Java are available and are compliant with the SCDF release, they need to be added to the `build-image.sh` script.
+

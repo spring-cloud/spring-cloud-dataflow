@@ -1,5 +1,3 @@
-version: '3'
-
 # Extends the default docker-compose.yml with Prometheus/Grafana monitoring configuration
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-prometheus.yml up
 services:
