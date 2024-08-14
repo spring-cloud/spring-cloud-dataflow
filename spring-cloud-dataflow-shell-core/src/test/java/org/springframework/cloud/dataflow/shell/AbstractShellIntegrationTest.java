@@ -124,10 +124,7 @@ public abstract class AbstractShellIntegrationTest {
 						"org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration," +
 						"org.springframework.boot.autoconfigure.session.SessionAutoConfiguration," +
 						"org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration," +
-						"org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration," +
-						"org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration," +
-						"org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration," +
-						"org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration",
+						"org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl,
 					"--spring.cloud.dataflow.features.schedules-enabled=true");
 			Shell shell = applicationContext.getBean(Shell.class);

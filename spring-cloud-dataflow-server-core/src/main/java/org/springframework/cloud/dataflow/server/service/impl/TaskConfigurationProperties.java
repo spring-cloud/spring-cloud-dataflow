@@ -69,11 +69,11 @@ public class TaskConfigurationProperties {
 	private boolean useKubernetesSecretsForDbCredentials;
 
 	/**
-	 * When SCDF reruns a failed batch jobs dataflow reconstitutes the job parameters.
-	 * By default, this will use the style specified by Spring Batch's DefaultJobParametersConverter.
-	 * but if this property is set to true the job parameters will reconstituted in the style specified by
-	 * Spring Batch's JsonJobParametersConverter.   Default is false.
+	 * Controls the style that Dataflow reconstitutes job parameters when re-running a
+	 * failed batch job. The style will be taken from Spring Batch's
+	 * DefaultJobParametersConverter when set to false or JsonJobParametersConverter when true.
 	 */
+
 	private boolean useJsonJobParameters = false;
 
 	@Deprecated

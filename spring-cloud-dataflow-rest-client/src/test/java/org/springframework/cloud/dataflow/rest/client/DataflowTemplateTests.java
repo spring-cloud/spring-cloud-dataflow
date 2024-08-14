@@ -111,16 +111,15 @@ public class DataflowTemplateTests {
 
 	@Test
 	public void testJobParameters() throws JsonProcessingException {
-		final ObjectMapper objectMapper = new ObjectMapper();
 		JobParametersBuilder jobParametersBuilder = new JobParametersBuilder();
 		jobParametersBuilder.addString("foo", "foo");
 		jobParametersBuilder.addString("bar", "bar");
 
 		JobParameters jobParameters = jobParametersBuilder.toJobParameters();
-		DataFlowTemplate.prepareObjectMapper(objectMapper);
-		assertCorrectMixins(objectMapper);
-		String jobParametersSerialized = objectMapper.writeValueAsString(jobParameters);
-		jobParameters = objectMapper.readValue(jobParametersSerialized, JobParameters.class);
+		DataFlowTemplate.prepareObjectMapper(this.mapper);
+		assertCorrectMixins(this.mapper);
+		String jobParametersSerialized = this.mapper.writeValueAsString(jobParameters);
+		jobParameters = this.mapper.readValue(jobParametersSerialized, JobParameters.class);
 		assertEquals(jobParameters.getParameter("foo").getValue(), "foo");
 		assertEquals(jobParameters.getParameter("bar").getValue(), "bar");
 		assertEquals(jobParameters.getParameters().size(), 2);

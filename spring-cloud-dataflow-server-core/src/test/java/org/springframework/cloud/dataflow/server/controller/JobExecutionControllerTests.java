@@ -203,8 +203,7 @@ public class JobExecutionControllerTests {
 			.andExpect(jsonPath("$.executionId", is(10)))
 			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
 			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
-		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true");
-		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"java.lang.String\"");
+		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true", "\"type\":\"java.lang.String\"");
 	}
 
 	@Test
