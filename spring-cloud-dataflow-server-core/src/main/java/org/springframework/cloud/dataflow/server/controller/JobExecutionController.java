@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -39,7 +41,6 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -62,6 +63,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/jobs/executions")
 @ExposesResourceFor(JobExecutionResource.class)
 public class JobExecutionController {
+
+	private static final Logger logger = LoggerFactory.getLogger(JobExecutionController.class);
 
 	private final Assembler jobAssembler = new Assembler();
 
@@ -151,7 +154,12 @@ public class JobExecutionController {
 		@PathVariable("executionId") long jobExecutionId,
 		@RequestParam(value = "useJsonJobParameters", required = false) Boolean useJsonJobParameters)
 		throws NoSuchJobExecutionException {
+		try {
 			taskJobService.restartJobExecution(jobExecutionId, useJsonJobParameters);
+		} catch (NoSuchJobExecutionException e) {
+			logger.warn(e.getMessage(), e);
+			throw e;
+		}
 			return ResponseEntity.ok().build();
 	}
 

@@ -24,8 +24,6 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,10 +39,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.RootResource;
-import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.LinkRelation;
-import org.springframework.hateoas.mediatype.hal.Jackson2HalModule;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.ResourceAccessException;
@@ -71,10 +67,7 @@ public class DataflowTemplateTests {
 	@Before
 	public void setup() {
 		mapper = new ObjectMapper();
-		mapper.registerModule(new Jdk8Module());
-		mapper.registerModule(new Jackson2HalModule());
-		mapper.registerModule(new JavaTimeModule());
-		mapper.registerModule(new Jackson2DataflowModule());
+		DataFlowTemplate.prepareObjectMapper(mapper);
 		System.setProperty("sun.net.client.defaultConnectTimeout", String.valueOf(100));
 	}
 
@@ -104,9 +97,7 @@ public class DataflowTemplateTests {
 
 	@Test
 	public void testThatObjectMapperGetsPrepared() {
-		final ObjectMapper objectMapper = new ObjectMapper();
-		DataFlowTemplate.prepareObjectMapper(objectMapper);
-		assertCorrectMixins(objectMapper);
+		assertCorrectMixins(this.mapper);
 	}
 
 	@Test
@@ -116,7 +107,6 @@ public class DataflowTemplateTests {
 		jobParametersBuilder.addString("bar", "bar");
 
 		JobParameters jobParameters = jobParametersBuilder.toJobParameters();
-		DataFlowTemplate.prepareObjectMapper(this.mapper);
 		assertCorrectMixins(this.mapper);
 		String jobParametersSerialized = this.mapper.writeValueAsString(jobParameters);
 		jobParameters = this.mapper.readValue(jobParametersSerialized, JobParameters.class);
