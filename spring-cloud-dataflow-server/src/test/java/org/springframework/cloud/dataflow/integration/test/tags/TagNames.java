@@ -73,9 +73,14 @@ public abstract class TagNames {
 	public static final String SKIPPER_2_8 = "skipper_2_8";
 
 	public static final String SKIPPER_2_9 = "skipper_2_9";
+
 	public static final String SKIPPER_2_11 = "skipper_2_11";
 
+	public static final String SKIPPER_3_0 = "skipper_3_0";
+
 	public static final String SKIPPER_main = "skipper_main";
+
+	public static final String DATAFLOW = "dataflow";
 
 	public static final String DATAFLOW_2_7 = "dataflow_2_7";
 
@@ -84,7 +89,10 @@ public abstract class TagNames {
 	public static final String DATAFLOW_2_9 = "dataflow_2_9";
 
 	public static final String DATAFLOW_2_10 = "dataflow_2_10";
+
 	public static final String DATAFLOW_2_11 = "dataflow_2_11";
+
+	public static final String DATAFLOW_3_0 = "dataflow_3_0";
 
 	public static final String DATAFLOW_main = "dataflow_main";
 }
