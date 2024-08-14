@@ -320,26 +320,26 @@ public class AppRegistryControllerTests {
 	public void testRegisterAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:3.2.1");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:5.0.0");
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:3.2.1");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:5.0.0");
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
-				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:3.2.1");
+				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:5.0.0");
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-task:3.2.1");
+				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-task:5.0.0");
 	}
 
 	@Test
 	public void testRegisterAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:3.2.1");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:5.0.0");
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:3.2.1");
+				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:5.0.0");
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
-				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:3.2.1");
+				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:5.0.0");
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:3.2.1");
+				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:5.0.0");
 	}
 
 	@Test
@@ -429,7 +429,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(2022)));
+				.andExpect(jsonPath("$.options[*]", hasSize(1946)));
 	}
 
 	@Test
@@ -478,11 +478,11 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isConflict());
 
 		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/3.2.1").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/sink/log/5.0.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/3.2.1").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/source/time/5.0.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source is part of a deployed stream, so it can not be unregistered.
@@ -620,11 +620,11 @@ public class AppRegistryControllerTests {
 				.andExpect(status().isOk());
 
 		// This log sink v1.0.BS is part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/sink/log/3.2.1").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/sink/log/5.0.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source v1.0 BS is not part of a deployed stream, so it can be unregistered
-		mockMvc.perform(delete("/apps/source/time/3.2.1").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(delete("/apps/source/time/5.0.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 
 		// This time source is part of a deployed stream, so it can not be unregistered.
@@ -724,17 +724,17 @@ public class AppRegistryControllerTests {
 
 	@Test
 	public void testListApplicationsByVersion() throws Exception {
-		mockMvc.perform(get("/apps?version=3.2.1").accept(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/apps?version=5.0.0").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(4)));
 	}
 
 	@Test
 	public void testListApplicationsByVersionAndSearch() throws Exception {
-		mockMvc.perform(get("/apps?version=3.2.1&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=5.0.0&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(2)));
-		mockMvc.perform(get("/apps?version=3.2.1&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=5.0.0&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 	}

@@ -206,8 +206,8 @@ applications built with the RabbitMQ binder, you could do the following:
 ====
 [source,bash]
 ----
-dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:3.2.1
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 ----
 ====
 
@@ -218,8 +218,8 @@ For example, to register the snapshot versions of the `http` and `log` applicati
 ====
 [source,bash]
 ----
-source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:3.2.1
-sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0
+sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 ----
 ====
 
@@ -486,9 +486,9 @@ The following listing shows the exposed properties for the `time` application:
 ----
 dataflow:> app info --name time --type source
 Information about source application 'time':
-Version: '3.2.1':
+Version: '5.0.0':
 Default application version: 'true':
-Resource URI: maven://org.springframework.cloud.stream.app:time-source-rabbit:3.2.1
+Resource URI: maven://org.springframework.cloud.stream.app:time-source-rabbit:5.0.0
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -521,9 +521,9 @@ The following listing shows the exposed properties for the `log` application:
 ----
 dataflow:> app info --name log --type sink
 Information about sink application 'log':
-Version: '3.2.1':
+Version: '5.0.0':
 Default application version: 'true':
-Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -790,13 +790,13 @@ Stream Deployment properties: {
 ----
 ====
 
-Then the following command updates the stream to use the `3.2.1` version of the log application.
+Then the following command updates the stream to use the `5.0.0` version of the log application.
 Before updating the stream with the specific version of the application, we need to make sure that the application is registered with that version:
 
 ====
 [source,bash]
 ----
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 Successfully registered application 'sink:log'
 ----
 ====
@@ -806,7 +806,7 @@ Then we can update the application:
 ====
 [source,bash]
 ----
-dataflow:>stream update --name httptest --properties version.log=3.2.1
+dataflow:>stream update --name httptest --properties version.log=5.0.0
 ----
 ====
 
@@ -829,11 +829,11 @@ Stream Deployment properties: {
     "spring.cloud.deployer.indexed" : "true",
     "spring.cloud.deployer.count" : "1",
     "spring.cloud.deployer.group" : "httptest",
-    "maven://org.springframework.cloud.stream.app:log-sink-rabbit" : "3.2.1"
+    "maven://org.springframework.cloud.stream.app:log-sink-rabbit" : "5.0.0"
   },
   "http" : {
     "spring.cloud.deployer.group" : "httptest",
-    "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "3.2.1"
+    "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "5.0.0"
   }
 }
 ----

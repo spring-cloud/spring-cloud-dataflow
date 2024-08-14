@@ -18,12 +18,12 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :scs-stream-apps-docs: https://docs.spring.io/stream-applications/docs/current/reference/html
 :dataflow-asciidoc-images: https://raw.githubusercontent.com/spring-cloud/spring-cloud-dataflow/main/spring-cloud-dataflow-docs/src/main/asciidoc/images
 
-:docker-http-source-rabbit-version: 3.2.1
-:docker-time-source-rabbit-version: 3.2.1
-:docker-log-sink-rabbit-version: 3.2.1
-:docker-log-sink-kafka-version: 3.2.1
-:docker-http-source-kafka-version: 3.2.1
-:docker-time-source-kafka-version: 3.2.1
+:docker-http-source-rabbit-version: 5.0.0
+:docker-time-source-rabbit-version: 5.0.0
+:docker-log-sink-rabbit-version: 5.0.0
+:docker-log-sink-kafka-version: 5.0.0
+:docker-http-source-kafka-version: 5.0.0
+:docker-time-source-kafka-version: 5.0.0
 :docker-timestamp-task-version: 2.0.2
 
 ifdef::backend-html5[]

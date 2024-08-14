@@ -69,14 +69,14 @@ echo "Registering Stream applications at $DATAFLOW_URL using $STREAM_URI"
 wget -qO- $DATAFLOW_URL/apps --post-data="uri=$STREAM_URI"
 
 # replace with individual invocations of register_app for only those applications used.
-#register_app "source/file" "docker:springcloudstream/file-source-$BROKER_NAME:3.2.1"
-#register_app "source/ftp" "docker:springcloudstream/ftp-source-$BROKER_NAME:3.2.1"
-#register_app "processor/aggregator" "docker:springcloudstream/aggregator-processor-$BROKER_NAME:3.2.1"
-#register_app "processor/filter" "docker:springcloudstream/filter-processor-$BROKER_NAME:3.2.1"
-#register_app "processor/groovy" "docker:springcloudstream/groovy-processor-$BROKER_NAME:3.2.1"
-#register_app "processor/script" "docker:springcloudstream/script-processor-$BROKER_NAME:3.2.1"
-#register_app "processor/splitter" "docker:springcloudstream/splitter-processor-$BROKER_NAME:3.2.1"
-#register_app "processor/transform" "docker:springcloudstream/transform-processor-$BROKER_NAME:3.2.1"
+#register_app "source/file" "docker:springcloudstream/file-source-$BROKER_NAME:5.0.0"
+#register_app "source/ftp" "docker:springcloudstream/ftp-source-$BROKER_NAME:5.0.0"
+#register_app "processor/aggregator" "docker:springcloudstream/aggregator-processor-$BROKER_NAME:5.0.0"
+#register_app "processor/filter" "docker:springcloudstream/filter-processor-$BROKER_NAME:5.0.0"
+#register_app "processor/groovy" "docker:springcloudstream/groovy-processor-$BROKER_NAME:5.0.0"
+#register_app "processor/script" "docker:springcloudstream/script-processor-$BROKER_NAME:5.0.0"
+#register_app "processor/splitter" "docker:springcloudstream/splitter-processor-$BROKER_NAME:5.0.0"
+#register_app "processor/transform" "docker:springcloudstream/transform-processor-$BROKER_NAME:5.0.0"
 
 TASK_URI=https://dataflow.spring.io/task-${TYPE}-latest
 echo "Registering Task applications at $DATAFLOW_URL using $TASK_URI"
