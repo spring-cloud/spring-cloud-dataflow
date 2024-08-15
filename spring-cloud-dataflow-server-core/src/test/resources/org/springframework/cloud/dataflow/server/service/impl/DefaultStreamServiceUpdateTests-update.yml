@@ -2,7 +2,7 @@ log:
   spec:
     applicationProperties:
       server.port: '9999'
-      log.level: 'ERROR'
+      log.consumer.level: 'ERROR'
       endpoints.sensitive: 'false'
       spring.cloud.dataflow.stream.app.type: 'sink'
     version: '1.1.1.RELEASE'

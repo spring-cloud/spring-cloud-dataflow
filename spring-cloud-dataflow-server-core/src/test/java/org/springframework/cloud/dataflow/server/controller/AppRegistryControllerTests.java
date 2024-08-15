@@ -429,7 +429,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(1946)));
+				.andExpect(jsonPath("$.options[*]", hasSize(2059)));
 	}
 
 	@Test
