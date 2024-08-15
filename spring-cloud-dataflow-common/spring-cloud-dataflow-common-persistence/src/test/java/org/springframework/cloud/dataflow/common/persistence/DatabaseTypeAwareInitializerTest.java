@@ -1,6 +1,6 @@
 package org.springframework.cloud.dataflow.common.persistence;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

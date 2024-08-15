@@ -21,6 +21,9 @@ import java.util.List;
 
 import jakarta.servlet.Filter;
 
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +69,9 @@ import static org.mockito.Mockito.when;
 /**
  * @author Marius Bogoevici
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-public class LocalDataflowResource extends ExternalResource {
+public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallback {
 
 	private static final String DATAFLOW_PORT_PROPERTY = "dataflow.port";
 
@@ -93,7 +97,7 @@ public class LocalDataflowResource extends ExternalResource {
 
 	private String skipperServerPort;
 
-	private String configurationLocation;
+	private final String configurationLocation;
 
 	private WebApplicationContext configurableApplicationContext;
 
@@ -132,7 +136,7 @@ public class LocalDataflowResource extends ExternalResource {
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled,
-			boolean metricsEnabled, boolean schedulesEnabled, String skipperServerPort) {
+								 boolean metricsEnabled, boolean schedulesEnabled, String skipperServerPort) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
@@ -141,7 +145,7 @@ public class LocalDataflowResource extends ExternalResource {
 	}
 
 	@Override
-	protected void before() {
+	public void beforeEach(ExtensionContext extensionContext) throws Exception {
 		originalDataflowServerPort = System.getProperty(DATAFLOW_PORT_PROPERTY);
 
 		this.dataflowServerPort = TestSocketUtils.findAvailableTcpPort();
@@ -155,7 +159,7 @@ public class LocalDataflowResource extends ExternalResource {
 		if (!StringUtils.isEmpty(configurationLocation)) {
 			final Resource resource = new PathMatchingResourcePatternResolver().getResource(configurationLocation);
 			if (!resource.exists()) {
-			  throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
+				throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
 			}
 			System.setProperty("spring.config.additional-location", configurationLocation);
 		}
@@ -163,14 +167,14 @@ public class LocalDataflowResource extends ExternalResource {
 		app = new SpringApplication(TestConfig.class);
 
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[] {
-				"--spring.cloud.kubernetes.enabled=false",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
-						+ this.streamsEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
-						+ this.tasksEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
-						+ this.schedulesEnabled,
-				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
+			"--spring.cloud.kubernetes.enabled=false",
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
+				+ this.streamsEnabled,
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
+				+ this.tasksEnabled,
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
+				+ this.schedulesEnabled,
+			"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
 		});
 		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);
 		LauncherRepository launcherRepository = configurableApplicationContext.getBean(LauncherRepository.class);
@@ -189,12 +193,12 @@ public class LocalDataflowResource extends ExternalResource {
 		logger.info("launcher:{}:maximumConcurrentTasks={}", launcher.getName(), maximumConcurrentTasks);
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)
-				.addFilters(filters.toArray(new Filter[0])).build();
+			.addFilters(filters.toArray(new Filter[0])).build();
 		dataflowPort = configurableApplicationContext.getEnvironment().resolvePlaceholders("${server.port}");
 	}
 
 	@Override
-	protected void after() {
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
 		SpringApplication.exit(configurableApplicationContext);
 		resetConfigLocation();
 		if (originalDataflowServerPort != null) {
@@ -238,14 +242,14 @@ public class LocalDataflowResource extends ExternalResource {
 
 	@EnableAutoConfiguration(
 		exclude = {
-				DataFlowClientAutoConfiguration.class,
-				SessionAutoConfiguration.class,
-				ManagementWebSecurityAutoConfiguration.class,
-				//SecurityAutoConfiguration.class,
-				UserDetailsServiceAutoConfiguration.class,
-				LocalDeployerAutoConfiguration.class,
-				CloudFoundryDeployerAutoConfiguration.class,
-				KubernetesAutoConfiguration.class
+			DataFlowClientAutoConfiguration.class,
+			SessionAutoConfiguration.class,
+			ManagementWebSecurityAutoConfiguration.class,
+			//SecurityAutoConfiguration.class,
+			UserDetailsServiceAutoConfiguration.class,
+			LocalDeployerAutoConfiguration.class,
+			CloudFoundryDeployerAutoConfiguration.class,
+			KubernetesAutoConfiguration.class
 		},
 		excludeName = "org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration")
 	@EnableDataFlowServer
@@ -293,5 +297,4 @@ public class LocalDataflowResource extends ExternalResource {
 		}
 
 	}
-
 }

@@ -56,9 +56,9 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -69,12 +69,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = { JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+@SpringBootTest(classes = {JobDependencies.class,
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class JobStepExecutionControllerTests {
+class JobStepExecutionControllerTests {
 
 	private final static String BASE_JOB_NAME = "myJob";
 
@@ -118,7 +118,7 @@ public class JobStepExecutionControllerTests {
 	TaskJobService taskJobService;
 
 	@BeforeEach
-	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
@@ -137,18 +137,18 @@ public class JobStepExecutionControllerTests {
 	}
 
 	@Test
-	public void testJobStepExecutionControllerConstructorMissingRepository() {
-		assertThrows(IllegalArgumentException.class, () -> new JobStepExecutionController(null));
+	void jobStepExecutionControllerConstructorMissingRepository() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new JobStepExecutionController(null));
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception {
+	void getExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1342434234/steps").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testSingleGetStepExecution() throws Exception {
+	void singleGetStepExecution() throws Exception {
 		validateStepDetail(1, 1, STEP_NAME_ORIG);
 		validateStepDetail(2, 2 ,STEP_NAME_ORIG);
 		validateStepDetail(2, 3 ,STEP_NAME_FOO);
@@ -166,7 +166,7 @@ public class JobStepExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetMultipleStepExecutions() throws Exception {
+	void getMultipleStepExecutions() throws Exception {
 		mockMvc.perform(get("/jobs/executions/3/steps").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[*]", hasSize(3)))
@@ -178,7 +178,7 @@ public class JobStepExecutionControllerTests {
 	//TODO: Boot3x followup
 	@Disabled("TODO: Boot3x followup Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
 	@Test
-	public void testSingleGetStepExecutionProgress() throws Exception {
+	void singleGetStepExecutionProgress() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1/steps/1/progress").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk()).andExpect(content().json("{finished: " + false + "}"))

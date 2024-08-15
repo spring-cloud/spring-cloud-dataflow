@@ -19,36 +19,38 @@ package org.springframework.cloud.dataflow.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-public class ArgumentSanitizerTest {
+class ArgumentSanitizerTest {
 
 	private ArgumentSanitizer sanitizer;
 
 	private static final String[] keys = { "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services", "url" };
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		sanitizer = new ArgumentSanitizer();
 	}
 
 	@Test
-	public void testSanitizeProperties() {
+	void sanitizeProperties() {
 		for (String key : keys) {
-			Assert.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
-			Assert.assertEquals("******", sanitizer.sanitize(key, "bar"));
+			assertThat(sanitizer.sanitize("--" + key + "=foo")).isEqualTo("--" + key + "=******");
+			assertThat(sanitizer.sanitize(key, "bar")).isEqualTo("******");
 		}
 	}
 
 	@Test
-	public void testSanitizeArguments() {
+	void testSanitizeArguments() {
 		final List<String> arguments = new ArrayList<>();
 
 		for (String key : keys) {
@@ -57,21 +59,21 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assert.assertEquals(keys.length, sanitizedArguments.size());
+		assertThat(sanitizedArguments).hasSize(keys.length);
 
 		int order = 0;
 		for(String sanitizedString : sanitizedArguments) {
-			Assert.assertEquals("--" + keys[order] + "=******", sanitizedString);
+			assertThat(sanitizedString).isEqualTo("--" + keys[order] + "=******");
 			order++;
 		}
 	}
 
 
 	@Test
-	public void testMultipartProperty() {
-		Assert.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
-		Assert.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
-		Assert.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
+	void multipartProperty() {
+		assertThat(sanitizer.sanitize("--password=boza")).isEqualTo("--password=******");
+		assertThat(sanitizer.sanitize("--one.two.password=boza")).isEqualTo("--one.two.password=******");
+		assertThat(sanitizer.sanitize("--one_two_password=boza")).isEqualTo("--one_two_password=******");
 	}
 
 //	@Test

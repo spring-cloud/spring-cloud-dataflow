@@ -34,12 +34,12 @@ import static org.awaitility.Awaitility.with;
 
 @Oauth
 @ActiveProfiles({TagNames.PROFILE_OAUTH})
-public class DataflowOAuthIT extends AbstractDataflowTests {
+class DataflowOAuthIT extends AbstractDataflowTests {
 
 	private final Logger log = LoggerFactory.getLogger(DataflowOAuthIT.class);
 
 	@Test
-	public void testSecuredSetup() throws Exception {
+	void securedSetup() throws Exception {
 		log.info("Running testSecuredSetup()");
 		this.dataflowCluster.startIdentityProvider(TagNames.UAA_4_32);
 		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);

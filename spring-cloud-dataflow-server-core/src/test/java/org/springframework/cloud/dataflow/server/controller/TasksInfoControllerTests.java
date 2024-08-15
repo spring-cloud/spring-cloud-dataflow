@@ -16,15 +16,21 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -54,29 +60,20 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TasksInfoControllerTests {
+class TasksInfoControllerTests {
 
     private final static String BASE_TASK_NAME = "myTask";
 
@@ -121,8 +118,8 @@ public class TasksInfoControllerTests {
     @Autowired
     TaskDeploymentRepository taskDeploymentRepository;
 
-	@Before
-    public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
+	@BeforeEach
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
         Launcher launcher = new Launcher("default", "local", taskLauncher);
         launcherRepository.save(launcher);
@@ -171,8 +168,8 @@ public class TasksInfoControllerTests {
         }
     }
 
-    @Test
-    public void testGetAllTaskExecutions() throws Exception {
+	@Test
+	void getAllTaskExecutions() throws Exception {
         mockMvc.perform(get("/tasks/info/executions").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
                 .andExpect(status().isOk())

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.data.domain.Page;
@@ -28,9 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * Provides the tests required for exercising a TaskDefinitionRepository impl.
@@ -38,12 +36,13 @@ import static org.junit.Assert.assertTrue;
  * @author Michael Minella
  * @author Mark Fisher
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public abstract class AbstractTaskDefinitionTests {
 	protected TaskDefinitionRepository repository;
 
 	@Test
-	public void testFindOne() {
+	public void findOne() {
 		TaskDefinition definition = new TaskDefinition("task1", "myTask");
 		repository.save(definition);
 		repository.save(new TaskDefinition("task2", "myTask"));
@@ -53,49 +52,53 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testFindAllNone() {
+	public void findAllNone() {
 		Pageable pageable = PageRequest.of(1, 10);
 
 		Page<TaskDefinition> page = repository.findAll(pageable);
 
-		assertEquals(page.getTotalElements(), 0);
-		assertEquals(page.getNumber(), 1);
-		assertEquals(page.getNumberOfElements(), 0);
-		assertEquals(page.getSize(), 10);
-		assertEquals(page.getContent().size(), 0);
+		assertThat(page.getTotalElements()).isEqualTo(0);
+		assertThat(page.getNumber()).isEqualTo(1);
+		assertThat(page.getNumberOfElements()).isEqualTo(0);
+		assertThat(page.getSize()).isEqualTo(10);
+		assertThat(page.getContent()).isEmpty();
 	}
 
 	@Test
-	public void testFindAllPageable() {
+	public void findAllPageable() {
 		initializeRepository();
 		Pageable pageable = PageRequest.of(0, 10);
 
 		Page<TaskDefinition> page = repository.findAll(pageable);
 
-		assertEquals(page.getTotalElements(), 3);
-		assertEquals(page.getNumber(), 0);
-		assertEquals(page.getNumberOfElements(), 3);
-		assertEquals(page.getSize(), 10);
-		assertEquals(page.getContent().size(), 3);
-	}
-
-	@Test(expected = DuplicateTaskException.class)
-	public void testSaveDuplicate() {
-		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.save(new TaskDefinition("task1", "myTask"));
-	}
-
-	@Test(expected = DuplicateTaskException.class)
-	public void testSaveAllDuplicate() {
-		List<TaskDefinition> definitions = new ArrayList<>();
-		definitions.add(new TaskDefinition("task1", "myTask"));
-
-		repository.save(new TaskDefinition("task1", "myTask"));
-		repository.saveAll(definitions);
+		assertThat(page.getTotalElements()).isEqualTo(3);
+		assertThat(page.getNumber()).isEqualTo(0);
+		assertThat(page.getNumberOfElements()).isEqualTo(3);
+		assertThat(page.getSize()).isEqualTo(10);
+		assertThat(page.getContent()).hasSize(3);
 	}
 
 	@Test
-	public void testFindOneNoneFound() {
+	public void saveDuplicate() {
+		assertThatExceptionOfType(DuplicateTaskException.class).isThrownBy(() -> {
+			repository.save(new TaskDefinition("task1", "myTask"));
+			repository.save(new TaskDefinition("task1", "myTask"));
+		});
+	}
+
+	@Test
+	public void saveAllDuplicate() {
+		assertThatExceptionOfType(DuplicateTaskException.class).isThrownBy(() -> {
+			List<TaskDefinition> definitions = new ArrayList<>();
+			definitions.add(new TaskDefinition("task1", "myTask"));
+
+			repository.save(new TaskDefinition("task1", "myTask"));
+			repository.saveAll(definitions);
+		});
+	}
+
+	@Test
+	public void findOneNoneFound() {
 		assertThat(repository.findById("notfound")).isEmpty();
 
 		initializeRepository();
@@ -104,18 +107,18 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testExists() {
-		assertFalse(repository.existsById("exists"));
+	public void exists() {
+		assertThat(repository.existsById("exists")).isFalse();
 
 		repository.save(new TaskDefinition("exists", "myExists"));
 
-		assertTrue(repository.existsById("exists"));
-		assertFalse(repository.existsById("nothere"));
+		assertThat(repository.existsById("exists")).isTrue();
+		assertThat(repository.existsById("nothere")).isFalse();
 	}
 
 	@Test
 	public void testFindAll() {
-		assertFalse(repository.findAll().iterator().hasNext());
+		assertThat(repository.findAll().iterator()).isExhausted();
 
 		initializeRepository();
 
@@ -127,12 +130,12 @@ public abstract class AbstractTaskDefinitionTests {
 			count++;
 		}
 
-		assertEquals(3, count);
+		assertThat(count).isEqualTo(3);
 	}
 
 	@Test
-	public void testFindAllSpecific() {
-		assertFalse(repository.findAll().iterator().hasNext());
+	public void findAllSpecific() {
+		assertThat(repository.findAll().iterator()).isExhausted();
 
 		initializeRepository();
 
@@ -148,25 +151,25 @@ public abstract class AbstractTaskDefinitionTests {
 			count++;
 		}
 
-		assertEquals(2, count);
+		assertThat(count).isEqualTo(2);
 	}
 
 	@Test
 	public void testCount() {
-		assertEquals(0, repository.count());
+		assertThat(repository.count()).isEqualTo(0);
 
 		initializeRepository();
 
-		assertEquals(3, repository.count());
+		assertThat(repository.count()).isEqualTo(3);
 	}
 
 	@Test
-	public void testDeleteNotFound() {
+	public void deleteNotFound() {
 		repository.deleteById("notFound");
 	}
 
 	@Test
-	public void testDelete() {
+	public void delete() {
 		initializeRepository();
 
 		assertThat(repository.findById("task2")).isNotEmpty();
@@ -177,7 +180,7 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testDeleteDefinition() {
+	public void deleteDefinition() {
 		initializeRepository();
 
 		assertThat(repository.findById("task2")).isNotEmpty();
@@ -188,7 +191,7 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testDeleteMultipleDefinitions() {
+	public void deleteMultipleDefinitions() {
 		initializeRepository();
 
 		assertThat(repository.findById("task1")).isNotEmpty();
@@ -201,7 +204,7 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testDeleteAllNone() {
+	public void deleteAllNone() {
 		repository.deleteAll();
 	}
 
@@ -209,9 +212,9 @@ public abstract class AbstractTaskDefinitionTests {
 	public void testDeleteAll() {
 		initializeRepository();
 
-		assertEquals(3, repository.count());
+		assertThat(repository.count()).isEqualTo(3);
 		repository.deleteAll();
-		assertEquals(0, repository.count());
+		assertThat(repository.count()).isEqualTo(0);
 	}
 
 	private void initializeRepository() {

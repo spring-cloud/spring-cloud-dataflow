@@ -16,6 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.single;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -30,9 +36,7 @@ import org.cloudfoundry.client.v2.spaces.SpaceResource;
 import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import reactor.core.publisher.Mono;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,16 +49,8 @@ import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import reactor.core.publisher.Mono;
 
 /**
  * @author David Turanski
@@ -71,14 +67,13 @@ import static org.mockito.Mockito.when;
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.scheduler-url=https://localhost"
 		})
-@RunWith(SpringRunner.class)
-public class MultiplePlatformTypeTests {
+class MultiplePlatformTypeTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
 
 	@Test
-	public void localTaskPlatform() {
+	void localTaskPlatform() {
 		assertThat(taskPlatforms).hasSize(3);
 
 		TaskPlatform localDefault = taskPlatforms.stream()
@@ -93,7 +88,7 @@ public class MultiplePlatformTypeTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatform() {
+	void cloudFoundryTaskPlatform() {
 		TaskPlatform cloudFoundry = taskPlatforms.stream()
 				.filter(taskPlatform -> taskPlatform.getName().equals("Cloud Foundry")).findFirst().get();
 
@@ -106,7 +101,7 @@ public class MultiplePlatformTypeTests {
 	}
 
 	@Test
-	public void kubernetesTaskPlatform() {
+	void kubernetesTaskPlatform() {
 		TaskPlatform kubernetes = taskPlatforms.stream()
 				.filter(taskPlatform -> taskPlatform.getName().equals("Kubernetes")).findFirst().get();
 

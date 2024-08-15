@@ -22,8 +22,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.apache.commons.io.IOUtils;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -55,7 +55,7 @@ class DockerTests {
     void callDockerNetworkLs() throws Exception {
         String lsOutput = "0.0.0.0:7000->7000/tcp";
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(lsOutput));
-        assertThat(docker.listNetworks(), is(lsOutput));
+		assertThat(docker.listNetworks()).isEqualTo(lsOutput);
         verify(executor).execute(false, "network", "ls");
     }
 
@@ -63,7 +63,7 @@ class DockerTests {
     void callDockerNetworkPrune() throws Exception {
         String lsOutput = "0.0.0.0:7000->7000/tcp";
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(lsOutput));
-        assertThat(docker.pruneNetworks(), is(lsOutput));
+		assertThat(docker.pruneNetworks()).isEqualTo(lsOutput);
         verify(executor).execute(false,"network", "prune", "--force");
     }
 
@@ -71,13 +71,13 @@ class DockerTests {
     void understandOldVersionFormat() throws Exception {
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 1.7.2"));
         Version version = docker.configuredVersion();
-        assertThat(version, is(Version.valueOf("1.7.2")));
+		assertThat(version).isEqualTo(Version.valueOf("1.7.2"));
     }
 
     @Test
     void understandNewVersionFormat() throws Exception {
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 17.03.1-ce"));
         Version version = docker.configuredVersion();
-        assertThat(version, is(Version.valueOf("17.3.1")));
+		assertThat(version).isEqualTo(Version.valueOf("17.3.1"));
     }
 }

@@ -17,33 +17,35 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Oleg Zhurakousky
  * @author Andy Clement
+ * @author Corneil du Plessis
  */
-public class NodeTests {
+class NodeTests {
 
 	@Test
-	public void testDestinationNodeDestinationName(){
+	void destinationNodeDestinationName(){
 		DestinationNode node = new DestinationNode(0, 0, "foo.bar.bazz", null);
-		assertEquals("foo.bar.bazz", node.getDestinationName());
+		assertThat(node.getDestinationName()).isEqualTo("foo.bar.bazz");
 	}
 
 	@Test
-	public void testDestinationNodeToString(){
+	void destinationNodeToString(){
 		ArgumentNode an1 = new ArgumentNode("foo", "bar", 0, 4);
 		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", 0, 4);
 		DestinationNode node = new DestinationNode(0, 4, "foo.bar.bazz", new ArgumentNode[]{an1, an2});
 		System.out.println(node.stringify());
-		assertEquals(":foo.bar.bazz", node.toString());
+		assertThat(node.toString()).isEqualTo(":foo.bar.bazz");
 	}
 
-	@Test // see https://github.com/spring-cloud/spring-cloud-dataflow/issues/1568
-	public void testStreamNodesToString(){
+	// see https://github.com/spring-cloud/spring-cloud-dataflow/issues/1568
+	@Test
+	void streamNodesToString(){
 		ArgumentNode an1 = new ArgumentNode("foo", "bar", 0, 4);
 		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", 0, 4);
 		AppNode appNode = new AppNode(null, "bar", 0, 2, new ArgumentNode[]{an1, an2});
@@ -53,6 +55,6 @@ public class NodeTests {
 		DestinationNode sinkDNode = new DestinationNode(0, 0, "sink.bar.bazz", null);
 		SinkDestinationNode sink = new SinkDestinationNode(sinkDNode, 4);
 		StreamNode sNode = new StreamNode(null, "myStream", Collections.singletonList(appNode), source, sink);
-		assertEquals("myStream = :source.bar.bazz > bar --foo=bar --abc='xyz' > :sink.bar.bazz", sNode.toString());
+		assertThat(sNode.toString()).isEqualTo("myStream = :source.bar.bazz > bar --foo=bar --abc='xyz' > :sink.bar.bazz");
 	}
 }

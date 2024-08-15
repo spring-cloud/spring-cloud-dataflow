@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.support.yaml.YamlConversionStatus.ConversionMessage;
 import org.springframework.cloud.skipper.support.yaml.YamlConverter.Builder;
@@ -419,7 +419,7 @@ public class YamlConverterTests {
 
 	private void do_conversionTest(Mode mode, List<String> keyspaces, String input, String expectedOutput, Checker<YamlConversionStatus> statusChecker) throws Exception {
 		File propertiesFile = createFile("application.properties", input);
-		assertThat(propertiesFile.exists()).isTrue();
+		assertThat(propertiesFile).exists();
 		Builder builder = YamlConverter.builder().mode(mode).file(propertiesFile);
 		if (keyspaces != null) {
 			for (String keyspace : keyspaces) {

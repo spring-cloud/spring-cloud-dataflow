@@ -16,25 +16,21 @@
 
 package org.springframework.cloud.dataflow.server.single;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.AnnotationConfigWebContextLoader;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author David Turanski
+ * @author Corneil du Plessis
  **/
 @ActiveProfiles("kubernetes")
 @SpringBootTest(
@@ -46,8 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 				"kubernetes_service_host=foo",
 				"spring.cloud.dataflow.features.schedules-enabled=true"
 		})
-@RunWith(SpringRunner.class)
-public class KubernetesSchedulerTests {
+class KubernetesSchedulerTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
@@ -56,7 +51,7 @@ public class KubernetesSchedulerTests {
 	SchedulerService schedulerService;
 
 	@Test
-	public void schedulerServiceCreated() {
+	void schedulerServiceCreated() {
 		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");

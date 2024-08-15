@@ -22,17 +22,13 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.persistence.spi.PersistenceUnitInfo;
-
 import org.hibernate.HibernateException;
-
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,25 +40,26 @@ import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.test.context.junit4.SpringRunner;
+
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {
 		EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class
 })
 @EntityScan({
-	"org.springframework.cloud.dataflow.core",
-	"org.springframework.cloud.dataflow.server.audit.domain"
+		"org.springframework.cloud.dataflow.core",
+		"org.springframework.cloud.dataflow.server.audit.domain"
 })
 @EnableJpaRepositories(basePackages = {
-	"org.springframework.cloud.dataflow.registry.repository",
-	"org.springframework.cloud.dataflow.server.audit.repository",
-	"org.springframework.cloud.dataflow.audit.repository"
+		"org.springframework.cloud.dataflow.registry.repository",
+		"org.springframework.cloud.dataflow.server.audit.repository",
+		"org.springframework.cloud.dataflow.audit.repository"
 })
-public class SchemaGenerationTests {
+class SchemaGenerationTests {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchemaGenerationTests.class);
 
@@ -70,7 +67,7 @@ public class SchemaGenerationTests {
 	private LocalContainerEntityManagerFactoryBean fb;
 
 	@Test
-	public void generateSchemaDdlFiles() throws Exception {
+	void generateSchemaDdlFiles() throws Exception {
 
 		final PersistenceUnitInfo persistenceUnitInfo = fb.getPersistenceUnitInfo();
 		final File tempDir = Files.createTempDirectory("scdf-sql-").toFile();

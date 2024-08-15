@@ -18,9 +18,10 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Ignore;
-import org.junit.Test;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.boot.SpringApplication;
@@ -52,13 +53,14 @@ import static org.junit.Assert.fail;
  * @author Eric Bottard
  * @author Mark Fisher
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-@Ignore
+@Disabled
 public class LocalConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		if (context != null) {
 			context.close();

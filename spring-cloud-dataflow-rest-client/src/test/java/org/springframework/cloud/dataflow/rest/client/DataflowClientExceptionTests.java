@@ -15,28 +15,29 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors;
 import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-public class DataflowClientExceptionTests {
+class DataflowClientExceptionTests {
 
 	@Test
-	public void testCreationOfDataflowClientExceptionWithNullError() {
+	void creationOfDataflowClientExceptionWithNullError() {
 
 		try {
 			new DataFlowClientException(null);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The provided vndErrors parameter must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The provided vndErrors parameter must not be null.");
 			return;
 		}
 
@@ -44,19 +45,19 @@ public class DataflowClientExceptionTests {
 	}
 
 	@Test
-	public void testCreationOfDataflowClientExceptionWithSingleError() {
+	void creationOfDataflowClientExceptionWithSingleError() {
 		final VndErrors errors = new VndErrors("foo", "bar message", Link.of("somewhere"));
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);
-		assertEquals("bar message", dataFlowClientException.getMessage());
+		assertThat(dataFlowClientException.getMessage()).isEqualTo("bar message");
 	}
 
 	@Test
-	public void testCreationOfDataflowClientExceptionWithMultipleErrors() {
+	void creationOfDataflowClientExceptionWithMultipleErrors() {
 		final VndError vndError1 = new VndError("foo logref", "foo message", Link.of("foo link"));
 		final VndError vndError2 = new VndError("bar logref", "bar message", Link.of("bar link"));
 
 		final VndErrors errors = new VndErrors(vndError1, vndError2);
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);
-		assertEquals("foo message\nbar message", dataFlowClientException.getMessage());
+		assertThat(dataFlowClientException.getMessage()).isEqualTo("foo message\nbar message");
 	}
 }

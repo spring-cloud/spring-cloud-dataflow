@@ -16,15 +16,19 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -35,48 +39,38 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-
 /**
  * Verifies the behavior of the methods in the utility.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 public class TaskServiceUtilsTests {
 	public static final String BASE_GRAPH = "AAA && BBB";
 
-	@Rule
-	public ExpectedException expectedException;
 
 	@Test
-	public void testCreateComposedTaskDefinition() {
+	void testCreateComposedTaskDefinition() {
 		assertThat(TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH)).isEqualTo("composed-task-runner --graph=\"AAA && BBB\"");
 	}
 
 	@Test
-	public void testCreateComposeTaskDefinitionNullNameCheck() {
-		assertThrows(IllegalArgumentException.class, () -> {
+	void createComposeTaskDefinitionNullNameCheck() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH);
 			TaskServiceUtils.createComposedTaskDefinition(null);
 		});
 	}
 
 	@Test
-	public void testCreateComposeTaskDefinitionNullProperties() {
-		assertThrows(IllegalArgumentException.class, () -> {
+	void createComposeTaskDefinitionNullProperties() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH, null);
 		});
 	}
 
 	@Test
-	public void testCTRPropertyReplacement() {
+	void ctrPropertyReplacement() {
 		TaskNode node = parse("AAA && BBB");
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		taskDeploymentProperties.put("app.test.BBB.timestamp.format", "aformat");
@@ -84,35 +78,33 @@ public class TaskServiceUtilsTests {
 		taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(
 				taskDeploymentProperties,
 				node);
-		assertThat(taskDeploymentProperties.size()).isEqualTo(1);
-		assertThat(taskDeploymentProperties.get(
-				"app.composed-task-runner.composed-task-properties"))
-				.isEqualTo("app.test-BBB.app.BBB.timestamp.format=aformat, deployer.test-BBB.deployer.BBB.foo=bar");
+		assertThat(taskDeploymentProperties).hasSize(1);
+		assertThat(taskDeploymentProperties).containsEntry("app.composed-task-runner.composed-task-properties", "app.test-BBB.app.BBB.timestamp.format=aformat, deployer.test-BBB.deployer.BBB.foo=bar");
 	}
 
 	@Test
-	public void testDatabasePropUpdate() {
+	void databasePropUpdate() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
 		DataSourceProperties dataSourceProperties = getDataSourceProperties();
 		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
 				dataSourceProperties, true);
-		assertThat(definition.getProperties().size()).isEqualTo(5);
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
-		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
-		assertThat(definition.getProperties().get("spring.datasource.username")).isEqualTo("myUser");
-		assertThat(definition.getProperties().get("spring.datasource.password")).isEqualTo("myPassword");
+		assertThat(definition.getProperties()).hasSize(5);
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.url", "myUrl");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.driverClassName", "myDriver");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.username", "myUser");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.password", "myPassword");
 
 		definition = TaskServiceUtils.updateTaskProperties(
 				taskDefinition,
 				dataSourceProperties, false);
-		assertThat(definition.getProperties().size()).isEqualTo(3);
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
-		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties()).hasSize(3);
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.url", "myUrl");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.driverClassName", "myDriver");
 	}
 
 	@Test
-	public void testDatabasePropUpdateWithPlatform() {
+	void databasePropUpdateWithPlatform() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
 		DataSourceProperties dataSourceProperties = getDataSourceProperties();
 		TaskDefinition definition = TaskServiceUtils.updateTaskProperties(
@@ -120,31 +112,31 @@ public class TaskServiceUtilsTests {
 				dataSourceProperties, false);
 
 		validateProperties(definition, 3);
-		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.driverClassName", "myDriver");
 	}
 
 	@Test
-	public void testDatabasePropUpdateWithPlatformForUserDriverClassName() {
+	void databasePropUpdateWithPlatformForUserDriverClassName() {
 		TaskDefinition definition = createUpdatedDefinitionForProperty("spring.datasource.driverClassName", "foobar");
 		validateProperties(definition, 2);
-		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("foobar");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.driverClassName", "foobar");
 
 		definition = createUpdatedDefinitionForProperty("spring.datasource.driver-class-name", "feebar");
 		validateProperties(definition, 2);
-		assertThat(definition.getProperties().get("spring.datasource.driver-class-name")).isEqualTo("feebar");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.driver-class-name", "feebar");
 
 		definition = createUpdatedDefinitionForProperty(null, null);
 		validateProperties(definition, 2);
-		assertThat(definition.getProperties().get("spring.datasource.driverClassName")).isEqualTo("myDriver");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.driverClassName", "myDriver");
 	}
 
 	@Test
-	public void testDatabasePropUpdateWithPlatformForUrl() {
+	void databasePropUpdateWithPlatformForUrl() {
 		TaskDefinition definition = createUpdatedDefinitionForProperty("spring.datasource.url", "newurl");
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("newurl");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.url", "newurl");
 
 		definition = createUpdatedDefinitionForProperty(null, null);
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.url", "myUrl");
 	}
 
 	private TaskDefinition createUpdatedDefinitionForProperty(String key, String value) {
@@ -164,14 +156,14 @@ public class TaskServiceUtilsTests {
 	}
 
 	private void validateProperties(TaskDefinition definition, int size) {
-		assertThat(definition.getProperties().size()).isEqualTo(size);
-		assertThat(definition.getProperties().get("spring.datasource.url")).isEqualTo("myUrl");
+		assertThat(definition.getProperties()).hasSize(size);
+		assertThat(definition.getProperties()).containsEntry("spring.datasource.url", "myUrl");
 		assertThat(definition.getProperties().get("spring.datasource.username")).isNull();
 		assertThat(definition.getProperties().get("spring.datasource.password")).isNull();
 	}
 
 	@Test
-	public void testExtractAppProperties() {
+	void testExtractAppProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		taskDeploymentProperties.put("app.test.foo", "bar");
 		taskDeploymentProperties.put("test.none", "boo");
@@ -180,13 +172,13 @@ public class TaskServiceUtilsTests {
 		Map<String, String> result = TaskServiceUtils.extractAppProperties("test",
 				taskDeploymentProperties);
 
-		assertThat(result.size()).isEqualTo(2);
-		assertThat(result.get("foo")).isEqualTo("bar");
-		assertThat(result.get("test")).isEqualTo("baz");
+		assertThat(result).hasSize(2);
+		assertThat(result).containsEntry("foo", "bar");
+		assertThat(result).containsEntry("test", "baz");
 	}
 
 	@Test
-	public void testExtractAppLabelProperties() {
+	void extractAppLabelProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		taskDeploymentProperties.put("app.myapplabel.foo", "bar");
 		taskDeploymentProperties.put("myappname.none", "boo");
@@ -196,13 +188,13 @@ public class TaskServiceUtilsTests {
 		Map<String, String> result = TaskServiceUtils.extractAppProperties("myappname", "myapplabel",
 				taskDeploymentProperties);
 
-		assertThat(result.size()).isEqualTo(2);
-		assertThat(result.get("foo")).isEqualTo("bar");
-		assertThat(result.get("myprop")).isEqualTo("baz");
+		assertThat(result).hasSize(2);
+		assertThat(result).containsEntry("foo", "bar");
+		assertThat(result).containsEntry("myprop", "baz");
 	}
 
 	@Test
-	public void testMergeAndExpandAppProperties() {
+	void testMergeAndExpandAppProperties() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		appDeploymentProperties.put("propA", "valA");
@@ -216,51 +208,47 @@ public class TaskServiceUtilsTests {
 				mock(Resource.class),
 				appDeploymentProperties,
 				visibleProperties);
-		assertThat(appDefinition.getProperties().size()).isEqualTo(2);
-		assertThat(appDefinition.getProperties().get("propA")).isEqualTo("valA");
-		assertThat(appDefinition.getProperties().get("propB")).isEqualTo("valB");
+		assertThat(appDefinition.getProperties()).hasSize(2);
+		assertThat(appDefinition.getProperties()).containsEntry("propA", "valA");
+		assertThat(appDefinition.getProperties()).containsEntry("propB", "valB");
 	}
 
 	@Test
-	public void testDataFlowUriProperty() throws Exception {
+	void dataFlowUriProperty() throws Exception {
 		final String DATA_FLOW_SERVICE_URI = "https://myserver:9191";
 		List<String> cmdLineArgs = new ArrayList<>();
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
-		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is expected to be in the app deployment properties",
-				appDeploymentProperties.get("dataflowServerUri").equals("https://myserver:9191"));
+		assertThat(appDeploymentProperties).containsKey("dataflowServerUri");
+		assertThat(appDeploymentProperties.get("dataflowServerUri")).as("dataflowServerUri is expected to be in the app deployment properties").isEqualTo("https://myserver:9191");
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflow-server-uri", "http://localhost:8080");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("dataflow-server-uri").equals("http://localhost:8080"));
+		assertThat(appDeploymentProperties.containsKey("dataflowServerUri")).isFalse();
+		assertThat(appDeploymentProperties.get("dataflow-server-uri")).as("dataflowServerUri is incorrect").isEqualTo("http://localhost:8080");
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("dataflowServerUri", "http://localhost:8191");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
-		assertTrue(appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("dataflowServerUri").equals("http://localhost:8191"));
+		assertThat(appDeploymentProperties).containsKey("dataflowServerUri");
+		assertThat(appDeploymentProperties.get("dataflowServerUri")).as("dataflowServerUri is incorrect").isEqualTo("http://localhost:8191");
 		appDeploymentProperties.clear();
 		appDeploymentProperties.put("DATAFLOW_SERVER_URI", "http://localhost:9000");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue("dataflowServerUri is incorrect",
-				appDeploymentProperties.get("DATAFLOW_SERVER_URI").equals("http://localhost:9000"));
+		assertThat(appDeploymentProperties.containsKey("dataflowServerUri")).isFalse();
+		assertThat(appDeploymentProperties.get("DATAFLOW_SERVER_URI")).as("dataflowServerUri is incorrect").isEqualTo("http://localhost:9000");
 		appDeploymentProperties.clear();
 		cmdLineArgs.add("--dataflowServerUri=http://localhost:8383");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
+		assertThat(appDeploymentProperties.containsKey("dataflowServerUri")).isFalse();
 		cmdLineArgs.clear();
 		cmdLineArgs.add("DATAFLOW_SERVER_URI=http://localhost:8383");
 		TaskServiceUtils.updateDataFlowUriIfNeeded(DATA_FLOW_SERVICE_URI, appDeploymentProperties, cmdLineArgs);
-		assertTrue(!appDeploymentProperties.containsKey("dataflowServerUri"));
-		assertTrue(!appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI"));
+		assertThat(appDeploymentProperties.containsKey("dataflowServerUri")).isFalse();
+		assertThat(appDeploymentProperties.containsKey("DATAFLOW-SERVER-URI")).isFalse();
 	}
 
 	@Test
-	public void testAddProvidedImagePullSecret() {
+	void addProvidedImagePullSecret() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		composedTaskRunnerConfigurationProperties.setImagePullSecret("regcred");
@@ -271,14 +259,13 @@ public class TaskServiceUtilsTests {
 
 		String imagePullSecretPropertyKey = "deployer.composed-task-runner.kubernetes.imagePullSecret";
 
-		assertTrue("Task deployment properties are missing composed task runner imagePullSecret",
-				taskDeploymentProperties.containsKey(imagePullSecretPropertyKey));
+		assertThat(taskDeploymentProperties.containsKey(imagePullSecretPropertyKey)).as("Task deployment properties are missing composed task runner imagePullSecret").isTrue();
 
-		assertEquals("Invalid imagePullSecret", "regcred", taskDeploymentProperties.get(imagePullSecretPropertyKey));
+		assertThat(taskDeploymentProperties.get(imagePullSecretPropertyKey)).as("Invalid imagePullSecret").isEqualTo("regcred");
 	}
 
 	@Test
-	public void testComposedTaskRunnerUriFromTaskProps() {
+	void composedTaskRunnerUriFromTaskProps() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
@@ -288,11 +275,11 @@ public class TaskServiceUtilsTests {
 		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
 				composedTaskRunnerConfigurationProperties);
 
-		assertEquals("Invalid task runner URI string", "docker://something", uri);
+		assertThat(uri).as("Invalid task runner URI string").isEqualTo("docker://something");
 	}
 
 	@Test
-	public void testComposedTaskRunnerUriFromCTRProps() {
+	void composedTaskRunnerUriFromCTRProps() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		composedTaskRunnerConfigurationProperties.setUri("docker://something");
@@ -300,11 +287,11 @@ public class TaskServiceUtilsTests {
 		String uri = TaskServiceUtils.getComposedTaskLauncherUri(new TaskConfigurationProperties(),
 				composedTaskRunnerConfigurationProperties);
 
-		assertEquals("Invalid task runner URI string", "docker://something", uri);
+		assertThat(uri).as("Invalid task runner URI string").isEqualTo("docker://something");
 	}
 
 	@Test
-	public void testComposedTaskRunnerUriFromCTRPropsOverridesTaskProps() {
+	void composedTaskRunnerUriFromCTRPropsOverridesTaskProps() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		composedTaskRunnerConfigurationProperties.setUri("gcr.io://something");
@@ -316,72 +303,71 @@ public class TaskServiceUtilsTests {
 		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
 				composedTaskRunnerConfigurationProperties);
 
-		assertEquals("Invalid task runner URI string", "gcr.io://something", uri);
+		assertThat(uri).as("Invalid task runner URI string").isEqualTo("gcr.io://something");
 	}
 
 	@Test
-	public void testImagePullSecretNullCTRProperties() {
+	void imagePullSecretNullCTRProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties, null);
-		assertFalse("Task deployment properties should not contain imagePullSecret",
-				taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret"));
+		assertThat(taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret")).as("Task deployment properties should not contain imagePullSecret").isFalse();
 	}
 
 	@Test
-	public void testUseUserAccessTokenFromCTRPropsEnabled() {
+	void useUserAccessTokenFromCTRPropsEnabled() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(true);
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
 
-		assertTrue("Use user access token should be true", result);
+		assertThat(result).as("Use user access token should be true").isTrue();
 	}
 
 	@Test
-	public void testUseUserAccessTokenFromCTRPropsDisabled() {
+	void useUserAccessTokenFromCTRPropsDisabled() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 				new ComposedTaskRunnerConfigurationProperties();
 		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(false);
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
 
-		assertFalse("Use user access token should be false", result);
+		assertThat(result).as("Use user access token should be false").isFalse();
 	}
 
 	@Test
-	public void testUseUserAccessTokenFromNullCTRProps() {
+	void useUserAccessTokenFromNullCTRProps() {
 		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
 		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
-		assertFalse("Use user access token should be false", result);
+		assertThat(result).as("Use user access token should be false").isFalse();
 	}
 
 	@Test
-	public void testUseUserAccessTokenFromTaskProps() {
+	void useUserAccessTokenFromTaskProps() {
 		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
 		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
 		taskConfigurationProperties.setUseUserAccessToken(true);
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
-		assertTrue("Use user access token should be true", result);
+		assertThat(result).as("Use user access token should be true").isTrue();
 	}
 
 	@Test
-	public void testUseUserAccessTokenFromTaskPropsDefault() {
+	void useUserAccessTokenFromTaskPropsDefault() {
 		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
 		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
 
 		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
 
-		assertFalse("Use user access token should be false", result);
+		assertThat(result).as("Use user access token should be false").isFalse();
 	}
 
 	@Test
-	public void testConvertCommandLineArgsToCTRFormat() {
+	void convertCommandLineArgsToCTRFormat() {
 		validateSingleCTRArgs("app.a.0=foo=bar", "--composed-task-app-arguments.base64_YXBwLmEuMA=foo=bar");
 		validateSingleCTRArgs("app.a.0=foo", "--composed-task-app-arguments.base64_YXBwLmEuMA=foo");
 		validateSingleCTRArgs("app.foo.bar", "--composed-task-app-arguments.app.foo.bar");
@@ -389,14 +375,14 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	public void testConvertCommandLineArgsToCTRFormatWithNull() {
+	void convertCommandLineArgsToCTRFormatWithNull() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 						TaskServiceUtils.convertCommandLineArgsToCTRFormat(Collections.singletonList(null)))
 				.withMessage("Command line Arguments for ComposedTaskRunner contain a null entry.");
 	}
 
 	@Test
-	public void testConvertMultipleCommandLineArgsToCTRFormat() {
+	void convertMultipleCommandLineArgsToCTRFormat() {
 		List<String> originalList = new ArrayList<>();
 		originalList.add("app.a.0=foo=bar");
 		originalList.add("app.b.0=baz=boo");

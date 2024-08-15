@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.Repository;
@@ -29,14 +29,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class RepositoryRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
 
-	@After
-	@Before
+	@AfterEach
+	@BeforeEach
 	public void cleanupRepository() {
 		deleteRepoIfExists("stable");
 		deleteRepoIfExists("unstable");

@@ -20,108 +20,108 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Thomas Risberg
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
-public class TaskDefinitionTests {
+class TaskDefinitionTests {
 
 	@Test
-	public void testDefinition() {
+	void definition() {
 		TaskDefinition definition = new TaskDefinition("test", "timestamp");
-		assertEquals("test", definition.getName());
-		assertEquals("timestamp", definition.getDslText());
-		assertEquals("timestamp", definition.getRegisteredAppName());
-		assertEquals(1, definition.getProperties().size());
-		assertEquals("test", definition.getProperties().get("spring.cloud.task.name"));
+		assertThat(definition.getName()).isEqualTo("test");
+		assertThat(definition.getDslText()).isEqualTo("timestamp");
+		assertThat(definition.getRegisteredAppName()).isEqualTo("timestamp");
+		assertThat(definition.getProperties()).hasSize(1);
+		assertThat(definition.getProperties()).containsEntry("spring.cloud.task.name", "test");
 
 		TaskDefinition composedDef = new TaskDefinition("composed", "foo && bar");
-		assertEquals("composed", composedDef.getName());
-		assertEquals("foo && bar", composedDef.getDslText());
-		assertEquals("composed", composedDef.getRegisteredAppName());
-		assertEquals(1, composedDef.getProperties().size());
-		assertEquals("composed", composedDef.getProperties().get("spring.cloud.task.name"));
+		assertThat(composedDef.getName()).isEqualTo("composed");
+		assertThat(composedDef.getDslText()).isEqualTo("foo && bar");
+		assertThat(composedDef.getRegisteredAppName()).isEqualTo("composed");
+		assertThat(composedDef.getProperties()).hasSize(1);
+		assertThat(composedDef.getProperties()).containsEntry("spring.cloud.task.name", "composed");
 	}
 
 	@Test
-	public void testPackageProtectedConstructor() {
+	void packageProtectedConstructor() {
 		TaskDefinition definition = new TaskDefinition("timestamp", "label",
 				Collections.singletonMap("spring.cloud.task.name", "label"));
-		assertEquals("label", definition.getName());
-		assertEquals("timestamp", definition.getRegisteredAppName());
-		assertEquals(1, definition.getProperties().size());
-		assertEquals("label", definition.getProperties().get("spring.cloud.task.name"));
+		assertThat(definition.getName()).isEqualTo("label");
+		assertThat(definition.getRegisteredAppName()).isEqualTo("timestamp");
+		assertThat(definition.getProperties()).hasSize(1);
+		assertThat(definition.getProperties()).containsEntry("spring.cloud.task.name", "label");
 	}
 
 	@Test
-	public void testBuilder() {
+	void builder() {
 		TaskDefinition definition = new TaskDefinition.TaskDefinitionBuilder()
 				.from(new TaskDefinition("test", "timestamp"))
 				.build();
-		assertEquals("test", definition.getName());
-		assertEquals("timestamp", definition.getRegisteredAppName());
-		assertEquals(1, definition.getProperties().size());
-		assertEquals("test", definition.getProperties().get("spring.cloud.task.name"));
+		assertThat(definition.getName()).isEqualTo("test");
+		assertThat(definition.getRegisteredAppName()).isEqualTo("timestamp");
+		assertThat(definition.getProperties()).hasSize(1);
+		assertThat(definition.getProperties()).containsEntry("spring.cloud.task.name", "test");
 	}
 
 	@Test
-	public void testEquality() {
+	void equality() {
 		TaskDefinition definitionOne = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionTwo = new TaskDefinition("test", "timestamp");
 
-		assertTrue("TaskDefinitions were expected to be equal.", definitionOne.equals(definitionTwo));
-		assertTrue("TaskDefinitions were expected to be equal.", definitionOne.equals(definitionOne));
+		assertThat(definitionTwo).as("TaskDefinitions were expected to be equal.").isEqualTo(definitionOne);
+		assertThat(definitionOne).as("TaskDefinitions were expected to be equal.").isEqualTo(definitionOne);
 
 	}
 
 	@Test
-	public void testInequality() {
+	void inequality() {
 		TaskDefinition definitionOne = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionFoo = new TaskDefinition("test", "foo");
 
-		assertFalse("TaskDefinitions were not expected to be equal.", definitionOne.equals(definitionFoo));
-		assertFalse("TaskDefinitions were not expected to be equal.", definitionOne.equals(null));
-		assertFalse("TaskDefinitions were not expected to be equal.", definitionOne.equals("HI"));
+		assertThat(definitionFoo).as("TaskDefinitions were not expected to be equal.").isNotEqualTo(definitionOne);
+		assertThat(definitionOne).as("TaskDefinitions were not expected to be equal.").isNotEqualTo(null);
+		assertThat(definitionOne).as("TaskDefinitions were not expected to be equal.").isNotEqualTo("HI");
 	}
+
 	@Test
-	public void testHashCode() {
+	void testHashCode() {
 		TaskDefinition definitionOne = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionTwo = new TaskDefinition("test", "timestamp");
 		TaskDefinition definitionFoo = new TaskDefinition("test", "foo");
 
-		assertTrue("TaskDefinitions' hashcodes were expected to be equal.", definitionOne.hashCode() == definitionTwo.hashCode());
-		assertFalse("TaskDefinitions' hashcodes were not expected to be equal.", definitionOne.hashCode() == definitionFoo.hashCode());
+		assertThat(definitionTwo.hashCode()).as("TaskDefinitions' hashcodes were expected to be equal.").isEqualTo(definitionOne.hashCode());
+		assertThat(definitionOne.hashCode() == definitionFoo.hashCode()).as("TaskDefinitions' hashcodes were not expected to be equal.").isFalse();
 	}
 
 	@Test
-	public void testDefinitionWithArguments() {
+	void definitionWithArguments() {
 		TaskDefinition definition = new TaskDefinition("test", "timestamp --timestamp.format=yyyy");
-		assertEquals("test", definition.getName());
-		assertEquals("timestamp --timestamp.format=yyyy", definition.getDslText());
-		assertEquals("timestamp", definition.getRegisteredAppName());
-		assertEquals(2, definition.getProperties().size());
-		assertEquals("test", definition.getProperties().get("spring.cloud.task.name"));
-		assertEquals("yyyy", definition.getProperties().get("timestamp.format"));
+		assertThat(definition.getName()).isEqualTo("test");
+		assertThat(definition.getDslText()).isEqualTo("timestamp --timestamp.format=yyyy");
+		assertThat(definition.getRegisteredAppName()).isEqualTo("timestamp");
+		assertThat(definition.getProperties()).hasSize(2);
+		assertThat(definition.getProperties()).containsEntry("spring.cloud.task.name", "test");
+		assertThat(definition.getProperties()).containsEntry("timestamp.format", "yyyy");
 	}
 
 	@Test
-	public void testBuilderSetProperties() {
+	void builderSetProperties() {
 		Map<String,String> properties = new HashMap<>();
 		properties.put("foo", "bar");
 		TaskDefinition definition = new TaskDefinition.TaskDefinitionBuilder()
 				.from(new TaskDefinition("test", "timestamp"))
 				.setProperties(properties)
 				.build();
-		assertEquals("test", definition.getName());
-		assertEquals("timestamp", definition.getRegisteredAppName());
-		assertEquals(1, definition.getProperties().size());
-		assertEquals("bar", definition.getProperties().get("foo"));
+		assertThat(definition.getName()).isEqualTo("test");
+		assertThat(definition.getRegisteredAppName()).isEqualTo("timestamp");
+		assertThat(definition.getProperties()).hasSize(1);
+		assertThat(definition.getProperties()).containsEntry("foo", "bar");
 	}
 
 	}

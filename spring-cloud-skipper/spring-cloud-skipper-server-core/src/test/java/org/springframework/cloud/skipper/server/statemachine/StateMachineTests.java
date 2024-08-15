@@ -18,9 +18,9 @@ package org.springframework.cloud.skipper.server.statemachine;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +75,7 @@ import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,10 +89,10 @@ import static org.mockito.Mockito.never;
  * mocks for classes actions are using.
  *
  * @author Janne Valkealahti
- *
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("unchecked")
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class StateMachineTests {
@@ -376,7 +376,7 @@ public class StateMachineTests {
 		Mockito.verify(errorAction, never()).execute(any());
 	}
 
-	@Ignore("Flaky, what it tests not actually used yet")
+	@Disabled("Flaky, what it tests not actually used yet")
 	@Test
 	public void testUpgradeCancelWhileCheckingApps() throws Exception {
 		Manifest manifest = new Manifest();

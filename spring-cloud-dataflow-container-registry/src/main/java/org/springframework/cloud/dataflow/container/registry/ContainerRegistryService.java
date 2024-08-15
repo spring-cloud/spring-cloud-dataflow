@@ -40,6 +40,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
 public class ContainerRegistryService {
 
@@ -222,14 +223,14 @@ public class ContainerRegistryService {
 
 		// Docker Registry HTTP V2 API pull config blob
 		UriComponents blobUriComponents = UriComponentsBuilder.newInstance()
-				.scheme(HTTPS_SCHEME)
-				.host(containerImage.getHostname())
-				.port(StringUtils.hasText(containerImage.getPort()) ? containerImage.getPort() : null)
-				.path(IMAGE_BLOB_DIGEST_PATH)
-				.build().expand(containerImage.getRepository(), configDigest);
+			.scheme(HTTPS_SCHEME)
+			.host(containerImage.getHostname())
+			.port(StringUtils.hasText(containerImage.getPort()) ? containerImage.getPort() : null)
+			.path(IMAGE_BLOB_DIGEST_PATH)
+			.build().expand(containerImage.getRepository(), configDigest);
 
 		ResponseEntity<T> blob = registryRequest.getRestTemplate().exchange(blobUriComponents.toUri(),
-				HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
+			HttpMethod.GET, new HttpEntity<>(httpHeaders), responseClassType);
 
 		return blob.getBody();
 	}

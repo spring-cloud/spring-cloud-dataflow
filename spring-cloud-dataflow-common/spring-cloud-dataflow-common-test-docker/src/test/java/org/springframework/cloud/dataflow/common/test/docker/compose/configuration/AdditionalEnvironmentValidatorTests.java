@@ -15,8 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +46,6 @@ public class AdditionalEnvironmentValidatorTests {
 		Map<String, String> variables = new HashMap<>();
 		variables.put("SOME_VARIABLE", "Some Value");
 
-		assertThat(AdditionalEnvironmentValidator.validate(variables), is(variables));
+		assertThat(AdditionalEnvironmentValidator.validate(variables)).isEqualTo(variables);
 	}
 }

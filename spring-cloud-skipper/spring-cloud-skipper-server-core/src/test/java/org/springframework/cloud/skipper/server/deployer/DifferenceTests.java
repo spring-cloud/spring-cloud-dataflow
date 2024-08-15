@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationManifest;
@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Tests for ApplicationManifestDifferenceFactory.
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 public class DifferenceTests {
 

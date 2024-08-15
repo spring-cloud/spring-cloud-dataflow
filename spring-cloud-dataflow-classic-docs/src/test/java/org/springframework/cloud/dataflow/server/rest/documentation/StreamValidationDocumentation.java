@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -30,10 +25,16 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
 /**
  * Documentation for the /streams/validation endpoint.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -41,7 +42,7 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 
 	private static boolean setUpIsDone = false;
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		if (setUpIsDone) {
 			return;

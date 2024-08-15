@@ -15,9 +15,14 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -26,45 +31,38 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Andy Clement
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class ToolsControllerTests {
+class ToolsControllerTests {
 
 	private MockMvc mockMvc;
 
 	@Autowired
 	private WebApplicationContext wac;
 
-	@Before
-	public void setupMocks() {
+	@BeforeEach
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
 	@Test
-	public void testMissingArgumentFailure() throws Exception {
+	void missingArgumentFailure() throws Exception {
 		mockMvc.perform(post("/tools/parseTaskTextToGraph").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 	}
 
 	@Test
-	public void testValidInput() throws Exception {
+	void validInput() throws Exception {
 		mockMvc.perform(post("/tools/parseTaskTextToGraph").content("{\"name\":\"foo\",\"dsl\":\"appA\"}")
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.graph.nodes[0].id", is("0")))
@@ -80,7 +78,7 @@ public class ToolsControllerTests {
 	}
 
 	@Test
-	public void badName() throws Exception {
+	void badName() throws Exception {
 		mockMvc.perform(post("/tools/parseTaskTextToGraph").content("{\"name\":\"a.b\",\"dsl\":\"appA\"}")
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.errors[0].position", is(0)))
@@ -88,7 +86,7 @@ public class ToolsControllerTests {
 	}
 
 	@Test
-	public void syntaxErrorInDsl() throws Exception {
+	void syntaxErrorInDsl() throws Exception {
 		mockMvc.perform(post("/tools/parseTaskTextToGraph").content("{\"name\":\"a\",\"dsl\":\"appA & appB\"}")
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.errors[0].position", is(5))).andExpect(jsonPath("$.errors[0].message",
@@ -96,7 +94,7 @@ public class ToolsControllerTests {
 	}
 
 	@Test
-	public void validationProblem() throws Exception {
+	void validationProblem() throws Exception {
 		mockMvc.perform(
 				post("/tools/parseTaskTextToGraph").content("{\"name\":\"a\",\"dsl\":\"label: appA && label: appA\"}")
 						.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -105,7 +103,7 @@ public class ToolsControllerTests {
 	}
 
 	@Test
-	public void twoValidationProblems() throws Exception {
+	void twoValidationProblems() throws Exception {
 		mockMvc.perform(post("/tools/parseTaskTextToGraph")
 				.content("{\"name\":\"a\",\"dsl\":\"label: appA && label: appA && label: appA\"}")
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())

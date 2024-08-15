@@ -43,8 +43,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests conversion of text column to oid in PostgreSQL.
@@ -53,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 @AutoConfigureJdbc
 @ExtendWith(SpringExtension.class)
-public class PostgreSQLTextToOIDTest {
+class PostgreSQLTextToOIDTest {
 	@SuppressWarnings("rawtypes")
 	static PostgreSQLContainer container = new PostgreSQLContainer(DockerImageName.parse("postgres:14"));
 
@@ -74,7 +73,7 @@ public class PostgreSQLTextToOIDTest {
 	}
 
 	@Test
-	public void testConvertText() {
+	void convertText() {
 		final List<Pair<String, String>> data = new ArrayList<>();
 		final Random random = new Random(System.currentTimeMillis());
 		for (int i = 0; i < 5000; i++) {
@@ -92,9 +91,9 @@ public class PostgreSQLTextToOIDTest {
 		);
 		for (Triple<Long, String, String> item : result) {
 			Pair<String, String> right = data.get(item.getLeft().intValue() - 1);
-			assertNotNull(right);
-			assertEquals(right.getLeft(), item.getMiddle());
-			assertEquals(right.getRight(), item.getRight());
+			assertThat(right).isNotNull();
+			assertThat(item.getMiddle()).isEqualTo(right.getLeft());
+			assertThat(item.getRight()).isEqualTo(right.getRight());
 		}
 		PostgreSQLTextToOID.convertColumnFromOID("simple_table", "id", "big_string", dataSource);
 		final String selectTextTable = "select id, big_string, short_string from simple_table";
@@ -107,14 +106,14 @@ public class PostgreSQLTextToOIDTest {
 		);
 		for (Triple<Long, String, String> item : result) {
 			Pair<String, String> right = data.get(item.getLeft().intValue() - 1);
-			assertNotNull(right);
-			assertEquals(right.getLeft(), item.getMiddle());
-			assertEquals(right.getRight(), item.getRight());
+			assertThat(right).isNotNull();
+			assertThat(item.getMiddle()).isEqualTo(right.getLeft());
+			assertThat(item.getRight()).isEqualTo(right.getRight());
 		}
 	}
 
 	@Test
-	public void testConvertVarChar() {
+	void convertVarChar() {
 		final List<Pair<String, String>> data = new ArrayList<>();
 		final Random random = new Random(System.currentTimeMillis());
 		for (int i = 0; i < 5000; i++) {
@@ -132,9 +131,9 @@ public class PostgreSQLTextToOIDTest {
 		);
 		for (Triple<Long, String, String> item : result) {
 			Pair<String, String> right = data.get(item.getLeft().intValue() - 1);
-			assertNotNull(right);
-			assertEquals(right.getLeft(), item.getMiddle());
-			assertEquals(right.getRight(), item.getRight());
+			assertThat(right).isNotNull();
+			assertThat(item.getMiddle()).isEqualTo(right.getLeft());
+			assertThat(item.getRight()).isEqualTo(right.getRight());
 		}
 		PostgreSQLTextToOID.convertColumnFromOID("simple_table2", "id", "big_string", dataSource);
 		final String selectTextTable = "select id, big_string, short_string from simple_table2";
@@ -147,9 +146,9 @@ public class PostgreSQLTextToOIDTest {
 		);
 		for (Triple<Long, String, String> item : result) {
 			Pair<String, String> right = data.get(item.getLeft().intValue() - 1);
-			assertNotNull(right);
-			assertEquals(right.getLeft(), item.getMiddle());
-			assertEquals(right.getRight(), item.getRight());
+			assertThat(right).isNotNull();
+			assertThat(item.getMiddle()).isEqualTo(right.getLeft());
+			assertThat(item.getRight()).isEqualTo(right.getRight());
 		}
 	}
 

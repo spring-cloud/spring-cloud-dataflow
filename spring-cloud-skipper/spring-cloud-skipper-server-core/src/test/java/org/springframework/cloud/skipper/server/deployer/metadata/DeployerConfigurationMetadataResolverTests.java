@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.deployer.metadata;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.configurationmetadata.ConfigurationMetadataProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -44,7 +44,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES);
+			assertThat(data).hasSize(ALL_LOCAL_DEPLOYER_PROPERTIES);
 				});
 	}
 
@@ -60,7 +60,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES - 2);
+			assertThat(data).hasSize(ALL_LOCAL_DEPLOYER_PROPERTIES - 2);
 				});
 	}
 
@@ -76,7 +76,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(ALL_LOCAL_DEPLOYER_PROPERTIES - 1);
+			assertThat(data).hasSize(ALL_LOCAL_DEPLOYER_PROPERTIES - 1);
 				});
 	}
 
@@ -92,7 +92,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(2);
+			assertThat(data).hasSize(2);
 				});
 	}
 
@@ -108,7 +108,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(1);
+			assertThat(data).hasSize(1);
 				});
 	}
 
@@ -124,7 +124,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(2);
+			assertThat(data).hasSize(2);
 				});
 	}
 
@@ -141,7 +141,7 @@ public class DeployerConfigurationMetadataResolverTests {
 							skipperServerProperties.getDeployerProperties());
 					resolver.setApplicationContext(context);
 					List<ConfigurationMetadataProperty> data = resolver.resolve();
-					assertThat(data.size()).isEqualTo(1);
+			assertThat(data).hasSize(1);
 				});
 	}
 

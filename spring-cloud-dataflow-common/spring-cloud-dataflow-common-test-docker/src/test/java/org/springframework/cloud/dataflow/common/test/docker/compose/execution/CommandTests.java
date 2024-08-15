@@ -25,9 +25,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.apache.commons.io.IOUtils;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.core.Is.is;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -73,7 +72,7 @@ class CommandTests {
         givenTheUnderlyingProcessTerminatesWithAnExitCodeOf(1);
         givenTheUnderlyingProcessHasOutput(expectedOutput);
         String commandOutput = dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
-        assertThat(commandOutput, is(expectedOutput));
+		assertThat(commandOutput).isEqualTo(expectedOutput);
     }
 
     @Test
@@ -81,14 +80,14 @@ class CommandTests {
         String expectedOutput = "test output";
         givenTheUnderlyingProcessHasOutput(expectedOutput);
         String commandOutput = dockerComposeCommand.execute(errorHandler, true,"rm", "-f");
-        assertThat(commandOutput, is(expectedOutput));
+		assertThat(commandOutput).isEqualTo(expectedOutput);
     }
 
     @Test
     void giveTheOutputToTheSpecifiedConsumerAsItIsAvailable() throws Exception {
         givenTheUnderlyingProcessHasOutput("line 1\nline 2");
         dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
-        assertThat(consumedLogLines, contains("line 1", "line 2"));
+		assertThat(consumedLogLines).containsExactly("line 1", "line 2");
     }
 
     @Disabled("flaky test: https://circleci.com/gh/palantir/docker-compose-rule/378, 370, 367, 366")
@@ -97,7 +96,7 @@ class CommandTests {
         int preThreadCount = Thread.getAllStackTraces().entrySet().size();
         dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
         int postThreadCount = Thread.getAllStackTraces().entrySet().size();
-        assertThat("command thread pool has exited", preThreadCount == postThreadCount);
+		assertThat(preThreadCount == postThreadCount).as("command thread pool has exited").isTrue();
     }
 
     private void givenTheUnderlyingProcessHasOutput(String output) {

@@ -16,15 +16,20 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,21 +48,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ApplicationConfigurationMetadataResolverAutoConfigurationTest.TestConfig.class)
 @TestPropertySource(properties = {
 		".dockerconfigjson={\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}" +
@@ -80,7 +82,7 @@ import static org.mockito.Mockito.when;
 		"spring.cloud.dataflow.container.registry-configurations[goharbor2].secret=Harbor12345",
 		"spring.cloud.dataflow.container.registry-configurations[goharbor2].use-http-proxy=true"
 })
-public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
+class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 
 	@Autowired
 	Map<String, ContainerRegistryConfiguration> registryConfigurationMap;
@@ -108,7 +110,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 	RestTemplate containerRestTemplateWithHttpProxy;
 
 	@Test
-	public void registryConfigurationBeanCreationTest() {
+	void registryConfigurationBeanCreationTest() {
 		assertThat(registryConfigurationMap).hasSize(4);
 
 		ContainerRegistryConfiguration secretConf = registryConfigurationMap.get("demo.repository.io");
@@ -121,8 +123,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 				.describedAs("The explicit disable-ssl-verification=true property should augment the .dockerconfigjson based config")
 				.isTrue();
 		assertThat(secretConf.getExtra()).isNotEmpty();
-		assertThat(secretConf.getExtra().get(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
-				.isEqualTo("https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
+		assertThat(secretConf.getExtra()).containsEntry(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, "https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
 
 		ContainerRegistryConfiguration secretConf2 = registryConfigurationMap.get("demo2.repository.io");
 		assertThat(secretConf2).isNotNull();
@@ -134,8 +135,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 				.describedAs("The explicit disable-ssl-verification=true property should augment the .dockerconfigjson based config")
 				.isTrue();
 		assertThat(secretConf2.getExtra()).isNotEmpty();
-		assertThat(secretConf2.getExtra().get(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
-				.isEqualTo("https://demo2.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
+		assertThat(secretConf2.getExtra()).containsEntry(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, "https://demo2.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
 
 		ContainerRegistryConfiguration goharborConf = registryConfigurationMap.get("demo.goharbor.io");
 		assertThat(goharborConf).isNotNull();
@@ -145,8 +145,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 		assertThat(goharborConf.getSecret()).isEqualTo("Harbor12345");
 		assertThat(goharborConf.isDisableSslVerification()).isFalse();
 		assertThat(goharborConf.getExtra()).isNotEmpty();
-		assertThat(goharborConf.getExtra().get(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
-				.isEqualTo("https://demo.goharbor.io/service/token?service=demo-registry2&scope=repository:{repository}:pull");
+		assertThat(goharborConf.getExtra()).containsEntry(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, "https://demo.goharbor.io/service/token?service=demo-registry2&scope=repository:{repository}:pull");
 
 
 		ContainerRegistryConfiguration goharborConf2 = registryConfigurationMap.get("demo2.goharbor.io");
@@ -157,12 +156,11 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 		assertThat(goharborConf2.getSecret()).isEqualTo("Harbor12345");
 		assertThat(goharborConf2.isDisableSslVerification()).isFalse();
 		assertThat(goharborConf2.getExtra()).isNotEmpty();
-		assertThat(goharborConf2.getExtra().get(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY))
-				.isEqualTo("https://demo2.goharbor.io/service/token?service=demo-registry2&scope=repository:{repository}:pull");
+		assertThat(goharborConf2.getExtra()).containsEntry(DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY, "https://demo2.goharbor.io/service/token?service=demo-registry2&scope=repository:{repository}:pull");
 	}
 
 	@Test
-	public void containerImageMetadataResolverWithActiveSSL() throws URISyntaxException {
+	void containerImageMetadataResolverWithActiveSSL() throws URISyntaxException {
 		assertThat(containerImageMetadataResolver).isNotNull();
 		Map<String, String> labels = containerImageMetadataResolver.getImageLabels("demo.goharbor.io/test/image:1.0.0");
 		assertThat(labels).containsExactly(Collections.singletonMap("foo", "bar").entrySet().iterator().next());
@@ -184,7 +182,7 @@ public class ApplicationConfigurationMetadataResolverAutoConfigurationTest {
 	}
 
 	@Test
-	public void containerImageMetadataResolverWithDisabledSSL() throws URISyntaxException {
+	void containerImageMetadataResolverWithDisabledSSL() throws URISyntaxException {
 		assertThat(containerImageMetadataResolver).isNotNull();
 		Map<String, String> labels = containerImageMetadataResolver.getImageLabels("demo.repository.io/disabledssl/image:1.0.0");
 		assertThat(labels).containsExactly(Collections.singletonMap("foo", "bar").entrySet().iterator().next());

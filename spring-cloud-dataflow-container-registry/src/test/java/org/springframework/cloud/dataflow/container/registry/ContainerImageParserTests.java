@@ -20,19 +20,20 @@ package org.springframework.cloud.dataflow.container.registry;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-public class ContainerImageParserTests {
+class ContainerImageParserTests {
 
 	private ContainerImageParser containerImageNameParser =
 			new ContainerImageParser("test-domain.io", "tag654", "official-repo-name");
 
 
 	@Test
-	public void testParseWithoutDefaults2() {
+	void parseWithoutDefaults2() {
 		ContainerImage containerImageName =
 				containerImageNameParser.parse("dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/spring-cloud-dataflow-composed-task-runner@sha256:c838be82e886b0db98ed847487ec6bf94f12e511ebe5659bd5fbe43597a4b734");
 
@@ -51,7 +52,7 @@ public class ContainerImageParserTests {
 	}
 
 	@Test
-	public void testParseWithoutDefaults() {
+	void parseWithoutDefaults() {
 		ContainerImage containerImageName =
 				containerImageNameParser.parse("springsource-docker-private-local.jfrog.io:80/scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173:123");
 
@@ -70,7 +71,7 @@ public class ContainerImageParserTests {
 	}
 
 	@Test
-	public void testParseWithoutDigest() {
+	void parseWithoutDigest() {
 		ContainerImage containerImageName =
 				containerImageNameParser.parse("springsource-docker-private-local.jfrog.io:80/scdf/stream/spring-cloud-dataflow-acceptance-image-drivers173@sha256:d44e9ac4c4bf53fb0b5424c35c85230a28eb03f24a2ade5bb7f2cc1462846401");
 
@@ -89,7 +90,7 @@ public class ContainerImageParserTests {
 	}
 
 	@Test
-	public void testParseWithDefaults() {
+	void parseWithDefaults() {
 		ContainerImage containerImageName = containerImageNameParser.parse("simple-repo-name");
 
 		assertThat(containerImageName.getHostname()).isEqualTo("test-domain.io");
@@ -104,14 +105,14 @@ public class ContainerImageParserTests {
 	}
 
 	@Test
-	public void testInvalidRegistryHostName() {
-		assertThrows(IllegalArgumentException.class, () ->
+	void invalidRegistryHostName() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
 				containerImageNameParser.parse("6666#.6:80/scdf/spring-image:123"));
 	}
 
 	@Test
-	public void testInvalidRegistryPart() {
-		assertThrows(IllegalArgumentException.class, () ->
+	void invalidRegistryPart() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->
 				containerImageNameParser.parse("localhost:80bla/scdf/spring-image:123"));
 	}
 }

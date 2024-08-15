@@ -16,64 +16,63 @@
 package org.springframework.cloud.dataflow.shell.command.support;
 
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
- *
  * @author Gunnar Hillert
- *
+ * @author Corneil du Plessis
  */
-public class RoleTypeTests {
+class RoleTypeTests {
 
 	@Test
-	public void testGetRoleFromNullKey() {
+	void getRoleFromNullKey() {
 		try {
 			RoleType.fromKey(null);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("Parameter role must not be null or empty.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Parameter role must not be null or empty.");
 			return;
 		}
 		fail("Expected an IllegalStateException to be thrown.");
 	}
 
 	@Test
-	public void testGetRoleFromEmptyKey() {
+	void getRoleFromEmptyKey() {
 		try {
 			RoleType.fromKey("   ");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("Parameter role must not be null or empty.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Parameter role must not be null or empty.");
 			return;
 		}
 		fail("Expected an IllegalStateException to be thrown.");
 	}
 
 	@Test
-	public void testGetRoleFromNonExistingKey() {
+	void getRoleFromNonExistingKey() {
 		try {
 			RoleType.fromKey("role_does_not_exist");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("Unable to map role role_does_not_exist", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unable to map role role_does_not_exist");
 			return;
 		}
 		fail("Expected an IllegalStateException to be thrown.");
 	}
 
 	@Test
-	public void testGetRolesFromExistingKeys() {
+	void getRolesFromExistingKeys() {
 
-		assertEquals(RoleType.CREATE, RoleType.fromKey("ROLE_CREATE"));
-		assertEquals(RoleType.DEPLOY, RoleType.fromKey("ROLE_DEPLOY"));
-		assertEquals(RoleType.DESTROY, RoleType.fromKey("ROLE_DESTROY"));
-		assertEquals(RoleType.MANAGE, RoleType.fromKey("ROLE_MANAGE"));
-		assertEquals(RoleType.MODIFY, RoleType.fromKey("ROLE_MODIFY"));
-		assertEquals(RoleType.SCHEDULE, RoleType.fromKey("ROLE_SCHEDULE"));
-		assertEquals(RoleType.VIEW, RoleType.fromKey("ROLE_VIEW"));
+		assertThat(RoleType.fromKey("ROLE_CREATE")).isEqualTo(RoleType.CREATE);
+		assertThat(RoleType.fromKey("ROLE_DEPLOY")).isEqualTo(RoleType.DEPLOY);
+		assertThat(RoleType.fromKey("ROLE_DESTROY")).isEqualTo(RoleType.DESTROY);
+		assertThat(RoleType.fromKey("ROLE_MANAGE")).isEqualTo(RoleType.MANAGE);
+		assertThat(RoleType.fromKey("ROLE_MODIFY")).isEqualTo(RoleType.MODIFY);
+		assertThat(RoleType.fromKey("ROLE_SCHEDULE")).isEqualTo(RoleType.SCHEDULE);
+		assertThat(RoleType.fromKey("ROLE_VIEW")).isEqualTo(RoleType.VIEW);
 
 	}
 

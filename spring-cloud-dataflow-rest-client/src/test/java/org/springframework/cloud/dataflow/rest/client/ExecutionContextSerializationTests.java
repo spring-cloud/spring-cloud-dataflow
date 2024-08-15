@@ -19,20 +19,21 @@ package org.springframework.cloud.dataflow.rest.client;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.springframework.batch.item.ExecutionContext;
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
-public class ExecutionContextSerializationTests {
+class ExecutionContextSerializationTests {
 
 	@Test
-	public void testSerializationOfExecutionContext() throws IOException {
+	void serializationOfExecutionContext() throws IOException {
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
 
 		final ExecutionContext stepExecutionExecutionContext = new ExecutionContext();
@@ -41,7 +42,7 @@ public class ExecutionContextSerializationTests {
 
 		final String serializedExecutionContext = objectMapper.writeValueAsString(stepExecutionExecutionContext);
 		final String expectedExecutionContext = "{\"dirty\":true,\"empty\":false,\"values\":[{\"foo\":\"bar\"},{\"foo2\":\"bar2\"}]}";
-		assertEquals(expectedExecutionContext, serializedExecutionContext);
+		assertThat(serializedExecutionContext).isEqualTo(expectedExecutionContext);
 
 	}
 

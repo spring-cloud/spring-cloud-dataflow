@@ -15,6 +15,14 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -22,12 +30,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -48,26 +53,21 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * @author Gunnar Hillert
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
-public class DataflowTemplateTests {
+class DataflowTemplateTests {
 
 	private ObjectMapper mapper;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		mapper = new ObjectMapper();
 		mapper.registerModule(new Jdk8Module());
 		mapper.registerModule(new Jackson2HalModule());
@@ -76,55 +76,57 @@ public class DataflowTemplateTests {
 		System.setProperty("sun.net.client.defaultConnectTimeout", String.valueOf(100));
 	}
 
-	@After
-	public void shutdown() {
+	@AfterEach
+	void shutdown() {
 		System.clearProperty("sun.net.client.defaultConnectTimeout");
 	}
 
 	@Test
-	public void testDataFlowTemplateContructorWithNullUri() throws URISyntaxException {
+	void dataFlowTemplateContructorWithNullUri() throws URISyntaxException {
 
 		try {
 			new DataFlowTemplate(null, mapper);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The provided baseURI must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The provided baseURI must not be null.");
 			return;
 		}
 
 		fail("Expected an IllegalArgumentException to be thrown.");
 	}
 
-	@Test(expected = ResourceAccessException.class)
-	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
-		new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
+	@Test
+	void dataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
+		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() -> {
+			new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
+		});
 	}
 
 	@Test
-	public void testThatObjectMapperGetsPrepared() {
+	void thatObjectMapperGetsPrepared() {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		DataFlowTemplate.prepareObjectMapper(objectMapper);
 		assertCorrectMixins(objectMapper);
 	}
 
 	@Test
-	public void testPrepareObjectMapperWithNullObjectMapper() {
+	void prepareObjectMapperWithNullObjectMapper() {
 		try {
 			DataFlowTemplate.prepareObjectMapper(null);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The objectMapper must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The objectMapper must not be null.");
 			return;
 		}
 	}
 
 	@Test
-	public void testThatDefaultDataflowRestTemplateContainsMixins() {
+	void thatDefaultDataflowRestTemplateContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
 
-		assertNotNull(restTemplate);
-		assertTrue(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler);
+		assertThat(restTemplate).isNotNull();
+		assertThat(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler).isTrue();
 
 		assertCorrectMixins(restTemplate);
 
@@ -149,42 +151,42 @@ public class DataflowTemplateTests {
 	}
 
 	private void assertCorrectMixins(ObjectMapper objectMapper) {
-		assertNotNull(objectMapper.findMixInClassFor(JobExecution.class));
-		assertNotNull(objectMapper.findMixInClassFor(JobParameters.class));
-		assertNotNull(objectMapper.findMixInClassFor(JobParameter.class));
-		assertNotNull(objectMapper.findMixInClassFor(JobInstance.class));
-		assertNotNull(objectMapper.findMixInClassFor(ExitStatus.class));
-		assertNotNull(objectMapper.findMixInClassFor(StepExecution.class));
-		assertNotNull(objectMapper.findMixInClassFor(ExecutionContext.class));
-		assertNotNull(objectMapper.findMixInClassFor(StepExecutionHistory.class));
+		assertThat(objectMapper.findMixInClassFor(JobExecution.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(JobParameters.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(JobParameter.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(JobInstance.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(ExitStatus.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(StepExecution.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(ExecutionContext.class)).isNotNull();
+		assertThat(objectMapper.findMixInClassFor(StepExecutionHistory.class)).isNotNull();
 	}
 
 
 	@Test
-	public void testThatPrepareRestTemplateWithNullContructorValueContainsMixins() {
+	void thatPrepareRestTemplateWithNullContructorValueContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(null);
 
-		assertNotNull(restTemplate);
-		assertTrue(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler);
+		assertThat(restTemplate).isNotNull();
+		assertThat(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler).isTrue();
 
 		assertCorrectMixins(restTemplate);
 
 	}
 
 	@Test
-	public void testThatPrepareRestTemplateWithProvidedRestTemplateContainsMixins() {
+	void thatPrepareRestTemplateWithProvidedRestTemplateContainsMixins() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 
-		assertNotNull(restTemplate);
-		assertTrue(providedRestTemplate == restTemplate);
-		assertTrue(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler);
+		assertThat(restTemplate).isNotNull();
+		assertThat(providedRestTemplate == restTemplate).isTrue();
+		assertThat(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler).isTrue();
 
 		assertCorrectMixins(restTemplate);
 	}
 
 	@Test
-	public void testPrepareRestTemplateWithRestTemplateThatHasNoMessageConverters() {
+	void prepareRestTemplateWithRestTemplateThatHasNoMessageConverters() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		providedRestTemplate.getMessageConverters().clear();
 
@@ -192,7 +194,7 @@ public class DataflowTemplateTests {
 			DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("'messageConverters' must not be empty", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("'messageConverters' must not be empty");
 			return;
 		}
 
@@ -200,7 +202,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testPrepareRestTemplateWithRestTemplateThatMissesJacksonConverter() {
+	void prepareRestTemplateWithRestTemplateThatMissesJacksonConverter() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final Iterator<HttpMessageConverter<?>> iterator = providedRestTemplate.getMessageConverters().iterator();
 
@@ -214,8 +216,7 @@ public class DataflowTemplateTests {
 			DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The RestTemplate does not contain a required MappingJackson2HttpMessageConverter.",
-					e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The RestTemplate does not contain a required MappingJackson2HttpMessageConverter.");
 			return;
 		}
 
@@ -223,36 +224,36 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testAllActive() throws Exception{
+	void allActive() throws Exception{
 		DataFlowTemplate template = getMockedDataFlowTemplate(true);
 
-		assertNotNull(template.taskOperations());
-		assertNotNull(template.streamOperations());
-		assertNotNull(template.runtimeOperations());
-		assertNotNull(template.jobOperations());
-		assertNotNull(template.schedulerOperations());
+		assertThat(template.taskOperations()).isNotNull();
+		assertThat(template.streamOperations()).isNotNull();
+		assertThat(template.runtimeOperations()).isNotNull();
+		assertThat(template.jobOperations()).isNotNull();
+		assertThat(template.schedulerOperations()).isNotNull();
 
 		testAlwaysActiveOperations(template);
 	}
 
 	@Test
-	public void testAllDeActive() throws Exception{
+	void allDeActive() throws Exception{
 		DataFlowTemplate template = getMockedDataFlowTemplate(false);
 
-		assertNull(template.taskOperations());
-		assertNull(template.streamOperations());
-		assertNull(template.runtimeOperations());
-		assertNull(template.jobOperations());
-		assertNull(template.schedulerOperations());
+		assertThat(template.taskOperations()).isNull();
+		assertThat(template.streamOperations()).isNull();
+		assertThat(template.runtimeOperations()).isNull();
+		assertThat(template.jobOperations()).isNull();
+		assertThat(template.schedulerOperations()).isNull();
 
 		testAlwaysActiveOperations(template);
 	}
 
 	private void testAlwaysActiveOperations(DataFlowTemplate template) {
 		//these operations are always active
-		assertNotNull(template.aboutOperation());
-		assertNotNull(template.appRegistryOperations());
-		assertNotNull(template.completionOperations());
+		assertThat(template.aboutOperation()).isNotNull();
+		assertThat(template.appRegistryOperations()).isNotNull();
+		assertThat(template.completionOperations()).isNotNull();
 	}
 
 	private DataFlowTemplate getMockedDataFlowTemplate(boolean isLinksActive) throws Exception{

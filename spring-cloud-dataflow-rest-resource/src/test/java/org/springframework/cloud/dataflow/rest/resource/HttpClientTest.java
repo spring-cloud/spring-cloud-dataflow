@@ -36,18 +36,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 /**
  * @author Mike Heath
  * @author Corneil du Plessis
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = HttpClientTest.HttpClientTestApp.class)
-public class HttpClientTest {
+class HttpClientTest {
 
 	@LocalServerPort
 	private int port;
 
 	@Test
-	public void resourceBasedAuthorizationHeader() throws Exception {
+	void resourceBasedAuthorizationHeader() throws Exception {
 		var credentials = "Super Secret Credentials";
 		var resource = new ByteArrayCheckableResource(credentials.getBytes(), null);
 		var targetHost = new URI("http://localhost:" + port);

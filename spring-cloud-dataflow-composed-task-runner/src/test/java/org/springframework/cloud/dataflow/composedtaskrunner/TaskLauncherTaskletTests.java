@@ -26,8 +26,6 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,14 +81,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
@@ -177,11 +175,10 @@ public class TaskLauncherTaskletTests {
 				environment,
 				mapper
 		);
-		Exception exception = assertThrows(
-				ComposedTaskException.class,
+		assertThatThrownBy(
 				() -> execute(taskLauncherTasklet, null, chunkContext())
-		);
-		AssertionsForClassTypes.assertThat(exception.getMessage()).isEqualTo(
+		).isInstanceOf(ComposedTaskException.class)
+			.hasMessage(
 				"Unable to connect to Data Flow Server to execute task operations. " +
 						"Verify that Data Flow Server's tasks/definitions endpoint can be accessed.");
 	}
@@ -259,15 +256,16 @@ public class TaskLauncherTaskletTests {
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(TaskExecutionTimeoutException.class, () -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Timeout occurred during " +
-				"startup of task with Execution Id 1");
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(TaskExecutionTimeoutException.class)
+			.hasMessage("Timeout occurred during startup of task with Execution Id 1");
 
 		createCompleteTaskExecution(0);
 		this.composedTaskProperties.setMaxStartWaitTime(500);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
 		TaskLauncherTasklet taskLauncherTaskletNoTimeout = getTaskExecutionTasklet();
-		assertDoesNotThrow(() -> execute(taskLauncherTaskletNoTimeout, null, chunkContext));
+		execute(taskLauncherTaskletNoTimeout, null, chunkContext);
+		// expect no exception
 	}
 
 	@Test
@@ -278,9 +276,9 @@ public class TaskLauncherTaskletTests {
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(TaskExecutionTimeoutException.class, () -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Timeout occurred while " +
-				"processing task with Execution Id 1");
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(TaskExecutionTimeoutException.class)
+			.hasMessage("Timeout occurred while processing task with Execution Id 1");
 	}
 
 	@Test
@@ -296,10 +294,9 @@ public class TaskLauncherTaskletTests {
 						ArgumentMatchers.any());
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(DataFlowClientException.class,
+		assertThatThrownBy(
 				() -> taskLauncherTasklet.execute(null, chunkContext)
-		);
-		Assertions.assertThat(exception.getMessage()).isEqualTo(ERROR_MESSAGE);
+		).isInstanceOf(DataFlowClientException.class).hasMessage(ERROR_MESSAGE);
 	}
 
 	@Test
@@ -313,9 +310,9 @@ public class TaskLauncherTaskletTests {
 				ArgumentMatchers.any());
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(ResourceAccessException.class,
-				() -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo(ERROR_MESSAGE);
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(ResourceAccessException.class)
+			.hasMessage(ERROR_MESSAGE);
 	}
 
 	@Test
@@ -325,13 +322,13 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		createCompleteTaskExecution(1, "This is the exit message of the task itself.");
-		UnexpectedTaskExecutionException exception = assertThrows(UnexpectedTaskExecutionException.class,
-				() -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a non zero exit code.");
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a non zero exit code.");
-		Assertions.assertThat(exception.getExitCode()).isEqualTo(1);
-		Assertions.assertThat(exception.getExitMessage()).isEqualTo("This is the exit message of the task itself.");
-		Assertions.assertThat(exception.getEndTime()).isNotNull();
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(UnexpectedTaskExecutionException.class)
+			.hasMessage("Task returned a non zero exit code.")
+			.matches(x -> ((UnexpectedTaskExecutionException) x).getExitCode() == 1)
+			.matches(x -> ((UnexpectedTaskExecutionException) x).getExitMessage()
+				.equals("This is the exit message of the task itself."))
+			.matches(x -> ((UnexpectedTaskExecutionException) x).getEndTime() != null);
 	}
 
 	private RepeatStatus execute(TaskLauncherTasklet taskLauncherTasklet, StepContribution contribution,
@@ -351,9 +348,9 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		getCompleteTaskExecutionWithNull();
-		Throwable exception = assertThrows(UnexpectedTaskExecutionException.class,
-				() -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a null exit code.");
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(UnexpectedTaskExecutionException.class)
+			.hasMessage("Task returned a null exit code.");
 	}
 
 	@Test
@@ -385,10 +382,10 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
 	}
@@ -404,10 +401,10 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
 	}
@@ -424,16 +421,16 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
 		boolean value = chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
-		Assertions.assertThat((Boolean)chunkContext.getStepContext()
+		assertThat((Boolean) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isFalse();
 	}

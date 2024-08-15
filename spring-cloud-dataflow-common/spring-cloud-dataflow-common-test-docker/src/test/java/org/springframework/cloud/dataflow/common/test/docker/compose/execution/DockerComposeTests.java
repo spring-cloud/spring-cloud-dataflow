@@ -32,11 +32,7 @@ import org.springframework.cloud.dataflow.common.test.docker.compose.connection.
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Ports;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -94,7 +90,7 @@ class DockerComposeTests {
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("ps\n----\ndir_db_1"));
         List<ContainerName> containerNames = compose.ps();
         verify(executor).execute(true,"ps");
-        assertThat(containerNames, contains(ContainerName.builder().semanticName("db").rawName("dir_db_1").build()));
+		assertThat(containerNames).containsExactly(ContainerName.builder().semanticName("db").rawName("dir_db_1").build());
     }
 
     @Test
@@ -106,7 +102,7 @@ class DockerComposeTests {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         compose.writeLogs("db", output);
         verify(executor).execute(true,"logs", "--no-color", "db");
-        assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8), is("logs"));
+		assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8)).isEqualTo("logs");
     }
 
     @Test
@@ -127,7 +123,7 @@ class DockerComposeTests {
         compose.writeLogs("db", output);
         verify(executor, times(4)).execute(true,"ps", "-q", "db");
         verify(executor).execute(true,"logs", "--no-color", "db");
-        assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8), is("logs"));
+		assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8)).isEqualTo("logs");
     }
 
     @Test
@@ -139,7 +135,7 @@ class DockerComposeTests {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         compose.writeLogs("db", output);
         verify(executor).execute(true,"logs", "--no-color", "--follow", "db");
-        assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8), is("logs"));
+		assertThat(new String(output.toByteArray(), StandardCharsets.UTF_8)).isEqualTo("logs");
     }
 
     @Test
@@ -176,7 +172,7 @@ class DockerComposeTests {
     void parseThePsOutputOnPorts() throws Exception {
         Ports ports = compose.ports("db");
         verify(executor).execute(true,"ps", "db");
-        assertThat(ports, is(new Ports(new DockerPort("0.0.0.0", 7000, 7000))));
+		assertThat(ports).isEqualTo(new Ports(new DockerPort("0.0.0.0", 7000, 7000)));
     }
 
     @Test
@@ -228,7 +224,7 @@ class DockerComposeTests {
 
         DockerCompose processCompose = new DefaultDockerCompose(processExecutor, dockerMachine);
 
-        assertThat(processCompose.exec(options(), "container_1", arguments("ls", "-l")), is(lsString));
+		assertThat(processCompose.exec(options(), "container_1", arguments("ls", "-l"))).isEqualTo(lsString);
     }
 
     @Test
@@ -238,7 +234,7 @@ class DockerComposeTests {
         DockerComposeExecutable processExecutor = mock(DockerComposeExecutable.class);
         addProcessToExecutor(processExecutor, processWithOutput(lsString), "run", "-it", "container_1", "ls", "-l");
         DockerCompose processCompose = new DefaultDockerCompose(processExecutor, dockerMachine);
-        assertThat(processCompose.run(DockerComposeRunOption.options("-it"), "container_1", DockerComposeRunArgument.arguments("ls", "-l")), is(lsString));
+		assertThat(processCompose.run(DockerComposeRunOption.options("-it"), "container_1", DockerComposeRunArgument.arguments("ls", "-l"))).isEqualTo(lsString);
     }
 
     private static void addProcessToExecutor(DockerComposeExecutable dockerComposeExecutable, Process process, String... commands) throws Exception {

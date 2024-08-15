@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.TCP_PROTOCOL;
 
 import org.hamcrest.Matchers;
@@ -49,12 +49,12 @@ public class RemoteHostIpResolverTests {
     @Test
     public void resolve_docker_host_with_port() {
         String dockerHost = String.format("%s%s:%d", TCP_PROTOCOL, IP, PORT);
-        assertThat(new RemoteHostIpResolver().resolveIp(dockerHost), Matchers.is(IP));
+		assertThat(new RemoteHostIpResolver().resolveIp(dockerHost)).isEqualTo(IP);
     }
 
     @Test
     public void resolve_docker_host_without_port() {
         String dockerHost = String.format("%s%s", TCP_PROTOCOL, IP);
-        assertThat(new RemoteHostIpResolver().resolveIp(dockerHost), Matchers.is(IP));
+		assertThat(new RemoteHostIpResolver().resolveIp(dockerHost)).isEqualTo(IP);
     }
 }

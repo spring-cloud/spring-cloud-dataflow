@@ -16,27 +16,28 @@
 
 package org.springframework.cloud.dataflow.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-public class TaskDefinitionToDslConverterTests {
+class TaskDefinitionToDslConverterTests {
 
 	@Test
-	public void testTaskDsl() {
-		assertEquals("foo --prop2=value2 --prop1=value1",
-				new TaskDefinitionToDslConverter().toDsl(new TaskDefinition("myTask", "foo --prop1=value1 --prop2=value2")));
+	void taskDsl() {
+		assertThat(new TaskDefinitionToDslConverter().toDsl(new TaskDefinition("myTask", "foo --prop1=value1 --prop2=value2"))).isEqualTo("foo --prop2=value2 --prop1=value1");
 	}
 
 	@Test
-	public void testExclusionOfDataFlowAddedProperties() {
+	void exclusionOfDataFlowAddedProperties() {
 
 		List<String> dataFlowAddedProperties = Arrays.asList(
 				TaskDefinition.SPRING_CLOUD_TASK_NAME);
@@ -47,13 +48,12 @@ public class TaskDefinitionToDslConverterTests {
 			System.out.println(dslText);
 			TaskDefinition taskDefinition = new TaskDefinition("streamName", dslText);
 
-			assertEquals("foo",
-					new TaskDefinitionToDslConverter().toDsl(taskDefinition));
+			assertThat(new TaskDefinitionToDslConverter().toDsl(taskDefinition)).isEqualTo("foo");
 		}
 	}
 
 	@Test
-	public void testPropertyAutoQuotes() {
+	void propertyAutoQuotes() {
 
 		TaskDefinition taskDefinition = new TaskDefinition("fooTask", "foo");
 
@@ -66,30 +66,30 @@ public class TaskDefinitionToDslConverterTests {
 				.setProperty("p5", "\"k l\"")
 				.build();
 
-		assertEquals("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\"",
-				new TaskDefinitionToDslConverter().toDsl(fooTask));
+		assertThat(new TaskDefinitionToDslConverter().toDsl(fooTask)).isEqualTo("foo --p1='a b' --p2=\"'c d'\" --p3=ef --p4=\"'i' 'j'\" --p5=\"k l\"");
 	}
 
 	@Test
-	public void autoQuotesOnStarProperties() {
+	void autoQuotesOnStarProperties() {
 
 		TaskDefinition taskDefinition = new TaskDefinition("fooTask", "jdbc-mssql --cron='/10 * * * * *' " +
 				"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
 				"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
 				"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****'");
 
-		assertEquals("jdbc-mssql --cron='/10 * * * * *' " +
-						"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
-						"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
-						"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****'",
-				new TaskDefinitionToDslConverter().toDsl(taskDefinition));
+		assertThat(new TaskDefinitionToDslConverter().toDsl(taskDefinition)).isEqualTo("jdbc-mssql --cron='/10 * * * * *' " +
+				"--max-messages=-1 --password='******' --query='UPDATE top (100) ASSURANCE SET assurance_flag = 1 " +
+				"OUTPUT Inserted.* WHERE assurance_flag IS NULL' " +
+				"--url='jdbc:sqlserver://db:1433;encrypt=false&databaseName=Spring' --username='*****'");
 
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void compositeTaskDsl() {
-		TaskDefinition taskDefinition = new TaskDefinition("composedTaskName", "foo && bar");
-		new TaskDefinitionToDslConverter().toDsl(taskDefinition);
+	@Test
+	void compositeTaskDsl() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			TaskDefinition taskDefinition = new TaskDefinition("composedTaskName", "foo && bar");
+			new TaskDefinitionToDslConverter().toDsl(taskDefinition);
+		});
 	}
 
 }

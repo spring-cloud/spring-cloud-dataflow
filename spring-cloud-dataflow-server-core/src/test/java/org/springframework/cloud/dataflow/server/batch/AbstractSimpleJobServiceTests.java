@@ -113,39 +113,32 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	@Test
 	void retrieveJobExecutionsByTypeAfterJobExeuction() throws Exception {
 		String suffix = "_BY_NAME";
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 5).size())
-			.isEqualTo(0);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 5)).isEmpty();
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, false, 7);
 		createJobExecutions(BASE_JOB_INST_NAME + suffix + "_FAILED", BatchStatus.FAILED, false, 5);
 
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20).size())
-			.isEqualTo(7);
-		assertThat(
-			jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix + "_FAILED", BatchStatus.FAILED, 0, 20)
-				.size())
-			.isEqualTo(5);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20)).hasSize(7);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix + "_FAILED", BatchStatus.FAILED, 0, 20)).hasSize(5);
 	}
 
 	@Test
 	void retrieveJobExecutionCountWithoutFilter() throws Exception {
 		String suffix = "_BY_NAME";
 		String suffixFailed = suffix + "_FAILED";
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20).size())
-			.isEqualTo(0);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20)).isEmpty();
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, false, 5);
 		createJobExecutions(BASE_JOB_INST_NAME + suffixFailed, BatchStatus.FAILED, false, 7);
 
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20).size()).isEqualTo(5);
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffixFailed, null, 0, 20).size())
-			.isEqualTo(7);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20)).hasSize(5);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffixFailed, null, 0, 20)).hasSize(7);
 	}
 
 	@Test
 	void retrieveJobExecutionCountFilteredByName() throws Exception {
 		String suffix = "COUNT_BY_NAME";
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20).size()).isEqualTo(0);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20)).isEmpty();
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, false, 5);
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20).size()).isEqualTo(5);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, null, 0, 20)).hasSize(5);
 	}
 
 	@Test
@@ -159,12 +152,10 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	@Test
 	void retrieveJobExecutionCountFilteredNameAndStatus() throws Exception {
 		String suffix = "_COUNT_BY_NAME_STATUS";
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20).size())
-			.isEqualTo(0);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20)).isEmpty();
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, false, 5);
 		createJobExecutions(BASE_JOB_INST_NAME + suffix + "_FAILED", BatchStatus.FAILED, false, 5);
-		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20).size())
-			.isEqualTo(5);
+		assertThat(jobService.listJobExecutionsForJob(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, 0, 20)).hasSize(5);
 	}
 
 	@Test
@@ -173,7 +164,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		createJobExecutions(BASE_JOB_INST_NAME + suffix, BatchStatus.COMPLETED, false, 5);
 		Collection<JobExecutionWithStepCount> jobExecutionsWithStepCount = jobService.listJobExecutionsWithStepCount(0,
 			20);
-		assertThat(jobExecutionsWithStepCount.size()).isEqualTo(5);
+		assertThat(jobExecutionsWithStepCount).hasSize(5);
 		JobExecutionWithStepCount jobExecutionWithStepCount = jobExecutionsWithStepCount.stream()
 			.findFirst()
 			.orElseThrow(() -> new RuntimeException("Expected entry"));

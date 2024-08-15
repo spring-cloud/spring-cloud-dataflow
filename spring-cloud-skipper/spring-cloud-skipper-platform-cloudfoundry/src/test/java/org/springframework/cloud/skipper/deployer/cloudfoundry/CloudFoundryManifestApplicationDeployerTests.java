@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.deployer.cloudfoundry;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.SpringCloudDeployerApplicationSpec;
 

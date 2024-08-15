@@ -16,15 +16,24 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -45,31 +54,19 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class RuntimeAppsControllerTests {
+class RuntimeAppsControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -85,8 +82,8 @@ public class RuntimeAppsControllerTests {
 	@Autowired
 	private SkipperClient skipperClient;
 
-	@Before
-	public void setupMocks() {
+	@BeforeEach
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		for (AppRegistration appRegistration : this.appRegistrationRepository.findAll()) {
@@ -157,7 +154,7 @@ public class RuntimeAppsControllerTests {
 	}
 
 	@Test
-	public void testFindNonExistentApp() throws Exception {
+	void findNonExistentApp() throws Exception {
 		mockMvc.perform(get("/runtime/apps/foo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().is4xxClientError())
@@ -165,7 +162,7 @@ public class RuntimeAppsControllerTests {
 	}
 
 	@Test
-	public void testFindNonExistentAppUnknownState() throws Exception {
+	void findNonExistentAppUnknownState() throws Exception {
 		Info info = new Info();
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
@@ -181,7 +178,7 @@ public class RuntimeAppsControllerTests {
 	}
 
 	@Test
-	public void testFindNonExistentAppInstance() throws Exception {
+	void findNonExistentAppInstance() throws Exception {
 		Info info = new Info();
 		info.setStatus(new Status());
 		info.getStatus().setStatusCode(StatusCode.UNKNOWN);
@@ -210,7 +207,7 @@ public class RuntimeAppsControllerTests {
 	}
 
 	@Test
-	public void testFindNonExistentAppInstance2() throws Exception {
+	void findNonExistentAppInstance2() throws Exception {
 		mockMvc.perform(
 				get("/runtime/apps/ticktock4.log-v1/instances/ticktock4.log-v1-0").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -223,7 +220,7 @@ public class RuntimeAppsControllerTests {
 	}
 
 	@Test
-	public void testListRuntimeApps() throws Exception {
+	void listRuntimeApps() throws Exception {
 		mockMvc.perform(get("/runtime/apps").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -239,7 +236,7 @@ public class RuntimeAppsControllerTests {
 	}
 
 	@Test
-	public void testListRuntimeAppsPageSizes() throws Exception {
+	void listRuntimeAppsPageSizes() throws Exception {
 
 		mockMvc.perform(get("/runtime/apps?page=0&size=1").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())

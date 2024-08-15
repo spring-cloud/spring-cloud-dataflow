@@ -21,8 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.util.TaskSanitizer;
@@ -31,29 +30,31 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.core.io.Resource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-public class TaskSanitizerTest {
+class TaskSanitizerTest {
 
 	private TaskSanitizer taskSanitizer = new TaskSanitizer();
 
 
 	@Test
-	public void testTaskExecutionArguments() {
+	void taskExecutionArguments() {
 		TaskExecution taskExecution = new TaskExecution();
 		taskExecution.setTaskName("a1");
 		taskExecution.setArguments(Arrays.asList("--username=test", "--password=testing"));
 		TaskExecution sanitizedTaskExecution = this.taskSanitizer.sanitizeTaskExecutionArguments(taskExecution);
-		Assert.assertEquals("--username=******", sanitizedTaskExecution.getArguments().get(0));
-		Assert.assertEquals("--password=******", sanitizedTaskExecution.getArguments().get(1));
+		assertThat(sanitizedTaskExecution.getArguments().get(0)).isEqualTo("--username=******");
+		assertThat(sanitizedTaskExecution.getArguments().get(1)).isEqualTo("--password=******");
 	}
 
 	@Test
-	public void testTaskManifest() {
+	void taskManifest() {
 		TaskManifest taskManifest = new TaskManifest();
 		AppDeploymentRequest appDeploymentRequest = mock(AppDeploymentRequest.class);
 		Map<String, String> appProperties = new HashMap<>();
@@ -69,13 +70,13 @@ public class TaskSanitizerTest {
 		taskManifest.setTaskDeploymentRequest(appDeploymentRequest);
 		TaskManifest sanitizedTaskManifest = this.taskSanitizer.sanitizeTaskManifest(taskManifest);
 		List<String> commandLineArgs = sanitizedTaskManifest.getTaskDeploymentRequest().getCommandlineArguments();
-		Assert.assertEquals("--username=******", commandLineArgs.get(0));
-		Assert.assertEquals("--password=******", commandLineArgs.get(1));
+		assertThat(commandLineArgs.get(0)).isEqualTo("--username=******");
+		assertThat(commandLineArgs.get(1)).isEqualTo("--password=******");
 		Map<String, String> deploymentProps = sanitizedTaskManifest.getTaskDeploymentRequest().getDeploymentProperties();
-		Assert.assertEquals("******", sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("secret"));
-		Assert.assertEquals("******", sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties().get("user.key"));
-		Assert.assertEquals("******", deploymentProps.get("secret"));
-		Assert.assertEquals("******", deploymentProps.get("user.key"));
+		assertThat(sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties()).containsEntry("secret", "******");
+		assertThat(sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties()).containsEntry("user.key", "******");
+		assertThat(deploymentProps).containsEntry("secret", "******");
+		assertThat(deploymentProps).containsEntry("user.key", "******");
 
 	}
 }

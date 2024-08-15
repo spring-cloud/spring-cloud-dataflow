@@ -17,8 +17,7 @@ package org.springframework.cloud.dataflow.server.config.features;
 
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -32,17 +31,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = LocalPlatformPropertiesTests.TestConfig.class)
 @ActiveProfiles("local-platform-properties")
-public class LocalPlatformPropertiesTests {
+class LocalPlatformPropertiesTests {
 
 	@Autowired
 	private LocalPlatformProperties localPlatformProperties;
 
 	@Test
-	public void deserializationTest() {
+	void deserializationTest() {
 		Map<String, LocalDeployerProperties> localAccounts = this.localPlatformProperties.getAccounts();
 		assertThat(localAccounts).hasSize(2);
 		assertThat(localAccounts).containsKeys("localDev", "localDevDebug");

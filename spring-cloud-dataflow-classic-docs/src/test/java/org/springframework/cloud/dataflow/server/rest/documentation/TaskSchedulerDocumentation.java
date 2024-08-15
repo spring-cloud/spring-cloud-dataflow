@@ -16,14 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-
-import org.springframework.cloud.dataflow.core.ApplicationType;
-
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -35,22 +27,31 @@ import static org.springframework.restdocs.request.RequestDocumentation.queryPar
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.core.ApplicationType;
+
 /**
  * Documentation for the /tasks/schedules endpoint.
  *
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class TaskSchedulerDocumentation extends BaseDocumentation {
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
 		createTaskDefinition("mytaskname");
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() throws Exception {
 		destroyTaskDefinition("mytaskname");
 		unregisterApp(ApplicationType.task, "timestamp");

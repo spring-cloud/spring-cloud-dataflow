@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import javax.sql.DataSource;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -25,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,6 @@ import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
@@ -57,6 +57,7 @@ import org.springframework.cloud.dataflow.server.configuration.TaskServiceDepend
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
@@ -66,7 +67,7 @@ import org.springframework.core.io.FileUrlResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -82,7 +83,7 @@ import static org.mockito.Mockito.when;
 		"spring.main.allow-bean-definition-overriding=true"}
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class DefaultTaskJobServiceTests {
+class DefaultTaskJobServiceTests {
 
 	private final static String BASE_JOB_NAME = "myJob";
 
@@ -128,7 +129,7 @@ public class DefaultTaskJobServiceTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		jobParameterMap.put("identifying.param", new JobParameter("testparam", String.class));
 		this.jobParameters = new JobParameters(jobParameterMap);
@@ -152,7 +153,7 @@ public class DefaultTaskJobServiceTests {
 	}
 
 	@Test
-	public void testRestart() throws Exception {
+	void restart() throws Exception {
 		createBaseLaunchers();
 		initializeJobs(true);
 
@@ -165,18 +166,18 @@ public class DefaultTaskJobServiceTests {
 	}
 
 	@Test
-	public void testRestartNoPlatform()
-		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
+	void restartNoPlatform()
+			throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		createBaseLaunchers();
 		initializeJobs(false);
-		Exception exception = assertThrows(IllegalStateException.class, () -> {
+		assertThatThrownBy(() -> {
 			this.taskJobService.restartJobExecution(jobInstanceCount);
-		});
-		assertThat(exception.getMessage()).contains("Did not find platform for taskName=[myJob_ORIG");
+		}).isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("Did not find platform for taskName=[myJob_ORIG");
 	}
 
 	@Test
-	public void testRestartOnePlatform() throws Exception {
+	void restartOnePlatform() throws Exception {
 		this.launcherRepository.save(new Launcher("demo", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, this.taskLauncher));
 
 		initializeJobs(false);

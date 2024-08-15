@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.statemachine;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
@@ -33,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for persist skip function.
  *
  * @author Janne Valkealahti
- *
+ * @author Corneil du Plessis
  */
 public class StateMachinePersistConfigurationTests {
 

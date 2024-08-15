@@ -16,9 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -35,28 +40,20 @@ import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = {  JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+@SpringBootTest(classes = {JobDependencies.class,
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class TaskPlatformControllerTests {
+class TaskPlatformControllerTests {
 
 	@Autowired
 	private TaskLauncher taskLauncher;
@@ -69,8 +66,8 @@ public class TaskPlatformControllerTests {
 	@Autowired
 	private WebApplicationContext wac;
 
-	@Before
-	public void setupMockMVC() {
+	@BeforeEach
+	void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
@@ -83,31 +80,31 @@ public class TaskPlatformControllerTests {
 	}
 
 	@Test
-	public void testGetPlatformList() throws Exception {
+	void getPlatformList() throws Exception {
 		String responseString = mockMvc
 				.perform(get("/tasks/platforms").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
-		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
-		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
+		assertThat(responseString).contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null");
+		assertThat(responseString).contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null");
+		assertThat(responseString).contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null");
 	}
 
 	@Test
-	public void testGetPlatformSchedulerList() throws Exception {
+	void getPlatformSchedulerList() throws Exception {
 		String responseString = mockMvc
 				.perform(get("/tasks/platforms?schedulesEnabled=true").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
+		assertThat(responseString).contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null");
 	}
 
 	@Test
-	public void testGetPlatformSchedulerListFalse() throws Exception {
+	void getPlatformSchedulerListFalse() throws Exception {
 		String responseString = mockMvc
 				.perform(get("/tasks/platforms?schedulesEnabled=false").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		assertTrue(responseString.contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null"));
-		assertTrue(responseString.contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null"));
-		assertTrue(responseString.contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null"));
+		assertThat(responseString).contains("{\"name\":\"default\",\"type\":\"local\",\"description\":null");
+		assertThat(responseString).contains("{\"name\":\"cf\",\"type\":\"Cloud Foundry\",\"description\":null");
+		assertThat(responseString).contains("{\"name\":\"cfsched\",\"type\":\"Cloud Foundry\",\"description\":null");
 	}
 
 }

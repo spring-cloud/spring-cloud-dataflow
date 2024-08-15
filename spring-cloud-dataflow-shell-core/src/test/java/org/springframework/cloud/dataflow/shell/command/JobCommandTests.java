@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,14 +47,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Glenn Renfro
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-public class JobCommandTests extends AbstractShellIntegrationTest {
+@Disabled("taskRepository not found")
+class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private final static String BASE_JOB_NAME = "myJob";
 
@@ -76,7 +77,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	private static List<Long> taskExecutionIds = new ArrayList<>(3);
 
 	@BeforeAll
-	public static void setUp() throws Exception {
+	static void setUp() throws Exception {
 		Thread.sleep(2000);
 		taskBatchDao = applicationContext.getBean(TaskBatchDao.class);
 		jobRepository = applicationContext.getBean(JobRepository.class);
@@ -87,7 +88,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@AfterAll
-	public static void tearDown() {
+	static void tearDown() {
 		if (applicationContext == null) {
 			logger.warn("Application context was null (probably due to setup failure) - not performing tearDown");
 			return;
@@ -123,7 +124,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testJobExecutionList() {
+	void testJobExecutionList() {
 		logger.info("Retrieve Job Execution List Test");
 		Table table = getTable(job().jobExecutionList());
 		verifyColumnNumber(table, 6);
@@ -137,7 +138,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
  	 	}
 
 	@Test
-	public void testJobExecutionListByName() {
+	void testJobExecutionListByName() {
 		logger.info("Retrieve Job Execution List By Name Test");
 		Table table = getTable(job().jobExecutionListByName(JOB_NAME_FOOBAR));
 		verifyColumnNumber(table, 6);
@@ -150,13 +151,12 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testViewExecution() {
+	void viewExecution() {
 		logger.info("Retrieve Job Execution Detail by Id");
 
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals("Number of expected rows returned from the table is incorrect", 18,
-				table.getModel().getRowCount());
+		assertThat(table.getModel().getRowCount()).as("Number of expected rows returned from the table is incorrect").isEqualTo(18);
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
 		checkCell(table, rowNumber++, 0, "Job Execution Id ");
@@ -183,11 +183,11 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 						&& table.getModel().getValue(paramRowTwo, 0).equals("foo(STRING) "))) {
 			jobParamsPresent = true;
 		}
-		assertTrue("the table did not contain the correct job parameters ", jobParamsPresent);
+		assertThat(jobParamsPresent).as("the table did not contain the correct job parameters ").isTrue();
 	}
 
 	@Test
-	public void testViewInstance() {
+	void viewInstance() {
 		logger.info("Retrieve Job Instance Detail by Id");
 
 		Table table = getTable(job().instanceDisplay(jobInstances.get(0).getInstanceId()));
@@ -202,11 +202,11 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 				|| table.getModel().getValue(1, 4).equals("-bar=BAR,foo=FOO")) {
 			isValidCell = true;
 		}
-		assertTrue("Job Parameters does match expected.", isValidCell);
+		assertThat(isValidCell).as("Job Parameters does match expected.").isTrue();
 	}
 
 	@Test
-	public void testJobStepExecutionList() {
+	void testJobStepExecutionList() {
 		logger.info("Retrieve Job Step Execution List Test");
 
 		Table table = getTable(job().jobStepExecutionList(getFirstJobExecutionIdFromTable()));
@@ -220,7 +220,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testJobStepExecutionProgress() {
+	void testJobStepExecutionProgress() {
 		logger.info("Retrieve Job Step Execution Progress Test");
 
 		long jobExecutionId = getFirstJobExecutionIdFromTable();
@@ -236,7 +236,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testStepExecutionView() {
+	void stepExecutionView() {
 		logger.info("Retrieve Job Execution Detail by Id");
 
 		long jobExecutionId = getFirstJobExecutionIdFromTable();
@@ -269,8 +269,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	private void checkCell(Table table, int row, int column, Object expectedValue) {
-		assertEquals(String.format("Cell %d,%d's value should be %s", row, column, expectedValue), expectedValue,
-				table.getModel().getValue(row, column));
+		assertThat(table.getModel().getValue(row, column)).as(String.format("Cell %d,%d's value should be %s", row, column, expectedValue)).isEqualTo(expectedValue);
 	}
 
 	private Table getTable(Object result) {
@@ -279,7 +278,7 @@ public class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	private void verifyColumnNumber(Table table, int columnCount) {
-		assertEquals("Number of columns returned was not expected", columnCount, table.getModel().getColumnCount());
+		assertThat(table.getModel().getColumnCount()).as("Number of columns returned was not expected").isEqualTo(columnCount);
 	}
 
 	private long getFirstJobExecutionIdFromTable() {

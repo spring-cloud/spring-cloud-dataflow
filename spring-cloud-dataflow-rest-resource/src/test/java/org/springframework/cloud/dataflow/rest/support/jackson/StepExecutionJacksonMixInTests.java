@@ -16,20 +16,19 @@
 
 package org.springframework.cloud.dataflow.rest.support.jackson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.item.ExecutionContext;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Test;
 
 /**
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.
@@ -37,7 +36,7 @@ import static org.junit.Assert.assertThat;
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class StepExecutionJacksonMixInTests {
+class StepExecutionJacksonMixInTests {
 
 	/**
 	 * Assert that without using the {@link ExecutionContextJacksonMixIn} Jackson does not
@@ -45,15 +44,16 @@ public class StepExecutionJacksonMixInTests {
 	 *
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
-	@Test(expected = JsonMappingException.class)
-	public void testSerializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
-
+	@Test
+	void serializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
+		assertThatExceptionOfType(JsonMappingException.class).isThrownBy(() -> {
 		final ObjectMapper objectMapper = new ObjectMapper();
 
 		final StepExecution stepExecution = getStepExecution();
 		final String result = objectMapper.writeValueAsString(stepExecution);
 
-		assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}"));
+			assertThat(result).contains("\"executionContext\":{\"dirty\":true,\"empty\":false}");
+		});
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class StepExecutionJacksonMixInTests {
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
 	@Test
-	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
+	void serializationOfSingleStepExecution() throws JsonProcessingException {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new JavaTimeModule());
@@ -74,15 +74,15 @@ public class StepExecutionJacksonMixInTests {
 		final StepExecution stepExecution = getStepExecution();
 		final String result = objectMapper.writeValueAsString(stepExecution);
 
-		assertThat(result, not(containsString("\"executionContext\":{\"dirty\":true,\"empty\":false}")));
-		assertThat(result, containsString("\"executionContext\":{\"dirty\":true,\"empty\":false,\"values\":[{"));
+		assertThat(result).doesNotContain("\"executionContext\":{\"dirty\":true,\"empty\":false}");
+		assertThat(result).contains("\"executionContext\":{\"dirty\":true,\"empty\":false,\"values\":[{");
 
-		assertThat(result, containsString("{\"counter\":1234}"));
-		assertThat(result, containsString("{\"myDouble\":1.123456}"));
-		assertThat(result, containsString("{\"Josh\":4444444444}"));
-		assertThat(result, containsString("{\"awesomeString\":\"Yep\"}"));
-		assertThat(result, containsString("{\"hello\":\"world\""));
-		assertThat(result, containsString("{\"counter2\":9999}"));
+		assertThat(result).contains("{\"counter\":1234}");
+		assertThat(result).contains("{\"myDouble\":1.123456}");
+		assertThat(result).contains("{\"Josh\":4444444444}");
+		assertThat(result).contains("{\"awesomeString\":\"Yep\"}");
+		assertThat(result).contains("{\"hello\":\"world\"");
+		assertThat(result).contains("{\"counter2\":9999}");
 	}
 
 	private StepExecution getStepExecution() {

@@ -19,25 +19,26 @@ import java.lang.reflect.Field;
 import java.net.URI;
 
 import org.apache.hc.client5.http.auth.AuthScope;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
 
-import static org.junit.Assert.fail;
-
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  * @since 1.4
  */
-public class HttpClientConfigurerTests {
+class HttpClientConfigurerTests {
 
 	/**
 	 * Basic test ensuring that the {@code HttpClient} is built successfully.
 	 */
 	@Test
-	public void testThatHttpClientWithProxyIsCreated() throws Exception {
+	void thatHttpClientWithProxyIsCreated() throws Exception {
 
 		final URI targetHost = new URI("http://test.com");
 		final HttpClientConfigurer builder = HttpClientConfigurer.create(targetHost);
@@ -50,7 +51,7 @@ public class HttpClientConfigurerTests {
 	 * null username and password.
 	 */
 	@Test
-	public void testThatHttpClientWithProxyIsCreatedWithNullUsernameAndPassword() throws Exception {
+	void thatHttpClientWithProxyIsCreatedWithNullUsernameAndPassword() throws Exception {
 		final URI targetHost = new URI("http://test.com");
 		final HttpClientConfigurer builder = HttpClientConfigurer.create(targetHost);
 		builder.withProxyCredentials(URI.create("https://spring.io"), null, null);
@@ -62,14 +63,14 @@ public class HttpClientConfigurerTests {
 	 * Uri is not set.
 	 */
 	@Test
-	public void testHttpClientWithProxyCreationWithMissingScheme() throws Exception {
+	void httpClientWithProxyCreationWithMissingScheme() throws Exception {
 		final URI targetHost = new URI("http://test.com");
 		final HttpClientConfigurer builder = HttpClientConfigurer.create(targetHost);
 		try {
 			builder.withProxyCredentials(URI.create("spring"), "spring", "cloud");
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The scheme component of the proxyUri must not be empty.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The scheme component of the proxyUri must not be empty.");
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown.");
@@ -80,14 +81,14 @@ public class HttpClientConfigurerTests {
 	 * Uri is null.
 	 */
 	@Test
-	public void testHttpClientWithNullProxyUri() throws Exception {
+	void httpClientWithNullProxyUri() throws Exception {
 		final URI targetHost = new URI("http://test.com");
 		final HttpClientConfigurer builder = HttpClientConfigurer.create(targetHost);
 		try {
 			builder.withProxyCredentials(null, null, null);
 		}
 		catch (IllegalArgumentException e) {
-			Assert.assertEquals("The proxyUri must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The proxyUri must not be null.");
 			return;
 		}
 		fail("Expected an IllegalArgumentException to be thrown.");
@@ -97,7 +98,7 @@ public class HttpClientConfigurerTests {
 	 * Test ensuring that the {@link AuthScope} is set for the target host.
 	 */
 	@Test
-	public void testThatHttpClientWithProxyIsCreatedAndHasCorrectCredentialsProviders() throws Exception {
+	void thatHttpClientWithProxyIsCreatedAndHasCorrectCredentialsProviders() throws Exception {
 		final URI targetHost = new URI("http://test.com");
 		final HttpClientConfigurer builder = HttpClientConfigurer.create(targetHost);
 		builder.basicAuthCredentials("foo", "password");
@@ -106,15 +107,15 @@ public class HttpClientConfigurerTests {
 		final Field credentialsProviderField = ReflectionUtils.findField(HttpClientConfigurer.class, "credentialsProvider");
 		ReflectionUtils.makeAccessible(credentialsProviderField);
 		CredentialsProvider credentialsProvider = (CredentialsProvider) credentialsProviderField.get(builder);
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80), null));
-		Assert.assertNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80), null));
+		assertThat(credentialsProvider.getCredentials(new AuthScope("test.com", 80), null)).isNotNull();
+		assertThat(credentialsProvider.getCredentials(new AuthScope("spring.io", 80), null)).isNull();
 	}
 
 	/**
 	 * Test ensuring that the {@link AuthScope} is set for the target host and the proxy server.
 	 */
 	@Test
-	public void testThatHttpClientWithProxyIsCreatedAndHasCorrectCredentialsProviders2() throws Exception {
+	void thatHttpClientWithProxyIsCreatedAndHasCorrectCredentialsProviders2() throws Exception {
 		final URI targetHost = new URI("http://test.com");
 		final HttpClientConfigurer builder = HttpClientConfigurer.create(targetHost);
 		builder.basicAuthCredentials("foo", "password");
@@ -123,7 +124,7 @@ public class HttpClientConfigurerTests {
 		final Field credentialsProviderField = ReflectionUtils.findField(HttpClientConfigurer.class, "credentialsProvider");
 		ReflectionUtils.makeAccessible(credentialsProviderField);
 		CredentialsProvider credentialsProvider = (CredentialsProvider) credentialsProviderField.get(builder);
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("test.com", 80), null));
-		Assert.assertNotNull(credentialsProvider.getCredentials(new AuthScope("spring.io", 80), null));
+		assertThat(credentialsProvider.getCredentials(new AuthScope("test.com", 80), null)).isNotNull();
+		assertThat(credentialsProvider.getCredentials(new AuthScope("spring.io", 80), null)).isNotNull();
 	}
 }

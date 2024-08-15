@@ -18,38 +18,31 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 import com.github.zafarkhaja.semver.Version;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class DockerComposeVersionTests {
 
     @Test
     public void compare_major_versions_first() {
-        assertThat(Version.valueOf("2.1.0").compareTo(Version.valueOf("1.2.1")), greaterThan(0));
+		assertThat(Version.valueOf("2.1.0").compareTo(Version.valueOf("1.2.1"))).isGreaterThan(0);
     }
 
     @Test
     public void compare_minor_versions_when_major_versions_are_the_same() {
-        assertThat(Version.valueOf("2.1.7").compareTo(Version.valueOf("2.3.2")), lessThan(0));
+		assertThat(Version.valueOf("2.1.7").compareTo(Version.valueOf("2.3.2"))).isLessThan(0);
     }
 
     @Test
     public void return_equals_for_the_same_version_strings() {
-        assertThat(Version.valueOf("2.1.2").compareTo(Version.valueOf("2.1.2")), is(0));
+		assertThat(Version.valueOf("2.1.2").compareTo(Version.valueOf("2.1.2"))).isEqualTo(0);
     }
 
     @Test
     public void remove_non_digits_when_passing_version_string() {
-        assertThat(
-                DockerComposeVersion.parseFromDockerComposeVersion("docker-compose version 1.7.0rc1, build 1ad8866"),
-                is(Version.valueOf("1.7.0")));
+		assertThat(DockerComposeVersion.parseFromDockerComposeVersion("docker-compose version 1.7.0rc1, build 1ad8866")).isEqualTo(Version.valueOf("1.7.0"));
     }
 	public void check_for_docker_version() {
-		assertThat(
-			DockerComposeVersion.parseFromDockerComposeVersion("Docker version 26.1.1, build 1ad8866"),
-			is(Version.valueOf("26.1.1")));
+		assertThat(DockerComposeVersion.parseFromDockerComposeVersion("Docker version 26.1.1, build 1ad8866")).isEqualTo(Version.valueOf("26.1.1"));
 	}
 }

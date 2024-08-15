@@ -25,8 +25,7 @@ import org.springframework.cloud.dataflow.common.test.docker.compose.TestContain
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerName;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Retryer.RetryableDockerOperation;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -72,7 +71,7 @@ public class RetryingDockerComposeTests {
     public void call_ps_on_the_underlying_docker_compose_and_returns_the_same_value() throws IOException, InterruptedException {
         when(dockerCompose.ps()).thenReturn(someContainerNames);
 
-        assertThat(retryingDockerCompose.ps(), is(someContainerNames));
+		assertThat(retryingDockerCompose.ps()).isEqualTo(someContainerNames);
 
         verifyRetryerWasUsed();
         verify(dockerCompose).ps();

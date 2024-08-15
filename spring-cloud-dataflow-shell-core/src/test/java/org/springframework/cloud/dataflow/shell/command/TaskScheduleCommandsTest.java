@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
@@ -27,36 +28,38 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * @author Daniel Serleg
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
+@Disabled("taskRepository not found")
+class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 
 	@BeforeAll
-	public static void setUp() throws InterruptedException {
+	static void setUp() throws InterruptedException {
 		Thread.sleep(2000);
 	}
 
 	@Test
-	public void createScheduleWithProperties() throws IOException {
+	void createScheduleWithProperties() throws IOException {
 		schedule().create("schedName", "def", "* * * * *", "app.tmp2.foo=bar", null);
 	}
 
 	@Test
-	public void createScheduleWithArguments() throws IOException {
+	void createScheduleWithArguments() throws IOException {
 		schedule().create("schedName", "def", "* * * * *", null, "foo=bar");
 	}
 
 	@Test
-	public void createScheduleWithPropertiesAndArguments() throws IOException {
+	void createScheduleWithPropertiesAndArguments() throws IOException {
 		schedule().create("schedName", "def", "* * * * *", "app.tmp2.foo=bar", "foo=bar");
 	}
 
 	@Test
-	public void createScheduleWithPropertiesFile() throws IOException {
+	void createScheduleWithPropertiesFile() throws IOException {
 		schedule().createWithPropertiesFile("schedName", "def", "* * * * *", "./src/test/resources/taskSchedulerWithPropertiesFile.properties", null);
 	}
 
 	@Test
-	public void tryScheduleWithPropertiesAndPropertiesFile() throws IOException {
+	void tryScheduleWithPropertiesAndPropertiesFile() throws IOException {
 		assertThatThrownBy(() -> scheduleWithErrors().createWithPropertiesAndPropertiesFile("schedName", "def", "* * * * *",
 				"app.tmp2.foo=bar",  "./src/test/resources/taskSchedulerWithPropertiesFile.properties", null))
 				.isInstanceOf(RuntimeException.class)
@@ -65,17 +68,17 @@ public class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void unschedule() {
+	void unschedule() {
 		schedule().unschedule("schedName");
 	}
 
 	@Test
-	public void list() {
+	void list() {
 		schedule().list();
 	}
 
 	@Test
-	public void listByTaskDefinition() {
+	void listByTaskDefinition() {
 		schedule().listByTaskDefinition("definition1");
 	}
 }

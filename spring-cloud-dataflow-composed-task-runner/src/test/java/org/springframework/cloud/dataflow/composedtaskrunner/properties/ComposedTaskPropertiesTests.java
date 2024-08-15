@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class ComposedTaskPropertiesTests {
 
@@ -59,7 +60,7 @@ public class ComposedTaskPropertiesTests {
 		assertThat(properties.getIntervalTimeBetweenChecks()).isEqualTo(12345);
 		assertThat(properties.getMaxWaitTime()).isEqualTo(6789);
 		assertThat(properties.getMaxStartWaitTime()).isEqualTo(101112);
-		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://test");
+		assertThat(properties.getDataflowServerUri()).hasToString("http://test");
 		assertThat(properties.getGraph()).isEqualTo("ddd");
 		assertThat(properties.getDataflowServerUsername()).isEqualTo("foo");
 		assertThat(properties.getDataflowServerPassword()).isEqualTo("bar");
@@ -76,7 +77,7 @@ public class ComposedTaskPropertiesTests {
 	@Test
 	public void testDataflowServerURIDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+		assertThat(properties.getDataflowServerUri()).hasToString("http://localhost:9393");
 	}
 
 	@Test
@@ -92,7 +93,7 @@ public class ComposedTaskPropertiesTests {
 		assertThat(properties.getSplitThreadKeepAliveSeconds()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT);
 		assertThat(properties.getSplitThreadMaxPoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT);
 		assertThat(properties.getSplitThreadQueueCapacity()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT);
-		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+		assertThat(properties.getDataflowServerUri()).hasToString("http://localhost:9393");
 		assertThat(properties.isSplitThreadAllowCoreThreadTimeout()).isFalse();
 		assertThat(properties.isSplitThreadWaitForTasksToCompleteOnShutdown()).isFalse();
 		assertThat(properties.getDataflowServerUsername()).isNull();

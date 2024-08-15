@@ -29,7 +29,6 @@ import java.util.Optional;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.hamcrest.MatcherAssert;
 import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,7 +75,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -104,7 +102,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TaskControllerTests {
+class TaskControllerTests {
 
 	@Autowired
 	TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider;
@@ -154,7 +152,7 @@ public class TaskControllerTests {
 	private static List<String> SAMPLE_CLEANSED_ARGUMENT_LIST;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 
@@ -209,19 +207,19 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testTaskDefinitionControllerConstructorMissingRepository() {
+	void taskDefinitionControllerConstructorMissingRepository() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new TaskDefinitionController(this.taskExplorer, null, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
 	@Test
-	public void testTaskDefinitionControllerConstructorMissingTaskExplorer() {
+	void taskDefinitionControllerConstructorMissingTaskExplorer() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				new TaskDefinitionController(null, this.repository, taskSaveService, taskDeleteService, taskDefinitionAssemblerProvider));
 	}
 
 	@Test
-	public void testTaskLaunchWithNullIDReturned() throws Exception {
+	void taskLaunchWithNullIDReturned() throws Exception {
 		when(taskLauncher.launch(any(AppDeploymentRequest.class))).thenReturn(null);
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
@@ -232,7 +230,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testSaveErrorNotInRegistry() throws Exception {
+	void saveErrorNotInRegistry() throws Exception {
 		assertThat(repository.count()).isZero();
 
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
@@ -242,7 +240,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testSave() throws Exception {
+	void testSave() throws Exception {
 		assertThat(repository.count()).isZero();
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
@@ -255,13 +253,13 @@ public class TaskControllerTests {
 		TaskDefinition myTask = myTaskOpt.get();
 
 		assertThat(myTask.getProperties()).hasSize(1);
-		assertThat(myTask.getProperties().get("spring.cloud.task.name")).isEqualTo("myTask");
+		assertThat(myTask.getProperties()).containsEntry("spring.cloud.task.name", "myTask");
 		assertThat(myTask.getDslText()).isEqualTo("task");
 		assertThat(myTask.getName()).isEqualTo("myTask");
 	}
 
 	@Test
-	public void testSaveDuplicate() throws Exception {
+	void saveDuplicate() throws Exception {
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		repository.save(new TaskDefinition("myTask", "task"));
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
@@ -270,7 +268,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testSaveWithParameters() throws Exception {
+	void saveWithParameters() throws Exception {
 
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask")
@@ -281,8 +279,8 @@ public class TaskControllerTests {
 
 		TaskDefinition myTask = repository.findById("myTask").orElseThrow(() -> new AssertionFailure("Expected myTask"));
 
-		assertThat(myTask.getProperties().get("foo")).isEqualTo("bar");
-		assertThat(myTask.getProperties().get("bar")).isEqualTo("baz");
+		assertThat(myTask.getProperties()).containsEntry("foo", "bar");
+		assertThat(myTask.getProperties()).containsEntry("bar", "baz");
 		assertThat(myTask.getDslText()).isEqualTo("task --foo=bar --bar=baz");
 		assertThat(myTask.getRegisteredAppName()).isEqualTo("task");
 		assertThat(myTask.getName()).isEqualTo("myTask");
@@ -290,7 +288,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testTaskDefinitionWithLastExecutionDetail() throws Exception {
+	void taskDefinitionWithLastExecutionDetail() throws Exception {
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask")
 						.param("definition", "task --foo=bar --bar=baz").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -310,7 +308,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testSaveCompositeTaskWithParameters() throws Exception {
+	void saveCompositeTaskWithParameters() throws Exception {
 
 		registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask")
@@ -323,7 +321,7 @@ public class TaskControllerTests {
 		Optional<TaskDefinition> myTask1Opt = repository.findById("myTask-t1");
 		assertThat(myTask1Opt).isPresent();
 		TaskDefinition myTask1 = myTask1Opt.get();
-		assertThat(myTask1.getProperties().get("foo")).isEqualTo("bar rab");
+		assertThat(myTask1.getProperties()).containsEntry("foo", "bar rab");
 		assertThat(myTask1.getDslText()).isEqualTo("t1:task --foo='bar rab'");
 		assertThat(myTask1.getRegisteredAppName()).isEqualTo("task");
 		assertThat(myTask1.getName()).isEqualTo("myTask-t1");
@@ -331,7 +329,7 @@ public class TaskControllerTests {
 		Optional<TaskDefinition> myTask2Opt = repository.findById("myTask-t2");
 		assertThat(myTask2Opt).isPresent();
 		TaskDefinition myTask2 = myTask2Opt.get();
-		assertThat(myTask2.getProperties().get("foo")).isEqualTo("one two");
+		assertThat(myTask2.getProperties()).containsEntry("foo", "one two");
 		assertThat(myTask2.getDslText()).isEqualTo("t2:task --foo='one two'");
 		assertThat(myTask2.getRegisteredAppName()).isEqualTo("task");
 		assertThat(myTask2.getName()).isEqualTo("myTask-t2");
@@ -339,7 +337,7 @@ public class TaskControllerTests {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"search", "taskName"})
-	public void testFindTaskNameContainsSubstring(String taskNameRequestParamName) throws Exception {
+	void findTaskNameContainsSubstring(String taskNameRequestParamName) throws Exception {
 		repository.save(new TaskDefinition("foo", "task"));
 		repository.save(new TaskDefinition("foz", "task"));
 		repository.save(new TaskDefinition("ooz", "task"));
@@ -368,7 +366,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testFindTaskDescriptionAndDslContainsSubstring() throws Exception {
+	void findTaskDescriptionAndDslContainsSubstring() throws Exception {
 		repository.save(new TaskDefinition("foo", "fooDsl", "fooTask"));
 		repository.save(new TaskDefinition("foz", "fozDsl", "fozTask"));
 
@@ -384,7 +382,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testFindDslTextContainsSubstring() throws Exception {
+	void findDslTextContainsSubstring() throws Exception {
 		repository.save(new TaskDefinition("foo", "task-foo"));
 		repository.save(new TaskDefinition("foz", "task-foz"));
 		repository.save(new TaskDefinition("ooz", "task-ooz"));
@@ -413,13 +411,13 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testFindByDslTextAndNameBadRequest() throws Exception {
+	void findByDslTextAndNameBadRequest() throws Exception {
 		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo").param("search", "f")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest());
 	}
 
 	@Test
-	public void testDestroyTask() throws Exception {
+	void destroyTask() throws Exception {
 		repository.save(new TaskDefinition("myTask", "task"));
 
 		mockMvc.perform(delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
@@ -429,14 +427,14 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testDestroyTaskNotFound() throws Exception {
+	void destroyTaskNotFound() throws Exception {
 		mockMvc.perform(delete("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isNotFound());
 		assertThat(repository.count()).isZero();
 	}
 
 	@Test
-	public void testDestroyAllTask() throws Exception {
+	void destroyAllTask() throws Exception {
 		repository.save(new TaskDefinition("myTask1", "task"));
 		repository.save(new TaskDefinition("myTask2", "task && task2"));
 		repository.save(new TaskDefinition("myTask3", "task"));
@@ -453,7 +451,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testCTRDeleteOutOfSequence() throws Exception {
+	void ctrDeleteOutOfSequence() throws Exception {
 		repository.save(new TaskDefinition("myTask-1", "task"));
 		repository.save(new TaskDefinition("myTask", "1: task && 2: task2"));
 		repository.save(new TaskDefinition("myTask-2", "task"));
@@ -471,7 +469,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testCTRElementUpdate() throws Exception {
+	void ctrElementUpdate() throws Exception {
 		repository.save(new TaskDefinition("a1", "t1: task && t2: task2"));
 		repository.save(new TaskDefinition("a2", "task"));
 		repository.save(new TaskDefinition("a1-t1", "task"));
@@ -494,7 +492,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testCTRElementUpdateValidate() throws Exception {
+	void ctrElementUpdateValidate() throws Exception {
 		repository.save(new TaskDefinition("a1", "t1: task --foo='a|b' && t2: task2"));
 		repository.save(new TaskDefinition("a2", "task"));
 		repository.save(new TaskDefinition("a1-t1", "task"));
@@ -517,7 +515,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testMissingApplication() throws Exception {
+	void missingApplication() throws Exception {
 		repository.save(new TaskDefinition("myTask", "no-such-task-app"));
 
 		mockMvc.perform(post("/tasks/executions").param("name", "myTask").accept(MediaType.APPLICATION_JSON))
@@ -527,7 +525,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testTaskNotDefined() throws Exception {
+	void taskNotDefined() throws Exception {
 		mockMvc.perform(post("/tasks/executions")
 						.param("name", "myFoo").accept(MediaType.APPLICATION_JSON))
 				.andDo(print()).andExpect(status().isNotFound())
@@ -536,7 +534,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testLaunch() throws Exception {
+	void testLaunch() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
@@ -548,8 +546,7 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		assertThat(request.getDefinition().getProperties()
-				.get("spring.cloud.task.name")).isEqualTo("myTask");
+		assertThat(request.getDefinition().getProperties()).containsEntry("spring.cloud.task.name", "myTask");
 
 		mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
 				.andExpect(status().isOk());
@@ -559,13 +556,13 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testLaunchWithDefaultApplicationPropertiesYamlResource() throws Exception {
+	void launchWithDefaultApplicationPropertiesYamlResource() throws Exception {
 		testLaunchWithCommonProperties(new DefaultResourceLoader().getResource(
 				"classpath:/defaults/test-application-task-common-properties-defaults.yml"));
 	}
 
 	@Test
-	public void testLaunchWithDefaultApplicationPropertiesPropertyResource() throws Exception {
+	void launchWithDefaultApplicationPropertiesPropertyResource() throws Exception {
 		testLaunchWithCommonProperties(new DefaultResourceLoader().getResource(
 				"classpath:/defaults/test-application-task-common-properties-defaults.properties"));
 	}
@@ -588,9 +585,9 @@ public class TaskControllerTests {
 			verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 			AppDeploymentRequest request = argumentCaptor.getValue();
-			assertThat(request.getDefinition().getProperties().get("spring.cloud.task.name")).isEqualTo("myTask");
-			assertThat(request.getDefinition().getProperties().get("my.test.static.property")).isEqualTo("Test");
-			assertThat(request.getDefinition().getProperties().get("my.test.property.with.placeholder")).isEqualTo("${my.placeholder}");
+			assertThat(request.getDefinition().getProperties()).containsEntry("spring.cloud.task.name", "myTask");
+			assertThat(request.getDefinition().getProperties()).containsEntry("my.test.static.property", "Test");
+			assertThat(request.getDefinition().getProperties()).containsEntry("my.test.property.with.placeholder", "${my.placeholder}");
 
 			mockMvc.perform(delete("/tasks/definitions").accept(MediaType.APPLICATION_JSON)).andDo(print())
 					.andExpect(status().isOk());
@@ -603,7 +600,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testLaunchWithAppProperties() throws Exception {
+	void launchWithAppProperties() throws Exception {
 
 		repository.save(new TaskDefinition("myTask2", "foo2 --common.prop2=wizz"));
 		this.registry.save("foo2", ApplicationType.task,
@@ -617,12 +614,12 @@ public class TaskControllerTests {
 		verify(this.taskLauncher, atLeast(1)).launch(argumentCaptor.capture());
 
 		AppDeploymentRequest request = argumentCaptor.getValue();
-		MatcherAssert.assertThat(request.getDefinition().getProperties(), hasEntry("common.prop2", "wizz"));
+		assertThat(request.getDefinition().getProperties()).containsEntry("common.prop2", "wizz");
 		assertThat(request.getDefinition().getProperties()).containsEntry("spring.cloud.task.name", "myTask2");
 	}
 
 	@Test
-	public void testLaunchWithArguments() throws Exception {
+	void launchWithArguments() throws Exception {
 		repository.save(new TaskDefinition("myTask3", "foo3"));
 		this.registry.save("foo3", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
@@ -643,12 +640,12 @@ public class TaskControllerTests {
 		AppDeploymentRequest request = argumentCaptor.getValue();
 		assertThat(request.getCommandlineArguments()).hasSize(4);
 		// don't assume order in a list
-		MatcherAssert.assertThat(request.getCommandlineArguments(), hasItems("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'"));
+		assertThat(request.getCommandlineArguments()).contains("--foobar=jee", "--foobar2=jee2,foo=bar", "--foobar3='jee3 jee3'");
 		assertThat(request.getDefinition().getProperties()).containsKey("spring.cloud.task.name");
 	}
 
 	@Test
-	public void testDisplaySingleTask() throws Exception {
+	void displaySingleTask() throws Exception {
 		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp --password=password");
 		repository.save(taskDefinition);
 
@@ -689,13 +686,13 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testDisplaySingleTaskNotFound() throws Exception {
+	void displaySingleTaskNotFound() throws Exception {
 		mockMvc.perform(get("/tasks/definitions/myTask").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetAllTasks() throws Exception {
+	void getAllTasks() throws Exception {
 		TaskDefinition taskDefinition = new TaskDefinition("myTask", "timestamp --password=123");
 		repository.save(taskDefinition);
 
@@ -720,7 +717,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testValidate() throws Exception {
+	void validate() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);
@@ -732,7 +729,7 @@ public class TaskControllerTests {
 	}
 
 	@Test
-	public void testTaskLaunchNoManifest() throws Exception {
+	void taskLaunchNoManifest() throws Exception {
 		final TaskExecution taskExecutionComplete = this.taskExecutionCreationService.createTaskExecution("myTask3", null);
 		assertThat(taskExecutionComplete.getExecutionId()).isGreaterThan(0L);
 		taskExecutionComplete.setTaskName("myTask3");

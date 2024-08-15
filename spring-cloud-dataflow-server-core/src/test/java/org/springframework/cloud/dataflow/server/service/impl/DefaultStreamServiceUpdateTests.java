@@ -16,19 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
-import org.yaml.snakeyaml.representer.Representer;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -46,11 +43,13 @@ import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.support.PlatformUtils;
 import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.StreamUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * @author Mark Pollack
@@ -59,7 +58,6 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Gunnar Hillert
  * @author Chris Bono
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
@@ -84,7 +82,7 @@ public class DefaultStreamServiceUpdateTests {
 	private StreamValidationService streamValidationService;
 
 	@Test
-	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
+	void createUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
 				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.1"),
 				null);
@@ -92,7 +90,7 @@ public class DefaultStreamServiceUpdateTests {
 	}
 
 	@Test
-	public void testCreateUpdateRequestsWithoutRegisteredApp() throws IOException {
+	void createUpdateRequestsWithoutRegisteredApp() throws IOException {
 		try {
 			testCreateUpdateRequests();
 			fail("IllegalStateException is expected.");

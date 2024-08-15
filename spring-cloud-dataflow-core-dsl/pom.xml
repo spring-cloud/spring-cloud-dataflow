@@ -13,7 +13,6 @@
 	<packaging>jar</packaging>
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
-		<surefire.includeJUnit5Engines>junit-vintage</surefire.includeJUnit5Engines>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>

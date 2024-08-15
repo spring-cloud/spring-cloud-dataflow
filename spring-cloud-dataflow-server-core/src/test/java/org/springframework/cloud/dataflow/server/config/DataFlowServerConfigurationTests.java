@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.sql.DataSource;
 import java.net.ConnectException;
+
+import javax.sql.DataSource;
 
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,6 @@ import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfi
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.context.annotation.Bean;
@@ -57,19 +57,16 @@ import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Michael Wirth
+ * @author Corneil du Plessis
  */
-public class DataFlowServerConfigurationTests {
+class DataFlowServerConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withAllowBeanDefinitionOverriding(true)
@@ -94,18 +91,18 @@ public class DataFlowServerConfigurationTests {
 	 * Verify that embedded server starts if h2 url is specified with default properties.
 	 */
 	@Test
-	public void testStartEmbeddedH2Server() {
+	void startEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
 						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> {
-					assertTrue(context.containsBean("h2TcpServer"));
+					assertThat(context.containsBean("h2TcpServer")).isTrue();
 					Server server = context.getBean("h2TcpServer", Server.class);
-					assertTrue(server.isRunning(false));
+					assertThat(server.isRunning(false)).isTrue();
 
 					// Verify H2 Service is stopped
 					context.close();
-					assertFalse(server.isRunning(false));
+					assertThat(server.isRunning(false)).isFalse();
 				});
 	}
 
@@ -114,16 +111,16 @@ public class DataFlowServerConfigurationTests {
 	 * spring.dataflow.embedded.database.enabled is set to false.
 	 */
 	@Test
-	public void testDoNotStartEmbeddedH2Server() {
+	void doNotStartEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
 						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=false",
 						"spring.jpa.database=H2"
 				)
 				.run(context -> {
-					assertNotNull(context.getStartupFailure());
-					assertInstanceOf(BeanCreationException.class, context.getStartupFailure());
-					assertInstanceOf(ConnectException.class, NestedExceptionUtils.getRootCause(context.getStartupFailure()));
+					assertThat(context.getStartupFailure()).isNotNull();
+					assertThat(context.getStartupFailure()).isInstanceOf(BeanCreationException.class);
+					assertThat(NestedExceptionUtils.getRootCause(context.getStartupFailure())).isInstanceOf(ConnectException.class);
 				});
 	}
 

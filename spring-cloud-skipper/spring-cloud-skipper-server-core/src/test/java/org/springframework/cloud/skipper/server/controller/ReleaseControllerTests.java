@@ -21,7 +21,7 @@ import java.util.Optional;
 
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletContext;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -63,6 +63,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
  * @author David Turanski
+ * @author Corneil du Plessis
  */
 @ActiveProfiles({"repo-test", "local"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -149,17 +150,17 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 				.contains("Can not delete Package Metadata [log:4.0.0] in Repository [test]. Not all releases of " +
 						"this package have the status DELETED. Active Releases [test2]");
 
-		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(5);
+		assertThat(this.packageMetadataRepository.findByName("log")).hasSize(5);
 
 		// Delete the 'release2' only not the package.
 		mockMvc.perform(delete("/api/release/" + releaseNameTwo))
 				.andDo(print()).andExpect(status().isOk()).andReturn();
-		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(5);
+		assertThat(this.packageMetadataRepository.findByName("log")).hasSize(5);
 
 		// Second attempt to delete 'release1' along with its package 'log'.
 		mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
 				.andDo(print()).andExpect(status().isOk()).andReturn();
-		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(0);
+		assertThat(this.packageMetadataRepository.findByName("log")).hasSize(0);
 
 	}
 
@@ -285,8 +286,8 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(appStatusCopy.getState()).isNotNull();
 		assertThat(appStatusCopy.getState()).isEqualTo(appStatusWithGeneralState.getState());
 
-		assertThat(appStatusWithGeneralState.getInstances().size()).isEqualTo(0);
-		assertThat(appStatusCopy.getInstances().size()).isEqualTo(0);
+		assertThat(appStatusWithGeneralState.getInstances()).hasSize(0);
+		assertThat(appStatusCopy.getInstances()).hasSize(0);
 
 		// Test AppStatus with instances
 		AppStatus appStatusWithInstances = AppStatus.of("id666").generalState(null)
@@ -310,9 +311,9 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		appStatusCopy = DefaultReleaseManager.copyStatus(appStatusWithInstances);
 		appStatusCopy.getInstances().get("instance666").getAttributes().put("key2", "value2");
 
-		assertThat(appStatusWithInstances.getInstances().get("instance666").getAttributes().size()).isEqualTo(1);
-		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().size()).isEqualTo(2);
-		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().get("key2")).isEqualTo("value2");
+		assertThat(appStatusWithInstances.getInstances().get("instance666").getAttributes()).hasSize(1);
+		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes()).hasSize(2);
+		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes()).containsEntry("key2", "value2");
 
 	}
 

@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -42,7 +42,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Donovan Muller
  * @author Ilayaperumal Gopinathan
  * @author David Turanski
+ * @author Corneil du Plessis
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -59,7 +59,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 })
 public class SkipperServerPlatformConfigurationTests {
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 	@ActiveProfiles({"platform-configuration", "local"})
 	public static class AllPlatformsConfigurationTest {
@@ -73,7 +72,6 @@ public class SkipperServerPlatformConfigurationTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class,
 			properties = {"spring.main.allow-bean-definition-overriding=true" })
 	public static class SinglePlatformConfigurationTest {
@@ -87,7 +85,6 @@ public class SkipperServerPlatformConfigurationTests {
 		}
 	}
 
-	@RunWith(SpringRunner.class)
 	@SpringBootTest(classes = TestConfig.class,
 			properties = {"spring.main.allow-bean-definition-overriding=true" })
 	@ActiveProfiles("platform-configuration")

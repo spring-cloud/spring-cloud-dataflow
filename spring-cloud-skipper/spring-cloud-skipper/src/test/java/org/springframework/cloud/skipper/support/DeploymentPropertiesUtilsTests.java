@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link DeploymentPropertiesUtils}.
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
 public class DeploymentPropertiesUtilsTests {
 
@@ -70,17 +71,17 @@ public class DeploymentPropertiesUtilsTests {
 		assertThat(props).containsEntry("app.transform.producer.partitionKeyExpression", "fakeExpression('xxx')");
 
 		props = DeploymentPropertiesUtils.parse("invalidkeyvalue");
-		assertThat(props.size()).isEqualTo(0);
+		assertThat(props).isEmpty();
 
 		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,invalidkeyvalue2");
-		assertThat(props.size()).isEqualTo(0);
+		assertThat(props).isEmpty();
 
 		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,invalidkeyvalue2,foo=bar");
-		assertThat(props.size()).isEqualTo(1);
+		assertThat(props).hasSize(1);
 		assertThat(props).containsEntry("foo", "bar");
 
 		props = DeploymentPropertiesUtils.parse("invalidkeyvalue1,foo=bar,invalidkeyvalue2");
-		assertThat(props.size()).isEqualTo(1);
+		assertThat(props).hasSize(1);
 		assertThat(props).containsEntry("foo", "bar,invalidkeyvalue2");
 
 		props = DeploymentPropertiesUtils.parse("foo.bar1=jee1,jee2,jee3,foo.bar2=jee4,jee5,jee6");

@@ -47,8 +47,9 @@ import static org.mockito.Mockito.verify;
  * Lightweight integration tests for {@link SpringDocAutoConfiguration}.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-public class SpringDocAutoConfigurationTests {
+class SpringDocAutoConfigurationTests {
 
 	// The base web context runner does the following:
 	//   - loads default props via config data additional location

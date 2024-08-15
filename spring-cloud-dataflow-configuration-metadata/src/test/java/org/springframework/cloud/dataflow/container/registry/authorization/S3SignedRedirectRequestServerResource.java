@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.container.registry.authorization;
 
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.rules.ExternalResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,43 +30,41 @@ import org.springframework.test.util.TestSocketUtils;
 
 /**
  * @author Adam J. Weigold
+ * @author Corneil du Plessis
  */
-public class S3SignedRedirectRequestServerResource extends ExternalResource {
+public class S3SignedRedirectRequestServerResource implements BeforeEachCallback, AfterEachCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(S3SignedRedirectRequestServerResource.class);
+	private static final Logger logger = LoggerFactory.getLogger(S3SignedRedirectRequestServerResource.class);
 
-    private int s3SignedRedirectServerPort;
+	private int s3SignedRedirectServerPort;
 
-    private ConfigurableApplicationContext application;
+	private ConfigurableApplicationContext application;
 
-    public S3SignedRedirectRequestServerResource() {
-        super();
-    }
 
-    @Override
-    protected void before() throws Throwable {
+	@Override
+	public void beforeEach(ExtensionContext context) throws Exception {
 
-        this.s3SignedRedirectServerPort = TestSocketUtils.findAvailableTcpPort();
+		this.s3SignedRedirectServerPort = TestSocketUtils.findAvailableTcpPort();
 
-        logger.info("Setting S3 Signed Redirect Server port to " + this.s3SignedRedirectServerPort);
+		logger.info("Setting S3 Signed Redirect Server port to " + this.s3SignedRedirectServerPort);
 
-        // Docker requires HTTPS.  Generated ssl keypair as follows:
-        // `keytool -genkeypair -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore s3redirectrequestserver.p12 -validity 1000000`
-        this.application = new SpringApplicationBuilder(S3SignedRedirectRequestServerApplication.class).build()
-                .run("--server.port=" + s3SignedRedirectServerPort,
-                        "--server.ssl.key-store=classpath:s3redirectrequestserver.p12",
-                        "--server.ssl.key-store-password=foobar");
-        logger.info("S3 Signed Redirect Server Server is UP!");
-    }
+		// Docker requires HTTPS.  Generated ssl keypair as follows:
+		// `keytool -genkeypair -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore s3redirectrequestserver.p12 -validity 1000000`
+		this.application = new SpringApplicationBuilder(S3SignedRedirectRequestServerApplication.class).build()
+			.run("--server.port=" + s3SignedRedirectServerPort,
+				"--server.ssl.key-store=classpath:s3redirectrequestserver.p12",
+				"--server.ssl.key-store-password=foobar");
+		logger.info("S3 Signed Redirect Server Server is UP!");
+	}
 
-    @Override
-    protected void after() {
-        application.stop();
-    }
+	@Override
+	public void afterEach(ExtensionContext context) throws Exception {
+		application.stop();
+	}
 
-    public int getS3SignedRedirectServerPort() {
-        return s3SignedRedirectServerPort;
-    }
+	public int getS3SignedRedirectServerPort() {
+		return s3SignedRedirectServerPort;
+	}
 
 
 }

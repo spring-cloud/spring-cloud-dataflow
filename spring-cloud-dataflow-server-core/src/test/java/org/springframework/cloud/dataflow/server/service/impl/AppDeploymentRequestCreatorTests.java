@@ -16,17 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
+
 import java.util.Collections;
 import java.util.HashMap;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -35,28 +35,24 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Eric Bottard
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
-public class AppDeploymentRequestCreatorTests {
+@ExtendWith(SpringExtension.class)
+class AppDeploymentRequestCreatorTests {
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
 
-	@Before
-	public void setupMock() {
+	@BeforeEach
+	void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
@@ -64,7 +60,7 @@ public class AppDeploymentRequestCreatorTests {
 	}
 
 	@Test
-	public void testRequalifyShortVisibleProperty() {
+	void requalifyShortVisibleProperty() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("timezone", "GMT+2").build("streamname");
@@ -78,7 +74,7 @@ public class AppDeploymentRequestCreatorTests {
 	}
 
 	@Test
-	public void testSameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
+	void sameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("time.format", "hh")
@@ -93,23 +89,22 @@ public class AppDeploymentRequestCreatorTests {
 	}
 
 	@Test
-	public void testSameNamePropertiesKOWhenShorthand() {
+	void sameNamePropertiesKOWhenShorthand() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("format", "hh").build("streamname");
 
 		Resource app = new ClassPathResource("/apps/included-source");
 
-		thrown.expect(IllegalArgumentException.class);
-		thrown.expectMessage("Ambiguous short form property 'format'");
-		thrown.expectMessage("date.format");
-		thrown.expectMessage("time.format");
-
-		this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
+		}).withMessageContaining("Ambiguous short form property 'format'")
+				.withMessageContaining("date.format")
+				.withMessageContaining("time.format");
 	}
 
 	@Test
-	public void testShorthandsAcceptRelaxedVariations() {
+	void shorthandsAcceptRelaxedVariations() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("someLongProperty", "yy") // Use camelCase here

@@ -17,8 +17,7 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import jakarta.servlet.RequestDispatcher;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.rest.Version;
 import org.springframework.restdocs.payload.JsonFieldType;

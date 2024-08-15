@@ -18,10 +18,11 @@ package org.springframework.cloud.skipper.support;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
+//@checkstyle:off
 import static org.assertj.core.api.Assertions.assertThat;
-
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+//@checkstyle:on
 public class DurationUtilsTests {
 
 	@Test
@@ -98,9 +99,11 @@ public class DurationUtilsTests {
 		assertThat(convert("-10", ChronoUnit.SECONDS)).isEqualTo(Duration.ofSeconds(-10));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void convertWhenBadFormatShouldThrowException() {
-		convert("10foo");
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			convert("10foo");
+		});
 	}
 
 	@Test

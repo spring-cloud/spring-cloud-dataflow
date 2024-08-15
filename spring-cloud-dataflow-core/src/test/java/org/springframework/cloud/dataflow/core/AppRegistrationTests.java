@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.core;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,8 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link AppRegistration}.
  *
  * @author Eric Bottard
+ * @author Corneil du Plessis
  */
-public class AppRegistrationTests {
+class AppRegistrationTests {
 
 	// @Test
 	// public void testResource() {
@@ -54,7 +55,7 @@ public class AppRegistrationTests {
 	// }
 
 	@Test
-	public void testCompareTo() {
+	void compareTo() {
 		AppRegistration registration1 = new AppRegistration("foo", ApplicationType.task, URI.create("file:///foobar"));
 		AppRegistration registration2 = new AppRegistration("foo2", ApplicationType.task, URI.create("file:///foobar2"));
 		assertThat(registration1).isNotEqualByComparingTo(registration2);
@@ -65,7 +66,7 @@ public class AppRegistrationTests {
 	}
 
 	@Test
-	public void testToString() {
+	void testToString() {
 		AppRegistration registration1 = new AppRegistration("foo", ApplicationType.task, URI.create("file:///foobar"),
 				URI.create("file:///foobar-metadata"));
 		assertThat(registration1.toString()).contains("foo").contains("task").contains("file:///foobar")

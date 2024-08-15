@@ -17,8 +17,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -44,12 +43,12 @@ import static org.mockito.Mockito.when;
 /**
  * @author Mark Pollack
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class DefaultStreamServiceUpgradeStreamTests {
+class DefaultStreamServiceUpgradeStreamTests {
 
 	@MockBean
 	private StreamDefinitionRepository streamDefinitionRepository;
@@ -65,7 +64,7 @@ public class DefaultStreamServiceUpgradeStreamTests {
 	private StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
 
 	@Test
-	public void verifyUpgradeStream() {
+	void verifyUpgradeStream() {
 		if (!PlatformUtils.isWindows()) {
 			when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 

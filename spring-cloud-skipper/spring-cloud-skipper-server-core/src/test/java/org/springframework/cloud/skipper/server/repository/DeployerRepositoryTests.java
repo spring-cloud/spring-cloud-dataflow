@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.repository;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
@@ -33,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Pollack
  * @author David Turanski
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("local")
 public class DeployerRepositoryTests extends AbstractIntegrationTest {

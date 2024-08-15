@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import javax.sql.DataSource;
 
 import com.zaxxer.hikari.HikariDataSource;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
@@ -132,7 +133,7 @@ class JobExecutionTestUtils
 	 * <p>To run, adjust the datasource properties accordingly and then execute the test manually in your editor.
 	 */
 	// @Disabled
-	static class JobExecutionTestDataGenerator {
+	@Nested class JobExecutionTestDataGenerator {
 
 		@Test
 		void generateJobExecutions() throws SQLException {

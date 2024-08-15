@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.zeroturnaround.zip.ZipUtil;
@@ -59,7 +59,7 @@ public class PackageWriterTests {
 
 		File zipFile = packageWriter.write(pkgtoWrite, outputDirectory);
 		assertThat(zipFile).exists();
-		assertThat(zipFile.getName()).isEqualTo("myapp-1.0.0.zip");
+		assertThat(zipFile).hasName("myapp-1.0.0.zip");
 		final AtomicInteger processedEntries = new AtomicInteger(3);
 		ZipUtil.iterate(zipFile, (inputStream, zipEntry) -> {
 			if (zipEntry.getName().equals("myapp-1.0.0/package.yml")) {

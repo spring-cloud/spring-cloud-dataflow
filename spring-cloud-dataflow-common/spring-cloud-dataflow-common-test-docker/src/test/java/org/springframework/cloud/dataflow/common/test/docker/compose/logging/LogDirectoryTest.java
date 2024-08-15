@@ -15,8 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.logging;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +30,7 @@ public class LogDirectoryTest {
     @Test
     public void gradleDockerLogsDirectory_should_use_class_simple_name() {
         String directory = LogDirectory.gradleDockerLogsDirectory(SomeTestClass.class);
-        assertThat(directory, is("build/dockerLogs/SomeTestClass"));
+		assertThat(directory).isEqualTo("build/dockerLogs/SomeTestClass");
     }
 
 //    @Test

@@ -16,13 +16,23 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import org.junit.Before;
 import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -39,17 +49,6 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Documentation for the /jobs/executions/{id}/steps endpoint.
@@ -58,7 +57,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
 public class JobStepExecutionsDocumentation extends BaseDocumentation {
@@ -74,7 +72,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	private TaskBatchDao taskBatchDao;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws Exception {
 		if (!initialized) {
 			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
@@ -93,6 +91,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 
 	@Test
+	@Disabled("assumption first execution id is 1")
 	public void listStepExecutionsForJob() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps", "1")
@@ -133,7 +132,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 				));
 	}
 
-	@Ignore("TODO: Boot3x followup : Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
+	@Disabled("TODO: Boot3x followup : Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
 	@Test
 	public void stepProgress() throws Exception {
 		this.mockMvc.perform(

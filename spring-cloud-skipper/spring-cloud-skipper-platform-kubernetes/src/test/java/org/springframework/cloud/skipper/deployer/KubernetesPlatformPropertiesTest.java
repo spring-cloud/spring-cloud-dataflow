@@ -18,8 +18,7 @@ package org.springframework.cloud.skipper.deployer;
 import java.util.Map;
 
 import io.fabric8.kubernetes.client.KubernetesClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -31,15 +30,14 @@ import org.springframework.cloud.deployer.spi.kubernetes.KubernetesDeployerPrope
 import org.springframework.cloud.skipper.deployer.kubernetes.KubernetesPlatformProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Donovan Muller
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = KubernetesPlatformPropertiesTest.TestConfig.class,
 		properties = { "spring.cloud.kubernetes.client.namespace=default" })
 @ActiveProfiles("platform-properties")
@@ -56,8 +54,8 @@ public class KubernetesPlatformPropertiesTest {
 		assertThat(k8sAccounts).hasSize(2);
 		assertThat(k8sAccounts).containsKeys("dev", "qa");
 		assertThat(devK8sClient.getNamespace()).isEqualTo("dev1");
-		assertThat(devK8sClient.getMasterUrl().toString()).isEqualTo("https://192.168.0.1:8443");
-		assertThat(qaK8sClient.getMasterUrl().toString()).isEqualTo("https://192.168.0.2:8443");
+		assertThat(devK8sClient.getMasterUrl()).hasToString("https://192.168.0.1:8443");
+		assertThat(qaK8sClient.getMasterUrl()).hasToString("https://192.168.0.2:8443");
 		assertThat(qaK8sClient.getNamespace()).isEqualTo("qaNamespace");
 		assertThat(k8sAccounts.get("dev").getImagePullPolicy()).isEqualTo(ImagePullPolicy.Always);
 		assertThat(k8sAccounts.get("dev").getEntryPointStyle()).isEqualTo(EntryPointStyle.exec);

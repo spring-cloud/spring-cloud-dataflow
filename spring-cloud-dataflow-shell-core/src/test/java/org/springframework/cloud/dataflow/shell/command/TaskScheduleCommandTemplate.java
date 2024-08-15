@@ -49,6 +49,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Daniel Serleg
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public class TaskScheduleCommandTemplate {
 
@@ -86,7 +87,7 @@ public class TaskScheduleCommandTemplate {
 		List<String> expectedArgs = args != null ? Arrays.asList(args) : Collections.emptyList();
 
 		verify(schedule).schedule(name, definition, expectedProperties, expectedArgs, null);
-		assertThat(result.toString()).isEqualTo(String.format("Created schedule '%s'", name));
+		assertThat(result).hasToString(String.format("Created schedule '%s'", name));
 	}
 
 	public void createWithPropertiesFile(String name, String definition, String expression, String propertiesFile, String args) throws IOException {
@@ -101,7 +102,7 @@ public class TaskScheduleCommandTemplate {
 		List<String> expectedArgs = args != null ? Arrays.asList(args) : Collections.emptyList();
 
 		verify(schedule).schedule(name, definition, expectedProperties, expectedArgs, null);
-		assertThat(result.toString()).isEqualTo(String.format("Created schedule '%s'", name));
+		assertThat(result).hasToString(String.format("Created schedule '%s'", name));
 	}
 
 	public void createWithPropertiesAndPropertiesFile(String name, String definition, String expression, String properties, String propertiesFile, String args) {

@@ -68,16 +68,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Unit tests for the {@link TaskExecutionController#cleanupAll async cleanup} API.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @SpringBootTest(
 		properties = "spring.cloud.dataflow.async.enabled=true",
-		classes = { JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
+		classes = {JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @EnableDataFlowServer
-public class TaskExecutionControllerCleanupAsyncTests {
+class TaskExecutionControllerCleanupAsyncTests {
 
 	@Autowired
 	private TaskExecutionDao taskExecutionDao;
@@ -106,7 +107,7 @@ public class TaskExecutionControllerCleanupAsyncTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);

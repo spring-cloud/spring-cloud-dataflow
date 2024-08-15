@@ -54,7 +54,7 @@ import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.lang.Nullable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(SpringExtension.class)
@@ -78,12 +78,12 @@ import static org.mockito.Mockito.mock;
 		"org.springframework.cloud.dataflow.audit.repository"
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
-public class TaskRegistrationTests {
+class TaskRegistrationTests {
 	@Autowired
 	AppRegistryService appRegistryService;
 
 	@Test
-	public void testRegistration() throws URISyntaxException {
+	void registration() throws URISyntaxException {
 		// given
 		appRegistryService.save("timestamp", ApplicationType.task, "2.0.2", new URI("maven://io.spring:timestamp-task:2.0.2"), null);
 		appRegistryService.save("timestamp", ApplicationType.task, "3.0.0", new URI("maven://io.spring:timestamp-task:3.0.0"), null);

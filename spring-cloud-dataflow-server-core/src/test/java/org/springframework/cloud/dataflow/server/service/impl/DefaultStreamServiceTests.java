@@ -26,12 +26,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.json.JSONObject;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
@@ -58,11 +55,12 @@ import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Manifest;
 import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.core.env.PropertyResolver;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -79,12 +77,10 @@ import static org.mockito.Mockito.when;
  * @author Christian Tzolov
  * @author Gunnar Hillert
  * @author Chris Schaefer
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 public class DefaultStreamServiceTests {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private final StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 
@@ -104,8 +100,8 @@ public class DefaultStreamServiceTests {
 
 	private DefaultStreamValidationService streamValidationService;
 
-	@Before
-	public void setupMock() {
+	@BeforeEach
+	void setupMock() {
 		this.streamDefinitionRepository = mock(StreamDefinitionRepository.class);
 		this.skipperStreamDeployer = mock(SkipperStreamDeployer.class);
 		this.appRegistryService = mock(AppRegistryService.class);
@@ -122,7 +118,7 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
-	public void createStream() {
+	void createStream() {
 		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
 		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
 
@@ -144,30 +140,29 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
-	public void createStreamWithMissingApps() {
-		when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(false);
-		when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(false);
-
-		thrown.expect(InvalidStreamDefinitionException.class);
-		thrown.expectMessage("Application name 'time' with type 'source' does not exist in the app registry.\n" +
+	void createStreamWithMissingApps() {
+		assertThatThrownBy(() -> {
+			when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(false);
+			when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(false);
+			this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false, null);
+		}).isInstanceOf(InvalidStreamDefinitionException.class)
+			.hasMessageContaining("Application name 'time' with type 'source' does not exist in the app registry.\n" +
 				"Application name 'log' with type 'sink' does not exist in the app registry.");
-
-		this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false, null);
 	}
 
 	@Test
-	public void createStreamInvalidDsl() {
-		when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(true);
-		when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(true);
+	void createStreamInvalidDsl() {
+		assertThatThrownBy(() -> {
+			when(this.appRegistryService.appExist("time", ApplicationType.source)).thenReturn(true);
+			when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(true);
 
-		thrown.expect(InvalidStreamDefinitionException.class);
-		thrown.expectMessage("Application name 'koza' with type 'app' does not exist in the app registry.");
-
-		this.defaultStreamService.createStream("testStream", "koza", "demo stream", false, null);
+			this.defaultStreamService.createStream("testStream", "koza", "demo stream", false, null);
+		}).isInstanceOf(InvalidStreamDefinitionException.class)
+			.hasMessageContaining("Application name 'koza' with type 'app' does not exist in the app registry.");
 	}
 
 	@Test
-	public void verifyUndeployStream() {
+	void verifyUndeployStream() {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 
 		this.defaultStreamService.undeployStream(streamDefinition2.getName());
@@ -179,7 +174,7 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
-	public void verifyRollbackStream() throws Exception {
+	void verifyRollbackStream() throws Exception {
 		StreamDefinition streamDefinition2 = new StreamDefinition("test2", "time | log");
 		verifyNoMoreInteractions(this.skipperStreamDeployer);
 		Release release = new Release();
@@ -195,7 +190,7 @@ public class DefaultStreamServiceTests {
 	}
 
 	@Test
-	public void verifyStreamInfo() {
+	void verifyStreamInfo() {
 		StreamDefinition streamDefinition1 = new StreamDefinition("test1", "time | log");
 		Map<String, String> deploymentProperties1 = new HashMap<>();
 		deploymentProperties1.put("test1", "value1");
@@ -208,13 +203,13 @@ public class DefaultStreamServiceTests {
 				new JSONObject(streamDeploymentProperties).toString());
 		when(this.skipperStreamDeployer.getStreamInfo(streamDeployment1.getStreamName())).thenReturn(streamDeployment1);
 		StreamDeployment streamDeployment = this.defaultStreamService.info("test1");
-		Assert.assertEquals(streamDeployment.getStreamName(), streamDefinition1.getName());
-		Assert.assertEquals("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}",
-				streamDeployment.getDeploymentProperties());
+		assertThat(streamDefinition1.getName()).isEqualTo(streamDeployment.getStreamName());
+		assertThat(streamDeployment.getDeploymentProperties())
+			.isEqualTo("{\"log\":{\"test2\":\"value2\"},\"time\":{\"test1\":\"value1\"}}");
 	}
 
 	@Test
-	public void verifyStreamState() {
+	void verifyStreamState() {
 		StreamDefinition streamDefinition = new StreamDefinition("myStream", "time|log");
 		Map<StreamDefinition, DeploymentState> streamSates = new HashMap<>();
 		streamSates.put(streamDefinition, DeploymentState.deployed);
@@ -225,13 +220,13 @@ public class DefaultStreamServiceTests {
 
 		verify(this.skipperStreamDeployer, times(1)).streamsStates(any());
 
-		Assert.assertNotNull(resultStates);
-		Assert.assertEquals(1, resultStates.size());
-		Assert.assertEquals(DeploymentState.deployed, resultStates.get(streamDefinition));
+		assertThat(resultStates).isNotNull();
+		assertThat(resultStates).hasSize(1);
+		assertThat(resultStates).containsEntry(streamDefinition, DeploymentState.deployed);
 	}
 
 	@Test
-	public void verifyStreamHistory() {
+	void verifyStreamHistory() {
 		Release release = new Release();
 		release.setName("RELEASE666");
 		when(this.skipperStreamDeployer.history(eq("myStream"))).thenReturn(Collections.singletonList(release));
@@ -240,57 +235,57 @@ public class DefaultStreamServiceTests {
 
 		verify(this.skipperStreamDeployer, times(1)).history(eq("myStream"));
 
-		Assert.assertNotNull(releases);
-		Assert.assertEquals(1, releases.size());
-		Assert.assertEquals("RELEASE666", releases.iterator().next().getName());
+		assertThat(releases).isNotNull();
+		assertThat(releases).hasSize(1);
+		assertThat(releases.iterator().next().getName()).isEqualTo("RELEASE666");
 	}
 
 	@Test
-	public void verifyStreamPlatformList() {
+	void verifyStreamPlatformList() {
 		Deployer deployer = new Deployer("testDeployer", "testType", null, mock(ActuatorOperations.class));
 		when(this.skipperStreamDeployer.platformList()).thenReturn(Collections.singletonList(deployer));
 		Collection<Deployer> deployers = this.defaultStreamService.platformList();
 
 		verify(this.skipperStreamDeployer, times(1)).platformList();
 
-		Assert.assertNotNull(deployers);
-		Assert.assertEquals(1, deployers.size());
-		Assert.assertEquals("testDeployer", deployers.iterator().next().getName());
+		assertThat(deployers).isNotNull();
+		assertThat(deployers).hasSize(1);
+		assertThat(deployers.iterator().next().getName()).isEqualTo("testDeployer");
 	}
 
 	@Test
-	public void verifyStreamManifest() {
+	void verifyStreamManifest() {
 		when(this.skipperStreamDeployer.manifest(eq("myManifest"), eq(666))).thenReturn("MANIFEST666");
 
 		String manifest = this.defaultStreamService.manifest("myManifest", 666);
 
 		verify(this.skipperStreamDeployer, times(1)).manifest(anyString(), anyInt());
-		Assert.assertEquals("MANIFEST666", manifest);
+		assertThat(manifest).isEqualTo("MANIFEST666");
 	}
 
 	@Test
-	public void testStreamDeployWithDefaultPackageVersion() {
+	void streamDeployWithDefaultPackageVersion() {
 		Map<String, String> deploymentProperties = new HashMap<>();
 
 		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
 
-		Assert.assertEquals(DefaultStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION,
-				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
+		assertThat(argumentCaptor.getValue().getStreamDeployerProperties())
+			.containsEntry(SkipperStream.SKIPPER_PACKAGE_VERSION, DefaultStreamService.DEFAULT_SKIPPER_PACKAGE_VERSION);
 	}
 
 	@Test
-	public void testStreamDeployWithPreDefinedPackageVersion() {
+	void streamDeployWithPreDefinedPackageVersion() {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "2.0.0");
 
 		ArgumentCaptor<StreamDeploymentRequest> argumentCaptor = this.testStreamDeploy(deploymentProperties);
 
-		Assert.assertEquals("2.0.0",
-				argumentCaptor.getValue().getStreamDeployerProperties().get(SkipperStream.SKIPPER_PACKAGE_VERSION));
+		assertThat(argumentCaptor.getValue().getStreamDeployerProperties())
+			.containsEntry(SkipperStream.SKIPPER_PACKAGE_VERSION, "2.0.0");
 	}
 
 	@Test
-	public void testInvalidStreamNameOnKubernetes() {
+	void invalidStreamNameOnKubernetes() {
 		when(this.streamValidationService.isRegistered("time", ApplicationType.source)).thenReturn(true);
 		when(this.streamValidationService.isRegistered("log", ApplicationType.sink)).thenReturn(true);
 		Deployer k8sDeployer = new Deployer("k8s1", "kubernetes", null, mock(ActuatorOperations.class));
@@ -306,10 +301,12 @@ public class DefaultStreamServiceTests {
 				this.defaultStreamService.deployStream(streamName, k8sProperties);
 				fail("Stream deployment should fail as the stream name is invalid");
 			} catch (Exception e) {
-				Assert.assertTrue(e instanceof InvalidStreamDefinitionException);
-				Assert.assertEquals(e.getMessage(), "Stream name "+ streamName +" is invalid. Stream name must consist of alphanumeric characters or '-', " +
+				assertThat(e instanceof InvalidStreamDefinitionException).isTrue();
+				assertThat("Stream name " + streamName
+						+ " is invalid. Stream name must consist of alphanumeric characters or '-', " +
 						"start with an alphabetic character, and end with an alphanumeric character (e.g. 'my-name', " +
-						"or 'abc-123')");
+						"or 'abc-123')")
+					.isEqualTo(e.getMessage());
 			}
 		}
 		for (String streamName : streamNames) {

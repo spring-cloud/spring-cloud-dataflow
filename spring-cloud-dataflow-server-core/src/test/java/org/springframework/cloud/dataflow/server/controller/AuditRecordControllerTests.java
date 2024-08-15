@@ -15,16 +15,29 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.time.Duration;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 
 import org.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,36 +61,21 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Verifies the functionality of the {@link AuditRecordController}.
  *
  * @author Gunnar Hillert
  * @author Daniel Serleg
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class AuditRecordControllerTests {
+class AuditRecordControllerTests {
 
 	private static final int INITIAL_AUDIT_CREATE_COUNT = 6;
 
@@ -109,8 +107,8 @@ public class AuditRecordControllerTests {
 
 	private ZonedDateTime endDate;
 
-	@Before
-	public void setupMocks() throws Exception {
+	@BeforeEach
+	void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 
@@ -146,14 +144,14 @@ public class AuditRecordControllerTests {
 				.andExpect(status().isOk());
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		appRegistrationRepository.deleteAll();
 		streamDefinitionRepository.deleteAll();
 		auditRecordRepository.deleteAll();
-		assertEquals(0, appRegistrationRepository.count());
-		assertEquals(0, streamDefinitionRepository.count());
-		assertEquals(0, auditRecordRepository.count());
+		assertThat(appRegistrationRepository.count()).isEqualTo(0);
+		assertThat(streamDefinitionRepository.count()).isEqualTo(0);
+		assertThat(auditRecordRepository.count()).isEqualTo(0);
 	}
 
 	/**
@@ -164,14 +162,14 @@ public class AuditRecordControllerTests {
 	 * {@link StreamService#undeployStream(String)} too.
 	 */
 	@Test
-	public void testVerifyNumberOfAuditRecords() {
-		assertEquals(4, appRegistrationRepository.count());
-		assertEquals(2, streamDefinitionRepository.count());
-		assertEquals(9, auditRecordRepository.count());
+	void verifyNumberOfAuditRecords() {
+		assertThat(appRegistrationRepository.count()).isEqualTo(4);
+		assertThat(streamDefinitionRepository.count()).isEqualTo(2);
+		assertThat(auditRecordRepository.count()).isEqualTo(9);
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecords() throws Exception {
+	void retrieveAllAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -180,7 +178,7 @@ public class AuditRecordControllerTests {
 
 
 	@Test
-	public void testRetrieveAllAuditRecordsOrderByCorrelationIdAsc() throws Exception {
+	void retrieveAllAuditRecordsOrderByCorrelationIdAsc() throws Exception {
 		mockMvc.perform(get("/audit-records")
 				.param("sort", "correlationId,asc")
 				.param("sort", "id,asc")
@@ -194,7 +192,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecordsOrderByCorrelationIdDesc() throws Exception {
+	void retrieveAllAuditRecordsOrderByCorrelationIdDesc() throws Exception {
 		mockMvc.perform(get("/audit-records")
 				.param("sort", "correlationId,desc")
 				.param("sort", "id,desc")
@@ -208,7 +206,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecordsWithActionUndeploy() throws Exception {
+	void retrieveAllAuditRecordsWithActionUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=UNDEPLOY").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -216,7 +214,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecordsWithOperationStream() throws Exception {
+	void retrieveAllAuditRecordsWithOperationStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -224,7 +222,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecordsWithOperationTask() throws Exception {
+	void retrieveAllAuditRecordsWithOperationTask() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -232,7 +230,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecordsWithOperationTaskAndStream() throws Exception {
+	void retrieveAllAuditRecordsWithOperationTaskAndStream() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=TASK,STREAM").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -240,7 +238,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAllAuditRecordsWithActionDeleteAndUndeploy() throws Exception {
+	void retrieveAllAuditRecordsWithActionDeleteAndUndeploy() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -248,7 +246,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAppRelatedAuditRecords() throws Exception {
+	void retrieveAppRelatedAuditRecords() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -256,7 +254,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsWithActionCreate() throws Exception {
+	void retrieveAuditRecordsWithActionCreate() throws Exception {
 		mockMvc.perform(get("/audit-records?actions=CREATE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -264,7 +262,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditActionTypes() throws Exception {
+	void retrieveAuditActionTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-action-types").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -306,7 +304,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditOperationTypes() throws Exception {
+	void retrieveAuditOperationTypes() throws Exception {
 		mockMvc.perform(get("/audit-records/audit-operation-types").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -334,7 +332,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveRegisteredAppsAuditData() throws Exception {
+	void retrieveRegisteredAppsAuditData() throws Exception {
 		mockMvc.perform(
 				get("/audit-records?operations=APP_REGISTRATION&actions=CREATE").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -346,7 +344,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveDeletedAppsAuditData() throws Exception {
+	void retrieveDeletedAppsAuditData() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -365,7 +363,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsFromNullToGivenDate() throws Exception {
+	void retrieveAuditRecordsFromNullToGivenDate() throws Exception {
 		ZonedDateTime time = betweenDate.withZoneSameInstant(ZoneOffset.UTC);
 		String toDate = time.toString();
 
@@ -384,7 +382,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsFromGivenDateToNull() throws Exception {
+	void retrieveAuditRecordsFromGivenDateToNull() throws Exception {
 		ZonedDateTime betweenTime = endDate.withZoneSameInstant(ZoneOffset.UTC);
 		String fromDate = betweenTime.toString();
 
@@ -403,7 +401,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsBetweenTwoGivenDates() throws Exception {
+	void retrieveAuditRecordsBetweenTwoGivenDates() throws Exception {
 		ZonedDateTime betweenTime = betweenDate.withZoneSameInstant(ZoneOffset.UTC);
 		String fromDate = betweenTime.toString();
 
@@ -422,7 +420,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsBetweenTwoGivenDatesWithFromDateAfterToDate() throws Exception {
+	void retrieveAuditRecordsBetweenTwoGivenDatesWithFromDateAfterToDate() throws Exception {
 		final String toDate = betweenDate.withZoneSameInstant(ZoneOffset.UTC).toString();
 		final String fromDate = endDate.withZoneSameInstant(ZoneOffset.UTC).toString();
 
@@ -435,7 +433,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordsBetweenTwoNullDates() throws Exception {
+	void retrieveAuditRecordsBetweenTwoNullDates() throws Exception {
 		mockMvc.perform(get("/audit-records").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -446,7 +444,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveAuditRecordById() throws Exception {
+	void retrieveAuditRecordById() throws Exception {
 		mockMvc.perform(get("/audit-records/13").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -456,7 +454,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveUpdatedAppsAuditData() throws Exception {
+	void retrieveUpdatedAppsAuditData() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=APP_REGISTRATION").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -476,15 +474,15 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveStreamAndTaskRecords() throws Exception {
+	void retrieveStreamAndTaskRecords() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM,TASK").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.auditRecordResourceList.*", hasSize(5)));
 	}
 
-    @Test
-	public void testRetrievePagedAuditDataNegative() throws Exception {
+	@Test
+	void retrievePagedAuditDataNegative() throws Exception {
 		mockMvc.perform(get("/audit-records?page=-5&size=2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -492,7 +490,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrievePagedAuditDataInRange() throws Exception {
+	void retrievePagedAuditDataInRange() throws Exception {
 		mockMvc.perform(get("/audit-records?page=0&size=5").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -501,7 +499,7 @@ public class AuditRecordControllerTests {
 
 
 	@Test
-	public void testRetrievePagedAuditDataFromPage3() throws Exception {
+	void retrievePagedAuditDataFromPage3() throws Exception {
 		mockMvc.perform(get("/audit-records?page=2&size=4").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -509,7 +507,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveDeletedAndUndeployedStreamsAndTasks() throws Exception {
+	void retrieveDeletedAndUndeployedStreamsAndTasks() throws Exception {
 		mockMvc.perform(get("/audit-records?operations=STREAM,TASK&actions=DELETE,UNDEPLOY").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -528,7 +526,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrieveDataByOperationsAndActionsAndDate() throws Exception {
+	void retrieveDataByOperationsAndActionsAndDate() throws Exception {
 		ZonedDateTime startTime = startDate.withZoneSameInstant(ZoneOffset.UTC);
 		String fromDate = startTime.toString();
 
@@ -553,7 +551,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrievePagedAuditDataOverlappingRightBound() throws Exception {
+	void retrievePagedAuditDataOverlappingRightBound() throws Exception {
 		mockMvc.perform(get("/audit-records?page=0&size=20").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -561,7 +559,7 @@ public class AuditRecordControllerTests {
 	}
 
 	@Test
-	public void testRetrievePagedAuditDataOutOfRange() throws Exception {
+	void retrievePagedAuditDataOutOfRange() throws Exception {
 		mockMvc.perform(get("/audit-records?page=55&size=2").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())

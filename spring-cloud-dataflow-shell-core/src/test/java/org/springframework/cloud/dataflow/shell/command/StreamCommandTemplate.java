@@ -27,7 +27,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Helper methods for stream commands to execute in the shell.
@@ -40,6 +40,7 @@ import static org.junit.Assert.fail;
  * @author Ilayaperumal Gopinathan
  * @author Glenn Renfro
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 public class StreamCommandTemplate {
 

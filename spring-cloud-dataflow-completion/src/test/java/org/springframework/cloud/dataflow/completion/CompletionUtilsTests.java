@@ -16,19 +16,22 @@
 
 package org.springframework.cloud.dataflow.completion;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.LinkedList;
+
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
+import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-
-import static org.hamcrest.core.Is.is;
-
 /**
  * Unit tests for CompletionUtils.
  *
  * @author Eric Bottard
+ * @author Corneil du Plessis
  */
 public class CompletionUtilsTests {
 
@@ -37,16 +40,18 @@ public class CompletionUtilsTests {
 	@Test
 	public void testLabelQualification() {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "http | filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
-				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("filter2: filter"));
+		LinkedList<StreamAppDefinition> appDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		assertThat(CompletionUtils.maybeQualifyWithLabel("filter", appDefinitions))
+			.isEqualTo("filter2: filter");
 
 		streamDefinition = new StreamDefinition("foo", "http | filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("transform",
-				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("transform"));
+		appDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		assertThat(CompletionUtils.maybeQualifyWithLabel("transform", appDefinitions))
+			.isEqualTo("transform");
 
 		streamDefinition = new StreamDefinition("foo", "http | filter | filter2: filter");
-		Assert.assertThat(CompletionUtils.maybeQualifyWithLabel("filter",
-				this.streamDefinitionService.getAppDefinitions(streamDefinition)), is("filter3: filter"));
+		appDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
+		assertThat(CompletionUtils.maybeQualifyWithLabel("filter", appDefinitions)).isEqualTo("filter3: filter");
 	}
 
 }

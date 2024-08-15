@@ -16,9 +16,9 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
+import static org.mockito.Mockito.mock;
+
 import org.cloudfoundry.operations.CloudFoundryOperations;
-import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
@@ -29,10 +29,10 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
-import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
@@ -42,14 +42,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.mockito.Mockito.mock;
+import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		classes = AbstractSchedulerPerPlatformTest.AutoConfigurationApplication.class)
 @DirtiesContext

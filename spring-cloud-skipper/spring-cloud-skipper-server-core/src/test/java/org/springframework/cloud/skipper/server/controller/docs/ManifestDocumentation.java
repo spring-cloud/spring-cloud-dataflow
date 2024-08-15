@@ -18,7 +18,7 @@ package org.springframework.cloud.skipper.server.controller.docs;
 
 import java.nio.charset.Charset;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.http.MediaType;
@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class ManifestDocumentation extends BaseDocumentation {
 

@@ -19,7 +19,7 @@ package org.springframework.cloud.skipper.server.controller.docs;
 import java.nio.charset.Charset;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.domain.LogInfo;
 import org.springframework.cloud.skipper.domain.Release;
@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class LogsDocumentation extends BaseDocumentation {
 

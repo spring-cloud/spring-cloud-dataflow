@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.repository;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.domain.PackageMetadata;
@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 
@@ -106,7 +107,7 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 				this.repositoryRepository.findByName(repoName3).getId(), "1.0.1");
 		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository
 				.findByNameAndVersionOrderByApiVersionDesc("package1", "1.0.0");
-		assertThat(packageMetadataList.size()).isEqualTo(3);
+		assertThat(packageMetadataList).hasSize(3);
 		assertThat(packageMetadataList.get(0).getName()).isEqualTo("package1");
 		assertThat(packageMetadataList.get(0).getVersion()).isEqualTo("1.0.0");
 		assertThat(packageMetadataList.get(0).getRepositoryId()).isEqualTo(this.repositoryRepository.findByName(repoName2)

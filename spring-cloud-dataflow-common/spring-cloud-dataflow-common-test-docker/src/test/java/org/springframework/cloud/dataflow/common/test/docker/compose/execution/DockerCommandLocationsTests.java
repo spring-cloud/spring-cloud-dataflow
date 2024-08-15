@@ -23,8 +23,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import static java.util.Optional.empty;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DockerCommandLocationsTests {
     private static final String badLocation = "file/that/does/not/exist";
@@ -46,8 +45,7 @@ public class DockerCommandLocationsTests {
                 goodLocation,
                 otherBadLocation);
 
-        assertThat(dockerCommandLocations.preferredLocation().get(),
-                is(goodLocation));
+		assertThat(dockerCommandLocations.preferredLocation()).contains(goodLocation);
     }
 
     @Test public void
@@ -56,8 +54,7 @@ public class DockerCommandLocationsTests {
                 System.getenv("AN_UNSET_DOCKER_COMPOSE_PATH"),
                 goodLocation);
 
-        assertThat(dockerCommandLocations.preferredLocation().get(),
-                is(goodLocation));
+		assertThat(dockerCommandLocations.preferredLocation()).contains(goodLocation);
     }
 
     @Test public void
@@ -65,7 +62,6 @@ public class DockerCommandLocationsTests {
         DockerCommandLocations dockerCommandLocations = new DockerCommandLocations(
                 badLocation);
 
-        assertThat(dockerCommandLocations.preferredLocation(),
-                is(empty()));
+		assertThat(dockerCommandLocations.preferredLocation()).isEqualTo(empty());
     }
 }

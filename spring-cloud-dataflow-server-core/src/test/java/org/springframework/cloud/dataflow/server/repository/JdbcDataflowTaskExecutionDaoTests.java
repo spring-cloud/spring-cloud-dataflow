@@ -15,14 +15,15 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -31,21 +32,16 @@ import org.springframework.cloud.dataflow.server.configuration.TaskServiceDepend
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
-		"spring.main.allow-bean-definition-overriding=true" })
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
 
 /**
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class JdbcDataflowTaskExecutionDaoTests {
+@SpringBootTest(classes = {TaskServiceDependencies.class}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"})
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+class JdbcDataflowTaskExecutionDaoTests {
 
 	@Autowired
 	private DataflowTaskExecutionDao dataflowTaskExecutionDao;
@@ -55,7 +51,7 @@ public class JdbcDataflowTaskExecutionDaoTests {
 
 	@Test
 	@DirtiesContext
-	public void testGetTaskExecutionIdsByTaskName() {
+	void testGetTaskExecutionIdsByTaskName() {
 		String taskName = UUID.randomUUID().toString();
 		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName, 4);
 		taskExecutions.forEach(taskRepository::createTaskExecution);
@@ -65,7 +61,7 @@ public class JdbcDataflowTaskExecutionDaoTests {
 
 	@Test
 	@DirtiesContext
-	public void testGetAllTaskExecutionIds() {
+	void testGetAllTaskExecutionIds() {
 		String taskName1 = UUID.randomUUID().toString();
 		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName1, 4);
 		String taskName2 = UUID.randomUUID().toString();
@@ -73,9 +69,9 @@ public class JdbcDataflowTaskExecutionDaoTests {
 		taskExecutions.forEach(taskRepository::createTaskExecution);
 		assertThat(dataflowTaskExecutionDao).isNotNull();
 		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(true, null)).isEqualTo(0);
-		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionIds(true, null).size()).isEqualTo(0);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionIds(true, null)).isEmpty();
 		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, null)).isEqualTo(6);
-		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionIds(false, null).size()).isEqualTo(6);
+		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionIds(false, null)).hasSize(6);
 		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName1)).isEqualTo(4);
 		assertThat(dataflowTaskExecutionDao.getAllTaskExecutionsCount(false, taskName2)).isEqualTo(2);
 	}

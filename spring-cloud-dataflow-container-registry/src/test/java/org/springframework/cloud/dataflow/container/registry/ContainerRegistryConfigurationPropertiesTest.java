@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.container.registry;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -30,13 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-public class ContainerRegistryConfigurationPropertiesTest {
+class ContainerRegistryConfigurationPropertiesTest {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
 	@Test
-	public void registryConfigurationProperties() {
+	void registryConfigurationProperties() {
 		this.contextRunner
 				.withInitializer(context -> {
 					Map<String, Object> map = new HashMap<>();
@@ -81,8 +82,8 @@ public class ContainerRegistryConfigurationPropertiesTest {
 					assertThat(myamazonawsConf.getSecret()).isEqualTo("myawspassword");
 					assertThat(myamazonawsConf.isDisableSslVerification()).isFalse();
 					assertThat(myamazonawsConf.getExtra()).hasSize(2);
-					assertThat(myamazonawsConf.getExtra().get("region")).isEqualTo("us-west-1");
-					assertThat(myamazonawsConf.getExtra().get("registryIds")).isEqualTo("283191309520");
+			assertThat(myamazonawsConf.getExtra()).containsEntry("region", "us-west-1");
+			assertThat(myamazonawsConf.getExtra()).containsEntry("registryIds", "283191309520");
 				});
 	}
 

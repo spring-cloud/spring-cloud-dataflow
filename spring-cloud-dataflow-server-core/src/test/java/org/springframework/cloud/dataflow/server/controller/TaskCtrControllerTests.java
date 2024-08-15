@@ -15,13 +15,17 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,26 +37,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Tests for TaskCtrController
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = TestDependencies.class)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TaskCtrControllerTests {
+class TaskCtrControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -62,8 +59,8 @@ public class TaskCtrControllerTests {
 	@MockBean
 	private ApplicationConfigurationMetadataResolver metadataResolver;
 
-	@Before
-	public void setupMocks() {
+	@BeforeEach
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		ConfigurationMetadataProperty p = new ConfigurationMetadataProperty();
@@ -79,7 +76,7 @@ public class TaskCtrControllerTests {
 	}
 
 	@Test
-	public void testOptions() throws Exception {
+	void options() throws Exception {
 		mockMvc.perform(get("/tasks/ctr/options").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.[?(@.id == 'oauth2-client-credentials-scopes')].name", hasItems("oauth2-client-credentials-scopes")))

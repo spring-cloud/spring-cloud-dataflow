@@ -20,18 +20,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-public class DeploymentStateResourceTests {
+class DeploymentStateResourceTests {
 
 	@Test
-	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
+	void serializationOfSingleStepExecution() throws JsonProcessingException {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
 

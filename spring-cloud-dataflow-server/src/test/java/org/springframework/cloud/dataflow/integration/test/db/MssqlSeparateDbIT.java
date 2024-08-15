@@ -31,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Mssql
 @DatabaseSeparate
 @ActiveProfiles({TagNames.PROFILE_DB_SEPARATE})
-public class MssqlSeparateDbIT extends AbstractDatabaseTests {
+class MssqlSeparateDbIT extends AbstractDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {

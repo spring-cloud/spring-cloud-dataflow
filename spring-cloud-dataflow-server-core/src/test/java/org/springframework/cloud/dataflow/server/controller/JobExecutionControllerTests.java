@@ -64,13 +64,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 @SpringBootTest(classes = {JobDependencies.class,
 		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class JobExecutionControllerTests {
+class JobExecutionControllerTests {
 
 	@Autowired
 	TaskExecutionDao taskExecutionDao;
@@ -93,7 +94,7 @@ public class JobExecutionControllerTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
 				jobRepository,
 				taskBatchDao,
@@ -105,26 +106,26 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testJobExecutionControllerConstructorMissingRepository() {
+	void jobExecutionControllerConstructorMissingRepository() {
 		assertThatIllegalArgumentException().isThrownBy(() ->new JobExecutionController(null));
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception {
+	void getExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testStopNonExistingJobExecution() throws Exception {
+	void stopNonExistingJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testRestartNonExistingJobExecution() throws Exception {
+	void restartNonExistingJobExecution() throws Exception {
 		mockMvc.perform(
 						put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
 				.andDo(print())
@@ -132,14 +133,14 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testRestartCompletedJobExecution() throws Exception {
+	void restartCompletedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/5").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
 				.andDo(print())
 				.andExpect(status().isUnprocessableEntity());
 	}
 
 	@Test
-	public void testStopStartedJobExecution() throws Exception {
+	void stopStartedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
 				.andExpect(status().isOk());
@@ -148,7 +149,7 @@ public class JobExecutionControllerTests {
 	//TODO: Boot3x followup
 	@Disabled("TODO: Boot3x followup We need to investigate why SimpleJobService uses JSR-352 for the getJobNames")
 	@Test
-	public void testStopStartedJobExecutionTwice() throws Exception {
+	void stopStartedJobExecutionTwice() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
 				.andExpect(status().isOk());
@@ -164,7 +165,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testStopStoppedJobExecution() throws Exception {
+	void stopStoppedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/7").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andDo(print())
 				.andExpect(status().isUnprocessableEntity());
@@ -177,7 +178,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecution() throws Exception {
+	void getExecution() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -186,7 +187,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionWithJobProperties() throws Exception {
+	void getExecutionWithJobProperties() throws Exception {
 		MvcResult result = mockMvc.perform(get("/jobs/executions/10").accept(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -198,7 +199,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetAllExecutionsFailed() throws Exception {
+	void getAllExecutionsFailed() throws Exception {
 		createDirtyJob();
 		// expecting to ignore dirty job
 		mockMvc.perform(get("/jobs/executions").accept(MediaType.APPLICATION_JSON))
@@ -206,7 +207,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetAllExecutions() throws Exception {
+	void getAllExecutions() throws Exception {
 		mockMvc.perform(get("/jobs/executions").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -217,13 +218,13 @@ public class JobExecutionControllerTests {
 	//TODO: Boot3x followup
 	@Disabled("TODO: Boot3x followup Until we implement the paging capabilities this tests is disabled.")
 	@Test
-	public void testGetAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
+	void getAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions"));
 		verifyBorderCaseForMaxInt(get("/jobs/executions"));
 	}
 
 	@Test
-	public void testGetExecutionsByName() throws Exception {
+	void getExecutionsByName() throws Exception {
 		mockMvc.perform(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -236,14 +237,14 @@ public class JobExecutionControllerTests {
 	//TODO: Boot3x followup
 	@Disabled("TODO: Boot3x followup Until we implement the paging capabilities this tests is disabled.")
 	@Test
-	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
+	void getExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(
 				get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 		verifyBorderCaseForMaxInt(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 	}
 
 	@Test
-	public void testGetExecutionsByNameMultipleResult() throws Exception {
+	void getExecutionsByNameMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
 						.accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -256,7 +257,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testFilteringByStatusAndName_EmptyNameAndStatusGiven() throws Exception {
+	void filteringByStatusAndNameEmptyNameAndStatusGiven() throws Exception {
 		mockMvc.perform(get("/jobs/executions")
 						.param("name", "")
 						.param("status", "FAILED")
@@ -271,7 +272,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testFilteringByUnknownStatus() throws Exception {
+	void filteringByUnknownStatus() throws Exception {
 		mockMvc.perform(get("/jobs/executions")
 						.param("status", "UNKNOWN")
 						.accept(MediaType.APPLICATION_JSON))
@@ -281,7 +282,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testFilteringByStatusAndName_NameAndStatusGiven() throws Exception {
+	void filteringByStatusAndNameNameAndStatusGiven() throws Exception {
 		mockMvc.perform(get("/jobs/executions")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
 						.param("status", "COMPLETED")
@@ -294,14 +295,14 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByNameNotFound() throws Exception {
+	void getExecutionsByNameNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testWildcardMatchMultipleResult() throws Exception {
+	void wildcardMatchMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/executions")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
@@ -314,7 +315,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testWildcardMatchSingleResult() throws Exception {
+	void wildcardMatchSingleResult() throws Exception {
 		mockMvc.perform(get("/jobs/executions")
 						.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())

@@ -16,7 +16,7 @@
 package org.springframework.cloud.skipper.server.controller;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 public abstract class AbstractControllerTests extends AbstractMockMvcTests {
@@ -62,7 +63,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 	@Autowired
 	protected SkipperServerProperties skipperServerProperties;
 
-	@Before
+	@BeforeEach
 	public void cleanupReleaseRepository() {
 		this.releaseRepository.deleteAll();
 	}

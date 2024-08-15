@@ -31,6 +31,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
  * have for all databases.
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
 @Database
 public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
@@ -45,7 +46,7 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 	 */
 	@Test
 	@DataflowMain
-	public void testLatestSharedDb() {
+	public void latestSharedDb() {
 		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
@@ -62,7 +63,7 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestSharedDbJdk21() {
+	public void latestSharedDbJdk21() {
 		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
@@ -79,7 +80,7 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestSharedDbJdk17() {
+	public void latestSharedDbJdk17() {
 		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());

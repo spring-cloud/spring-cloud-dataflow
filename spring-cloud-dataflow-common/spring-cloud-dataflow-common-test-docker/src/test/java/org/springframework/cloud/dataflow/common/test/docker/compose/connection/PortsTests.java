@@ -15,15 +15,14 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+
+import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 
 public class PortsTests {
 
@@ -34,7 +33,7 @@ public class PortsTests {
 		String psOutput = "------";
 		Ports ports = Ports.parseFromDockerComposePs(psOutput, null);
 		Ports expected = new Ports(emptyList());
-		assertThat(ports, is(expected));
+		assertThat(ports).isEqualTo(expected);
 	}
 
 	@Test
@@ -42,7 +41,7 @@ public class PortsTests {
 		String psOutput = "0.0.0.0:5432->5432/tcp";
 		Ports ports = Ports.parseFromDockerComposePs(psOutput, LOCALHOST_IP);
 		Ports expected = new Ports(Arrays.asList(new DockerPort(LOCALHOST_IP, 5432, 5432)));
-		assertThat(ports, is(expected));
+		assertThat(ports).isEqualTo(expected);
 	}
 
 	@Test
@@ -51,7 +50,7 @@ public class PortsTests {
 		String psOutput = "10.0.1.2:1234->2345/tcp";
 		Ports ports = Ports.parseFromDockerComposePs(psOutput, LOCALHOST_IP);
 		Ports expected = new Ports(Arrays.asList(new DockerPort("10.0.1.2", 1234, 2345)));
-		assertThat(ports, is(expected));
+		assertThat(ports).isEqualTo(expected);
 	}
 
 	@Test
@@ -60,7 +59,7 @@ public class PortsTests {
 		Ports ports = Ports.parseFromDockerComposePs(psOutput, LOCALHOST_IP);
 		Ports expected = new Ports(Arrays.asList(new DockerPort(LOCALHOST_IP, 5432, 5432),
 												new DockerPort(LOCALHOST_IP, 5433, 5432)));
-		assertThat(ports, is(expected));
+		assertThat(ports).isEqualTo(expected);
 	}
 
 	@Test
@@ -68,7 +67,7 @@ public class PortsTests {
 		String psOutput = "5432/tcp";
 		Ports ports = Ports.parseFromDockerComposePs(psOutput, LOCALHOST_IP);
 		Ports expected = new Ports(emptyList());
-		assertThat(ports, is(expected));
+		assertThat(ports).isEqualTo(expected);
 	}
 
 	@Test
@@ -80,18 +79,14 @@ public class PortsTests {
 				+ "";
 		Ports ports = Ports.parseFromDockerComposePs(psOutput, LOCALHOST_IP);
 		Ports expected = new Ports(Arrays.asList(new DockerPort(LOCALHOST_IP, 8880, 8880)));
-		assertThat(ports, is(expected));
+		assertThat(ports).isEqualTo(expected);
 	}
 
 	@Test
 	public void throw_illegal_state_exception_when_no_running_container_found_for_service() {
-		// exception.expect(IllegalArgumentException.class);
-		// exception.expectMessage("No container found");
-		// assertThrows(expectedType, executable)
-
-		IllegalStateException thrown = assertThrows(IllegalStateException.class,
-				() -> Ports.parseFromDockerComposePs("", ""),
-				"Expected Ports.parseFromDockerComposePs to throw, but it didn't");
-		assertThat(thrown.getMessage()).contains("No container found");
+		assertThatThrownBy(() -> Ports.parseFromDockerComposePs("", ""),
+				"Expected Ports.parseFromDockerComposePs to throw, but it didn't")
+				.hasMessageContaining("No container found")
+				.isInstanceOf(IllegalStateException.class);
 	}
 }

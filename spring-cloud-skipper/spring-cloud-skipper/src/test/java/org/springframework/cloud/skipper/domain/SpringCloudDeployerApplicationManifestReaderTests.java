@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.util.StreamUtils;
@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
 public class SpringCloudDeployerApplicationManifestReaderTests {
 
@@ -58,7 +59,7 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 				Charset.defaultCharset());
 		List<SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
 				.read(manifestYaml);
-		assertThat(applicationSpecList.isEmpty()).isTrue();
+		assertThat(applicationSpecList).isEmpty();
 	}
 
 	private void assertTimeOrLogApp(SpringCloudDeployerApplicationManifest applicationSpec) {

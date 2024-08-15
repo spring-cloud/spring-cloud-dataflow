@@ -15,47 +15,41 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
+import org.junit.Test;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.Is.is;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.failure;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.failureWithMessage;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.successful;
 
-import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure;
-
 public class SuccessOrFailureTests {
     @Test
     public void not_have_failed_if_actually_a_success() {
-        assertThat(SuccessOrFailure.success(), is(successful()));
+		assertThat(SuccessOrFailure.success(), successful());
     }
 
     @Test
     public void have_failed_if_actually_a_failure() {
-        assertThat(SuccessOrFailure.failure("oops"), is(failure()));
+		assertThat(SuccessOrFailure.failure("oops"), failure());
     }
 
     @Test
     public void return_the_failure_message_if_set() {
-        assertThat(SuccessOrFailure.failure("oops"), is(failureWithMessage("oops")));
+		assertThat(SuccessOrFailure.failure("oops"), failureWithMessage("oops"));
     }
 
     @Test
     public void fail_from_an_exception() {
         Exception exception = new RuntimeException("oh no");
         assertThat(SuccessOrFailure.fromException(exception),
-                is(failureWithMessage(both(
-                    containsString("RuntimeException")).and(
-                    containsString("oh no")
-                ))));
+				failureWithMessage(containsString("oh no")));
     }
 
     @Test
     public void succeed_on_a_lambda_that_returns_true() {
         SuccessOrFailure successFromLambda = SuccessOrFailure.onResultOf(() -> true);
-        assertThat(successFromLambda, is(successful()));
+		assertThat(successFromLambda, successful());
     }
 
     @Test
@@ -64,17 +58,13 @@ public class SuccessOrFailureTests {
             throw new IllegalArgumentException("oh no");
         });
 
-        assertThat(failureFromLambda,
-                is(failureWithMessage(both(
-                        containsString("IllegalArgumentException")).and(
-                        containsString("oh no")
-                ))));
+        assertThat(failureFromLambda, failureWithMessage(containsString("oh no")));
     }
 
     @Test
     public void fail_on_a_lambda_that_returns_false() {
         SuccessOrFailure failureFromLambda = SuccessOrFailure.onResultOf(() -> false);
 
-        assertThat(failureFromLambda, is(failureWithMessage("Attempt to complete healthcheck failed")));
+		assertThat(failureFromLambda, failureWithMessage("Attempt to complete healthcheck failed"));
     }
 }

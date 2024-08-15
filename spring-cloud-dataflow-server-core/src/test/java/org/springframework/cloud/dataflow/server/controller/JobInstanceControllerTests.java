@@ -67,11 +67,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {JobDependencies.class,
-	PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class JobInstanceControllerTests {
+class JobInstanceControllerTests {
 
 	private final static String BASE_JOB_NAME = "myJob";
 
@@ -101,7 +101,7 @@ public class JobInstanceControllerTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 			.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
@@ -113,18 +113,18 @@ public class JobInstanceControllerTests {
 	}
 
 	@Test()
-	public void testJobInstanceControllerConstructorMissingRepository() {
+	void jobInstanceControllerConstructorMissingRepository() {
 		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->new JobInstanceController(null));
 	}
 
 	@Test
-	public void testGetInstanceNotFound() throws Exception {
+	void getInstanceNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/instances/1345345345345").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetInstance() throws Exception {
+	void getInstance() throws Exception {
 		mockMvc.perform(get("/jobs/instances/1").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.jobInstanceId", equalTo(1)))
@@ -133,7 +133,7 @@ public class JobInstanceControllerTests {
 	}
 
 	@Test
-	public void testGetInstancesByName() throws Exception {
+	void getInstancesByName() throws Exception {
 		mockMvc.perform(get("/jobs/instances").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_ORIG)))
@@ -141,7 +141,7 @@ public class JobInstanceControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByNameMultipleResult() throws Exception {
+	void getExecutionsByNameMultipleResult() throws Exception {
 		mockMvc.perform(get("/jobs/instances").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_FOOBAR)))
@@ -151,7 +151,7 @@ public class JobInstanceControllerTests {
 	}
 
 	@Test
-	public void testGetInstanceByNameNotFound() throws Exception {
+	void getInstanceByNameNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/instances").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().is4xxClientError())
 			.andExpect(content().string(containsString("NoSuchJobException")));

@@ -16,31 +16,26 @@
 
 package org.springframework.cloud.dataflow.server.repository.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.data.domain.PageRequest;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-public class SearchPageableTests {
+class SearchPageableTests {
 
 	@Test
-	public void initializeSearchPageableWithNullPageable() throws Exception {
+	void initializeSearchPageableWithNullPageable() throws Exception {
 		try {
 			new SearchPageable(null, null);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("pageable must not be null", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("pageable must not be null");
 			return;
 		}
 
@@ -48,13 +43,13 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void initializeSearchPageableWithNullSearchQuery() throws Exception {
+	void initializeSearchPageableWithNullSearchQuery() throws Exception {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		try {
 			new SearchPageable(pageable, null);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("searchQuery must not be empty", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("searchQuery must not be empty");
 			return;
 		}
 
@@ -62,13 +57,13 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void initializeSearchPageableWithEmptySearchQuery() throws Exception {
+	void initializeSearchPageableWithEmptySearchQuery() throws Exception {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		try {
 			new SearchPageable(pageable, "  ");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("searchQuery must not be empty", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("searchQuery must not be empty");
 			return;
 		}
 
@@ -76,7 +71,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addNullColumn() throws Exception {
+	void addNullColumn() throws Exception {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameContains query");
 
@@ -84,7 +79,7 @@ public class SearchPageableTests {
 			searchPageable.addColumns(new String[] {});
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("You must specify at least 1 column.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("You must specify at least 1 column.");
 			return;
 		}
 
@@ -92,7 +87,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addNullColumn2() throws Exception {
+	void addNullColumn2() throws Exception {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameContains query");
 
@@ -100,7 +95,7 @@ public class SearchPageableTests {
 			searchPageable.addColumns("c1", null);
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("Column names cannot be null or empty.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Column names cannot be null or empty.");
 			return;
 		}
 
@@ -108,7 +103,7 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void addWhitespaceColumn() throws Exception {
+	void addWhitespaceColumn() throws Exception {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameContains query");
 
@@ -116,7 +111,7 @@ public class SearchPageableTests {
 			searchPageable.addColumns("     ");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("Column names cannot be null or empty.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Column names cannot be null or empty.");
 			return;
 		}
 
@@ -124,18 +119,18 @@ public class SearchPageableTests {
 	}
 
 	@Test
-	public void testSearchPageableGetters() throws Exception {
+	void searchPageableGetters() throws Exception {
 		final PageRequest pageable = PageRequest.of(1, 5);
 		final SearchPageable searchPageable = new SearchPageable(pageable, "findByTaskNameContains query");
 
-		assertThat(searchPageable.getColumns(), is(empty()));
-		assertNotNull(searchPageable.getPageable());
-		assertEquals(searchPageable.getSearchQuery(), "findByTaskNameContains query");
+		assertThat(searchPageable.getColumns()).isEmpty();
+		assertThat(searchPageable.getPageable()).isNotNull();
+		assertThat(searchPageable.getSearchQuery()).isEqualTo("findByTaskNameContains query");
 
 		searchPageable.addColumns("c1", "c2");
 
-		assertThat(searchPageable.getColumns(), hasSize(2));
-		assertThat(searchPageable.getColumns(), contains("c1", "c2"));
+		assertThat(searchPageable.getColumns()).hasSize(2);
+		assertThat(searchPageable.getColumns()).containsExactly("c1", "c2");
 
 	}
 }

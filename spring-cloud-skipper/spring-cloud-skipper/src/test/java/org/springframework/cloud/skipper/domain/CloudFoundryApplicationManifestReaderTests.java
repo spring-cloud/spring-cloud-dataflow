@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.TestResourceUtils;
 import org.springframework.cloud.skipper.domain.CloudFoundryApplicationSpec.HealthCheckType;
@@ -57,9 +57,9 @@ public class CloudFoundryApplicationManifestReaderTests {
 		assertThat(m.getSpec().getManifest().getInstances()).isEqualTo(1);
 		assertThat(m.getSpec().getManifest().getMemory()).isEqualTo("1024");
 		assertThat(m.getSpec().getManifest().getTimeout()).isEqualTo(180);
-		assertThat(m.getSpec().getManifest().getNoHostname()).isEqualTo(false);
-		assertThat(m.getSpec().getManifest().getNoRoute()).isEqualTo(false);
-		assertThat(m.getSpec().getManifest().getRandomRoute()).isEqualTo(true);
+		assertThat(m.getSpec().getManifest().getNoHostname()).isFalse();
+		assertThat(m.getSpec().getManifest().getNoRoute()).isFalse();
+		assertThat(m.getSpec().getManifest().getRandomRoute()).isTrue();
 		assertThat(m.getSpec().getManifest().getStack()).isEqualTo("stack");
 		assertThat(m.getSpec().getManifest().getServices()).containsExactlyInAnyOrder("rabbit");
 	}

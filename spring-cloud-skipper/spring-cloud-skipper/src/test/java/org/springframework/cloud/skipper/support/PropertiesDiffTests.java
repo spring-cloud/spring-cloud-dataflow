@@ -19,7 +19,7 @@ package org.springframework.cloud.skipper.support;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.skipper.support.PropertiesDiff.PropertyChange;
 
@@ -29,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link PropertiesDiff}.
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  *
  */
 public class PropertiesDiffTests {
@@ -40,10 +41,10 @@ public class PropertiesDiffTests {
 		PropertiesDiff diff = PropertiesDiff.builder().left(left).right(right).build();
 
 		assertThat(diff.areEqual()).isTrue();
-		assertThat(diff.getAdded()).hasSize(0);
-		assertThat(diff.getRemoved()).hasSize(0);
-		assertThat(diff.getChanged()).hasSize(0);
-		assertThat(diff.getCommon()).hasSize(0);
+		assertThat(diff.getAdded()).isEmpty();
+		assertThat(diff.getRemoved()).isEmpty();
+		assertThat(diff.getChanged()).isEmpty();
+		assertThat(diff.getCommon()).isEmpty();
 	}
 
 	@Test

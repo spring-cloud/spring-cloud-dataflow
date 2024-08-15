@@ -17,7 +17,7 @@ package org.springframework.cloud.skipper.server.repository;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * @author Ilayaperumal Gopinathan
  * @author Mark Pollack
+ * @author Corneil du Plessis
  */
 @ActiveProfiles("repo-test")
 @Transactional
@@ -496,7 +497,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		List<Release> foundByRepositoryIdAndPackageMetadataId =
 				this.releaseRepository.findByRepositoryIdAndPackageMetadataIdOrderByNameAscVersionDesc(REMOTE_REPO,
 						ticktockPackageMetadataId);
-		assertThat(foundByRepositoryIdAndPackageMetadataId).hasSize(0);
+		assertThat(foundByRepositoryIdAndPackageMetadataId).isEmpty();
 
 	}
 

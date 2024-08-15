@@ -31,7 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Mssql
 @DatabaseShared
 @ActiveProfiles({TagNames.PROFILE_DB_SHARED})
-public class MssqlSharedDbIT extends AbstractDatabaseTests {
+class MssqlSharedDbIT extends AbstractDatabaseTests {
 
 	@Override
 	protected String getDatabaseTag() {

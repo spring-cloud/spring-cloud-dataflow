@@ -17,8 +17,7 @@ package org.springframework.cloud.dataflow.rest.client;
 
 import java.util.Collections;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.boot.SpringApplication;
@@ -31,19 +30,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * @author Vinicius Carvalho
+ * @author Corneil du Plessis
  */
-public class DataFlowClientAutoConfigurationTests {
+class DataFlowClientAutoConfigurationTests {
 
 	@Test
-	public void contextLoads() throws Exception {
+	void contextLoads() throws Exception {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
 				"--spring.cloud.dataflow.client.enableDsl=true",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration");
-		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
-		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
+		assertThat(applicationContext.getBean(DataFlowTemplate.class)).isNotNull();
+		assertThat(applicationContext.getBean(StreamBuilder.class)).isNotNull();
 		RestTemplate template = applicationContext.getBean(RestTemplate.class);
 		//No auth
 		Mockito.verify(template, Mockito.times(0)).setRequestFactory(Mockito.any());
@@ -51,19 +53,19 @@ public class DataFlowClientAutoConfigurationTests {
 	}
 
 	@Test
-	public void usingAuthentication() throws Exception {
+	void usingAuthentication() throws Exception {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
 				"--spring.cloud.dataflow.client.authentication.basic.username=foo",
 				"--spring.cloud.dataflow.client.authentication.basic.password=bar",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration");
-		Assert.assertNotNull(applicationContext.getBean(DataFlowTemplate.class));
-		Assert.assertNotNull(applicationContext.getBean(StreamBuilder.class));
+		assertThat(applicationContext.getBean(DataFlowTemplate.class)).isNotNull();
+		assertThat(applicationContext.getBean(StreamBuilder.class)).isNotNull();
 
 		RestTemplate template = applicationContext.getBean(RestTemplate.class);
 		DataFlowClientProperties properties = applicationContext.getBean(DataFlowClientProperties.class);
-		Assert.assertNotNull(properties.getAuthentication());
-		Assert.assertEquals("foo", properties.getAuthentication().getBasic().getUsername());
-		Assert.assertEquals("bar", properties.getAuthentication().getBasic().getPassword());
+		assertThat(properties.getAuthentication()).isNotNull();
+		assertThat(properties.getAuthentication().getBasic().getUsername()).isEqualTo("foo");
+		assertThat(properties.getAuthentication().getBasic().getPassword()).isEqualTo("bar");
 		Mockito.verify(template, Mockito.times(1)).setRequestFactory(Mockito.any());
 		applicationContext.close();
 	}

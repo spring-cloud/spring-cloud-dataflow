@@ -15,44 +15,38 @@
  */
 package org.springframework.cloud.dataflow.registry.support;
 
-/**
- * @author Mark Pollack
- */
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * Test for DockerImage parsing methods Code from https://github.com/vmware/admiral
  */
-@RunWith(Parameterized.class)
 public class DockerImageTests {
-	private final String description;
+	private String description;
 
-	private final String fullImageName;
+	private String fullImageName;
 
-	private final String expectedHost;
+	private String expectedHost;
 
-	private final String expectedNamespace;
+	private String expectedNamespace;
 
-	private final String expectedRepo;
+	private String expectedRepo;
 
-	private final String expectedNamespaceAndRepo;
+	private String expectedNamespaceAndRepo;
 
-	private final String expectedTag;
+	private String expectedTag;
 
 	/**
 	 * @param expectedHost
 	 * @param expectedNamespace
 	 * @param expectedRepo
 	 */
-	public DockerImageTests(String description, String fullImageName, String expectedHost,
+	public void initDockerImageTests(String description, String fullImageName, String expectedHost,
 			String expectedNamespace,
 			String expectedRepo,
 			String expectedNamespaceAndRepo,
@@ -67,7 +61,6 @@ public class DockerImageTests {
 		this.expectedTag = expectedTag;
 	}
 
-	@Parameterized.Parameters
 	public static List<String[]> data() {
 		List<String[]> data = new ArrayList<>();
 		data.add(new String[] { "all sections", "myhost:300/namespace/repo:tag", "myhost:300",
@@ -120,15 +113,17 @@ public class DockerImageTests {
 		return data;
 	}
 
-	@Test
-	public void testDockerImageParsing() {
+	@MethodSource("data")
+	@ParameterizedTest
+	public void dockerImageParsing(String description, String fullImageName, String expectedHost, String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
+
+		initDockerImageTests(description, fullImageName, expectedHost, expectedNamespace, expectedRepo, expectedNamespaceAndRepo, expectedTag);
 
 		DockerImage dockerImage = DockerImage.fromImageName(fullImageName);
-		assertEquals(description + ": host", expectedHost, dockerImage.getHost());
-		assertEquals(description + ": namespace", expectedNamespace, dockerImage.getNamespace());
-		assertEquals(description + ": repository", expectedRepo, dockerImage.getRepository());
-		assertEquals(description + ": namespace and repo", expectedNamespaceAndRepo,
-				dockerImage.getNamespaceAndRepo());
-		assertEquals(description + ": tag", expectedTag, dockerImage.getTag());
+		assertThat(dockerImage.getHost()).as(description + ": host").isEqualTo(expectedHost);
+		assertThat(dockerImage.getNamespace()).as(description + ": namespace").isEqualTo(expectedNamespace);
+		assertThat(dockerImage.getRepository()).as(description + ": repository").isEqualTo(expectedRepo);
+		assertThat(dockerImage.getNamespaceAndRepo()).as(description + ": namespace and repo").isEqualTo(expectedNamespaceAndRepo);
+		assertThat(dockerImage.getTag()).as(description + ": tag").isEqualTo(expectedTag);
 	}
 }
