@@ -180,13 +180,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
  * https://dataflow.spring.io/docs/installation/kubernetes/kubectl/#choose-a-message-broker
  * - Set the TEST_PLATFORM_NAME to 'k8s'. - In the DockerMachine configuration set the
  * STREAM_APPS_URI variable to link loading Kafka/Docker apps (e.g
- * https://dataflow.spring.io/rabbitmq-maven-latest).
+ * https://dataflow.spring.io/rabbitmq-maven-5-0-x).
  * <p>
  * Stream tests on CloudFoundry (CF) platform: - Add the docker-compose-cf.yml to the
  * DOCKER_COMPOSE_PATHS list. - On the CF platform start a RabbitMQ service called
  * 'rabbit'. - Set the TEST_PLATFORM_NAME to 'cf'. - In the DockerMachine configuration
  * set the STREAM_APPS_URI variable to link loading Rabbit/Maven apps. (e.g.
- * https://dataflow.spring.io/rabbitmq-maven-latest)
+ * https://dataflow.spring.io/rabbitmq-maven-5-0-x)
  *
  * @author Christian Tzolov
  */

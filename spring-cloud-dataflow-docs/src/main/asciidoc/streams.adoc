@@ -340,20 +340,20 @@ The following table includes the `dataflow.spring.io` links to the stream applic
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|https://dataflow.spring.io/rabbitmq-maven-latest
-|https://dataflow.spring.io/rabbitmq-maven-latest-snapshot
+|https://dataflow.spring.io/rabbitmq-maven-5-0-x
+|https://dataflow.spring.io/rabbitmq-maven-5-0-x-snapshot
 
 |RabbitMQ + Docker
-|https://dataflow.spring.io/rabbitmq-docker-latest
-|https://dataflow.spring.io/rabbitmq-docker-latest-snapshot
+|https://dataflow.spring.io/rabbitmq-docker-5-0-x
+|https://dataflow.spring.io/rabbitmq-docker-5-0-x-snapshot
 
 |Apache Kafka + Maven
-|https://dataflow.spring.io/kafka-maven-latest
-|https://dataflow.spring.io/kafka-maven-latest-snapshot
+|https://dataflow.spring.io/kafka-maven-5-0-x
+|https://dataflow.spring.io/kafka-maven-5-0-x-snapshot
 
 |Apache Kafka + Docker
-|https://dataflow.spring.io/kafka-docker-latest
-|https://dataflow.spring.io/kafka-docker-latest-snapshot
+|https://dataflow.spring.io/kafka-docker-5-0-x
+|https://dataflow.spring.io/kafka-docker-5-0-x-snapshot
 |======================
 
 NOTE: By default, the out-of-the-box app's actuator endpoints are secured. You can disable security by deploying streams by setting the following property: `[small]#app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration#`
@@ -370,12 +370,12 @@ The following table includes the `dataflow.spring.io` links to the task applicat
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|https://dataflow.spring.io/task-maven-latest
-|https://dataflow.spring.io/task-maven-latest-snapshot
+|https://dataflow.spring.io/task-maven-3-0-x
+|https://dataflow.spring.io/task-maven-3-0-x-snapshot
 
 |Docker
-|https://dataflow.spring.io/task-docker-latest
-|https://dataflow.spring.io/task-docker-latest-snapshot
+|https://dataflow.spring.io/task-docker-3-0-x
+|https://dataflow.spring.io/task-docker-3-0-x-snapshot
 |======================
 
 For more information about the available out-of-the-box stream applications see the https://cloud.spring.io/spring-cloud-task-app-starters/[Spring Cloud Stream Applications] project page.
@@ -387,7 +387,7 @@ As an example, if you would like to register all out-of-the-box stream applicati
 ====
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-latest
+$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-5-0-x
 ----
 ====
 
@@ -396,7 +396,7 @@ Alternatively, you can register all the stream applications with the Rabbit bind
 ====
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-latest
+$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-5-0-x
 ----
 ====
 
