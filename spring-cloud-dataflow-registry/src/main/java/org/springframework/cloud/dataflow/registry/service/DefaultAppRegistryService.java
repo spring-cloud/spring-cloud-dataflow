@@ -394,11 +394,22 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		}
 		String type = typeName[0].trim();
 		String name = typeName[1].trim();
-		String version = getResourceVersion(lineSplit[1]);
+		String extra = typeName.length == 3 ? typeName[2] : null;
+		String version = "bootVersion".equals(extra) ? null : getResourceVersion(lineSplit[1]);
 		// This is now versioned key
 		String key = type + name + version;
 		if (!registrations.containsKey(key) && registrations.containsKey(type + name + "latest")) {
 			key = type + name + "latest";
+		}
+		// Allow bootVersion in descriptor file (already in 5.0.x stream app descriptor)
+		if("bootVersion".equals(extra)) {
+			if (previous == null) {
+				throw new IllegalArgumentException("Expected uri for bootVersion:" + lineSplit[0]);
+			}
+			ApplicationType appType = ApplicationType.valueOf(type);
+			Assert.isTrue(appType == previous.getType() && name.equals(previous.getName()), "Expected previous to be same type and name for:" + lineSplit[0]);
+			// Do nothing with bootVersion though
+			return previous;
 		}
 		AppRegistration ar = registrations.getOrDefault(key, new AppRegistration());
 		ar.setName(name);
@@ -413,6 +424,7 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				throw new IllegalArgumentException(e);
 			}
 		} else if (typeName.length == 3) {
+			if (extra.equals("metadata")) {
 				// metadata app uri
 				try {
 					ar.setMetadataUri(new URI(lineSplit[1]));
@@ -420,7 +432,9 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				} catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
-
+			} else if (!"bootVersion".equals(extra)) {
+				throw new IllegalArgumentException("Invalid property: " + lineSplit[0]);
+			}
 		}
 		registrations.put(key, ar);
 		return ar;
