@@ -24,7 +24,7 @@ Sabby Anandan; Marius Bogoevici; Eric Bottard; Mark Fisher; Ilayaperumal Gopinat
 :docker-log-sink-kafka-version: 5.0.0
 :docker-http-source-kafka-version: 5.0.0
 :docker-time-source-kafka-version: 5.0.0
-:docker-timestamp-task-version: 2.0.2
+:docker-timestamp-task-version: 3.0.0
 
 ifdef::backend-html5[]
 
