@@ -16,6 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.test.web.servlet.MvcResult;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -25,22 +39,8 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.subsecti
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
-
-import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.test.web.servlet.MvcResult;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Documentation for the /tasks/executions endpoint.
@@ -56,7 +56,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class TaskExecutionsDocumentation extends BaseDocumentation {
 	@BeforeEach
 	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
 		executeTask("taskA");
@@ -221,7 +221,6 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				));
 	}
 	@Test
-	@Disabled("find error")
 	public void listTaskExecutions() throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 						post("/tasks/executions")
@@ -235,6 +234,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						get("/tasks/executions")
 								.queryParam("page", "1")
 								.queryParam("size", "2"))
+			.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page")
@@ -246,15 +246,26 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 								subsectionWithPath("_embedded.taskExecutionResourceList")
 										.description("Contains a collection of Task Executions/"),
 								subsectionWithPath("_links.self").description("Link to the task execution resource"),
-								subsectionWithPath("_links.first").description("Link to the first page of task execution resources").optional(),
-								subsectionWithPath("_links.last").description("Link to the last page of task execution resources").optional(),
-								subsectionWithPath("_links.next").description("Link to the next page of task execution resources").optional(),
-								subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").optional(),
+							subsectionWithPath("_links.first")
+								.description("Link to the first page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
+							subsectionWithPath("_links.last")
+								.description("Link to the last page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
+							subsectionWithPath("_links.next")
+								.description("Link to the next page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
+							subsectionWithPath("_links.prev")
+								.description("Link to the previous page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
 								subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test
-	@Disabled("find error")
 	public void listTaskThinExecutions() throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 				post("/tasks/executions")
@@ -268,6 +279,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 				get("/tasks/thinexecutions")
 					.queryParam("page", "1")
 					.queryParam("size", "2"))
+			.andDo(print())
 			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 				queryParameters(
 					parameterWithName("page")
@@ -279,10 +291,22 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 					subsectionWithPath("_embedded.taskExecutionThinResourceList")
 						.description("Contains a collection of thin Task Executions/"),
 					subsectionWithPath("_links.self").description("Link to the task execution resource"),
-					subsectionWithPath("_links.first").description("Link to the first page of task execution resources").optional(),
-					subsectionWithPath("_links.last").description("Link to the last page of task execution resources").optional(),
-					subsectionWithPath("_links.next").description("Link to the next page of task execution resources").optional(),
-					subsectionWithPath("_links.prev").description("Link to the previous page of task execution resources").optional(),
+							subsectionWithPath("_links.first")
+								.description("Link to the first page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
+							subsectionWithPath("_links.last")
+								.description("Link to the last page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
+							subsectionWithPath("_links.next")
+								.description("Link to the next page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
+							subsectionWithPath("_links.prev")
+								.description("Link to the previous page of task execution resources")
+								.type(JsonFieldType.OBJECT)
+								.optional(),
 					subsectionWithPath("page").description("Pagination properties"))));
 	}
 

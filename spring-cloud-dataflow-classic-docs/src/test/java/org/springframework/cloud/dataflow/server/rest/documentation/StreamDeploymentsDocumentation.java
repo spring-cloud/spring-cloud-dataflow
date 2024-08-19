@@ -16,6 +16,25 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
+import org.springframework.cloud.skipper.domain.PackageIdentifier;
+import org.springframework.cloud.skipper.domain.Release;
+import org.springframework.cloud.skipper.domain.RollbackRequest;
+import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
@@ -26,26 +45,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
-
-import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
-import org.springframework.cloud.skipper.domain.PackageIdentifier;
-import org.springframework.cloud.skipper.domain.Release;
-import org.springframework.cloud.skipper.domain.RollbackRequest;
-import org.springframework.http.MediaType;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
@@ -54,16 +53,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@DirtiesContext
 public class StreamDeploymentsDocumentation extends BaseDocumentation {
-
-	private static boolean setUpIsDone = false;
 
 	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
 		this.mockMvc.perform(
 				post("/apps/{type}/time", "source")
 						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE")
@@ -86,7 +80,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 						.param("definition", "time --format='YYYY MM DD' | log")
 						.param("deploy", "false"))
 				.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test
@@ -108,7 +101,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	@Disabled("find error")
 	public void unDeploy() throws Exception {
 		this.mockMvc.perform(
 				delete("/streams/deployments/{timelog}", "timelog"))
@@ -129,7 +121,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
 
 	@Test
-	@Disabled("find error")
 	public void info() throws Exception {
 		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
 		this.mockMvc.perform(
@@ -146,7 +137,6 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	@Disabled("find error")
 	public void deploy() throws Exception {
 		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
 		this.mockMvc.perform(

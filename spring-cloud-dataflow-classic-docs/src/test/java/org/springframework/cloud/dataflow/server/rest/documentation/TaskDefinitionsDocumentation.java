@@ -16,6 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.core.ApplicationType;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -27,15 +35,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
-
-import org.springframework.cloud.dataflow.core.ApplicationType;
 
 /**
  * Documentation for the /tasks/definitions endpoint.
@@ -50,7 +49,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 	}
 
 	@AfterEach
@@ -87,8 +86,13 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	@Disabled("find error")
 	public void listAllTaskDefinitions() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "my-task")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'")
+						.queryParam("description", "Demo task definition for testing"))
+					.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			get("/tasks/definitions")
 				.queryParam("page", "0")
@@ -115,8 +119,13 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	@Disabled("find error")
 	public void displayDetail() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "my-task")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'")
+						.queryParam("description", "Demo task definition for testing"))
+					.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			get("/tasks/definitions/{my-task}","my-task")
 			.queryParam("manifest", "true"))
@@ -144,8 +153,13 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	@Disabled("find error")
 	public void taskDefinitionDelete() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "my-task")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'")
+						.queryParam("description", "Demo task definition for testing"))
+					.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			delete("/tasks/definitions/{my-task}", "my-task")
 			.queryParam("cleanup", "true"))

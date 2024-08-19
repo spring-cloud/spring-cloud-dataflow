@@ -16,19 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
@@ -36,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
@@ -59,6 +45,19 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 /**
  * Documentation for the /jobs/executions endpoint.
@@ -69,12 +68,9 @@ import org.springframework.test.annotation.DirtiesContext;
 @SuppressWarnings("NewClassNamingConvention")
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
-@Disabled("to b determine why output is missing")
 public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
-
-	private static boolean initialized;
 
 	private JobRepository jobRepository;
 
@@ -89,28 +85,24 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		if (!initialized) {
-			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
-			initialize();
-			createJobExecution(JOB_NAME, BatchStatus.STARTED);
-			createJobExecution(JOB_NAME + "1", BatchStatus.STOPPED);
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
+		initialize();
+		createJobExecution(JOB_NAME, BatchStatus.STARTED);
+		createJobExecution(JOB_NAME + "1", BatchStatus.STOPPED);
 
 
-			jdbcTemplate = new JdbcTemplate(this.dataSource);
-			jdbcTemplate.afterPropertiesSet();
-			jdbcTemplate.update(
-					"INSERT into task_deployment(id, object_version, task_deployment_id, task_definition_name, platform_name, created_on) " +
-							"values (?,?,?,?,?,?)",
-					1, 1, "2", JOB_NAME + "_1", "default", new Date());
+		jdbcTemplate = new JdbcTemplate(this.dataSource);
+		jdbcTemplate.afterPropertiesSet();
+		jdbcTemplate.update(
+				"INSERT into task_deployment(id, object_version, task_deployment_id, task_definition_name, platform_name, created_on) "
+						+ "values (?,?,?,?,?,?)",
+				1, 1, "2", JOB_NAME + "_1", "default", new Date());
 
-			documentation.dontDocument(() -> this.mockMvc.perform(
-							post("/tasks/definitions")
-									.queryParam("name", "DOCJOB1")
-									.queryParam("definition", "timestamp --format='YYYY MM DD'"))
+		documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "DOCJOB1")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
-
-			initialized = true;
-		}
 	}
 
 	@Test

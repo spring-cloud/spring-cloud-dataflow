@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
@@ -27,12 +32,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.queryPar
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
-
 /**
  * Documentation for the {@code /audit-records} endpoint.
  *
@@ -43,14 +42,8 @@ import org.junit.runners.MethodSorters;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AuditRecordsDocumentation extends BaseDocumentation {
 
-	private static boolean setUpIsDone = false;
-
 	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
 					.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
@@ -65,7 +58,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 						.param("definition", "time --format='YYYY MM DD' | log")
 						.param("deploy", "false"))
 				.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test
@@ -100,7 +92,6 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	@Disabled("find 404")
 	public void getAuditRecord() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/{id}", "5"))

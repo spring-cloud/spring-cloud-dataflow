@@ -16,20 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -50,6 +39,16 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * Documentation for the /jobs/executions/{id}/steps endpoint.
  *
@@ -63,8 +62,6 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
-	private static boolean initialized;
-
 	private JobRepository jobRepository;
 
 	private TaskExecutionDao taskExecutionDao;
@@ -74,24 +71,19 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		if (!initialized) {
-			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
-			initialize();
-			createJobExecution(JOB_NAME, BatchStatus.STARTED);
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
+		initialize();
+		createJobExecution(JOB_NAME, BatchStatus.STARTED);
 
-			documentation.dontDocument(() -> this.mockMvc.perform(
-							post("/tasks/definitions")
-									.param("name", "DOCJOB1")
-									.param("definition", "timestamp --format='YYYY MM DD'"))
+		documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").param("name", "DOCJOB1")
+						.param("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
-
-			initialized = true;
-		}
 	}
 
 
 	@Test
-	@Disabled("assumption first execution id is 1")
 	public void listStepExecutionsForJob() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps", "1")

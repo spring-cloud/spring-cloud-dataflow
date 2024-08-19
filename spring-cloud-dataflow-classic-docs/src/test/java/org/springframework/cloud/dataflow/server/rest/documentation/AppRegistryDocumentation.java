@@ -49,11 +49,11 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void appDefault() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "4.0.0");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 
 		this.mockMvc.perform(RestDocumentationRequestBuilders
-						.put("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.2.0.RELEASE")
+			.put("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "4.0.0")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isAccepted())
 				.andDo(
@@ -65,15 +65,15 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 								)
 						)
 				);
-		unregisterApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		unregisterApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+		unregisterApp(ApplicationType.source, "http", "4.0.0");
+		unregisterApp(ApplicationType.source, "http", "5.0.0");
 	}
 
 	@Test
 	public void registeringAnApplicationVersion() throws Exception {
 		this.mockMvc.perform(
-						post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.1.0.RELEASE")
-								.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+				post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "4.0.0").queryParam("uri",
+						"maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
 			).andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
@@ -93,7 +93,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 						)
 				);
 
-		unregisterApp(ApplicationType.source, "http", "1.1.0.RELEASE");
+		unregisterApp(ApplicationType.source, "http", "4.0.0");
 	}
 
 
@@ -101,7 +101,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void bulkRegisteringApps() throws Exception {
 		this.mockMvc.perform(
 						post("/apps")
-								.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+					.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
 								.param("force", "false"))
 				.andExpect(status().isCreated())
 				.andDo(
@@ -118,8 +118,8 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getApplicationsFiltered() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.source, "time", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
+		registerApp(ApplicationType.source, "time", "5.0.0");
 		this.mockMvc.perform(
 						get("/apps")
 								.param("search", "")
@@ -154,7 +154,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getSingleApplication() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 		this.mockMvc.perform(
 						get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON)
 								.param("exhaustive", "false"))
@@ -192,7 +192,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void registeringAnApplication() throws Exception {
 		this.mockMvc.perform(
 						post("/apps/{type}/{name}", ApplicationType.source, "http")
-								.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+					.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0")
 				)
 				.andExpect(status().isCreated())
 				.andDo(
@@ -214,10 +214,10 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void unregisteringAnApplication() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 
 		this.mockMvc.perform(
-						delete("/apps/{type}/{name}/{version}", ApplicationType.source, "http", "1.2.0.RELEASE"))
+				delete("/apps/{type}/{name}/{version}", ApplicationType.source, "http", "5.0.0"))
 				.andExpect(status().isOk())
 				.andDo(
 						this.documentationHandler.document(
@@ -232,8 +232,8 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void unregisteringAllApplications() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "4.0.0");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 		this.mockMvc.perform(
 						delete("/apps"))
 				.andExpect(status().isOk()

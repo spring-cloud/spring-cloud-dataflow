@@ -16,11 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +31,11 @@ import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 /**
  * Creates asciidoc snippets for endpoints exposed by {@literal RuntimeAppsController}.
  *
@@ -49,8 +49,8 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.sink, "log", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
+		registerApp(ApplicationType.sink, "log", "5.0.0");
 		createStream("mystream", "http | log", true);
 	}
 

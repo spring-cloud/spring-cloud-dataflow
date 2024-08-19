@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.time.Duration;
+
 import org.awaitility.Awaitility;
 import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.Test;
@@ -24,8 +26,6 @@ import org.junit.runners.MethodSorters;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
-
-import java.time.Duration;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -47,7 +47,7 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getLogsByTaskId() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		String taskName = "taskA";
 		documentation.dontDocument( () -> this.mockMvc.perform(
 				post("/tasks/definitions")

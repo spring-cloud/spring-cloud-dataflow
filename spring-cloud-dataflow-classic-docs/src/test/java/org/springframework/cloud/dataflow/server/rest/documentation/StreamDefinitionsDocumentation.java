@@ -16,6 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.util.Arrays;
+
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.core.ApplicationType;
+import org.springframework.test.annotation.DirtiesContext;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -28,16 +38,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.queryPar
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Arrays;
-
-import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
-
-import org.springframework.cloud.dataflow.core.ApplicationType;
-
 /**
  * Documentation for the /streams/definitions endpoint.
  *
@@ -47,26 +47,18 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
  */
 @SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Disabled("find error")
+@DirtiesContext
 public class StreamDefinitionsDocumentation extends BaseDocumentation {
-
-	private static boolean setUpIsDone = false;
-
 	@BeforeEach
 	public void setup() throws Exception {
-		if (setUpIsDone) {
-			return;
-		}
-
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
-					.queryParam("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
+					.queryParam("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:5.0.0"))
 			.andExpect(status().isCreated());
 		this.mockMvc.perform(
 			post("/apps/{type}/log", "sink")
-					.queryParam("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE"))
+					.queryParam("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0"))
 			.andExpect(status().isCreated());
-		setUpIsDone = true;
 	}
 
 	@Test
@@ -100,6 +92,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void listAllStreamDefinitions() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/streams/definitions").queryParam("name", "timelog")
+						.queryParam("definition", "time --format='YYYY MM DD' | log")
+						.queryParam("description", "Demo stream for testing")
+						.queryParam("deploy", "false"))
+					.andExpect(status().isCreated()));
 		this.mockMvc.perform(
 			get("/streams/definitions")
 				.queryParam("page", "0")
@@ -123,6 +122,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getStreamDefinition() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/streams/definitions").queryParam("name", "timelog")
+						.queryParam("definition", "time --format='YYYY MM DD' | log")
+						.queryParam("description", "Demo stream for testing")
+						.queryParam("deploy", "false"))
+					.andExpect(status().isCreated()));
 		this.mockMvc.perform(
 				get("/streams/definitions/{name}", "timelog"))
 				.andDo(print())
@@ -170,6 +176,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void listRelatedStreamDefinitions() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/streams/definitions").queryParam("name", "timelog")
+						.queryParam("definition", "time --format='YYYY MM DD' | log")
+						.queryParam("description", "Demo stream for testing")
+						.queryParam("deploy", "false"))
+					.andExpect(status().isCreated()));
 		this.mockMvc.perform(
 			get("/streams/definitions/{name}/related", "timelog")
                     .queryParam("page", "0")
@@ -199,6 +212,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void streamDefinitionDelete1() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/streams/definitions").queryParam("name", "timelog")
+						.queryParam("definition", "time --format='YYYY MM DD' | log")
+						.queryParam("description", "Demo stream for testing")
+						.queryParam("deploy", "false"))
+					.andExpect(status().isCreated()));
 		this.mockMvc.perform(
 			delete("/streams/definitions/{name}", "timelog"))
 			.andDo(print())
@@ -211,6 +231,13 @@ public class StreamDefinitionsDocumentation extends BaseDocumentation {
 
 	@Test
 	public void streamDefinitionDeleteAll() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/streams/definitions").queryParam("name", "timelog")
+						.queryParam("definition", "time --format='YYYY MM DD' | log")
+						.queryParam("description", "Demo stream for testing")
+						.queryParam("deploy", "false"))
+					.andExpect(status().isCreated()));
 		this.mockMvc.perform(
 			delete("/streams/definitions"))
 			.andDo(print())

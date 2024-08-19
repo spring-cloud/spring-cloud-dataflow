@@ -16,6 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.runners.MethodSorters;
+
+import org.springframework.cloud.dataflow.core.ApplicationType;
+
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -26,14 +34,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.pathPara
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.FixMethodOrder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
-
-import org.springframework.cloud.dataflow.core.ApplicationType;
 
 /**
  * Documentation for the /tasks/schedules endpoint.
@@ -47,7 +47,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		createTaskDefinition("mytaskname");
 	}
 
