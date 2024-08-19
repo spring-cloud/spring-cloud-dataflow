@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration.postgresql;
+package org.springframework.cloud.dataflow.server.db.migration.mysql;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,7 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractRemoveBatc
  *
  * @author Glenn Renfro
  */
-public class V12__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
+public class V13__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
 
 	/*
 	 * Scripts to remove views used for Task V2/Batch V4 Task V3/Batch V5 queries.
@@ -76,6 +76,7 @@ public class V12__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	/*
 	 * Scripts to rename Batch V5 tables removing BOOT_ prefix.
 	 */
+
 	private final static String RENAME_BATCH_JOB_INSTANCE_V4_TABLE =
 		"ALTER TABLE BATCH_JOB_INSTANCE RENAME TO V2_BATCH_JOB_INSTANCE";
 
@@ -106,7 +107,6 @@ public class V12__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	/*
 	 * Scripts to rename Task V3 tables removing BOOT_ prefix.
 	 */
-
 	private final static String RENAME_TASK_EXECUTION_V3_TABLE =
 			"ALTER TABLE BOOT3_TASK_EXECUTION RENAME TO TASK_EXECUTION";
 

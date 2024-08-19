@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.cloud.dataflow.server.db.migration.oracle;
+package org.springframework.cloud.dataflow.server.db.migration.postgresql;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +26,7 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractRemoveBatc
  *
  * @author Glenn Renfro
  */
-public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
+public class V14__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
 
 	/*
 	 * Scripts to remove views used for Task V2/Batch V4 Task V3/Batch V5 queries.
@@ -65,18 +65,17 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 		"ALTER TABLE TASK_LOCK RENAME TO V2_TASK_LOCK";
 
 	private final static String RENAME_TASK_V2_SEQ =
-		"RENAME TASK_SEQ TO V2_TASK_SEQ";
+		"ALTER TABLE TASK_SEQ RENAME TO V2_TASK_SEQ";
 
 	private final static String RENAME_TASK_EXECUTION_METADATA_V2_TABLE =
 		"ALTER TABLE TASK_EXECUTION_METADATA RENAME TO V2_TASK_EXECUTION_METADATA";
 
 	private final static String RENAME_TASK_EXECUTION_METADATA_V2_SEQ =
-		"RENAME TASK_EXECUTION_METADATA_SEQ TO V2_TASK_EXECUTION_METADATA_SEQ";
+		"ALTER TABLE TASK_EXECUTION_METADATA_SEQ RENAME TO V2_TASK_EXECUTION_METADATA_SEQ";
 
 	/*
 	 * Scripts to rename Batch V5 tables removing BOOT_ prefix.
 	 */
-
 	private final static String RENAME_BATCH_JOB_INSTANCE_V4_TABLE =
 		"ALTER TABLE BATCH_JOB_INSTANCE RENAME TO V2_BATCH_JOB_INSTANCE";
 
@@ -96,17 +95,18 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 		"ALTER TABLE BATCH_JOB_EXECUTION_CONTEXT RENAME TO V2_BATCH_JOB_EXECUTION_CONTEXT";
 
 	private final static String RENAME_BATCH_STEP_EXECUTION_V4_SEQ =
-		"RENAME BATCH_STEP_EXECUTION_SEQ TO V2_BATCH_STEP_EXECUTION_SEQ";
+		"ALTER TABLE BATCH_STEP_EXECUTION_SEQ RENAME TO V2_BATCH_STEP_EXECUTION_SEQ";
 
 	private final static String RENAME_BATCH_JOB_EXECUTION_V4_SEQ =
-		"RENAME BATCH_JOB_EXECUTION_SEQ TO V2_BATCH_JOB_EXECUTION_SEQ";
+		"ALTER TABLE BATCH_JOB_EXECUTION_SEQ RENAME TO V2_BATCH_JOB_EXECUTION_SEQ";
 
 	private final static String RENAME_BATCH_JOB_V4_SEQ =
-		"RENAME BATCH_JOB_SEQ TO V2_BATCH_JOB_SEQ";
+		"ALTER TABLE BATCH_JOB_SEQ RENAME TO V2_BATCH_JOB_SEQ";
 
 	/*
 	 * Scripts to rename Task V3 tables removing BOOT_ prefix.
 	 */
+
 	private final static String RENAME_TASK_EXECUTION_V3_TABLE =
 			"ALTER TABLE BOOT3_TASK_EXECUTION RENAME TO TASK_EXECUTION";
 
@@ -120,13 +120,13 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 			"ALTER TABLE BOOT3_TASK_LOCK RENAME TO TASK_LOCK";
 
 	private final static String RENAME_TASK_V3_SEQ =
-			"RENAME BOOT3_TASK_SEQ TO TASK_SEQ";
+			"ALTER TABLE BOOT3_TASK_SEQ RENAME TO TASK_SEQ";
 
 	private final static String RENAME_TASK_EXECUTION_METADATA_V3_TABLE =
 			"ALTER TABLE BOOT3_TASK_EXECUTION_METADATA RENAME TO TASK_EXECUTION_METADATA";
 
 	private final static String RENAME_TASK_EXECUTION_METADATA_V3_SEQ =
-			"RENAME BOOT3_TASK_EXECUTION_METADATA_SEQ TO TASK_EXECUTION_METADATA_SEQ";
+			"ALTER TABLE BOOT3_TASK_EXECUTION_METADATA_SEQ RENAME TO TASK_EXECUTION_METADATA_SEQ";
 
 	/*
 	 * Scripts to rename Batch V5 tables removing BOOT_ prefix.
@@ -151,13 +151,13 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 			"ALTER TABLE BOOT3_BATCH_JOB_EXECUTION_CONTEXT RENAME TO BATCH_JOB_EXECUTION_CONTEXT";
 
 	private final static String RENAME_BATCH_STEP_EXECUTION_V5_SEQ =
-			"RENAME BOOT3_BATCH_STEP_EXECUTION_SEQ TO BATCH_STEP_EXECUTION_SEQ";
+			"ALTER TABLE BOOT3_BATCH_STEP_EXECUTION_SEQ RENAME TO BATCH_STEP_EXECUTION_SEQ";
 
 	private final static String RENAME_BATCH_JOB_EXECUTION_V5_SEQ =
-			"RENAME BOOT3_BATCH_JOB_EXECUTION_SEQ TO BATCH_JOB_EXECUTION_SEQ";
+			"ALTER TABLE BOOT3_BATCH_JOB_EXECUTION_SEQ RENAME TO BATCH_JOB_EXECUTION_SEQ";
 
 	private final static String RENAME_BATCH_JOB_V5_SEQ =
-			"RENAME BOOT3_BATCH_JOB_SEQ TO BATCH_JOB_SEQ";
+			"ALTER TABLE BOOT3_BATCH_JOB_SEQ RENAME TO BATCH_JOB_SEQ";
 
 	@Override
 	public List<SqlCommand> dropBoot3Boot2Views() {
@@ -174,28 +174,28 @@ public class V11__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2T
 	@Override
 	public List<SqlCommand> renameTask3Tables() {
 		return Arrays.asList(
-				SqlCommand.from(RENAME_TASK_EXECUTION_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_EXECUTION_PARAMS_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_TASK_BATCH_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_V3_SEQ),
-				SqlCommand.from(RENAME_TASK_LOCK_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_TABLE),
-				SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_SEQ)
+			SqlCommand.from(RENAME_TASK_EXECUTION_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_EXECUTION_PARAMS_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_TASK_BATCH_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_V3_SEQ),
+			SqlCommand.from(RENAME_TASK_LOCK_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_TABLE),
+			SqlCommand.from(RENAME_TASK_EXECUTION_METADATA_V3_SEQ)
 		);
 	}
 
 	@Override
 	public List<SqlCommand> renameBatch5Tables() {
 		return Arrays.asList(
-				SqlCommand.from(RENAME_BATCH_JOB_INSTANCE_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
-				SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_SEQ),
-				SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_SEQ),
-				SqlCommand.from(RENAME_BATCH_JOB_V5_SEQ)
+			SqlCommand.from(RENAME_BATCH_JOB_INSTANCE_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_PARAMS_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_CONTEXT_V5_TABLE),
+			SqlCommand.from(RENAME_BATCH_STEP_EXECUTION_V5_SEQ),
+			SqlCommand.from(RENAME_BATCH_JOB_EXECUTION_V5_SEQ),
+			SqlCommand.from(RENAME_BATCH_JOB_V5_SEQ)
 		);
 	}
 
