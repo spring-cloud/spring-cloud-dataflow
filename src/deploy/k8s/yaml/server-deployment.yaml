@@ -128,9 +128,9 @@ spec:
                 configMapKeyRef:
                   key: SPRING_JPA_DATABASE_PLATFORM
                   name: scdf-datasource
-            - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED'
+            - name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED'
               value: 'true'
-            - name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED'
+            - name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED'
               value: 'true'
             - name: 'SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL'
               value: 'http://localhost:3000'

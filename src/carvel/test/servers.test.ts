@@ -300,11 +300,11 @@ describe('servers', () => {
     expect(envs).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED',
+          name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED',
           value: 'true'
         }),
         expect.objectContaining({
-          name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED',
+          name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED',
           value: 'true'
         })
       ])
@@ -454,8 +454,8 @@ describe('servers', () => {
     expect(envs).toBeTruthy();
     expect(envs).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED', value: 'true' }),
-        expect.objectContaining({ name: 'MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED', value: 'true' })
+        expect.objectContaining({ name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED', value: 'true' }),
+        expect.objectContaining({ name: 'MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED', value: 'true' })
       ])
     );
   });
@@ -485,14 +485,14 @@ describe('servers', () => {
 
     const dataflowDoc = parseYamlDocument(dataflowApplicationYaml);
     const dataflowJson = dataflowDoc.toJSON();
-    const enabled1 = lodash.get(dataflowJson, 'management.metrics.export.prometheus.enabled') as boolean;
+    const enabled1 = lodash.get(dataflowJson, 'management.prometheus.metrics.export.enabled') as boolean;
     expect(enabled1).toBeTrue();
     const url = lodash.get(dataflowJson, 'spring.cloud.dataflow.metrics.dashboard.url') as string;
     expect(url).toBeFalsy();
 
     const skipperDoc = parseYamlDocument(skipperApplicationYaml);
     const skipperJson = skipperDoc.toJSON();
-    const enabled2 = lodash.get(skipperJson, 'management.metrics.export.prometheus.enabled') as boolean;
+    const enabled2 = lodash.get(skipperJson, 'management.prometheus.metrics.export.enabled') as boolean;
     expect(enabled2).toBeTrue();
   });
 
