@@ -50,24 +50,16 @@ public class JobParameterJacksonDeserializer extends JsonDeserializer<JobParamet
 		String type = node.get("type").asText();
 
 		JobParameter jobParameter;
-		//TODO: Boot3x followup Verify that Job Parameters setup properly for Batch 5
-		if (!type.isEmpty() && !type.equalsIgnoreCase("STRING")) {
-			if ("DATE".equalsIgnoreCase(type)) {
-				jobParameter = new JobParameter(LocalDateTime.parse(value), LocalDateTime.class,  identifying);
-			}
-			else if ("DOUBLE".equalsIgnoreCase(type)) {
-				jobParameter = new JobParameter(Double.valueOf(value), Double.class, identifying);
-			}
-			else if ("LONG".equalsIgnoreCase(type)) {
-				jobParameter = new JobParameter(Long.valueOf(value), Long.class, identifying);
-			}
-			else {
-				throw new IllegalStateException("Unsupported JobParameter type: " + type);
+		if (!type.isEmpty()) {
+			try {
+				jobParameter = new JobParameter(value, Class.forName(type), identifying);
+			} catch (ClassNotFoundException e) {
+				throw new IllegalArgumentException("JobParameter type %s is not supported by DataFlow".formatted(type), e);
 			}
 		}
 		else {
-			jobParameter = new JobParameter(value, String.class, identifying);
-		}
+            jobParameter = new JobParameter(value, String.class, identifying);
+        }
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("jobParameter - value: {} (type: {}, isIdentifying: {})",

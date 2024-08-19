@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
-import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -84,13 +83,16 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	private final LauncherRepository launcherRepository;
 
+	private final TaskConfigurationProperties taskConfigurationProperties;
+
 
 	public DefaultTaskJobService(
-			JobService jobService,
-			DataflowTaskExplorer taskExplorer,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskExecutionService taskExecutionService,
-			LauncherRepository launcherRepository) {
+		JobService jobService,
+		DataflowTaskExplorer taskExplorer,
+		TaskDefinitionRepository taskDefinitionRepository,
+		TaskExecutionService taskExecutionService,
+		LauncherRepository launcherRepository,
+		TaskConfigurationProperties taskConfigurationProperties) {
 		Assert.notNull(jobService, "jobService must not be null");
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
 		Assert.notNull(taskDefinitionRepository, "taskDefinitionRepository must not be null");
@@ -101,6 +103,7 @@ public class DefaultTaskJobService implements TaskJobService {
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskExecutionService = taskExecutionService;
 		this.launcherRepository = launcherRepository;
+		this.taskConfigurationProperties = taskConfigurationProperties;
 	}
 
 	@Override
@@ -218,6 +221,11 @@ public class DefaultTaskJobService implements TaskJobService {
 
 	@Override
 	public void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException {
+		restartJobExecution(jobExecutionId, null);
+	}
+
+	@Override
+	public void restartJobExecution(long jobExecutionId, Boolean useJsonJobParameters) throws NoSuchJobExecutionException {
 		logger.info("restarting job:{}", jobExecutionId);
 		final TaskJobExecution taskJobExecution = this.getJobExecution(jobExecutionId);
 		final JobExecution jobExecution = taskJobExecution.getJobExecution();
@@ -253,7 +261,7 @@ public class DefaultTaskJobService implements TaskJobService {
 			deploymentProperties.put(DefaultTaskExecutionService.TASK_PLATFORM_NAME, platformName);
 			taskExecutionService.executeTask(taskDefinition.getName(), deploymentProperties,
 					restartExecutionArgs(taskExecution.getArguments(),
-							taskJobExecution.getJobExecution().getJobParameters()));
+							taskJobExecution.getJobExecution().getJobParameters(), useJsonJobParameters));
 		} else {
 			throw new IllegalStateException(String.format("Did not find platform for taskName=[%s] , taskId=[%s]",
 					taskExecution.getTaskName(), taskJobExecution.getTaskId()));
@@ -269,28 +277,23 @@ public class DefaultTaskJobService implements TaskJobService {
 	 *
 	 * @param taskExecutionArgs original set of task execution arguments
 	 * @param jobParameters     for the job to be restarted.
+	 * @param useJsonJobParameters determine what converter to use to serialize the job parameter to the command line arguments.
 	 * @return deduped list of arguments that contains the original arguments and any
 	 * identifying job parameters not in the original task execution arguments.
 	 */
-	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters) {
-		List<String> result = new ArrayList<>(taskExecutionArgs);
-		String type;
-		Map<String, JobParameter<?>> jobParametersMap = jobParameters.getParameters();
-		for (String key : jobParametersMap.keySet()) {
-			if (!key.startsWith("-")) {
-				boolean existsFlag = false;
-				for (String arg : taskExecutionArgs) {
-					if (arg.startsWith(key)) {
-						existsFlag = true;
-						break;
-					}
-				}
-				if (!existsFlag) {
-					type = jobParametersMap.get(key).getType().getCanonicalName();
-					result.add(String.format("%s=%s,%s", key, jobParametersMap.get(key).getValue(), type));
-				}
-			}
+	private List<String> restartExecutionArgs(List<String> taskExecutionArgs, JobParameters jobParameters,
+		Boolean useJsonJobParameters) {
+		if (useJsonJobParameters == null) {
+			useJsonJobParameters = taskConfigurationProperties.isUseJsonJobParameters();
 		}
+		var jobParamsConverter = useJsonJobParameters ? new ScdfJsonJobParametersConverter()
+			: new ScdfDefaultJobParametersConverter();
+		List<String> result = new ArrayList<>(taskExecutionArgs);
+		jobParameters.getParameters().entrySet().stream()
+			.filter((e) -> !e.getKey().startsWith("-"))
+			.filter((e) -> taskExecutionArgs.stream().noneMatch((arg) -> arg.startsWith(e.getKey())))
+			.map((e) -> e.getKey() + "=" + jobParamsConverter.deserializeJobParameter(e.getValue()))
+			.forEach(result::add);
 		return result;
 	}
 

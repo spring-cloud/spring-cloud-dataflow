@@ -111,7 +111,7 @@ class JobExecutionControllerTests {
 	}
 
 	@Test
-	void getExecutionNotFound() throws Exception {
+	public void testGetExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNotFound());
@@ -196,6 +196,16 @@ class JobExecutionControllerTests {
 			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
 		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true");
 		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"java.lang.String\"");
+	}
+
+	@Test
+	public void testGetExecutionWithJobPropertiesOverrideJobParam() throws Exception {
+		MvcResult result = mockMvc.perform(get("/jobs/executions/10?useJsonJobParameters=true").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.executionId", is(10)))
+			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
+			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
+		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true", "\"type\":\"java.lang.String\"");
 	}
 
 	@Test

@@ -325,6 +325,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	public void jobRestart() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "2")
 						.queryParam("restart", "true")
+						.queryParam("useJsonJobParameters", "true")
 				)
 				.andDo(print())
 				.andExpect(status().isOk())
@@ -332,6 +333,9 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								pathParameters(parameterWithName("id")
 										.description("The id of an existing job execution (required)"))
 								, queryParameters(
+										parameterWithName("useJsonJobParameters").description("If true dataflow will " +
+											"serialize job parameters as JSON.  Default is null, and the default " +
+											"configuration will be used to determine serialization method.").optional(),
 										parameterWithName("restart")
 												.description("Sends signal to restart the job if set to true")
 								)
