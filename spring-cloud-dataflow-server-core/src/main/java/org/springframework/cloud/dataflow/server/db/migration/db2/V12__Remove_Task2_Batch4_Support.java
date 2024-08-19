@@ -26,7 +26,7 @@ import org.springframework.cloud.dataflow.server.db.migration.AbstractRemoveBatc
  *
  * @author Glenn Renfro
  */
-public class V10__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
+public class V12__Remove_Task2_Batch4_Support extends AbstractRemoveBatch4Task2Tables {
 
 	/*
 	 * Scripts to remove views used for Task V2/Batch V4 Task V3/Batch V5 queries.
