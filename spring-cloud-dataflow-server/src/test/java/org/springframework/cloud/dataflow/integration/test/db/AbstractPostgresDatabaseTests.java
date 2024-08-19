@@ -94,7 +94,7 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 		objectMapper.registerModule(new Jackson2DataflowModule());
 		final DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(new URI(dataflowCluster.getDataflowUrl()), objectMapper);
 		dataFlowTemplate.appRegistryOperations().register("time", ApplicationType.source, "docker:springcloudstream/time-source-rabbit:5.0.0", null, false);
-		dataFlowTemplate.appRegistryOperations().register("log", ApplicationType.sink, "docker:springcloudstream/log-sink-rabbit:3.2.1", null, false);
+		dataFlowTemplate.appRegistryOperations().register("log", ApplicationType.sink, "docker:springcloudstream/log-sink-rabbit:5.0.0", null, false);
 		dataFlowTemplate.streamOperations().createStream("timelogger", "time | log", "timelogger", false);
 
 		StreamDefinitionResource timelogger = dataFlowTemplate.streamOperations().getStreamDefinition("timelogger");
