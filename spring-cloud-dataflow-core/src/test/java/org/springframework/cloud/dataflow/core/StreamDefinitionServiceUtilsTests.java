@@ -60,7 +60,6 @@ class StreamDefinitionServiceUtilsTests {
 		reverseDslTest("time | filter | log", 3);
 	}
 
-	@Disabled
 	@Test
 	void xd24161() {
 		reverseDslTest("http | transform --expression='payload.replace(\"abc\", \"\")' | log", 3);

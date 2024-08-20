@@ -1113,7 +1113,7 @@ public abstract class DefaultTaskExecutionServiceTests {
 			assertThatThrownBy(() -> {
 				initializeSuccessfulRegistry(appRegistry);
 				ValidationStatus validationStatus = taskValidationService.validateTask("simpleTask");
-				assertThat(validationStatus.getAppsStatuses().get("task:simpleTask")).isEqualTo("valid");
+				assertThat(validationStatus.getAppsStatuses()).containsEntry("task:simpleTask", "valid");
 			}).isInstanceOf(NoSuchTaskDefinitionException.class);
 		}
 

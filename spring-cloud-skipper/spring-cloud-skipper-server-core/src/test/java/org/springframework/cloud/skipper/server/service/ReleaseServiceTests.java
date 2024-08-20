@@ -344,7 +344,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		// Delete
 		delete(releaseName, true);
 
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(0);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).isEmpty();
 	}
 
 	@Test
@@ -464,7 +464,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 		// Successful deletion of release and its package.
 		assertReleaseStatus(RELEASE_ONE, StatusCode.DELETED);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(0);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).isEmpty();
 	}
 
 	private Release install(String releaseName, PackageIdentifier packageIdentifier) throws InterruptedException {

@@ -160,7 +160,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		// Second attempt to delete 'release1' along with its package 'log'.
 		mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
 				.andDo(print()).andExpect(status().isOk()).andReturn();
-		assertThat(this.packageMetadataRepository.findByName("log")).hasSize(0);
+		assertThat(this.packageMetadataRepository.findByName("log")).isEmpty();
 
 	}
 
@@ -286,8 +286,8 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(appStatusCopy.getState()).isNotNull();
 		assertThat(appStatusCopy.getState()).isEqualTo(appStatusWithGeneralState.getState());
 
-		assertThat(appStatusWithGeneralState.getInstances()).hasSize(0);
-		assertThat(appStatusCopy.getInstances()).hasSize(0);
+		assertThat(appStatusWithGeneralState.getInstances()).isEmpty();
+		assertThat(appStatusCopy.getInstances()).isEmpty();
 
 		// Test AppStatus with instances
 		AppStatus appStatusWithInstances = AppStatus.of("id666").generalState(null)
