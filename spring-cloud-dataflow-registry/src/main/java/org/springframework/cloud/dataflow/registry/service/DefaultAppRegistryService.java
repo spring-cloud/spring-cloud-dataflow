@@ -432,8 +432,6 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				} catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
-			} else if (!"bootVersion".equals(extra)) {
-				throw new IllegalArgumentException("Invalid property: " + lineSplit[0]);
 			}
 		}
 		registrations.put(key, ar);
