@@ -87,7 +87,7 @@ The default _app-name_ is `scdf-${SCDF_TYPE}`.
 | register-apps.sh
 | <broker> [stream-application-version]
 | _broker_ must be one of rabbit or kafka.
-_stream-application-version_ is optional and will install the latest version. The latest version is 2021.1.2
+_stream-application-version_ is optional and will install the latest version. The latest version is 2024.0.0
 |===
 
 NOTE: Take note that the registration of application in the _pro_ version can take a few minutes since it retrieves all version information and metadata upfront.
