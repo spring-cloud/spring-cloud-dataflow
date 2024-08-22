@@ -202,10 +202,10 @@ public class ContainerImageRestTemplateFactory {
 								.setDefaultRequestConfig(RequestConfig.custom().setNormalizeUri(false).build())
 								.build());
 
-		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
-		// Similarly the Github CR response's media-type is always text/plain although the content is in JSON.
-		// Therefore we extend the MappingJackson2HttpMessageConverter media-types to
-		// include application/octet-stream and text/plain.
+		// Extend the MappingJackson2HttpMessageConverter to support the following:
+		// - DockerHub response media-type is application/octet-stream although the content is in JSON
+		// - Github CR response media-type is text/plain although the content is in JSON
+		// - quay.io response media-type is binary/octet-stream although the content is in JSON
 		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
 		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
