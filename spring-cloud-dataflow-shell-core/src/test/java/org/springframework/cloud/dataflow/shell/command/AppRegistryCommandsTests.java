@@ -104,8 +104,8 @@ class AppRegistryCommandsTests extends AbstractShellIntegrationTest {
 
 		@Test
 		void taskAppBootVersion() {
-			AppRegistration registration = registerTimestampTask("timestamp3", "3.2.1", "--bootVersion 3", false);
-			assertThat(registration.getVersion()).isEqualTo("3.2.1");
+			AppRegistration registration = registerTimestampTask("timestamp3", "5.0.0", "--bootVersion 3", false);
+			assertThat(registration.getVersion()).isEqualTo("5.0.0");
 		}
 
 		@Test
@@ -113,8 +113,8 @@ class AppRegistryCommandsTests extends AbstractShellIntegrationTest {
 			AppRegistration registration = registerTimestampTask("timestamp2to3", "3.2.0", "-b 2", false);
 			assertThat(registration.getVersion()).isEqualTo("3.2.0");
 			// The 'force=true' signals to udpate the existing 'timestamp2to3' app
-			registration = registerTimestampTask("timestamp2to3", "3.2.1", "-b 3", true);
-			assertThat(registration.getVersion()).isEqualTo("3.2.1");
+			registration = registerTimestampTask("timestamp2to3", "5.0.0", "-b 3", true);
+			assertThat(registration.getVersion()).isEqualTo("5.0.0");
 		}
 	}
 }

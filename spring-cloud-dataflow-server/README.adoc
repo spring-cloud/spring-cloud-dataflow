@@ -157,7 +157,7 @@ SCDF, Skipper servers installed, or the versions Stream and Task apps:
 ----
 ./mvnw clean test-compile failsafe:integration-test -pl spring-cloud-dataflow-server -Pfailsafe -Dgroups="docker-compose" \
    -Dtest.docker.compose.paths="../src/docker-compose/docker-compose.yml,../src/docker-compose/docker-compose-influxdb.yml,../src/docker-compose/docker-compose-postgres.yml,../src/docker-compose/docker-compose-rabbitmq.yml" \
-   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/rabbitmq-maven-latest \
+   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/rabbitmq-maven-5-0-x \
    -Dtest.docker.compose.dataflow.version=2.8.0-SNAPSHOT \
    -Dtest.docker.compose.skipper.version=2.7.0-SNAPSHOT \
 ----
@@ -171,8 +171,8 @@ The `test.docker.compose.paths` property accepts comma separated list of docker 
     ../src/docker-compose/docker-compose-kafka.yml, \
     ../src/docker-compose/docker-compose-dood.yml, \
     ../src/docker-compose/docker-compose-prometheus.yml" \
-   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/kafka-docker-latest \
-   -Dtest.docker.compose.task.apps.uri=https://dataflow.spring.io/task-docker-latest \
+   -Dtest.docker.compose.stream.apps.uri=https://dataflow.spring.io/kafka-docker-5-0-x \
+   -Dtest.docker.compose.task.apps.uri=https://dataflow.spring.io/task-docker-3-0-x \
    -Dtest.docker.compose.dataflow.version=2.8.0-SNAPSHOT \
    -Dtest.docker.compose.skipper.version=2.7.0-SNAPSHOT \
    -Dtest.docker.compose.apps.port.range=80 \

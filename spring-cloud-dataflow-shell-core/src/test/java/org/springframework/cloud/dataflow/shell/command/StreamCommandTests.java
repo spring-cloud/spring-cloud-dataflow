@@ -87,7 +87,7 @@ class StreamCommandTests extends AbstractShellIntegrationTest {
 		Deployer deployer = new Deployer("testDeployer", "testType", appDeployer, mock(ActuatorOperations.class));
 		when(skipperClient.listDeployers()).thenReturn(Arrays.asList(deployer));
 		stream().create(streamName, "time | log");
-		stream().update(streamName, "version.log=3.2.1","Update request has been sent for the stream");
+		stream().update(streamName, "version.log=5.0.0","Update request has been sent for the stream");
 	}
 
 	@Test

@@ -67,8 +67,8 @@ The following examples show typical application definitions:
 ====
 [source,subs=properties]
 ----
-task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:1.2.0.RELEASE
-processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:1.2.0.RELEASE
+task.timestamp=maven://org.springframework.cloud.task.app:timestamp-task:3.0.0
+processor.transform=maven://org.springframework.cloud.stream.app:transform-processor-rabbit:5.0.0
 ----
 ====
 

@@ -944,6 +944,7 @@ class StreamControllerTests {
 		assertThat(timePackage).isNotNull();
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
+
 		assertThat(logSpec.getApplicationProperties()).containsEntry("log.level", "WARN");
 		assertThat(logSpec.getApplicationProperties().get("level")).isNull();
 
@@ -987,7 +988,7 @@ class StreamControllerTests {
 		assertThat(timePackage).isNotNull();
 
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
-		assertThat(logSpec.getApplicationProperties()).containsKey("log.level");
+		assertThat(logSpec.getApplicationProperties()).containsKey("log.consumer.level");
 		assertThat(logSpec.getApplicationProperties()).containsKey("extra");
 		assertThat(logSpec.getApplicationProperties()).containsEntry("log.level", "ERROR");
 		assertThat(logSpec.getApplicationProperties()).containsEntry("extra", "foo-bar");
@@ -1027,6 +1028,7 @@ class StreamControllerTests {
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		logger.info("log:applicationProperties={}", logSpec.getApplicationProperties());
 		logger.info("log:deploymentProperties={}", logSpec.getDeploymentProperties());
+
 		assertThat(logSpec.getApplicationProperties()).containsEntry("log.level", "ERROR");
 
 		SpringCloudDeployerApplicationSpec timeSpec = parseSpec(timePackage.getConfigValues().getRaw());
