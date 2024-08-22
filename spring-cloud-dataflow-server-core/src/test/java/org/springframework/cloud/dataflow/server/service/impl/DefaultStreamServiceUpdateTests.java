@@ -57,6 +57,7 @@ import org.yaml.snakeyaml.representer.Representer;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -84,7 +85,7 @@ public class DefaultStreamServiceUpdateTests {
 	@Test
 	void createUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
-				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.1"),
+				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:5.0.0"),
 				null);
 		testCreateUpdateRequests();
 	}

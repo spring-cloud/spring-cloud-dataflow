@@ -165,7 +165,7 @@ class DefaultTaskJobServiceTests {
 	}
 
 	@Test
-	public void testRestartWithJsonParameters() throws Exception {
+	void restartWithJsonParameters() throws Exception {
 		createBaseLaunchers();
 		initializeJobs(true);
 

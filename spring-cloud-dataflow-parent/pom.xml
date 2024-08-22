@@ -39,7 +39,7 @@
 		<joda-time.version>2.12.7</joda-time.version>
 		<aws-java-sdk-ecr.version>1.12.513</aws-java-sdk-ecr.version>
 		<!-- only used for dataflow managed stream applications, e.g., tasklauncher -->
-		<stream-applications.version>3.2.1</stream-applications.version>
+		<stream-applications.version>5.0.0</stream-applications.version>
 		<wavefront-spring-boot-bom.version>3.2.0</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.14</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.14</spring-cloud-dataflow-apps-metadata-plugin.version>

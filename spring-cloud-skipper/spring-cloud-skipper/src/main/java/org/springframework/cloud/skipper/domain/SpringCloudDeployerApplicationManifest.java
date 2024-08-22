@@ -32,8 +32,8 @@ import org.springframework.cloud.skipper.SkipperException;
  *   name: log-sink
  *   type: sink
  * spec:
- * resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.2.0.RELEASE
- * resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:1.2.0.RELEASE
+ * resource: maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
+ * resourceMetadata: maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:5.0.0
  * applicationProperties:
  *  log.level: INFO
  *  log.expression: hellobaby

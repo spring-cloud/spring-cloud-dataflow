@@ -95,7 +95,7 @@ import org.yaml.snakeyaml.representer.Representer;
 @TestPropertySource(properties = {"spring.main.banner-mode=off"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class DefaultStreamServiceIntegrationTests {
+class DefaultStreamServiceIntegrationTests {
 
 	@Autowired
 	private StreamService streamService;
