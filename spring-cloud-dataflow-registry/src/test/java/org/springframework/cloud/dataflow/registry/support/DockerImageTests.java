@@ -115,7 +115,7 @@ public class DockerImageTests {
 
 	@MethodSource("data")
 	@ParameterizedTest
-	public void dockerImageParsing(String description, String fullImageName, String expectedHost, String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
+	void dockerImageParsing(String description, String fullImageName, String expectedHost, String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
 
 		initDockerImageTests(description, fullImageName, expectedHost, expectedNamespace, expectedRepo, expectedNamespaceAndRepo, expectedTag);
 

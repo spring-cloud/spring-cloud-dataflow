@@ -20,9 +20,9 @@ import java.io.IOException;
 
 import javax.sql.DataSource;
 
-import org.junit.After;
-import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +69,7 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
-	@Rule
+	@RegisterExtension
 	public LogTestNameRule logTestName = new LogTestNameRule();
 
 	@Autowired
@@ -102,7 +102,7 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 		dbScriptFile.deleteOnExit();
 	}
 
-	@After
+	@AfterEach
 	public void restoreEmptySchema() {
 		// Add a sleep for now to give the local deployer a chance to install the app. This
 		// should go away once we introduce spring state machine.

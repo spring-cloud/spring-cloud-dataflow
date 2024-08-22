@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.cloud.dataflow.server.db.DB2_11_5_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MariaDB_10_6_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MariaDB_11_ContainerSupport;
@@ -30,8 +29,6 @@ import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSuppor
 import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class DatabaseTypeTests {
 
