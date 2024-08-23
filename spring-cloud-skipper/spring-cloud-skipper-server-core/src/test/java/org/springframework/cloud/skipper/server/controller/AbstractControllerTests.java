@@ -15,7 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,7 @@ public abstract class AbstractControllerTests extends AbstractMockMvcTests {
 		this.releaseRepository.deleteAll();
 	}
 
-	@After
+	@AfterEach
 	public void cleanupReleases() throws Exception {
 		// Add a sleep for now to give the local deployer a chance to install the app.
 		// This

@@ -51,8 +51,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -159,8 +159,9 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Job Execution Detail by Id");
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals("Number of expected rows returned from the table is incorrect", 19,
-				table.getModel().getRowCount());
+		assertEquals(19,
+				table.getModel().getRowCount(),
+				"Number of expected rows returned from the table is incorrect");
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
 		checkCell(table, rowNumber++, 0, "Job Execution Id ");
@@ -180,14 +181,14 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, rowNumber++, 0, "Job Parameters ");
 		int paramRowOne = rowNumber;
 
-		assertTrue("the table did not contain the correct job parameters for job parameter value foo",
-			checkModelColumn(paramRowOne, table, "-foo(java.lang.String) "));
+		assertTrue(checkModelColumn(paramRowOne, table, "-foo(java.lang.String) "),
+			"the table did not contain the correct job parameters for job parameter value foo");
 
-		assertTrue("the table did not contain the correct job parameters for job parameter value bar",
-			checkModelColumn(paramRowOne, table, "bar(java.lang.String) "));
+		assertTrue(checkModelColumn(paramRowOne, table, "bar(java.lang.String) "),
+			"the table did not contain the correct job parameters for job parameter value bar");
 
-		assertTrue("the table did not contain the correct job parameters for job parameter value baz",
-			checkModelColumn(paramRowOne, table, "baz(java.lang.Long) "));
+		assertTrue(checkModelColumn(paramRowOne, table, "baz(java.lang.Long) "),
+			"the table did not contain the correct job parameters for job parameter value baz");
 
 	}
 

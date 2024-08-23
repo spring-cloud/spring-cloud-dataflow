@@ -16,22 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +37,7 @@ import org.springframework.cloud.dataflow.server.configuration.TestDependencies;
 import org.springframework.cloud.dataflow.server.registry.DataFlowAppRegistryPopulator;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.StreamService;
-import org.springframework.cloud.dataflow.server.service.impl.DefaultStreamServiceIntegrationTests;
 import org.springframework.cloud.dataflow.server.support.MockUtils;
-import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -73,6 +55,22 @@ import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 
 /**
  * Tests for {@link AppRegistryController}
@@ -85,7 +83,7 @@ import org.springframework.web.context.WebApplicationContext;
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Transactional
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class AppRegistryControllerTests {
+class AppRegistryControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -318,26 +316,26 @@ public class AppRegistryControllerTests {
 	void registerAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri())
-				.hasToString("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:5.0.0");
+			.hasToString("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:5.0.0");
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri())
-				.hasToString("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:5.0.0");
+			.hasToString("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:5.0.0");
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri())
-				.hasToString("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:5.0.0");
+			.hasToString("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:5.0.0");
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri())
-				.hasToString("maven://org" + ".springframework.cloud.task.app:timestamp-task:5.0.0");
+			.hasToString("maven://org" + ".springframework.cloud.task.app:timestamp-task:5.0.0");
 	}
 
 	@Test
 	void registerAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
 		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri())
-				.hasToString("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:5.0.0");
+			.hasToString("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:5.0.0");
 		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri())
-				.hasToString("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:5.0.0");
+			.hasToString("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:5.0.0");
 		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri())
-				.hasToString("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:5.0.0");
+			.hasToString("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:5.0.0");
 		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri())
-				.hasToString("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:5.0.0");
+			.hasToString("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:5.0.0");
 	}
 
 	@Test
@@ -550,9 +548,7 @@ public class AppRegistryControllerTests {
 		streamDefinitionRepository.save(streamDefinition);
 
 		// configure mock SkipperClient
-		String expectedReleaseManifest = StreamUtils.copyToString(
-				TestResourceUtils.qualifiedResource(DefaultStreamServiceIntegrationTests.class,
-						"deployManifest.yml").getInputStream(),
+		String expectedReleaseManifest = StreamUtils.copyToString(new ClassPathResource("org/springframework/cloud/dataflow/server/service/impl/DefaultStreamServiceIntegrationTests-deployManifest.yml").getInputStream(),
 				Charset.defaultCharset());
 		Release release = new Release();
 		Manifest manifest = new Manifest();

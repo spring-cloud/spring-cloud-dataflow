@@ -57,6 +57,7 @@ import org.yaml.snakeyaml.representer.Representer;
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

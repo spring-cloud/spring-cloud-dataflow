@@ -111,7 +111,7 @@ class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception {
+	void getExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
 				.andDo(print())
 				.andExpect(status().isNotFound());
@@ -199,7 +199,7 @@ class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionWithJobPropertiesOverrideJobParam() throws Exception {
+	void getExecutionWithJobPropertiesOverrideJobParam() throws Exception {
 		MvcResult result = mockMvc.perform(get("/jobs/executions/10?useJsonJobParameters=true").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.executionId", is(10)))

@@ -989,7 +989,7 @@ class StreamControllerTests {
 		SpringCloudDeployerApplicationSpec logSpec = parseSpec(logPackage.getConfigValues().getRaw());
 		assertThat(logSpec.getApplicationProperties()).containsKey("log.consumer.level");
 		assertThat(logSpec.getApplicationProperties()).containsKey("extra");
-		assertThat(logSpec.getApplicationProperties()).containsEntry("log.level", "ERROR");
+		assertThat(logSpec.getApplicationProperties()).containsEntry("log.consumer.level", "ERROR");
 		assertThat(logSpec.getApplicationProperties()).containsEntry("extra", "foo-bar");
 
 
