@@ -26,20 +26,24 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
+    - name: Login dockerhub
+      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
+      uses: docker/login-action@v3
       with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-#    - name: Login dockerhub
-#      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
-#      uses: docker/login-action@v3
-#      with:
-#        username: ${{ secrets.DOCKERHUB_USERNAME }}
-#        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
     # build
     - name: Build
       run: |
-        mvn -B -s .github/settings.xml clean install
+        ./mvnw -B -s .github/settings.xml -Pfull,asciidoctordocs,restdocs clean install
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: ${{ success() || failure() }}
+      with:
+        name: Unit Tests
+        path: '**/surefire-reports/*.xml'
+        reporter: java-junit
+        list-tests: failed
     - name: Capture Test Results
       if: failure()
       uses: actions/upload-artifact@v3
