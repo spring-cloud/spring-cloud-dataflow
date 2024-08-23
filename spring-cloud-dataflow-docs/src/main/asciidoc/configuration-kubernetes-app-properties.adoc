@@ -1128,7 +1128,7 @@ Replace the `statefulSetInitContainerImageName` attribute with the appropriate v
 When you deploy applications, you can set a custom Init Container on a per-application basis.
 Refer to the https://kubernetes.io/docs/concepts/workloads/pods/init-containers/[Init Containers] section of the Kubernetes reference for more information.
 
-The following example shows how you can configure an Init Container for an application:
+The following example shows how you can configure an Init Container or multiple Init Containers for an application:
 
 ====
 [source,options=nowrap]
