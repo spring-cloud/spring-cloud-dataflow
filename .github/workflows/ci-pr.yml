@@ -26,16 +26,17 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - name: Login dockerhub
-      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+# secrets not available to PR.
+#    - name: Login dockerhub
+#      if: ${{ secrets.DOCKERHUB_USERNAME != null && secrets.DOCKERHUB_USERNAME != '' }}
+#      uses: docker/login-action@v3
+#      with:
+#        username: ${{ secrets.DOCKERHUB_USERNAME }}
+#        password: ${{ secrets.DOCKERHUB_TOKEN }}
     # build
     - name: Build
       run: |
-        ./mvnw -B -s .github/settings.xml -Pfull,asciidoctordocs,restdocs clean install
+        ./mvnw -B -s .github/settings.xml -Pasciidoctordocs,restdocs clean install
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}
