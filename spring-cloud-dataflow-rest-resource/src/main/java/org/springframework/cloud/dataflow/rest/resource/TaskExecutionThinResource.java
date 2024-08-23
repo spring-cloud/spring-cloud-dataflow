@@ -17,7 +17,7 @@ package org.springframework.cloud.dataflow.rest.resource;
 
 import java.time.LocalDateTime;
 
-import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -66,15 +66,14 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 
 	private String errorMessage;
 
+	private String composedTaskJobExecutionStatus;
 
 	public TaskExecutionThinResource() {
 	}
 
-	public TaskExecutionThinResource(TaskExecution taskExecution) {
+	public TaskExecutionThinResource(ThinTaskExecution taskExecution) {
 		this.executionId = taskExecution.getExecutionId();
-
 		this.taskName = taskExecution.getTaskName();
-
 		this.externalExecutionId = taskExecution.getExternalExecutionId();
 		this.parentExecutionId =taskExecution.getParentExecutionId();
 		this.startTime = taskExecution.getStartTime();
@@ -82,6 +81,7 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.exitCode = taskExecution.getExitCode();
 		this.exitMessage = taskExecution.getExitMessage();
 		this.errorMessage = taskExecution.getErrorMessage();
+		this.composedTaskJobExecutionStatus = taskExecution.getCtrTaskStatus();
 	}
 
 	public long getExecutionId() {
@@ -156,6 +156,30 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.errorMessage = errorMessage;
 	}
 
+	public String getComposedTaskJobExecutionStatus() {
+		return composedTaskJobExecutionStatus;
+	}
+
+	public void setComposedTaskJobExecutionStatus(String composedTaskJobExecutionStatus) {
+		this.composedTaskJobExecutionStatus = composedTaskJobExecutionStatus;
+	}
+
+	public TaskExecutionStatus getTaskExecutionStatus() {
+		if (this.startTime == null) {
+			return TaskExecutionStatus.UNKNOWN;
+		}
+		if (this.endTime == null) {
+			return TaskExecutionStatus.RUNNING;
+		}
+		if (this.composedTaskJobExecutionStatus != null) {
+			return (this.composedTaskJobExecutionStatus.equals("ABANDONED") ||
+					this.composedTaskJobExecutionStatus.equals("FAILED") ||
+					this.composedTaskJobExecutionStatus.equals("STOPPED")) ?
+					TaskExecutionStatus.ERROR : TaskExecutionStatus.COMPLETE;
+		}
+		return (this.exitCode == null) ? TaskExecutionStatus.RUNNING :
+				((this.exitCode == 0) ? TaskExecutionStatus.COMPLETE : TaskExecutionStatus.ERROR);
+	}
 	public static class Page extends PagedModel<TaskExecutionThinResource> {
 	}
 }

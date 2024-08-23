@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.data.domain.Page;
@@ -166,4 +167,5 @@ public interface DataflowTaskExecutionQueryDao {
 
 	TaskExecution geTaskExecutionByExecutionId(String executionId, String taskName);
 
+	void populateCtrStatus(Collection<ThinTaskExecution> aggregateTaskExecutions);
 }
