@@ -317,27 +317,27 @@ public class AppRegistryControllerTests {
 	@Test
 	void registerAllWithoutForce() throws Exception {
 		this.appRegistryService.importAll(false, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
-		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:5.0.0");
-		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:5.0.0");
-		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
-				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:5.0.0");
-		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-task:5.0.0");
+		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri())
+				.hasToString("maven://org" + ".springframework.cloud.stream.app:time-source-rabbit:5.0.0");
+		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri())
+				.hasToString("maven://org" + ".springframework.cloud.stream.app:filter-processor-rabbit:5.0.0");
+		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri())
+				.hasToString("maven://org.springframework" + ".cloud.stream.app:log-sink-rabbit:5.0.0");
+		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri())
+				.hasToString("maven://org" + ".springframework.cloud.task.app:timestamp-task:5.0.0");
 	}
 
 	@Test
 	void registerAllWithForce() throws Exception {
 		this.appRegistryService.importAll(true, new ClassPathResource("META-INF/test-apps-overwrite.properties"));
-		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:5.0.0");
-		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:5.0.0");
-		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri().toString())
-				.isEqualTo("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:5.0.0");
-		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri().toString())
-				.isEqualTo("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:5.0.0");
+		assertThat(this.appRegistryService.find("time", ApplicationType.source).getUri())
+				.hasToString("maven://org" + ".springframework.cloud.stream.app:time-source-kafka:5.0.0");
+		assertThat(this.appRegistryService.find("filter", ApplicationType.processor).getUri())
+				.hasToString("maven://org" + ".springframework.cloud.stream.app:filter-processor-kafka:5.0.0");
+		assertThat(this.appRegistryService.find("log", ApplicationType.sink).getUri())
+				.hasToString("maven://org.springframework" + ".cloud.stream.app:log-sink-kafka:5.0.0");
+		assertThat(this.appRegistryService.find("timestamp", ApplicationType.task).getUri())
+				.hasToString("maven://org" + ".springframework.cloud.task.app:timestamp-overwrite-task:5.0.0");
 	}
 
 	@Test
@@ -427,7 +427,7 @@ public class AppRegistryControllerTests {
 		mockMvc.perform(get("/apps/source/time?exhaustive=true").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(jsonPath("name", is("time")))
 				.andExpect(jsonPath("type", is("source")))
-				.andExpect(jsonPath("$.options[*]", hasSize(2059)));
+			.andExpect(jsonPath("$.options[*]", hasSize(2059)));
 	}
 
 	@Test
@@ -730,10 +730,12 @@ public class AppRegistryControllerTests {
 
 	@Test
 	void listApplicationsByVersionAndSearch() throws Exception {
-		mockMvc.perform(get("/apps?version=5.0.0&search=time").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=5.0.0&search=time").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(2)));
-		mockMvc.perform(get("/apps?version=5.0.0&search=timestamp").accept(MediaType.APPLICATION_JSON)).andDo(print())
+		mockMvc.perform(get("/apps?version=5.0.0&search=timestamp").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("_embedded.appRegistrationResourceList", hasSize(1)));
 	}
