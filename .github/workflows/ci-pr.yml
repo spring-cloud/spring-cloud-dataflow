@@ -37,21 +37,6 @@ jobs:
     - name: Build
       run: |
         ./mvnw -B -s .github/settings.xml -Pasciidoctordocs,restdocs clean install
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: ${{ success() || failure() }}
-      with:
-        name: Unit Tests
-        path: '**/surefire-reports/*.xml'
-        reporter: java-junit
-        list-tests: failed
-    - name: Capture Test Results
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: Unit Tests
-        path: '**/surefire-reports/*.xml'
-        retention-days: 3
     # clean m2 cache
     - name: Clean cache
       run: |
