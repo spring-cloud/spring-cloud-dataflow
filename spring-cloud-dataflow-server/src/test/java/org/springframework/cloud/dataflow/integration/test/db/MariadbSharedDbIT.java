@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.integration.test.db;
 
-import org.junit.jupiter.api.Disabled;
 import org.springframework.cloud.dataflow.integration.test.tags.DatabaseShared;
 import org.springframework.cloud.dataflow.integration.test.tags.Mariadb;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
@@ -25,8 +24,6 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * Database tests for {@code mariadb 10.3} using shared db.
  */
-@Disabled("TODO: Boot3x followup Enable once Spring Cloud Skipper has successfully built and pushed its bits to dockerhub")
-//TODO: Boot3x followup
 @Mariadb
 @DatabaseShared
 @ActiveProfiles({TagNames.PROFILE_DB_SHARED})

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.integration.test.db;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,7 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
+	@Disabled("TODO: Enable once Java 21 images are supported")
 	public void latestSharedDbJdk21() {
 		log.info("Running testLatestSharedDb()");
 		// start defined database
