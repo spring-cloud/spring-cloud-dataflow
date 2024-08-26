@@ -14,9 +14,6 @@ for image in $IMAGES; do
     $K8S/load-image.sh "$image"
   fi
 done
-#$K8S/load-image.sh "quay.io/jetstack/cert-manager-controller:$CERT_MANAGER_VERSION"
-#$K8S/load-image.sh "quay.io/jetstack/cert-manager-cainjector:$CERT_MANAGER_VERSION"
-#$K8S/load-image.sh "quay.io/jetstack/cert-manager-webhook:$CERT_MANAGER_VERSION"
 wget -q -O secretgen-release.yml "https://github.com/carvel-dev/secretgen-controller/releases/download/$SECRETGEN_CONTROLLER_VERSION/release.yml"
 IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' secretgen-release.yml)
 for image in $IMAGES; do
