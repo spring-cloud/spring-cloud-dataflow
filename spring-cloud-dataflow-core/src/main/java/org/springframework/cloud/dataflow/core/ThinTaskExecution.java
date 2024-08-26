@@ -21,7 +21,7 @@ import java.util.List;
 import org.springframework.cloud.task.repository.TaskExecution;
 
 /**
- * Provide for ctr status
+ * Overrides TaskExecution class to provide CTR status required.
  * @author Corneil du Plessis
  */
 public class ThinTaskExecution extends TaskExecution {

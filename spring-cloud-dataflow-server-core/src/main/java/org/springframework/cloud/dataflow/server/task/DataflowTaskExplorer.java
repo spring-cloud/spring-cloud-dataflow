@@ -179,7 +179,7 @@ public interface DataflowTaskExplorer {
 
 	/**
 	 * Populate CTR status for all tasks
-	 * @param aggregateTaskExecutions
+	 * @param thinTaskExecutions
 	 */
-	void populateCtrStatus(Collection<ThinTaskExecution> aggregateTaskExecutions);
+	void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions);
 }

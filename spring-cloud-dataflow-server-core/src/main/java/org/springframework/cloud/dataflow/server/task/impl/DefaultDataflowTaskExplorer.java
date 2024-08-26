@@ -187,7 +187,7 @@ public class DefaultDataflowTaskExplorer implements DataflowTaskExplorer {
 	}
 
 	@Override
-	public void populateCtrStatus(Collection<ThinTaskExecution> taskExecutions) {
-		this.taskExecutionQueryDao.populateCtrStatus(taskExecutions);
+	public void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions) {
+		this.taskExecutionQueryDao.populateCtrStatus(thinTaskExecutions);
 	}
 }

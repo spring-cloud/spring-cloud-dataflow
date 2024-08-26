@@ -28,7 +28,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -523,9 +522,8 @@ public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecuti
 	}
 
 	@Override
-	public void populateCtrStatus(Collection<ThinTaskExecution> taskExecutions) {
-		final AtomicInteger updated = new AtomicInteger(0);
-		Map<Long, ThinTaskExecution> taskExecutionMap = taskExecutions.stream()
+	public void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions) {
+		Map<Long, ThinTaskExecution> taskExecutionMap = thinTaskExecutions.stream()
 				.collect(Collectors.toMap(ThinTaskExecution::getExecutionId, Function.identity()));
 		String ids = taskExecutionMap.keySet()
 				.stream()
@@ -538,7 +536,6 @@ public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecuti
 			logger.debug("populateCtrStatus:{}={}", id, ctrStatus);
 			ThinTaskExecution execution = taskExecutionMap.get(id);
 			Assert.notNull(execution, "Expected TaskExecution for " + id + " from " + ids);
-			updated.incrementAndGet();
 			execution.setCtrTaskStatus(ctrStatus);
 		});
 	}

@@ -167,5 +167,5 @@ public interface DataflowTaskExecutionQueryDao {
 
 	TaskExecution geTaskExecutionByExecutionId(String executionId, String taskName);
 
-	void populateCtrStatus(Collection<ThinTaskExecution> aggregateTaskExecutions);
+	void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions);
 }
