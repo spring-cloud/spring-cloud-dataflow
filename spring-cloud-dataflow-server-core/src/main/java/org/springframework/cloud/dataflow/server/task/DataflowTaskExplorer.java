@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -175,4 +176,10 @@ public interface DataflowTaskExplorer {
 	 * @see #getLatestTaskExecutionsByTaskNames(String...)
 	 */
 	TaskExecution getLatestTaskExecutionForTaskName(String taskName);
+
+	/**
+	 * Populate CTR status for all tasks
+	 * @param thinTaskExecutions
+	 */
+	void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions);
 }

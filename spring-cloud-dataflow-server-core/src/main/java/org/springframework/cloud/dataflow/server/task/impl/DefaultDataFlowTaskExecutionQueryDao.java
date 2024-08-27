@@ -28,6 +28,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -35,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.item.database.Order;
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.database.PagingQueryProvider;
@@ -78,6 +81,14 @@ public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecuti
 
 	private static final String FIND_TASK_ARGUMENTS = "SELECT TASK_EXECUTION_ID, "
 			+ "TASK_PARAM from TASK_EXECUTION_PARAMS where TASK_EXECUTION_ID = :taskExecutionId";
+
+	private static final String FIND_CTR_STATUS = "SELECT T.TASK_EXECUTION_ID as TASK_EXECUTION_ID, J.EXIT_CODE as CTR_STATUS" +
+			" from TASK_EXECUTION T" +
+			" JOIN TASK_TASK_BATCH TB ON TB.TASK_EXECUTION_ID = T.TASK_EXECUTION_ID" +
+			" JOIN BATCH_JOB_EXECUTION J ON J.JOB_EXECUTION_ID = TB.JOB_EXECUTION_ID" +
+			" WHERE T.TASK_EXECUTION_ID in (:taskExecutionIds) " +
+			"    AND (select count(*) from TASK_EXECUTION CT" + // it is the parent of one or more tasks
+			"        where CT.PARENT_EXECUTION_ID = T.TASK_EXECUTION_ID) > 0";
 
 	private static final String GET_EXECUTIONS = "SELECT " + SELECT_CLAUSE +
 			" from TASK_EXECUTION";
@@ -508,5 +519,24 @@ public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecuti
 				new MapSqlParameterSource("taskExecutionId", taskExecutionId),
 				handler);
 		return params;
+	}
+
+	@Override
+	public void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions) {
+		Map<Long, ThinTaskExecution> taskExecutionMap = thinTaskExecutions.stream()
+				.collect(Collectors.toMap(ThinTaskExecution::getExecutionId, Function.identity()));
+		String ids = taskExecutionMap.keySet()
+				.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining(","));
+		String sql = FIND_CTR_STATUS.replace(":taskExecutionIds", ids);
+		jdbcTemplate.query(sql, rs -> {
+			Long id = rs.getLong("TASK_EXECUTION_ID");
+			String ctrStatus = rs.getString("CTR_STATUS");
+			logger.debug("populateCtrStatus:{}={}", id, ctrStatus);
+			ThinTaskExecution execution = taskExecutionMap.get(id);
+			Assert.notNull(execution, "Expected TaskExecution for " + id + " from " + ids);
+			execution.setCtrTaskStatus(ctrStatus);
+		});
 	}
 }

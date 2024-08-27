@@ -25,6 +25,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
@@ -185,4 +186,8 @@ public class DefaultDataflowTaskExplorer implements DataflowTaskExplorer {
 		return taskExplorer.getLatestTaskExecutionForTaskName(taskName);
 	}
 
+	@Override
+	public void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions) {
+		this.taskExecutionQueryDao.populateCtrStatus(thinTaskExecutions);
+	}
 }
