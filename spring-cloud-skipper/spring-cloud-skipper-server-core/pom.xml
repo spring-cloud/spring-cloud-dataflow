@@ -272,7 +272,7 @@
 			</build>
 		</profile>
 		<profile>
-			<id>restdocs</id>
+			<id>docs</id>
 			<build>
 				<plugins>
 					<plugin>

@@ -16,7 +16,7 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |
-        ./mvnw -B -s .github/settings.xml -Pasciidoctordocs,restdocs clean install
+        ./mvnw -B -s .github/settings.xml -Pdocs clean install
   scan:
     runs-on: ubuntu-latest
     steps:
