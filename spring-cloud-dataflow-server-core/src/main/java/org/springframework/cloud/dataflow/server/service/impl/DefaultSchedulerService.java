@@ -224,10 +224,12 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		String taskAppName = taskDefinition.getRegisteredAppName();
 		String taskLabel = taskDefinition.getAppDefinition().getName();
-		if(!StringUtils.hasText(taskLabel)) {
-			taskLabel = taskAppName;
-		}
 		String version = taskDeploymentProperties.get("version." + taskLabel);
+		if (version == null) {
+			version = taskDeploymentProperties.get("version." + taskAppName);
+		}
+
+
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, version, taskDefinition);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
