@@ -94,7 +94,7 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>asciidoctordocs</id>
+			<id>docs</id>
 			<build>
 				<plugins>
 					<plugin>

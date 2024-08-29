@@ -84,7 +84,7 @@ jobs:
           echo "::notice ::install"
           mvn -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C
           jfrog rt mvn -gs .github/settings.xml \
-            -Pstagingrelease,full,deploymentfiles,asciidoctordocs,restdocs \
+            -Pstagingrelease,full,deploymentfiles,docs \
             -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-docs \
             -B install -DskipTests
           echo "::notice ::build-publish"
