@@ -2,9 +2,15 @@
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
-CERT_MANAGER_VERSION=v1.14.2
-SECRETGEN_CONTROLLER_VERSION=v0.17.0
-KAPP_CONTROLLER_VERSION=v0.50.0
+if [ "$CERT_MANAGER_VERSION" = "" ]; then
+  CERT_MANAGER_VERSION=v1.14.2
+fi
+if [ "$SECRETGEN_CONTROLLER_VERSION" = "" ]; then
+  SECRETGEN_CONTROLLER_VERSION=v0.17.0
+fi
+if [ "$KAPP_CONTROLLER_VERSION" = "" ]; then
+  KAPP_CONTROLLER_VERSION=v0.53.0
+fi
 start_time=$(date +%s)
 echo "Deploying cert-manager $CERT_MANAGER_VERSION"
 kapp deploy --yes --wait --wait-check-interval 10s --app cert-manager \

@@ -15,6 +15,7 @@ fi
 check_env NS
 check_env PACKAGE
 check_env PACKAGE_NAME
+
 echo "Adding $PACKAGE as $PACKAGE_NAME in $NS"
 
 if [ "$DEBUG" = "true" ]; then
@@ -23,5 +24,27 @@ else
     ARGS=""
 fi
 echo "Creating $PACKAGE_NAME for $PACKAGE"
-kctrl package repository add --namespace $NS --repository $PACKAGE_NAME --url $PACKAGE --yes --wait --wait-check-interval 10s $ARGS
+if [ "$REPO_SECRET_REF" = "" ]; then
+  if [[ "$PACKAGE_NAME" == *"pro"* ]]; then
+    REPO_SECRET_REF=reg-creds-dev-registry
+  else
+    REPO_SECRET_REF=reg-creds-dockerhub
+  fi
+fi
+
+echo "Using secretRef=$REPO_SECRET_REF in $PACKAGE_NAME for $PACKAGE"
+
+kubectl apply --namespace $NS -f -  <<EOF
+apiVersion: packaging.carvel.dev/v1alpha1
+kind: PackageRepository
+metadata:
+  name: $PACKAGE_NAME
+spec:
+  fetch:
+    imgpkgBundle:
+      image: $PACKAGE
+      secretRef:
+        name: $REPO_SECRET_REF
+EOF
+kctrl package repository kick --namespace $NS --repository $PACKAGE_NAME --yes --wait --wait-check-interval 10s
 kctrl package repository list --namespace $NS

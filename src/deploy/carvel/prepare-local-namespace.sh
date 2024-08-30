@@ -36,8 +36,8 @@ $SCDIR/add-roles.sh "system:aggregate-to-edit" "system:aggregate-to-admin" "syst
 
 kubectl create serviceaccount "$SA" --namespace $NS
 
-$SCDIR/add-local-registry-secret.sh scdfmetadata docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
-$SCDIR/add-local-registry-secret.sh reg-creds-dockerhub docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
+$SCDIR/add-local-registry-secret.sh scdfmetadata index.docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
+$SCDIR/add-local-registry-secret.sh reg-creds-dockerhub index.docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
 patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"}]}'
 
 if [ "$SCDF_TYPE" = "pro" ]; then

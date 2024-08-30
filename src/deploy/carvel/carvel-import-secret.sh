@@ -26,30 +26,30 @@ if [ "$NAMESPACE" = "" ]; then
     exit 2
 fi
 if [ "$IMPORT_TYPE" == "import" ]; then
-kubectl apply -f -  <<EOF
+  echo "Creating SecretImport $SECRET_NAME from $FROM_NAMESPACE to $NAMESPACE"
+  kubectl apply --namespace $NAMESPACE -f -  <<EOF
 apiVersion: secretgen.carvel.dev/v1alpha1
 kind: SecretImport
 metadata:
   name: $SECRET_NAME
-  namespace: $NAMESPACE
 spec:
   fromNamespace: $FROM_NAMESPACE
 EOF
-echo "Created SecretImport $SECRET_NAME from $FROM_NAMESPACE to $NAMESPACE"
+  echo "Created SecretImport $SECRET_NAME from $FROM_NAMESPACE to $NAMESPACE"
 else
-kubectl apply -f -  <<EOF
+  echo "Creating Placeholder Secret $SECRET_NAME in $NAMESPACE"
+  kubectl apply --namespace $NAMESPACE -f - <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
   name: $SECRET_NAME
-  namespace: $NAMESPACE
   annotations:
     secretgen.carvel.dev/image-pull-secret: ""
 type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: e30K
 EOF
-echo "Created Placeholder Secret $SECRET_NAME in $NAMESPACE"
+  echo "Created Placeholder Secret $SECRET_NAME in $NAMESPACE"
 fi
 
 if [ "$DEBUG" = "true" ]; then

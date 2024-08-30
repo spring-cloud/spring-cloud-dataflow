@@ -42,7 +42,7 @@ case $SCDF_TYPE in
 "oss")
     PACKAGE_NAME=scdf.tanzu.vmware.com
     if [ "$PACKAGE_REPO" = "" ]; then
-        PACKAGE_REPO="index.docker.io/springcloud"
+        PACKAGE_REPO="docker.io/springcloud"
     fi
     if [ "$REPO_NAME" = "" ]; then
         REPO_NAME="scdf-oss-repo"
