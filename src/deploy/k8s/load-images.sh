@@ -18,9 +18,9 @@ case $BROKER in
 esac
 if [ "$STREAM_APPS_VERSION" == "" ]; then
     if [[ "$DATAFLOW_VERSION" == *"SNAPSHOT"* ]]; then
-        STREAM_APPS_VERSION="4.0.0-SNAPSHOT"
+        STREAM_APPS_VERSION="5.0.1-SNAPSHOT"
     else
-        STREAM_APPS_VERSION="4.0.0"
+        STREAM_APPS_VERSION="5.0.0"
     fi
 fi
 

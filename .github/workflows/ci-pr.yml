@@ -8,13 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        dotnet: false
-        docker-images: false
-        swap-storage: false
-        large-packages: false
     - uses: actions/setup-java@v3
       with:
         java-version: '8'
@@ -23,14 +16,7 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |
-        ./mvnw -B -s .github/settings.xml clean install
-    - name: Capture Test Results
-      if: failure()
-      uses: actions/upload-artifact@v3
-      with:
-        name: Unit Tests
-        path: '**/surefire-reports/*.xml'
-        retention-days: 3
+        ./mvnw -B -s .github/settings.xml -Pdocs clean install
   scan:
     runs-on: ubuntu-latest
     steps:

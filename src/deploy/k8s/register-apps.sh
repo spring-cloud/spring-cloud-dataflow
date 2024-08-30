@@ -44,10 +44,8 @@ else
     BROKER_NAME=$BROKER
 fi
 if [ "$STREAM_APPS_RT_VERSION" = "" ]; then
-    # export STREAM_APPS_RT_VERSION=2022.0.0-SNAPSHOT
-    # export STREAM_APPS_RT_VERSION=2021.1.2 # release for Boot 2.x
-    # export STREAM_APPS_RT_VERSION=2022.0.0 # release for Boot 3.x
-    export STREAM_APPS_RT_VERSION=2022.0.0
+    export STREAM_APPS_RT_VERSION=2021.1.2 # release for Boot 2.x
+    # export STREAM_APPS_RT_VERSION=2022.0.0 # release for Boot 3.x apps
 fi
 echo "STREAM_APPS_RT_VERSION=$STREAM_APPS_RT_VERSION"
 if [ "$PLATFORM_TYPE" != "kubernetes" ]; then

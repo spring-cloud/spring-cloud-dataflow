@@ -14,7 +14,7 @@ spec:
         app: grafana
     spec:
       containers:
-        - image: springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.3-SNAPSHOT
+        - image: springcloud/spring-cloud-dataflow-grafana-prometheus:2.11.4
           name: grafana
           env:
             - name: GF_SECURITY_ADMIN_USER
