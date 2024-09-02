@@ -43,12 +43,13 @@ if [ "$DEBUG" = "true" ]; then
 else
     ARGS=""
 fi
-if [ "$SA" = "" ]; then
-    SA=scdf-sa
+SA_ARGS=
+if [ "$SA" != "" ]; then
+    SA_ARGS="--service-account-name $SA"
 fi
 echo "Installing $APP_NAME from $PACKAGE_NAME:$PACKAGE_VERSION"
+# $SA_ARGS
 kctrl package install --package-install "$APP_NAME" \
-  --service-account-name "$SA" \
   --package "$PACKAGE_NAME" \
   --values-file "$VALUES_FILE" \
   --version "$PACKAGE_VERSION" --namespace "$NS" --yes \
