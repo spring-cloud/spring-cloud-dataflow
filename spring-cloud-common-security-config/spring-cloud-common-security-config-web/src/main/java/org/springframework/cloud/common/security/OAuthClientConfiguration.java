@@ -93,10 +93,6 @@ public class OAuthClientConfiguration {
 	protected static class ProviderManagerConfig {
 		private AuthenticationProvider authenticationProvider;
 
-		protected AuthenticationProvider getAuthenticationProvider() {
-			return authenticationProvider;
-		}
-
 		@Autowired(required = false)
 		protected void setAuthenticationProvider(AuthenticationProvider authenticationProvider) {
 			this.authenticationProvider = authenticationProvider;

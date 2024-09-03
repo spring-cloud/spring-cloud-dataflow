@@ -42,8 +42,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -136,19 +138,16 @@ public class DataflowOAuthSecurityConfiguration {
 		http.authorizeHttpRequests(auth -> {
 			auth.requestMatchers(permitAllPaths.toArray(new String[0])).permitAll();
 			auth.requestMatchers(authenticatedPaths.toArray(new String[0])).authenticated();
-			SecurityConfigUtils.configureSimpleSecurity2(auth, authorizationProperties);
+			SecurityConfigUtils.configureSimpleSecurity(auth, authorizationProperties);
 		});
 
-		http.httpBasic(auth -> {
-		});
+		http.httpBasic(Customizer.withDefaults());
 
 		http.logout(auth -> {
 			auth.logoutSuccessHandler(logoutSuccessHandler(authorizationProperties, oauth2TokenUtilsService));
 		});
 
-		http.csrf(auth -> {
-			auth.disable();
-		});
+		http.csrf(AbstractHttpConfigurer::disable);
 
 		http.exceptionHandling(auth -> {
 			auth.defaultAuthenticationEntryPointFor(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),

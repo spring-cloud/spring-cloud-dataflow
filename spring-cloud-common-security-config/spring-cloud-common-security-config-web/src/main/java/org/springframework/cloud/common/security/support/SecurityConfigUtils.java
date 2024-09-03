@@ -24,7 +24,6 @@ import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
 import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -52,31 +51,10 @@ public class SecurityConfigUtils {
 	/**
 	 * Read the configuration for "simple" (that is, not ACL based) security and apply it.
 	 *
-	 * @param security The ExpressionUrlAuthorizationConfigurer to apply the authorization rules to
+	 * @param auth The Configurer to apply the authorization rules to
 	 * @param authorizationProperties Contains the rules to configure authorization
-	 *
-	 * @return ExpressionUrlAuthorizationConfigurer
 	 */
-	public static ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureSimpleSecurity(
-			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security,
-			AuthorizationProperties authorizationProperties) {
-		for (String rule : authorizationProperties.getRules()) {
-			Matcher matcher = AUTHORIZATION_RULE.matcher(rule);
-			Assert.isTrue(matcher.matches(),
-					String.format("Unable to parse security rule [%s], expected format is 'HTTP_METHOD ANT_PATTERN => "
-							+ "SECURITY_ATTRIBUTE(S)'", rule));
-
-			HttpMethod method = HttpMethod.valueOf(matcher.group(1).trim());
-			String urlPattern = matcher.group(2).trim();
-			String attribute = matcher.group(3).trim();
-
-			logger.info("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
-			security = security.requestMatchers(method, urlPattern).access(attribute);
-		}
-		return security;
-	}
-
-	public static void configureSimpleSecurity2(
+	public static void configureSimpleSecurity(
 			AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth,
 			AuthorizationProperties authorizationProperties) {
 		for (String rule : authorizationProperties.getRules()) {

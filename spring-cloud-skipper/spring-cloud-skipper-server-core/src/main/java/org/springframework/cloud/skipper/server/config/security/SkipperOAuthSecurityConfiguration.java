@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.skipper.server.config.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
@@ -36,8 +33,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.introspection.OpaqueTokenIntrospector;
@@ -94,21 +93,15 @@ public class SkipperOAuthSecurityConfiguration {
 			http.addFilter(basicAuthenticationFilter);
 		}
 
-		List<String> authenticatedPaths = new ArrayList<>(authorizationProperties.getAuthenticatedPaths());
-		List<String> permitAllPaths = new ArrayList<>(authorizationProperties.getPermitAllPaths());
-
 		http.authorizeHttpRequests(auth -> {
-			auth.requestMatchers(permitAllPaths.toArray(new String[0])).permitAll();
-			auth.requestMatchers(authenticatedPaths.toArray(new String[0])).authenticated();
-			SecurityConfigUtils.configureSimpleSecurity2(auth, authorizationProperties);
+			auth.requestMatchers(authorizationProperties.getPermitAllPaths().toArray(String[]::new)).permitAll();
+			auth.requestMatchers(authorizationProperties.getAuthenticatedPaths().toArray(String[]::new)).authenticated();
+			SecurityConfigUtils.configureSimpleSecurity(auth, authorizationProperties);
 		});
 
-		http.httpBasic(auth -> {
-		});
 
-		http.csrf(auth -> {
-			auth.disable();
-		});
+		http.httpBasic(Customizer.withDefaults());
+		http.csrf(AbstractHttpConfigurer::disable);
 
 		http.exceptionHandling(auth -> {
 			auth.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/api/**"));
