@@ -16,13 +16,13 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,7 +38,6 @@ import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
@@ -51,8 +50,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -159,9 +156,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Job Execution Detail by Id");
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals(19,
-				table.getModel().getRowCount(),
-				"Number of expected rows returned from the table is incorrect");
+		assertThat(table.getModel().getRowCount()).as("Number of expected rows returned from the table is incorrect").isEqualTo(19);
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
 		checkCell(table, rowNumber++, 0, "Job Execution Id ");
@@ -181,14 +176,11 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, rowNumber++, 0, "Job Parameters ");
 		int paramRowOne = rowNumber;
 
-		assertTrue(checkModelColumn(paramRowOne, table, "-foo(java.lang.String) "),
-			"the table did not contain the correct job parameters for job parameter value foo");
+		assertThat(checkModelColumn(paramRowOne, table, "-foo(java.lang.String) ")).as("the table did not contain the correct job parameters for job parameter value foo").isTrue();
 
-		assertTrue(checkModelColumn(paramRowOne, table, "bar(java.lang.String) "),
-			"the table did not contain the correct job parameters for job parameter value bar");
+		assertThat(checkModelColumn(paramRowOne, table, "bar(java.lang.String) ")).as("the table did not contain the correct job parameters for job parameter value bar").isTrue();
 
-		assertTrue(checkModelColumn(paramRowOne, table, "baz(java.lang.Long) "),
-			"the table did not contain the correct job parameters for job parameter value baz");
+		assertThat(checkModelColumn(paramRowOne, table, "baz(java.lang.Long) ")).as("the table did not contain the correct job parameters for job parameter value baz").isTrue();
 
 	}
 

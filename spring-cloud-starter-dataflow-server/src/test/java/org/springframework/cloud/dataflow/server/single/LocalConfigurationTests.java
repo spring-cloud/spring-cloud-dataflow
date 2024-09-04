@@ -40,11 +40,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.test.util.TestSocketUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for {@link LocalTestDataFlowServer}.
@@ -73,10 +70,10 @@ class LocalConfigurationTests {
 		int randomPort = TestSocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow;DATABASE_TO_UPPER=FALSE", randomPort);
 		context = app.run(new String[] { "--debug","--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.datasource.url=" + dataSourceUrl });
-		assertNotNull(context.getBean(AppRegistryService.class));
-		assertNotNull(context.getBean(TaskExecutionController.class));
+		assertThat(context.getBean(AppRegistryService.class)).isNotNull();
+		assertThat(context.getBean(TaskExecutionController.class)).isNotNull();
 		// From DataFlowControllerAutoConfiguration
-		assertNotNull(context.getBean(AboutController.class));
+		assertThat(context.getBean(AboutController.class)).isNotNull();
 	}
 
 	@Test
@@ -86,9 +83,9 @@ class LocalConfigurationTests {
 		// LocalDataFlowServerAutoConfiguration also adds docker and maven resource loaders.
 		DelegatingResourceLoader delegatingResourceLoader = context.getBean(DelegatingResourceLoader.class);
 		Map<String, ResourceLoader> loaders = TestUtils.readField("loaders", delegatingResourceLoader);
-		assertThat(loaders.size(), is(2));
-		assertThat(loaders.get("maven"), notNullValue());
-		assertThat(loaders.get("docker"), notNullValue());
+		assertThat(loaders).hasSize(2);
+		assertThat(loaders.get("maven")).isNotNull();
+		assertThat(loaders.get("docker")).isNotNull();
 	}
 
 	@Test
@@ -96,9 +93,9 @@ class LocalConfigurationTests {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false" });
-		assertNotNull(context.getBean(TaskDefinitionRepository.class));
+		assertThat(context.getBean(TaskDefinitionRepository.class)).isNotNull();
 		// The StreamDefinition repository is expected to exist.
-		assertNotNull(context.getBean(StreamDefinitionRepository.class));
+		assertThat(context.getBean(StreamDefinitionRepository.class)).isNotNull();
 		try {
 			context.getBean(StreamService.class);
 			fail("Stream features should have been disabled.");
@@ -112,9 +109,9 @@ class LocalConfigurationTests {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0",
 				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false" });
-		assertNotNull(context.getBean(StreamDefinitionRepository.class));
+		assertThat(context.getBean(StreamDefinitionRepository.class)).isNotNull();
 		// The TaskDefinition repository is expected to exist.
-		assertNotNull(context.getBean(TaskDefinitionRepository.class));
+		assertThat(context.getBean(TaskDefinitionRepository.class)).isNotNull();
 		try {
 			context.getBean(TaskExecutionService.class);
 			fail("Task features should have been disabled.");
@@ -127,6 +124,6 @@ class LocalConfigurationTests {
 	void noDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
 		context = app.run(new String[] { "--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false" });
-		assertThat(context.containsBean("appRegistry"), is(false));
+		assertThat(context.containsBean("appRegistry")).isEqualTo(false);
 	}
 }
