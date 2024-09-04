@@ -14,10 +14,6 @@ management:
           autotime:
             enabled: true # true is default to Boot 2.3.2 at least.
             percentiles-histogram: true
-    export:
-      prometheus:
-        rsocket:
-          enabled: false
   influx:
     metrics:
       export:
@@ -26,6 +22,8 @@ management:
     metrics:
       export:
         enabled: false
+        rsocket:
+          enabled: false
   wavefront:
     metrics:
       export:
