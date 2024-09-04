@@ -90,6 +90,23 @@ def service_spec_type():
   return data.values.scdf.skipper.service.type
 end
 
+def service_spec_type_loadbalancer():
+  return non_empty_string(data.values.scdf.skipper.service.type) and data.values.scdf.skipper.service.type == 'LoadBalancer'
+end
+
+def service_spec_allocate_load_balancer_node_ports():
+  return data.values.scdf.skipper.service.allocateLoadBalancerNodePorts
+  end
+
+def has_service_spec_load_balancer_class():
+  return non_empty_string(data.values.scdf.skipper.service.loadBalancerClass)
+  end
+
+def service_spec_load_balancer_class():
+  return data.values.scdf.skipper.service.loadBalancerClass
+end
+
 def skipper_has_password():
   return non_empty_string(data.values.scdf.skipper.database.password)
 end
+

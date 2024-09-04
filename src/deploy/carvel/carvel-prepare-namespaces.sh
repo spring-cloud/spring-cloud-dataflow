@@ -32,29 +32,30 @@ function create_secret() {
     # kubectl annotate secret "$SCRT_NAME" --namespace "$SCRT_NS"  secretgen.carvel.dev/image-pull-secret=""
 }
 function patch_serviceaccount() {
-    kubectl patch serviceaccount scdf-sa -p "$1" --namespace "$NS"
+    if [ "$2" != "" ]; then
+      kubectl patch serviceaccount $2 -p "$1" --namespace "$NS"
+    fi
     kubectl patch serviceaccount default -p "$1" --namespace "$NS"
-    kubectl patch serviceaccount default -p "$1" --namespace default
 }
-if [ "$1" != "" ]; then
-    NS=$1
+if [ "$2" = "" ]; then
+  echo "Usage $0: <namespace> <serviceaccount>"
+  exit 1
 fi
-if [ "$2" != "" ]; then
-    SA=$2
-else
-    SA=scdf-sa
-fi
-check_env NS
+NS=$1
+SA=$2
+
 kubectl create namespace $NS
-kubectl create namespace secrets-ns
 $SCDIR/add-roles.sh "system:aggregate-to-edit" "system:aggregate-to-admin" "system:aggregate-to-view"
 PRESENT=$(kubectl get serviceaccount --namespace $NS --output=json | count_kind serviceaccount "$SA")
-if ((PRESENT > 0)); then
-    kubectl delete serviceaccount "$SA" --namespace $NS
+if ((PRESENT==0)); then
+    kubectl create serviceaccount "$SA" --namespace $NS
 fi
-kubectl create serviceaccount "$SA" --namespace $NS
 IMPORT=true
 if [ "$IMPORT" == "true" ]; then
+  PRESENT=$(kubectl get namespace --output=json | count_kind namespace "secret-ns")
+  if ((PRESENT == 0)); then
+    kubectl create namespace secrets-ns
+  fi
   $SCDIR/carvel-add-registry-secret.sh scdfmetadata index.docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
   $SCDIR/carvel-import-secret.sh scdfmetadata $NS
   $SCDIR/carvel-add-registry-secret.sh reg-creds-dockerhub index.docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD"
@@ -64,7 +65,7 @@ else
   create_secret reg-creds-dockerhub index.docker.io "$DOCKER_HUB_USERNAME" "$DOCKER_HUB_PASSWORD" "$NS"
 fi
 
-patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"}]}'
+patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"}]}' $SA
 
 if [ "$SCDF_TYPE" = "pro" ]; then
     if [ "$TANZU_DOCKER_USERNAME" = "" ]; then
@@ -76,6 +77,6 @@ if [ "$SCDF_TYPE" = "pro" ]; then
         # $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry registry.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
         $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry spring-scdf-docker-virtual.usw1.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
         $SCDIR/carvel-import-secret.sh reg-creds-dev-registry $NS
-        patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"},{"name": "reg-creds-dev-registry"}]}'
+        patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"},{"name": "reg-creds-dev-registry"}]}' $SA
     fi
 fi

@@ -2,13 +2,6 @@
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
-function check_env() {
-    eval ev='$'$1
-    if [ "$ev" == "" ]; then
-        echo "env var $1 not defined"
-        exit 1
-    fi
-}
 
 function count_kind() {
     jq --arg kind $1 --arg name $2 '.items | .[] | select(.kind == $kind) | .metadata | select(.name == $name) | .name' | grep -c -F "$2"
@@ -20,13 +13,13 @@ fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 start_time=$(date +%s)
 # the following names are your choice.
-check_env NS
-check_env SCDF_TYPE
-check_env PACKAGE_VERSION
-check_env DOCKER_HUB_USERNAME
-check_env DOCKER_HUB_PASSWORD
+readonly NS="${NS:?must be set}"
+readonly SCDF_TYPE="${SCDF_TYPE:?must be set}"
+readonly PACKAGE_VERSION="${PACKAGE_VERSION:?must be set}"
+readonly DOCKER_HUB_USERNAME="${DOCKER_HUB_USERNAME:?must be set}"
+readonly DOCKER_HUB_PASSWORD="${DOCKER_HUB_PASSWORD:?must be set}"
 
-$SCDIR/carvel-prepare-namespaces.sh $NS
+$SCDIR/carvel-prepare-namespaces.sh $NS scdf-sa
 # Credentials for docker.io
 
 case $SCDF_TYPE in

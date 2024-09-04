@@ -25,8 +25,6 @@ if [ "$5" != "" ]; then
 fi
 if [ "$6" != "" ]; then
     SA=$6
-else
-    SA=scdf-sa
 fi
 if [ ! -f "$VALUES_FILE" ]; then
     echo "Cannot find $VALUES_FILE"
