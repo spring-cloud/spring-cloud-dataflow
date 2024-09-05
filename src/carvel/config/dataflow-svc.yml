@@ -1,6 +1,9 @@
 #@ load("@ytt:data", "data")
 #@ load("dataflow.star", "service_spec_type")
-
+#@ load("dataflow.star", "service_spec_type_loadbalancer")
+#@ load("dataflow.star", "service_spec_allocate_load_balancer_node_ports")
+#@ load("dataflow.star", "has_service_spec_load_balancer_class")
+#@ load("dataflow.star", "service_spec_load_balancer_class")
 kind: Service
 apiVersion: v1
 metadata:
@@ -18,5 +21,11 @@ spec:
   - port: 80
     targetPort: 9393
     name: scdf-server
+  #@ if service_spec_type_loadbalancer():
+  allocateLoadBalancerNodePorts: #@ service_spec_allocate_load_balancer_node_ports()
+    #@ if has_service_spec_load_balancer_class():
+  loadBalancerClass: #@ service_spec_load_balancer_class()
+    #@ end
+  #@ end
   selector:
     app: scdf-server

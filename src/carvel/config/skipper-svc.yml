@@ -1,5 +1,9 @@
 #@ load("@ytt:data", "data")
 #@ load("skipper.star", "service_spec_type")
+#@ load("skipper.star", "service_spec_type_loadbalancer")
+#@ load("skipper.star", "service_spec_allocate_load_balancer_node_ports")
+#@ load("skipper.star", "has_service_spec_load_balancer_class")
+#@ load("skipper.star", "service_spec_load_balancer_class")
 
 apiVersion: v1
 kind: Service
@@ -16,5 +20,11 @@ spec:
   ports:
   - port: 80
     targetPort: 7577
+  #@ if service_spec_type_loadbalancer():
+  allocateLoadBalancerNodePorts: #@ service_spec_allocate_load_balancer_node_ports()
+    #@ if has_service_spec_load_balancer_class():
+  loadBalancerClass: #@ service_spec_load_balancer_class()
+    #@ end
+  #@ end
   selector:
     app: skipper

@@ -32,7 +32,7 @@ K8S=$(realpath $SCDIR/../kubernetes)
 if [ ! -d "$K8S" ]; then
   K8S=$(realpath $SCDIR/../../kubernetes)
 fi
-$SCDIR/prepare-local-namespace.sh "$BROKER-sa" $BROKER
+$SCDIR/prepare-local-namespace.sh $BROKER "$BROKER-sa"
 kubectl create --namespace $BROKER -f $K8S/$BROKER/
 if [ "$BROKER" = "rabbitmq" ]; then
     kubectl rollout status deployment --namespace "rabbitmq" rabbitmq

@@ -4,30 +4,41 @@ K8S=$(realpath $SCDIR/../k8s)
 bold="\033[1m"
 dim="\033[2m"
 end="\033[0m"
-CERT_MANAGER_VERSION=v1.14.2
-SECRETGEN_CONTROLLER_VERSION=v0.17.3
-KAPP_CONTROLLER_VERSION=v0.50.0
-wget -q -O cert-manager-release.yml "https://github.com/cert-manager/cert-manager/releases/download/$CERT_MANAGER_VERSION/cert-manager.yaml"
-IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' cert-manager-release.yml)
-for image in $IMAGES; do
-  if [[ "$image" != "---"* ]]; then
-    $K8S/load-image.sh "$image"
-  fi
-done
-wget -q -O secretgen-release.yml "https://github.com/carvel-dev/secretgen-controller/releases/download/$SECRETGEN_CONTROLLER_VERSION/release.yml"
-IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' secretgen-release.yml)
-for image in $IMAGES; do
-  if [[ "$image" != "---"* ]]; then
-    $K8S/load-image.sh "$image"
-  fi
-done
-wget -q -O kapp-controller-release.yml https://github.com/carvel-dev/kapp-controller/releases/download/$KAPP_CONTROLLER_VERSION/release.yml
-IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' kapp-controller-release.yml)
-for image in $IMAGES; do
-  if [[ "$image" != "---"* ]]; then
-    $K8S/load-image.sh "$image"
-  fi
-done
+
+readonly PULL_IMAGES="${PULL_IMAGES:false}"
+
+if [ "$CERT_MANAGER_VERSION" = "" ]; then
+  CERT_MANAGER_VERSION=v1.14.2
+fi
+if [ "$SECRETGEN_CONTROLLER_VERSION" = "" ]; then
+  SECRETGEN_CONTROLLER_VERSION=v0.17.0
+fi
+if [ "$KAPP_CONTROLLER_VERSION" = "" ]; then
+  KAPP_CONTROLLER_VERSION=v0.53.0
+fi
+if [ "$PULL_IMAGES" == "true" ]; then
+  wget -q -O cert-manager-release.yml "https://github.com/cert-manager/cert-manager/releases/download/$CERT_MANAGER_VERSION/cert-manager.yaml"
+  IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' cert-manager-release.yml)
+  for image in $IMAGES; do
+    if [[ "$image" != "---"* ]]; then
+      $K8S/load-image.sh "$image"
+    fi
+  done
+  wget -q -O secretgen-release.yml "https://github.com/carvel-dev/secretgen-controller/releases/download/$SECRETGEN_CONTROLLER_VERSION/release.yml"
+  IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' secretgen-release.yml)
+  for image in $IMAGES; do
+    if [[ "$image" != "---"* ]]; then
+      $K8S/load-image.sh "$image"
+    fi
+  done
+  wget -q -O kapp-controller-release.yml https://github.com/carvel-dev/kapp-controller/releases/download/$KAPP_CONTROLLER_VERSION/release.yml
+  IMAGES=$(yq '.spec.template.spec.containers | .[] | .image' kapp-controller-release.yml)
+  for image in $IMAGES; do
+    if [[ "$image" != "---"* ]]; then
+      $K8S/load-image.sh "$image"
+    fi
+  done
+fi
 start_time=$(date +%s)
 echo "Deploying cert-manager $CERT_MANAGER_VERSION"
 kapp deploy --yes --wait --wait-check-interval 10s --app cert-manager \

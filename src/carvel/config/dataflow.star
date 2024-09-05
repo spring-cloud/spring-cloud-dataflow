@@ -82,9 +82,28 @@ end
 def image_pull_secrets():
   return [{"name": registry_secret_ref()}]
 end
+def has_service_spec_type():
+  return non_empty_string(data.values.scdf.server.service.type)
+end
+
+def service_spec_type_loadbalancer():
+  return non_empty_string(data.values.scdf.server.service.type) and data.values.scdf.server.service.type == 'LoadBalancer'
+end
 
 def service_spec_type():
   return data.values.scdf.server.service.type
+end
+
+def service_spec_allocate_load_balancer_node_ports():
+  return data.values.scdf.server.service.allocateLoadBalancerNodePorts
+end
+
+def has_service_spec_load_balancer_class():
+  return non_empty_string(data.values.scdf.server.service.loadBalancerClass)
+end
+
+def service_spec_load_balancer_class():
+  return data.values.scdf.server.service.loadBalancerClass
 end
 
 def context_path():

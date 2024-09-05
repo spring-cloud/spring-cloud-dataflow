@@ -39,7 +39,7 @@ if [ ! -d "$K8S" ]; then
   K8S=$(realpath $SCDIR/../../kubernetes)
 fi
 set +e
-$SCDIR/prepare-local-namespace.sh "$DATABASE-sa" $DATABASE
+$SCDIR/prepare-local-namespace.sh $DATABASE "$DATABASE-sa"
 
 kubectl create --namespace $DATABASE -f $K8S/$DATABASE/
 set -e
@@ -50,6 +50,7 @@ set +e
 "$SCDIR/configure-database.sh" skipper $DATABASE "$JDBC_URL" $DATABASE database-username database-password
 export DATABASE
 echo "Deployed $DATABASE. Host:$DATABASE.$DATABASE"
+
 FILE="$(mktemp).yml"
 cat >$FILE <<EOF
 apiVersion: secretgen.carvel.dev/v1alpha1
@@ -65,6 +66,7 @@ if [ "$DEBUG" = "true" ]; then
     cat $FILE
 fi
 kubectl apply -f $FILE
+
 "$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE" --import
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))

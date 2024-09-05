@@ -29,7 +29,6 @@ describe('ordering', () => {
     expect(findAnnotation(skipperDeployment, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/skipper');
     expect(findAnnotation(dataflowService, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/server');
     expect(findAnnotation(dataflowDeployment, 'kapp.k14s.io/change-group')).toBe('scdf.tanzu.vmware.com/server');
-
     expect(findAnnotations(dataflowService, 'kapp.k14s.io/change-rule')).toContainAnyValues([
       'upsert after upserting scdf.tanzu.vmware.com/skipper'
     ]);

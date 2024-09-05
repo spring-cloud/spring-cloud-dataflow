@@ -30,7 +30,6 @@ function create_secret() {
 #            --docker-password="$4" \
 #            --namespace "$NS"
     echo "Annotating $SCRT_NAME for image-pull-secret"
-    # kubectl annotate secret "$SCRT_NAME" --namespace "$SCRT_NS"  secretgen.carvel.dev/image-pull-secret=""
 #    kubectl annotate secret "$1" --namespace "$NS"  secretgen.carvel.dev/image-pull-secret=""
     echo "Exporting $SCRT_NAME from $SCRT_NS"
     kubectl apply -f - <<EOF
@@ -40,7 +39,8 @@ metadata:
   name: ${SCRT_NAME}
   namespace: ${SCRT_NS}
 spec:
-  toNamespace: '*'
+  toNamespaces:
+    - "*"
 EOF
 
 }
