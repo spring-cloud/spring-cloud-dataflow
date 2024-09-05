@@ -210,10 +210,11 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		String taskAppName = taskDefinition.getRegisteredAppName();
 		String taskLabel = taskDefinition.getAppDefinition().getName();
-		if(!StringUtils.hasText(taskLabel)) {
-			taskLabel = taskAppName;
-		}
 		String version = taskDeploymentProperties.get("version." + taskLabel);
+		if (version == null) {
+			version = taskDeploymentProperties.get("version." + taskAppName);
+		}
+
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		AppRegistration appRegistration;

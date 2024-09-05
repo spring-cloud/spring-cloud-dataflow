@@ -288,6 +288,29 @@ NOTE: Properties configured by using this mechanism have lower precedence than t
 They are overridden if a property with the same key is specified at task launch time (for example, `app.trigger.prop2`
 overrides the common property).
 
+==== Launching tasks with a specific application version
+
+When launching a task you can specify the specific version of the application.
+If no version is specified Spring Cloud Data Flow will use the default version of the application.
+To specify a version of the application to be used at launch time use the deployer property `version.<app-name>`.
+For example:
+
+====
+[source,bash,subs=attributes]
+----
+task launch my-task --properties 'version.timestamp=3.0.0'
+----
+====
+
+Similarly, when scheduling a task you will use the same format of `version.<app-name>`.  For example:
+
+====
+[source,bash,subs=attributes]
+----
+task schedule create --name my-schedule --definitionName my-task --expression '*/1 * * * *' --properties 'version.timestamp=3.0.0'
+----
+====
+
 [[spring-cloud-dataflow-task-limit-concurrent-executions]]
 === Limit the number concurrent task launches
 
