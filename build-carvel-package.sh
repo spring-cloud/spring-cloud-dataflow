@@ -17,9 +17,7 @@ fi
 
 # you can launch a local docker registry using docker run -d -p 5000:5000 --name registry registry:2.7
 # export REPO_PREFIX="<local-machine-ip>:5000/"
-if [ "$REPO_PREFIX" = "" ]; then
-  REPO_PREFIX="docker.io/"
-fi
+readonly REPO_PREFIX="${REPO_PREFIX:-docker.io/}"
 
 export PACKAGE_BUNDLE_REPOSITORY="${REPO_PREFIX}springcloud/scdf-oss-package"
 export REPOSITORY_BUNDLE="${REPO_PREFIX}springcloud/scdf-oss-repo"
