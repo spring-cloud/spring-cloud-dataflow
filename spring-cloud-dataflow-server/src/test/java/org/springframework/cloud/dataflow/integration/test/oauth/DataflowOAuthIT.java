@@ -72,10 +72,8 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 								VersionUtils.getThreePartVersion(version), "2.11.3")) {
 							api = "tasks/thinexecutions";
 						}
-						log.info("Checking {}", api);
 						cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/" + api);
 						response = cmdResult.getStdout();
-						log.debug("Response is {}", response);
 						ok = !JsonPath.parse(response).read("$._links.self.href", String.class).isEmpty();
 					}
 					return ok;
