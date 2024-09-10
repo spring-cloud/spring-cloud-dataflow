@@ -8,10 +8,6 @@ kind: Service
 apiVersion: v1
 metadata:
   name: scdf-server
-  annotations:
-    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/server"
-    kapp.k14s.io/change-rule.1: "upsert after upserting scdf.tanzu.vmware.com/db"
-    kapp.k14s.io/change-rule.2: "upsert after upserting scdf.tanzu.vmware.com/skipper"
   labels:
     app: scdf-server
     spring-deployment-id: scdf
