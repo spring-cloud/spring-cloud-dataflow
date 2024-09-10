@@ -18,7 +18,7 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.37</spring-framework.version>
+		<spring-framework.version>5.3.39</spring-framework.version>
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-cloud-dataflow-ui.version>3.4.6-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
@@ -33,16 +33,16 @@
 		<codearte-props2yml.version>0.5</codearte-props2yml.version>
 		<jettison.version>1.5.4</jettison.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
-		<tomcat.version>9.0.90</tomcat.version>
+		<tomcat.version>9.0.93</tomcat.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
-		<netty.version>4.1.111.Final</netty.version>
-		<reactor-bom.version>2020.0.45</reactor-bom.version>
+		<netty.version>4.1.113.Final</netty.version>
+		<reactor-bom.version>2020.0.47</reactor-bom.version>
 		<rsocket.version>1.1.4</rsocket.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
-		<snappy-java.version>1.1.10.5</snappy-java.version>
+		<snappy-java.version>1.1.10.6</snappy-java.version>
 		<commons-compress.version>1.26.1</commons-compress.version>
 		<commons-io.version>2.15.1</commons-io.version>
 		<jackson-bom.version>2.17.2</jackson-bom.version>

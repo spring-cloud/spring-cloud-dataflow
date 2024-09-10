@@ -21,24 +21,24 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.37</spring-framework.version>
+		<spring-framework.version>5.3.39</spring-framework.version>
 		<spring-cloud.version>2021.0.9</spring-cloud.version>
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-shell.version>2.1.13</spring-shell.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<testcontainers.version>1.19.8</testcontainers.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
-		<tomcat.version>9.0.90</tomcat.version>
+		<tomcat.version>9.0.93</tomcat.version>
 		<bouncycastle.version>1.78.1</bouncycastle.version>
 		<spring-kafka.version>2.9.13</spring-kafka.version>
-		<netty.version>4.1.111.Final</netty.version>
-		<reactor-bom.version>2020.0.45</reactor-bom.version>
+		<netty.version>4.1.113.Final</netty.version>
+		<reactor-bom.version>2020.0.47</reactor-bom.version>
 		<rsocket.version>1.1.4</rsocket.version>
 		<snakeyaml.version>1.33</snakeyaml.version>
 		<jackson-bom.version>2.17.2</jackson-bom.version>
 		<json-smart.version>2.4.11</json-smart.version>
 		<nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
-		<snappy-java.version>1.1.10.5</snappy-java.version>
+		<snappy-java.version>1.1.10.6</snappy-java.version>
 		<commons-compress.version>1.26.1</commons-compress.version>
 		<commons-io.version>2.15.1</commons-io.version>
 		<postgresql.version>42.7.2</postgresql.version>
