@@ -37,10 +37,17 @@ check_env IMGPKG_LOCK_TEMPLATE
 check_env VENDIR_SRC_IN
 
 echo "Build Package Bundle: $PACKAGE_BUNDLE_TEMPLATE package.name=$PACKAGE_NAME, server.repository=$SERVER_REPOSITORY, server.version=$SERVER_VERSION,skipper.repository=$SKIPPER_REPOSITORY, skipper.version=$SKIPPER_VERSION, output=$PACKAGE_BUNDLE_GENERATED"
-
+set +e
+time ls > /dev/null 2>&1
+RC=$?
+if((RC=0)); then
+  MEASURE="time -v -o times.txt -a"
+else
+  MEASURE=""
+fi
 set -e
 echo "ytt -f $PACKAGE_BUNDLE_TEMPLATE" > times.txt
-MEASURE="time -v -o times.txt -a"
+
 $MEASURE ytt -f "$PACKAGE_BUNDLE_TEMPLATE" \
     --output-files "$PACKAGE_BUNDLE_GENERATED" \
     --data-value-yaml server.version="$SERVER_VERSION" \
