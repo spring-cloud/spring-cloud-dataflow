@@ -14,7 +14,7 @@ if [ "$SECRETGEN_CONTROLLER_VERSION" = "" ]; then
   SECRETGEN_CONTROLLER_VERSION=v0.17.0
 fi
 if [ "$KAPP_CONTROLLER_VERSION" = "" ]; then
-  KAPP_CONTROLLER_VERSION=v0.53.0
+  KAPP_CONTROLLER_VERSION=v0.53.1
 fi
 if [ "$PULL_IMAGES" == "true" ]; then
   wget -q -O cert-manager-release.yml "https://github.com/cert-manager/cert-manager/releases/download/$CERT_MANAGER_VERSION/cert-manager.yaml"

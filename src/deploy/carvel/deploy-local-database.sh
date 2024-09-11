@@ -67,7 +67,7 @@ if [ "$DEBUG" = "true" ]; then
 fi
 kubectl apply -f $FILE
 
-"$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE" --import
+"$SCDIR/carvel-import-secret.sh" "$DATABASE" "$NS" "$DATABASE"
 end_time=$(date +%s)
 elapsed=$((end_time - start_time))
 echo -e "Deployed $DATABASE in ${bold}$elapsed${end} seconds"
