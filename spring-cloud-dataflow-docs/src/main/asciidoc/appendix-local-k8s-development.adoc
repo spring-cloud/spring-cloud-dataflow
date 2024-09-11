@@ -8,7 +8,7 @@ You will need to install kubectl and then kind or minikube for a local cluster.
 
 All the examples assume you have cloned the `spring-cloud-dataflow` repository and are executing the scripts from `deploy/k8s`.
 
-On macOS you may need to install `realpath` from link:https://ports.macports.org/port/realpath/[Macports] or `brew install realpath`
+On macOS, you may need to install `realpath` from link:https://ports.macports.org/port/realpath/[Macports] or `brew install realpath`
 
 NOTE: The scripts require a shell like `bash` or `zsh` and should work on Linux, WSL 2 or macOS.
 
@@ -83,7 +83,7 @@ source ./k8s/use-mk-docker.sh postgresql rabbitmq --namespace test-ns
 
 ===== TMC or GKE Cluster in Cloud
 
-The cluster must exist before use and you should use the relevant cli to login before executing `source ./k8s/use-gke.sh`
+The cluster must exist before use, and you should use the relevant cli to login before executing `source ./k8s/use-gke.sh`
 
 ===== Create Local Cluster.
 
@@ -139,13 +139,19 @@ This example shows the versions of the current development snapshot.
 
 [source,shell]
 ....
-export DATAFLOW_VERSION=2.11.3-SNAPSHOT
-export SKIPPER_VERSION=2.11.3-SNAPSHOT
+export DATAFLOW_VERSION=2.11.5-SNAPSHOT
+export SKIPPER_VERSION=2.11.5-SNAPSHOT
 ....
 
 Before you can install SCDF you will need to pull the following images to ensure they are present for uploading to the k8s cluster.
 
+You can configure the before `pull-app-images` and `install-scdf`:
+
+* `STREAM_APPS_RT_VERSION` Stream Apps Release Train Version. _Default is 2022.0.0_.
+* `STREAM_APPS_VERSION` Stream Apps Version. _Default is 4.0.0_.
+
 Use:
+
 [source,shell]
 ....
 ./images/pull-app-images.sh
@@ -197,13 +203,17 @@ The following list of utilities may prove useful.
 
 
 * Using kail to log activity related to a specific stream.
-```shell
+
+[source,shell]
+----
 kail --label=spring-group-id=<stream-name>
-```
+----
 * Using kail to log all pods in specific namespace.
-```shell
+
+[source,shell]
+----
 kail --ns=<namespace>
-```
+----
 
 ==== Scripts
 
@@ -225,7 +235,7 @@ Some of the scripts apply to local containers as well and can be found in `src/l
 | ./k8s/delete-scdf.sh | Delete all Kubernetes resources create by the deployment.
 | ./k8s/destroy-k8s.sh | Delete cluster, kind or minikube.
 | ./k8s/export-dataflow-ip.sh | Export the url of the data flow server to `DATAFLOW_IP`
-| ./k8s/export-http-url.sh | Export the url of an http source of a specific flow by name to `HTTP_APP_URL`
+| ./k8s/export-http-url.sh | Export the url of the http source of a specific flow by name to `HTTP_APP_URL`
 | ./k8s/install-scdf.sh | Configure and deploy all the containers for Spring Cloud Dataflow
 | ./k8s/load-images.sh | Load all container images required by tests into kind or minikube to ensure you have control over what is used.
 | ./k8s/load-image.sh | Load a specific container image into local kind or minikube.

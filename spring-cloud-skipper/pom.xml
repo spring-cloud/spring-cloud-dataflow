@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-skipper-parent</artifactId>
-	<version>2.11.4-SNAPSHOT</version>
+	<version>2.11.5-SNAPSHOT</version>
 	<name>Spring Cloud Skipper</name>
 	<description>Spring Cloud Skipper</description>
 	<packaging>pom</packaging>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.11.4-SNAPSHOT</version>
+		<version>2.11.5-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-build</relativePath>
 	</parent>
 
@@ -25,7 +25,7 @@
 		<java.version>1.8</java.version>
 
 		<spring-statemachine.version>2.5.1</spring-statemachine.version>
-		<spring-cloud-deployer.version>2.9.4-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer.version>2.9.5-SNAPSHOT</spring-cloud-deployer.version>
 
 		<zeroturnaround.version>1.15</zeroturnaround.version>
 		<spring-restdocs.version>2.0.7.RELEASE</spring-restdocs.version>
@@ -39,9 +39,6 @@
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
 		<jmockit.version>1.24</jmockit.version>
-
-		<testcontainers.version>1.19.7</testcontainers.version>
-		<commons-compress.version>1.26.0</commons-compress.version>
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
@@ -208,24 +205,6 @@
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
 				<version>${jmockit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-bom</artifactId>
-				<version>${testcontainers.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.commons</groupId>
-						<artifactId>commons-compress</artifactId>
-					</exclusion>
-				</exclusions>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-compress</artifactId>
-				<version>${commons-compress.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

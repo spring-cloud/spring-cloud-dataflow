@@ -17,10 +17,10 @@ if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
   DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  export DATAFLOW_VERSION=2.11.4-SNAPSHOT
+  export DATAFLOW_VERSION=2.11.5-SNAPSHOT
 fi
 if [ "$SKIPPER_VERSION" = "" ]; then
-  export SKIPPER_VERSION=2.11.4-SNAPSHOT
+  export SKIPPER_VERSION=2.11.5-SNAPSHOT
 fi
 
 case $BROKER in
@@ -85,11 +85,11 @@ if [ "$USE_PRO" = "" ]; then
 fi
 
 if [ "$DATAFLOW_VERSION" = "" ]; then
-    DATAFLOW_VERSION=2.11.4-SNAPSHOT
+    DATAFLOW_VERSION=2.11.5-SNAPSHOT
 fi
 
 if [ "$SKIPPER_VERSION" = "" ]; then
-    SKIPPER_VERSION=2.11.4-SNAPSHOT
+    SKIPPER_VERSION=2.11.5-SNAPSHOT
 fi
 
 YAML_PATH=$(realpath $SCDIR/yaml)
@@ -136,9 +136,9 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
 
 
     if [ "$USE_PRO" = "true" ]; then
-        sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
 #        if [[ "$DATAFLOW_PRO_VERSION" == *"1.6"* ]]; then
-#            sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
+#            sh "$SCDIR/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
 #
 #        else
             sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true

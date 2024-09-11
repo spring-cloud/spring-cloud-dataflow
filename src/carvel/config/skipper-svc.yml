@@ -1,13 +1,14 @@
 #@ load("@ytt:data", "data")
 #@ load("skipper.star", "service_spec_type")
+#@ load("skipper.star", "service_spec_type_loadbalancer")
+#@ load("skipper.star", "service_spec_allocate_load_balancer_node_ports")
+#@ load("skipper.star", "has_service_spec_load_balancer_class")
+#@ load("skipper.star", "service_spec_load_balancer_class")
 
 apiVersion: v1
 kind: Service
 metadata:
   name: skipper
-  annotations:
-    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/skipper"
-    kapp.k14s.io/change-rule: "upsert after upserting scdf.tanzu.vmware.com/db"
   labels:
     app: skipper
     spring-deployment-id: scdf
@@ -16,5 +17,11 @@ spec:
   ports:
   - port: 80
     targetPort: 7577
+  #@ if service_spec_type_loadbalancer():
+  allocateLoadBalancerNodePorts: #@ service_spec_allocate_load_balancer_node_ports()
+    #@ if has_service_spec_load_balancer_class():
+  loadBalancerClass: #@ service_spec_load_balancer_class()
+    #@ end
+  #@ end
   selector:
     app: skipper

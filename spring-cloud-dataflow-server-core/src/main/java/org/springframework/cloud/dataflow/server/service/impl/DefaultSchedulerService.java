@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023 the original author or authors.
+ * Copyright 2018-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -224,10 +224,12 @@ public class DefaultSchedulerService implements SchedulerService {
 
 		String taskAppName = taskDefinition.getRegisteredAppName();
 		String taskLabel = taskDefinition.getAppDefinition().getName();
-		if(!StringUtils.hasText(taskLabel)) {
-			taskLabel = taskAppName;
-		}
 		String version = taskDeploymentProperties.get("version." + taskLabel);
+		if (version == null) {
+			version = taskDeploymentProperties.get("version." + taskAppName);
+		}
+
+
 		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, version, taskDefinition);
 		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
@@ -321,7 +323,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				deployerDeploymentProperties,
 				commandLineArgs,
 				scheduleName,
-				getTaskResource(taskDefinitionName));
+				getTaskResource(taskDefinitionName, version));
 
 		launcher.getScheduler().schedule(scheduleRequest);
 
@@ -588,7 +590,7 @@ public class DefaultSchedulerService implements SchedulerService {
 						(fromWildcard, fromApp) -> fromApp));
 	}
 
-	protected Resource getTaskResource(String taskDefinitionName) {
+	protected Resource getTaskResource(String taskDefinitionName, String version) {
 		TaskDefinition taskDefinition = this.taskDefinitionRepository.findById(taskDefinitionName)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskDefinitionName));
 		AppRegistration appRegistration = null;
@@ -603,8 +605,14 @@ public class DefaultSchedulerService implements SchedulerService {
 			}
 			appRegistration = new AppRegistration(ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME, ApplicationType.task, composedTaskUri);
 		} else {
-			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
+			if(version != null) {
+				appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
+					ApplicationType.task, version);
+			}
+			else {
+				appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
 					ApplicationType.task);
+			}
 		}
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		return this.registry.getAppResource(appRegistration);

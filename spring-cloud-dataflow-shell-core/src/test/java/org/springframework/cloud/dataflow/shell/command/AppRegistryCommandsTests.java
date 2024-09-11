@@ -100,7 +100,7 @@ public class AppRegistryCommandsTests extends AbstractShellIntegrationTest {
 	class AppRegisterTests {
 		@Test
 		void taskAppNoBootVersion() {
-			AppRegistration registration = registerTimestampTask("timestamp", "3.2.0", "", false);
+			AppRegistration registration = registerTimestampTask("timestamp1", "3.2.0", "", false);
 			assertThat(registration.getVersion()).isEqualTo("3.2.0");
 			assertThat(registration.getBootVersion()).isEqualTo(AppBootSchemaVersion.defaultVersion());
 		}

@@ -6,11 +6,11 @@
 	<packaging>jar</packaging>
 	<name>Spring Cloud Skipper :: Server</name>
 	<description>Spring Cloud Skipper :: Server</description>
-	<version>2.11.4-SNAPSHOT</version>
+	<version>2.11.5-SNAPSHOT</version>
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.11.4-SNAPSHOT</version>
+		<version>2.11.5-SNAPSHOT</version>
 		<relativePath>../../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<properties>
@@ -18,21 +18,6 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk18on</artifactId>
-				<version>1.76</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk18on</artifactId>
-				<version>1.75</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcutil-jdk18on</artifactId>
-				<version>1.75</version>
-			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
@@ -215,7 +200,9 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<imageName>springcloud/${project.artifactId}:${project.version}</imageName>
+					<image>
+						<name>springcloud/${project.artifactId}:${project.version}</name>
+					</image>
 				</configuration>
 				<executions>
 					<execution>

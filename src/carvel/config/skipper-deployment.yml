@@ -10,9 +10,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: skipper
-  annotations:
-    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/skipper"
-    kapp.k14s.io/change-rule: "upsert after upserting scdf.tanzu.vmware.com/db"
   labels:
     app: skipper
 spec:

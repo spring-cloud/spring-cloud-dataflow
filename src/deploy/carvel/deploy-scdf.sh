@@ -108,19 +108,6 @@ if [ "$SCDF_TYPE" = "pro" ]; then
     "$SCDIR/carvel-import-secret.sh" "reg-creds-dev-registry" "$NS"
 fi
 
-"$SCDIR/carvel-import-secret.sh" "scdfmetadata" "$NS"
-"$SCDIR/carvel-import-secret.sh" "reg-creds-dockerhub" "$NS"
-
-if [ "$SCDF_TYPE" = "pro" ]; then
-    "$SCDIR/carvel-import-secret.sh" "reg-creds-dev-registry" "$NS"
-fi
-
-"$SCDIR/carvel-import-secret.sh" "scdfmetadata" "$NS"
-"$SCDIR/carvel-import-secret.sh" "reg-creds-dockerhub" "$NS"
-
-if [ "$SCDF_TYPE" = "pro" ]; then
-    "$SCDIR/carvel-import-secret.sh" "reg-creds-dev-registry" "$NS"
-fi
 set +e
 $SCDIR/carvel-deploy-package.sh $APP_NAME $PACKAGE_NAME $PACKAGE_VERSION "./scdf-values.yml" "$NS"
 end_time=$(date +%s)

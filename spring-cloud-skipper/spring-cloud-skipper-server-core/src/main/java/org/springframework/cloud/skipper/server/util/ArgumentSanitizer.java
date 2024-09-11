@@ -22,7 +22,10 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * Sanitizes potentially sensitive keys from manifest data.
@@ -60,7 +63,7 @@ public class ArgumentSanitizer {
 			DumperOptions options = new DumperOptions();
 			options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 			options.setPrettyFlow(true);
-			Yaml yaml = new Yaml(options);
+			Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(options), options);
 			Iterator<Object> iter = yaml.loadAll(yml).iterator();
 			while (iter.hasNext()) {
 				Object o = iter.next();

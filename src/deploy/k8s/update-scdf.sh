@@ -13,10 +13,10 @@ if [ "$DATAFLOW_PRO_VERSION" = "" ]; then
   DATAFLOW_PRO_VERSION=1.6.1-SNAPSHOT
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
-  export DATAFLOW_VERSION=2.11.4-SNAPSHOT
+  export DATAFLOW_VERSION=2.11.5-SNAPSHOT
 fi
 if [ "$SKIPPER_VERSION" = "" ]; then
-  export SKIPPER_VERSION=2.11.4-SNAPSHOT
+  export SKIPPER_VERSION=2.11.5-SNAPSHOT
 fi
 
 case $BROKER in
@@ -86,8 +86,8 @@ if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
     sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-composed-task-runner:$DATAFLOW_VERSION" true
 
     if [ "$USE_PRO" = "true" ]; then
-        sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
-        sh "$SCDIR/load-image.sh" "dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION" true
+        sh "$SCDIR/load-image.sh" "spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION" true
     else
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-skipper-server:$SKIPPER_VERSION" true
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-server:$DATAFLOW_VERSION" true
@@ -111,8 +111,8 @@ kubectl --namespace "$NS" set image deployments/scdf-server scdf-server=$SCDF_SE
 
 if [ "$USE_PRO" = "true" ]; then
     echo "Deploying Data Flow Server Pro $DATAFLOW_PRO_VERSION for $BROKER and $DATABASE"
-    SCDF_SERVER_IMAGE="dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION"
-#    SCDF_SKIPPER_IMAGE="dev.registry.tanzu.vmware.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION"
+    SCDF_SERVER_IMAGE="spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server:$DATAFLOW_PRO_VERSION"
+#    SCDF_SKIPPER_IMAGE="spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-skipper:$DATAFLOW_PRO_VERSION"
 #    cat "$YAML_PATH/server-deployment-pro.yaml" | envsubst '$DATAFLOW_VERSION,$DATAFLOW_PRO_VERSION,$DATABASE' | kubectl apply --namespace "$NS" -f -
     cat "$YAML_PATH/server-deployment-pro.yaml" | envsubst '$DATAFLOW_VERSION,$DATAFLOW_PRO_VERSION,$DATABASE' | kubectl apply --namespace "$NS" -f -
     kubectl --namespace "$NS" set image deployments/scdf-server scdf-server=$SCDF_SERVER_IMAGE

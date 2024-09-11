@@ -22,7 +22,10 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 import org.zeroturnaround.zip.ZipUtil;
 
 import org.springframework.cloud.skipper.domain.Package;
@@ -45,7 +48,8 @@ public class DefaultPackageWriter implements PackageWriter {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);
-		this.yaml = new Yaml(dumperOptions);
+		this.yaml = new Yaml(new SafeConstructor(new LoaderOptions()), new Representer(dumperOptions), dumperOptions);
+
 	}
 
 	@Override

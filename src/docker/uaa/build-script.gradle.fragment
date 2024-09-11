@@ -1,0 +1,16 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven {
+            url 'https://repo.spring.io/plugins-release'
+            credentials {
+                username = System.getenv('ARTIFACTORY_USERNAME')
+                password = System.getenv('ARTIFACTORY_PASSWORD')
+            }
+        }
+    }
+    dependencies {
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+    }
+}

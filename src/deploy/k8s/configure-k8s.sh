@@ -22,14 +22,16 @@ if [ "$1" != "" ]; then
     export K8S_VERSION="$1"
 else
     if [ "$K8S_VERSION" == "" ]; then
-        export K8S_VERSION="1.28"
+        export K8S_VERSION="1.30"
     fi
 fi
 set +e
 case "$K8S_DRIVER" in
 "kind")
     echo "Creating kind cluster: $K8S_VERSION"
+    set -e
     kind create cluster --image "kindest/node:v$K8S_VERSION"
+    set +e
     "$SCDIR/setup-metallb.sh"
     ;;
 "gke")

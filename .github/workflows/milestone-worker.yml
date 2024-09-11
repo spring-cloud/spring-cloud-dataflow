@@ -96,7 +96,7 @@ jobs:
           -B
         jfrog rt build-clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,asciidoctordocs,restdocs -B install -DskipTests 
+        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,docs -B install -DskipTests 
         jfrog rt build-publish
         PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV

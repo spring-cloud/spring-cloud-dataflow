@@ -1,2 +1,7 @@
 #!/bin/bash
-./build-uaa && ./build-docker
+set -euo pipefail
+SRCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+pushd $SRCDIR
+./build-uaa
+./build-docker
+popd

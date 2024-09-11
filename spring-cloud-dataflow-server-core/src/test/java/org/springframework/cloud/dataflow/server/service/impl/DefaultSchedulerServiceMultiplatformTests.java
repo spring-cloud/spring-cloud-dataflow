@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 the original author or authors.
+ * Copyright 2020-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.service.impl;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -75,6 +76,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -162,18 +164,13 @@ public class DefaultSchedulerServiceMultiplatformTests {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		this.appRegistry.save("demo",
-				ApplicationType.task,
-				"1.0.0.",
-				new URI("file:src/test/resources/apps/foo-task"),
-				new URI("file:src/test/resources/apps/foo-task"),
-				null);
-		this.appRegistry.save("demo2",
-				ApplicationType.task,
-				"1.0.0",
-				new URI("file:src/test/resources/apps/foo-task"),
-				new URI("file:src/test/resources/apps/foo-task"),
-				null);
+
+		when(this.appRegistry.find(
+			eq("demo"), eq(ApplicationType.task), eq("1.0.0"))).thenReturn(new AppRegistration("demo",
+			ApplicationType.task, new URI("file:src/test/resources/apps/foo-task")));
+		when(this.appRegistry.find(
+			eq("demo2"), eq(ApplicationType.task), eq("1.0.0"))).thenReturn(new AppRegistration("demo2",
+			ApplicationType.task, new URI("file:src/test/resources/apps/foo-task")));
 
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME, "demo"));
 		taskDefinitionRepository.save(new TaskDefinition(CTR_DEFINITION_NAME, "demo && demo2"));
@@ -182,7 +179,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		this.testProperties = new HashMap<>();
 		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "AAAA", "* * * * *");
 		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
-		this.testProperties.put("version." + BASE_DEFINITION_NAME, "boot2");
+		this.testProperties.put("version." + BASE_DEFINITION_NAME, "1.0.0");
 		this.resolvedProperties = new HashMap<>();
 		this.resolvedProperties.put(DEPLOYER_PREFIX + "AAAA", "* * * * *");
 		this.resolvedProperties.put(DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
@@ -196,6 +193,13 @@ public class DefaultSchedulerServiceMultiplatformTests {
 
 	@Test
 	public void testSchedule() {
+		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
+		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
+	}
+
+	@Test
+	public void testScheduleWithNoVersion() {
+		this.testProperties.remove("version." + BASE_DEFINITION_NAME);
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
@@ -416,15 +420,19 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testScheduleWithoutCommandLineArguments() {
+	public void testScheduleWithoutCommandLineArguments() throws URISyntaxException {
 		List<String> args = getCommandLineArguments(new ArrayList<>());
 		assertThatCommandLineArgsHaveNonDefaultArgs(args, "--app.timestamp");
 	}
 
-	private List<String> getCommandLineArguments(List<String> commandLineArguments) {
+	private List<String> getCommandLineArguments(List<String> commandLineArguments) throws URISyntaxException {
 		Scheduler mockScheduler = mock(SimpleTestScheduler.class);
 		TaskDefinitionRepository mockTaskDefinitionRepository = mock(TaskDefinitionRepository.class);
 		AppRegistryService mockAppRegistryService = mock(AppRegistryService.class);
+		when(mockAppRegistryService.find(
+			eq("timestamp"), eq(ApplicationType.task), eq("1.0.0"))).
+			thenReturn(new AppRegistration("timestamp", ApplicationType.task,
+				new URI("file:src/test/resources/apps/timestamp-task")));
 
 		AggregateExecutionSupport mockAggExecSupport = mock(AggregateExecutionSupport.class);
 		when(mockAggExecSupport.findSchemaVersionTarget(anyString(), anyString(), any(TaskDefinition.class)))

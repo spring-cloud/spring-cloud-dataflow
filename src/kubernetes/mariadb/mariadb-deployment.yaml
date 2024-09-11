@@ -1,3 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-configmap
+data:
+  primary.sql: |
+    CREATE DATABASE IF NOT EXISTS dataflow;
+    CREATE DATABASE IF NOT EXISTS skipper;
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,32 +24,37 @@ spec:
         app: mariadb
     spec:
       containers:
-      - image: mariadb:10.4
-        imagePullPolicy: IfNotPresent
-        name: mariadb
-        env:
-          - name: MARIADB_ROOT_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: database-password
-                name: mariadb
-          - name: MARIADB_DATABASE
-            value: 'dataflow'
-        ports:
-          - containerPort: 3306
-            name: mariadb
-        resources:
-          requests:
-            cpu: 2000m
-            memory: 1Gi
-        volumeMounts:
-          - name: data
-            mountPath: /var/lib/mariadb
-        args:
-          - "--ignore-db-dir=lost+found"
-          - "--character-set-server=utf8mb4"
-          - "--collation-server=utf8mb4_unicode_ci"
+        - image: mariadb:10.6
+          imagePullPolicy: IfNotPresent
+          name: mariadb
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: database-password
+                  name: mariadb
+            - name: MARIADB_DATABASE
+              value: 'dataflow'
+          ports:
+            - containerPort: 3306
+              name: mariadb
+          resources:
+            requests:
+              cpu: 2000m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+          args:
+            - "--ignore-db-dir=lost+found"
+            - "--character-set-server=utf8mb4"
+            - "--collation-server=utf8mb4_unicode_ci"
       volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: mariadb
+        - name: initdb
+          configMap:
+            name: mariadb-configmap
+        - name: data
+          persistentVolumeClaim:
+            claimName: mariadb

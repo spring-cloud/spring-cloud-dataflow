@@ -37,19 +37,25 @@ describe('servers', () => {
       dataValueYamls: [
         ...DEFAULT_REQUIRED_DATA_VALUES,
         'scdf.server.service.type=LoadBalancer',
-        'scdf.skipper.service.type=LoadBalancer'
+        'scdf.server.service.allocateLoadBalancerNodePorts=false',
+        'scdf.skipper.service.type=ClusterIP',
+        'scdf.skipper.service.allocateLoadBalancerNodePorts=true'
       ]
     });
     expect(result.success, result.stderr).toBeTruthy();
     const yaml = result.stdout;
 
     const dataflowService = findService(yaml, SCDF_SERVER_NAME);
+    console.log(dataflowService);
     expect(dataflowService).toBeTruthy();
     expect(dataflowService?.spec?.type).toBe('LoadBalancer');
 
+    expect(dataflowService?.spec?.allocateLoadBalancerNodePorts).toBe(false);
+
     const skipperService = findService(yaml, SKIPPER_NAME);
     expect(skipperService).toBeTruthy();
-    expect(skipperService?.spec?.type).toBe('LoadBalancer');
+    expect(skipperService?.spec?.type).toBe('ClusterIP');
+    expect(skipperService?.spec?.allocateLoadBalancerNodePorts).toBeFalsy();
   });
 
   it('should have tagged images', async () => {

@@ -69,11 +69,14 @@ import org.springframework.cloud.dataflow.server.controller.JobStepExecutionCont
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
 import org.springframework.cloud.dataflow.server.controller.SchemaController;
+import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
@@ -409,7 +412,28 @@ public class JobDependencies {
 				composedTaskRunnerConfigurationProperties
 		);
 	}
-
+	@Bean
+	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
+		TaskExecutionService taskExecutionService,
+		TaskJobService taskJobService,
+		AggregateTaskExplorer taskExplorer,
+		AggregateExecutionSupport aggregateExecutionSupport
+	) {
+		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer, aggregateExecutionSupport);
+	}
+	@Bean
+	public TaskDefinitionController taskDefinitionController(
+		AggregateTaskExplorer explorer, TaskDefinitionRepository repository,
+		TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+		TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider
+	) {
+		return new TaskDefinitionController(explorer,
+			repository,
+			taskSaveService,
+			taskDeleteService,
+			taskDefinitionAssemblerProvider
+		);
+	}
 	@Bean
 	@Primary
 	public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {

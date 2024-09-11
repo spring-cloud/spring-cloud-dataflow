@@ -1,3 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-configmap
+data:
+  primary.sql: |
+    CREATE DATABASE IF NOT EXISTS dataflow;
+    CREATE DATABASE IF NOT EXISTS skipper;
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,7 +66,12 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/mysql57
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: mysql57
+        - name: initdb
+          configMap:
+            name: mysql-configmap

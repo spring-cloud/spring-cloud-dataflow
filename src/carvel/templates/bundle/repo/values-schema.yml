@@ -79,6 +79,12 @@ components:
                         - ClusterIP
                         - ExternalName
                       description: Service type
+                    allocateLoadBalancerNodePorts:
+                      type: boolean
+                      description: Indicates if load balancer should create node ports. Default is true
+                    loadBalancerClass:
+                      type: string
+                      description: Determines a specific configured type of load balancer.
                 resources:
                   type: object
                   properties:
@@ -185,6 +191,12 @@ components:
                         - ClusterIP
                         - ExternalName
                       description: Service type
+                    allocateLoadBalancerNodePorts:
+                      type: boolean
+                      description: Indicates if load balancer should create node ports. Default is true
+                    loadBalancerClass:
+                      type: string
+                      description: Determines a specific configured type of load balancer.
                 resources:
                   type: object
                   properties:
