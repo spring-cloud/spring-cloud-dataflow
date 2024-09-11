@@ -3,8 +3,7 @@ configuration:
   tasksEnabled: true
   composedTaskRunner:
     image:
-      digest: sha256:612de6a94ae122434b5bc73f32a8c19e0bcfa1cbdb1dcd7287bb290d113f03e4
-      tag: 2.11.4
+      tag: 2.11.5-SNAPSHOT
   stream:
     deployer:
       kubernetes:

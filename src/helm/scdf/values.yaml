@@ -9,7 +9,7 @@ configuration:
   composedTaskRunner:
     image:
       repository: springcloud/spring-cloud-dataflow-composed-task-runner
-      tag: "2.11.4-SNAPSHOT"
+      tag: "2.11.5-SNAPSHOT"
       digest: ""
   stream:
     deployer:
@@ -126,7 +126,7 @@ serviceAccount:
 server:
   image:
     repository: 'springcloud/spring-cloud-dataflow-server'
-    tag: '2.11.4-SNAPSHOT'
+    tag: '2.11.5-SNAPSHOT'
     digest: ""
     pullPolicy: IfNotPresent
     pullSecrets: [ ]
@@ -196,7 +196,7 @@ server:
 skipper:
   image:
     repository: 'springcloud/spring-cloud-skipper'
-    tag: '2.11.4-SNAPSHOT'
+    tag: '2.11.5-SNAPSHOT'
     digest: ""
     pullPolicy: IfNotPresent
     pullSecrets: [ ]

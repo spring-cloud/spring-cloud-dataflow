@@ -65,7 +65,7 @@ spec:
               {{- if .Values.configuration.composedTaskRunner.image.digest }}
               value: {{ print "docker://" $ctrImageRepository ":" .Values.configuration.composedTaskRunner.image.digest | squote }}
               {{- else }}
-              {{- $ctrImageTag := .Values.configuration.composedTaskRunner.image.tag | default "2.11.4-SNAPSHOT" }}
+              {{- $ctrImageTag := .Values.configuration.composedTaskRunner.image.tag | default "2.11.5-SNAPSHOT" }}
               value: {{ print "docker://" $ctrImageRepository ":" $ctrImageTag | squote }}
               {{- end }}
             - name: SPRING_CLOUD_DATAFLOW_SERVER_URI
