@@ -41,6 +41,7 @@ if [ "$PULL_IMAGES" == "true" ]; then
 fi
 start_time=$(date +%s)
 echo "Deploying cert-manager $CERT_MANAGER_VERSION"
+set -e
 kapp deploy --yes --wait --wait-check-interval 10s --app cert-manager \
     --file https://github.com/cert-manager/cert-manager/releases/download/$CERT_MANAGER_VERSION/cert-manager.yaml
 echo "Deployed cert-manager $CERT_MANAGER_VERSION"
