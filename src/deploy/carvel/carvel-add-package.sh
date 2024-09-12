@@ -33,7 +33,7 @@ if [ "$REPO_SECRET_REF" = "" ]; then
 fi
 
 echo "Using secretRef=$REPO_SECRET_REF in $PACKAGE_NAME for $PACKAGE"
-
+set -e
 kubectl apply --namespace $NS -f -  <<EOF
 apiVersion: packaging.carvel.dev/v1alpha1
 kind: PackageRepository
