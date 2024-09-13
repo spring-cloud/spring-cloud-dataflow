@@ -39,7 +39,7 @@ jobs:
           .github/workflows/generate-release-notes.sh "${{ runner.temp }}" "$BUILD_ZOO_HANDLER_spring_cloud_deployer_version" "$BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version" "$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version"
           export PACKAGE_VERSION=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
           echo "## What's Changed in Spring Cloud Dataflow and Skipper from `v<previous-version>` to `v${PACKAGE_VERSION}` >> "${{runner.temp}}/release_notes.md"
-          gh pr list --search "milestone:$PACKAGE_VERSION" --state closed --json=number,title,author -jq '.[] | "* " + .title + " by @" + .author.login + " in #" + (.number|tostring)' >> "${{runner.temp}}/release_notes.md"  
+          gh pr list --search "milestone:$PACKAGE_VERSION" --state closed --json=number,title,author -jq '.[] | "* " + .title + " by @" + .author.login + " in https://github.com/spring-cloud/spring-cloud-dataflow/pull/" + (.number|tostring)' >> "${{runner.temp}}/release_notes.md"  
           gh release create v$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version \
             --draft \
             --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
