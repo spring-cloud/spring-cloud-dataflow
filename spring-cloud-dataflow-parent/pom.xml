@@ -7,23 +7,23 @@
 	<name>spring-cloud-dataflow-parent</name>
 	<description>Data Flow Parent</description>
 
-	<version>2.11.5-SNAPSHOT</version>
+	<version>2.11.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<url>https://cloud.spring.io/spring-cloud-dataflow/</url>
 	<properties>
 		<!-- NOTE: this needs to be updated and kept in sync w/ the project.version -->
 		<git-commit-id-plugin.version>4.9.9</git-commit-id-plugin.version>
-		<dataflow.version>2.11.5-SNAPSHOT</dataflow.version>
+		<dataflow.version>2.11.6-SNAPSHOT</dataflow.version>
 		<java.version>1.8</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<spring-boot.version>2.7.18</spring-boot.version>
 		<spring-framework.version>5.3.39</spring-framework.version>
 		<spring-security.version>5.7.12</spring-security.version>
-		<spring-cloud-dataflow-ui.version>3.4.6-SNAPSHOT</spring-cloud-dataflow-ui.version>
+		<spring-cloud-dataflow-ui.version>3.4.7-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
 		<spring-cloud-skipper.version>${dataflow.version}</spring-cloud-skipper.version>
-		<spring-cloud-deployer.version>2.9.5-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-cloud-deployer.version>2.9.6-SNAPSHOT</spring-cloud-deployer.version>
 		<spring-cloud-task.version>2.4.6</spring-cloud-task.version>
 		<spring-cloud-common-security-config.version>${dataflow.version}</spring-cloud-common-security-config.version>
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>

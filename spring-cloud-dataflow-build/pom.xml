@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-build</artifactId>
-	<version>2.11.5-SNAPSHOT</version>
+	<version>2.11.6-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Spring Cloud Dataflow Build</name>
 	<description>Spring Cloud Dataflow Build, managing plugins and dependencies</description>
@@ -27,7 +27,7 @@
 		<spring-cloud.version>2021.0.9</spring-cloud.version>
 		<spring-security.version>5.7.12</spring-security.version>
 		<spring-shell.version>2.1.15</spring-shell.version>
-		<dataflow.version>2.11.5-SNAPSHOT</dataflow.version>
+		<dataflow.version>2.11.6-SNAPSHOT</dataflow.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-asciidoctor-extensions.version>0.1.3.RELEASE</spring-asciidoctor-extensions.version>
@@ -101,7 +101,7 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-build-dependencies</artifactId>
-				<version>2.11.5-SNAPSHOT</version>
+				<version>2.11.6-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
