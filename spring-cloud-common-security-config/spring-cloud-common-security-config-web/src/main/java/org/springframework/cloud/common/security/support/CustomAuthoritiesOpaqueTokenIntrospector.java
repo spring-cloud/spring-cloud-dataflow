@@ -66,7 +66,16 @@ public class CustomAuthoritiesOpaqueTokenIntrospector implements OpaqueTokenIntr
 		final List<String> scopes = principal.getAttribute(OAuth2IntrospectionClaimNames.SCOPE);
 		final Set<String> scopesAsSet = new HashSet<>(scopes);
 		final Set<GrantedAuthority> authorities = this.authorityMapper.mapScopesToAuthorities(null, scopesAsSet, token);
-		final Set<GrantedAuthority> authorities2 = this.authorityMapper.mapClaimsToAuthorities(null, Arrays.asList("groups", "roles"));
+
+		List<String> roleClaims = principal.getAttribute("groups");
+		if (roleClaims == null) {
+			roleClaims = principal.getAttribute("roles");
+		}
+		if (roleClaims == null) {
+			roleClaims = new ArrayList<>();
+		}
+		
+		final Set<GrantedAuthority> authorities2 = this.authorityMapper.mapClaimsToAuthorities(null, roleClaims);
 		authorities.addAll(authorities2);
 		return authorities;
 	}
