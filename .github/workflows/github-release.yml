@@ -123,7 +123,7 @@ jobs:
             --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
             --notes-file $RELEASE_NOTES_FILE
           # retrieve spring-cloud-dataflow-package and upload to github release
-          export PACKAGE_VERSION=${$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
+          export PACKAGE_VERSION=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
           pushd spring-cloud-dataflow-package 
             ./set-package-version.sh
             ../mvnw package
