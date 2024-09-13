@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: skipper
-        image: springcloud/spring-cloud-skipper-server:2.11.3-SNAPSHOT
+        image: springcloud/spring-cloud-skipper-server:2.11.5
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: config
@@ -44,31 +44,32 @@ spec:
         startupProbe:
           tcpSocket:
             port: 7577
-          initialDelaySeconds: 15
+          initialDelaySeconds: 30
           periodSeconds: 3
-          failureThreshold: 120
+          failureThreshold: 20
           timeoutSeconds: 3
         resources:
-          requests:
-            cpu: 1500m
+          limits:
+            cpu: 1.0
             memory: 1024Mi
+          requests:
+            cpu: 0.5
+            memory: 640Mi
         env:
-        - name: LANG
-          value: 'en_US.utf8'
-        - name: LC_ALL
-          value: 'en_US.utf8'
-        - name: JDK_JAVA_OPTIONS
-          value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
-        - name: SERVER_PORT
-          value: '7577'
-        - name: SPRING_CLOUD_CONFIG_ENABLED
-          value: 'false'
-        - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
-          value: 'false'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
-          value: 'false'
-        - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
-          value: /etc/secrets
+          - name: LANG
+            value: en_US.utf8
+          - name: LC_ALL
+            value: en_US.utf8
+          - name: JDK_JAVA_OPTIONS
+            value: '-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8'
+          - name: SPRING_CLOUD_CONFIG_ENABLED
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_CONFIG_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_ENABLE_API
+            value: 'false'
+          - name: SPRING_CLOUD_KUBERNETES_SECRETS_PATHS
+            value: /etc/secrets
       serviceAccountName: scdf-sa
       volumes:
         - name: config
