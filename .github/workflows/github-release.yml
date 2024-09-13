@@ -43,10 +43,9 @@ jobs:
             --notes-file "${{runner.temp}}/release_notes.md"
           # retrieve spring-cloud-dataflow-package and upload to github release
           export PACKAGE_VERSION=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}
-          pushd spring-cloud-dataflow-package 
-            ./set-package-version.sh
-            ../mvnw package
-          popd
+          ./mvnw -s .settings.xml build-helper:parse-version versions:set -DskipResolution=true -DprocessAllModules=true -DgenerateBackupPoms=false -Dartifactory.publish.artifacts=false -DnewVersion=$PACKAGE_VERSION
+          ./spring-cloud-dataflow-package/set-package-version.sh
+          ./mvnw -s .settings.xml package -pl spring-cloud-dataflow-package          
           PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-oss-install-${PACKAGE_VERSION}.zip"          
           gh release upload v$PACKAGE_VERSION $PACKAGE_FILE --clobber
         # zoo success
