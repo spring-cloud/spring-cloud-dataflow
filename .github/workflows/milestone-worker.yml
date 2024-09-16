@@ -46,7 +46,7 @@ jobs:
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=libs-milestone-local \
           --repo-deploy-snapshots=libs-snapshot-local
-        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
+        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-2-11-x-milestone >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
 #     zoo extract and ensure
@@ -100,7 +100,7 @@ jobs:
         jfrog rt build-publish
         PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-2-11-x-milestone >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
 #        set +e

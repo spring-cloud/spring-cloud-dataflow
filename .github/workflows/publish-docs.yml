@@ -42,7 +42,7 @@ jobs:
             --repo-resolve-snapshots=libs-snapshot \
             --repo-deploy-releases=libs-staging-local \
             --repo-deploy-snapshots=libs-snapshot-local
-          echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-release >> $GITHUB_ENV
+          echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-2-11-x-release >> $GITHUB_ENV
           echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
       - name: 'Install: xmllint'

@@ -48,7 +48,7 @@ jobs:
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=libs-release-local \
           --repo-deploy-snapshots=libs-snapshot-local
-        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
+        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-2-11-x-ndv >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
     # zoo extract and ensure
@@ -89,14 +89,14 @@ jobs:
         ./spring-cloud-dataflow-package/set-package-version.sh
         jfrog rt mvn install -DskipTests -B         
         jfrog rt build-publish
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-2-11-x-ndv >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
     # zoo commit
     - name: Commit Next Dev Changes
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
-        commit-changes-branch: main
+        commit-changes-branch: 2.11.x
         commit-changes-message: Next development version
 
     # zoo success
