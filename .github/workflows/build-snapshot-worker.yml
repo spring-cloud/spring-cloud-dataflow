@@ -50,7 +50,7 @@ jobs:
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=libs-release-local \
           --repo-deploy-snapshots=libs-snapshot-local
-        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
+        echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-2-11-x >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
     - name: Extract Zoo Context Properties
       uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -69,7 +69,7 @@ jobs:
         jfrog rt build-publish
         PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-2-11-x >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
 #        echo "Determine project version"
