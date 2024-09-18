@@ -1,8 +1,13 @@
 #!/bin/bash
+SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 (return 0 2>/dev/null) && sourced=1 || sourced=0
 if [ "$sourced" = "0" ]; then
   echo "This script must be invoked using: source $0 $*"
   exit 1
+fi
+if [ "$1" = "" ]; then
+  echo "Usage $0 [--release | --snapshot | --milestone] [--pro] [--skip-reg] [--namespace <namespace> | -ns <namespace>] [postgres | postgresql | maria | mariadb | mysql | mysql57] [rabbit | rabbitmq | kafka] [prometheus | grafana]"
+  return 0
 fi
 METRICS=
 SKIP_REG=
@@ -63,10 +68,10 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-echo "Namespace: $NS"
 if [ "$NS" = "" ]; then
     NS=scdf
 fi
+echo "Namespace: $NS"
 export NS
 if [ "$BROKER" != "" ]; then
     echo "BROKER: $BROKER"
@@ -89,10 +94,10 @@ if [ "$DATAFLOW_VERSION" = "" ] || [ "$FORCE_VERSION" = "true" ]; then
         export DATAFLOW_PRO_VERSION
         DATAFLOW_VERSION=$(cat $VERSION_FILE | yq ".scdf-type.oss.${VERSION_TYPE}")
     else
-        DATAFLOW_VERSION=$(cat $VERSION_FILE | yq ".scdf-type.${SCDF_TYPE}.${VERSION_TYPE}")
+        DATAFLOW_VERSION=$(cat $VERSION_FILE | yq ".scdf-type.oss.${VERSION_TYPE}")
     fi
-    export DATAFLOW_VERSION
     SKIPPER_VERSION=$DATAFLOW_VERSION
+    export DATAFLOW_VERSION
     export SKIPPER_VERSION
     echo "DATAFLOW_VERSION: $DATAFLOW_VERSION"
     echo "SKIPPER_VERSION: $SKIPPER_VERSION"
