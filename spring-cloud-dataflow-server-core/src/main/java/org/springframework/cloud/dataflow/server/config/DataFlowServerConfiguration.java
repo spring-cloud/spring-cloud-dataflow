@@ -74,7 +74,8 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		H2ServerConfiguration.class,
 		SchemaServiceConfiguration.class,
 		AggregateTaskConfiguration.class,
-		AggregateDataFlowTaskConfiguration.class
+		AggregateDataFlowTaskConfiguration.class,
+		CleanupTaskExecutionConfiguration.class
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 @ComponentScan(basePackages = {"org.springframework.cloud.dataflow.schema.service", "org.springframework.cloud.dataflow.aggregate.task"})
