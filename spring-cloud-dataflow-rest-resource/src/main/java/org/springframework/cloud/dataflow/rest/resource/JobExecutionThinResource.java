@@ -132,8 +132,8 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 			this.name = "?";
 		}
 
-		// Duration is always in GMT
 		durationFormat.setTimeZone(TimeUtils.getJvmTimeZone());
+
 		// The others can be localized
 		timeFormat.setTimeZone(timeZone);
 		dateFormat.setTimeZone(timeZone);
