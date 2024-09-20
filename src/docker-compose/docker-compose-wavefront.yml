@@ -7,22 +7,30 @@ version: '3'
 #  - WAVEFRONT_URI (optional) can be used to set the wavefront uri. Defaults to https://vmware.wavefront.com
 #  - WAVEFRONT_SOURCE (optional) can be used to set the wavefront source name. Defaults to scdf-docker-compose
 
+# NOTE: In Boot 3.0 - 3.3 only global tracing property 'management.tracing.enabled' available.
+# This means in order to disable the other tracer reporters we have to exclude their tracing
+# auto-configuration. In Boot 3.4 there is a specific enabled property
+# 'management.<product>.tracing.export.enabled' that simplifies this by not requiring the
+# auto-configuration exclusion. However, to support all version of Boot 3.0 - 3.4 we add
+# both sets of properties in env vars below.
+
 services:
   dataflow-server:
     environment:
+      - MANAGEMENT_WAVEFRONT_APITOKEN=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - MANAGEMENT_WAVEFRONT_URI=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - MANAGEMENT_WAVEFRONT_SOURCE=${WAVEFRONT_SOURCE:-scdf-docker-compose}
       - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_ENABLED=true
-      - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_APITOKEN=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
-      - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_URI=${WAVEFRONT_URI:-https://vmware.wavefront.com}
-      - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_SOURCE=${WAVEFRONT_SOURCE:-scdf-docker-compose}
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_TRACING_ENABLED=true
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_WAVEFRONT_TRACING_EXPORT_ENABLED=true
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.actuate.autoconfigure.tracing.zipkin.ZipkinAutoConfiguration
       - SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
 
   skipper-server:
     environment:
+      - MANAGEMENT_WAVEFRONT_APITOKEN=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
+      - MANAGEMENT_WAVEFRONT_URI=${WAVEFRONT_URI:-https://vmware.wavefront.com}
+      - MANAGEMENT_WAVEFRONT_SOURCE=${WAVEFRONT_SOURCE:-scdf-docker-compose}
       - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_ENABLED=true
-      - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_APITOKEN=${WAVEFRONT_KEY:?WAVEFRONT_KEY is not set!}
-      - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_URI=${WAVEFRONT_URI:-https://vmware.wavefront.com}
-      - MANAGEMENT_WAVEFRONT_METRICS_EXPORT_SOURCE=${WAVEFRONT_SOURCE:-scdf-docker-compose}
       - SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
