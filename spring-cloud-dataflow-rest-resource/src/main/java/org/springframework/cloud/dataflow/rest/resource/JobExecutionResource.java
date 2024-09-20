@@ -123,8 +123,8 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 			this.name = "?";
 		}
 
-		// Duration is always in GMT
-		durationFormat.setTimeZone(TimeUtils.getDefaultTimeZone());
+		durationFormat.setTimeZone(TimeUtils.getJvmTimeZone());
+
 		// The others can be localized
 		timeFormat.setTimeZone(timeZone);
 		dateFormat.setTimeZone(timeZone);

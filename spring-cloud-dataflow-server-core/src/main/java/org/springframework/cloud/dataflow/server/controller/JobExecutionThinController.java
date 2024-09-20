@@ -198,7 +198,7 @@ public class JobExecutionThinController {
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<TaskJobExecution, JobExecutionThinResource> {
 
-		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
+		private TimeZone timeZone = TimeUtils.getJvmTimeZone();
 
 		public Assembler() {
 			super(JobExecutionThinController.class, JobExecutionThinResource.class);

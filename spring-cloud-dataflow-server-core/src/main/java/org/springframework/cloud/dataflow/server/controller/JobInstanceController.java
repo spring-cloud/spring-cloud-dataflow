@@ -126,7 +126,7 @@ public class JobInstanceController {
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {
 
-		private TimeZone timeZone = TimeUtils.getDefaultTimeZone();
+		private TimeZone timeZone = TimeUtils.getJvmTimeZone();
 
 		public Assembler() {
 			super(JobInstanceController.class, JobInstanceResource.class);
