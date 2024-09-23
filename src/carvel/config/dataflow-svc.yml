@@ -8,6 +8,8 @@ kind: Service
 apiVersion: v1
 metadata:
   name: scdf-server
+  annotations:
+    kapp.k14s.io/change-group: "scdf.tanzu.vmware.com/scdf-server-service"
   labels:
     app: scdf-server
     spring-deployment-id: scdf
