@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.common.security.AuthorizationProperties;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
+import org.springframework.security.web.access.expression.WebExpressionAuthorizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -50,13 +51,11 @@ public class SecurityConfigUtils {
 	/**
 	 * Read the configuration for "simple" (that is, not ACL based) security and apply it.
 	 *
-	 * @param security The ExpressionUrlAuthorizationConfigurer to apply the authorization rules to
+	 * @param auth The Configurer to apply the authorization rules to
 	 * @param authorizationProperties Contains the rules to configure authorization
-	 *
-	 * @return ExpressionUrlAuthorizationConfigurer
 	 */
-	public static ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry configureSimpleSecurity(
-			ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security,
+	public static void configureSimpleSecurity(
+			AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth,
 			AuthorizationProperties authorizationProperties) {
 		for (String rule : authorizationProperties.getRules()) {
 			Matcher matcher = AUTHORIZATION_RULE.matcher(rule);
@@ -69,8 +68,8 @@ public class SecurityConfigUtils {
 			String attribute = matcher.group(3).trim();
 
 			logger.info("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
-			security = security.requestMatchers(method, urlPattern).access(attribute);
+			auth.requestMatchers(method, urlPattern).access(new WebExpressionAuthorizationManager(attribute));
 		}
-		return security;
+
 	}
 }
