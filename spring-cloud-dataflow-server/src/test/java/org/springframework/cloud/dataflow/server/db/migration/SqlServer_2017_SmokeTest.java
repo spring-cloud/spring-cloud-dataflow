@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
+import org.junit.jupiter.api.Disabled;
+
 import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 
 /**
@@ -23,5 +25,6 @@ import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupp
  * @author Corneil du Plessis
  * @author Chris Bono
  */
+@Disabled("See https://github.com/spring-cloud/spring-cloud-dataflow/issues/5952")
 public class SqlServer_2017_SmokeTest extends AbstractSmokeTest implements SqlServer_2017_ContainerSupport {
 }

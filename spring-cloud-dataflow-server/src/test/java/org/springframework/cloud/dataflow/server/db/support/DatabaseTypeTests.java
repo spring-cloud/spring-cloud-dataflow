@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.db.support;
 
 import javax.sql.DataSource;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -97,6 +98,7 @@ class DatabaseTypeTests {
 	class OracleDatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
 	}
 
+	@Disabled("See https://github.com/spring-cloud/spring-cloud-dataflow/issues/5952")
 	@Nested
 	class SqlServer_2017_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements SqlServer_2017_ContainerSupport {
 	}
