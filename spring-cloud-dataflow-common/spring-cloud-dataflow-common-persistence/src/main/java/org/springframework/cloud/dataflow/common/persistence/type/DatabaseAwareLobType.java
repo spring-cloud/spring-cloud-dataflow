@@ -16,11 +16,10 @@
 package org.springframework.cloud.dataflow.common.persistence.type;
 
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
-import org.hibernate.type.descriptor.java.StringTypeDescriptor;
-import org.hibernate.type.descriptor.sql.ClobTypeDescriptor;
-import org.hibernate.type.descriptor.sql.SqlTypeDescriptor;
-import org.hibernate.type.descriptor.sql.VarcharTypeDescriptor;
-
+import org.hibernate.type.descriptor.jdbc.AdjustableJdbcType;
+import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
+import org.hibernate.type.descriptor.java.StringJavaType;
+import org.hibernate.type.descriptor.jdbc.ClobJdbcType;
 import org.springframework.util.Assert;
 
 /**
@@ -34,21 +33,21 @@ public class DatabaseAwareLobType extends AbstractSingleColumnStandardBasicType<
 
 
 	public DatabaseAwareLobType() {
-		super( getDbDescriptor(), StringTypeDescriptor.INSTANCE );
+		super( getDbDescriptor(), StringJavaType.INSTANCE );
 	}
 
-	public static SqlTypeDescriptor getDbDescriptor() {
+	public static AdjustableJdbcType getDbDescriptor() {
 		if( isPostgres() ) {
-			return VarcharTypeDescriptor.INSTANCE;
+			return VarcharJdbcType.INSTANCE;
 		}
 		else {
-			return ClobTypeDescriptor.DEFAULT;
+			return ClobJdbcType.DEFAULT;
 		}
 	}
 
 	/**
 	 * This method will be used to set an indicator that the database driver in use is PostgreSQL.
-	 * @param postgresDB true if PostgreSQL.
+	 * if postgresDB true if PostgreSQL.
 	 */
 	private static boolean isPostgres() {
 		Boolean postgresDatabase = DatabaseTypeAwareInitializer.getPostgresDatabase();

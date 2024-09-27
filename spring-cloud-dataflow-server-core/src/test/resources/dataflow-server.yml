@@ -1,2 +1,7 @@
 management:
-  contextPath: /bar
+  context-path: /foo
+
+spring:
+  cloud:
+    task:
+      transaction-manager: transactionManager

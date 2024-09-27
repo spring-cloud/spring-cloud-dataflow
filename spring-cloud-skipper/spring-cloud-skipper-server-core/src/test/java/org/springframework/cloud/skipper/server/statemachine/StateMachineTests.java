@@ -16,16 +16,17 @@
 package org.springframework.cloud.skipper.server.statemachine;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.skipper.domain.AbstractEntity;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
@@ -73,7 +74,8 @@ import org.springframework.statemachine.test.StateMachineTestPlan;
 import org.springframework.statemachine.test.StateMachineTestPlanBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ReflectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +92,8 @@ import static org.mockito.Mockito.never;
  * @author Corneil du Plessis
  */
 @SuppressWarnings("unchecked")
-@SpringJUnitConfig(classes = TestConfig.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = TestConfig.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class StateMachineTests {
 
@@ -595,7 +598,7 @@ public class StateMachineTests {
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
 		packageMetadata1.setKind("SpringCloudDeployerApplication");
-		setId(PackageMetadata.class, packageMetadata1, "id", 1L);
+		setId(AbstractEntity.class, packageMetadata1, "id", 1L);
 		packageMetadata1.setRepositoryId(1L);
 		packageMetadata1.setName("package1");
 		packageMetadata1.setVersion("1.0.0");
@@ -605,19 +608,10 @@ public class StateMachineTests {
 	}
 
 	private static void setId(Class<?> clazz, Object instance, String fieldName, Object value) {
-		try {
-			Field field = ReflectionUtils.findField(clazz, fieldName);
-			field.setAccessible(true);
-			int modifiers = field.getModifiers();
-			Field modifierField = field.getClass().getDeclaredField("modifiers");
-			modifiers = modifiers & ~Modifier.FINAL;
-			modifierField.setAccessible(true);
-			modifierField.setInt(field, modifiers);
-			ReflectionUtils.setField(field, instance, value);
-		}
-		catch (ReflectiveOperationException e) {
-			throw new IllegalArgumentException(e);
-		}
+		Field field = ReflectionUtils.findField(clazz, fieldName);
+		assertThat(field).isNotNull();
+		field.setAccessible(true);
+		ReflectionUtils.setField(field, instance, value);
 	}
 
 	@Test

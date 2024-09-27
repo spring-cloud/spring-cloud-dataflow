@@ -24,6 +24,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -141,15 +142,15 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		// Upload new package
 		assertThat(packageService).isNotNull();
 		PackageMetadata uploadedPackageMetadata = this.packageService.upload(uploadProperties);
-		assertThat(uploadedPackageMetadata.getName().equals("log")).isTrue();
-		assertThat(uploadedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
+		assertThat(uploadedPackageMetadata.getName()).isEqualTo("log");
+		assertThat(uploadedPackageMetadata.getVersion()).isEqualTo("9.9.9");
 		assertThat(uploadedPackageMetadata.getId()).isNotNull();
 
 		// Retrieve new package
 		PackageMetadata retrievedPackageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log",
 				"9.9.9");
-		assertThat(retrievedPackageMetadata.getName().equals("log")).isTrue();
-		assertThat(retrievedPackageMetadata.getVersion().equals("9.9.9")).isTrue();
+		assertThat(retrievedPackageMetadata.getName()).isEqualTo("log");
+		assertThat(retrievedPackageMetadata.getVersion()).isEqualTo("9.9.9");
 		assertThat(retrievedPackageMetadata).isNotNull();
 		assertThat(retrievedPackageMetadata.getPackageFile().getPackageBytes()).isNotNull();
 		byte[] retrievedPackageBytes = retrievedPackageMetadata.getPackageFile().getPackageBytes();
@@ -276,14 +277,14 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	protected void assertConfigValues(Package pkg) {
 		// Note same config values for both time and log
 		ConfigValues configValues = pkg.getConfigValues();
-		Yaml yaml = new Yaml(new SafeConstructor());
-		Map<String, Object> logConfigValueMap = yaml.load(configValues.getRaw());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+		Map<String, Object> logConfigValueMap = (Map<String, Object>) yaml.load(configValues.getRaw());
 		assertThat(logConfigValueMap).containsKeys("version", "spec");
 		if (pkg.getMetadata().getName().equals("log")) {
-			assertThat(logConfigValueMap.get("version")).isEqualTo("1.1.0.RELEASE");
+			assertThat(logConfigValueMap).containsEntry("version", "1.1.0.RELEASE");
 		}
 		if (pkg.getMetadata().getName().equals("time")) {
-			assertThat(logConfigValueMap.get("version")).isEqualTo("1.2.0.RELEASE");
+			assertThat(logConfigValueMap).containsEntry("version", "1.2.0.RELEASE");
 		}
 		Map<String, Object> spec = (Map<String, Object>) logConfigValueMap.get("spec");
 		assertThat(spec).hasSize(2);

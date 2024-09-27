@@ -15,6 +15,14 @@
  */
 package org.springframework.cloud.dataflow.rest.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -22,9 +30,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,25 +53,21 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * @author Gunnar Hillert
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class DataflowTemplateTests {
+class DataflowTemplateTests {
 
 	private ObjectMapper mapper;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		mapper = new ObjectMapper();
 		mapper.registerModule(new Jdk8Module());
 		mapper.registerModule(new Jackson2HalModule());
@@ -76,12 +77,12 @@ public class DataflowTemplateTests {
 	}
 
 	@AfterEach
-	public void shutdown() {
+	void shutdown() {
 		System.clearProperty("sun.net.client.defaultConnectTimeout");
 	}
 
 	@Test
-	public void testDataFlowTemplateContructorWithNullUri() throws URISyntaxException {
+	void dataFlowTemplateContructorWithNullUri() throws URISyntaxException {
 
 		try {
 			new DataFlowTemplate(null, mapper);
@@ -95,32 +96,33 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
+	void dataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
 		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() -> {
 			new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
 		});
 	}
 
 	@Test
-	public void testThatObjectMapperGetsPrepared() {
+	void thatObjectMapperGetsPrepared() {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		DataFlowTemplate.prepareObjectMapper(objectMapper);
 		assertCorrectMixins(objectMapper);
 	}
 
 	@Test
-	public void testPrepareObjectMapperWithNullObjectMapper() {
+	void prepareObjectMapperWithNullObjectMapper() {
 		try {
 			DataFlowTemplate.prepareObjectMapper(null);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).isEqualTo("The objectMapper must not be null.");
+			return;
 		}
 	}
 
 	@Test
-	public void testThatDefaultDataflowRestTemplateContainsMixins() {
+	void thatDefaultDataflowRestTemplateContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
 
 		assertThat(restTemplate).isNotNull();
@@ -161,7 +163,7 @@ public class DataflowTemplateTests {
 
 
 	@Test
-	public void testThatPrepareRestTemplateWithNullContructorValueContainsMixins() {
+	void thatPrepareRestTemplateWithNullContructorValueContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(null);
 
 		assertThat(restTemplate).isNotNull();
@@ -172,19 +174,19 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testThatPrepareRestTemplateWithProvidedRestTemplateContainsMixins() {
+	void thatPrepareRestTemplateWithProvidedRestTemplateContainsMixins() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 
 		assertThat(restTemplate).isNotNull();
-		assertThat(restTemplate).isSameAs(providedRestTemplate);
+		assertThat(providedRestTemplate == restTemplate).isTrue();
 		assertThat(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler).isTrue();
 
 		assertCorrectMixins(restTemplate);
 	}
 
 	@Test
-	public void testPrepareRestTemplateWithRestTemplateThatHasNoMessageConverters() {
+	void prepareRestTemplateWithRestTemplateThatHasNoMessageConverters() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		providedRestTemplate.getMessageConverters().clear();
 
@@ -200,7 +202,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testPrepareRestTemplateWithRestTemplateThatMissesJacksonConverter() {
+	void prepareRestTemplateWithRestTemplateThatMissesJacksonConverter() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final Iterator<HttpMessageConverter<?>> iterator = providedRestTemplate.getMessageConverters().iterator();
 
@@ -222,7 +224,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testAllActive() throws Exception{
+	void allActive() throws Exception{
 		DataFlowTemplate template = getMockedDataFlowTemplate(true);
 
 		assertThat(template.taskOperations()).isNotNull();
@@ -235,7 +237,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testAllDeActive() throws Exception{
+	void allDeActive() throws Exception{
 		DataFlowTemplate template = getMockedDataFlowTemplate(false);
 
 		assertThat(template.taskOperations()).isNull();

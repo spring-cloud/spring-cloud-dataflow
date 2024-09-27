@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,13 @@
 package org.springframework.cloud.dataflow.tasklauncher;
 
 import java.util.Collections;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
@@ -31,14 +31,13 @@ import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.context.Lifecycle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.hateoas.PagedModel;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -48,6 +47,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+/**
+ * @author David Turanski
+ * @author Corneil du Plessis
+ */
 @SpringBootTest
 public class TaskLauncherFunctionApplicationTests {
 
@@ -61,10 +64,8 @@ public class TaskLauncherFunctionApplicationTests {
 	public void successfulLaunch() {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
-		setCurrentExecutionState(0);
-		Optional<LaunchResponse> response = taskLauncherFunction.apply(launchRequest);
-		assertThat(response.isPresent()).isTrue();
-		assertThat(response.get().getTaskId()).isEqualTo(1L);
+		setCurrentExecutionState(1);
+		taskLauncherFunction.accept(launchRequest);
 
 		verify(taskOperations).launch("someTask",
 				Collections.singletonMap(TaskLauncherFunction.TASK_PLATFORM_NAME, "default"),
@@ -76,8 +77,7 @@ public class TaskLauncherFunctionApplicationTests {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(3);
-		Optional<LaunchResponse> taskId = taskLauncherFunction.apply(launchRequest);
-		assertThat(taskId.isPresent()).isFalse();
+		assertThatExceptionOfType(SystemAtMaxCapacityException.class).isThrownBy(() -> taskLauncherFunction.accept(launchRequest));
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class TaskLauncherFunctionApplicationTests {
 		launchRequest
 				.setDeploymentProperties(Collections.singletonMap(TaskLauncherFunction.TASK_PLATFORM_NAME, "other"));
 		setCurrentExecutionState(0);
-		assertThatIllegalStateException().isThrownBy(() -> taskLauncherFunction.apply(launchRequest))
+		assertThatIllegalStateException().isThrownBy(() -> taskLauncherFunction.accept(launchRequest))
 				.withStackTraceContaining("does not match the platform configured for the Task Launcher");
 	}
 
@@ -98,18 +98,18 @@ public class TaskLauncherFunctionApplicationTests {
 		currentTaskExecutionsResource.setName("default");
 		when(taskOperations.currentTaskExecutions())
 				.thenReturn(Collections.singletonList(currentTaskExecutionsResource));
-		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L, SchemaVersionTarget.defaultTarget().getName()));
+		when(taskOperations.launch(anyString(), anyMap(), anyList())).thenReturn(new LaunchResponseResource(1L));
 	}
 
 	@Test
 	public void noLaunchersConfigured() {
-		ApplicationContextRunner contextRunner = new ApplicationContextRunner().withUserConfiguration(TestConfig.class);
+		ApplicationContextRunner contextRunner = new ApplicationContextRunner().withUserConfiguration(TaskLauncherFunctionApplicationTests.TestConfig.class);
 		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> contextRunner
 				.withPropertyValues("spring.profiles.active=nolaunchers")
-				.run(context -> context.start()))
-				.withCauseInstanceOf(BeanCreationException.class)
-				.withRootCauseInstanceOf(IllegalArgumentException.class)
-				.withStackTraceContaining("The Data Flow Server has no task platforms configured");
+				.run(Lifecycle::start))
+			.withCauseInstanceOf(BeanCreationException.class)
+			.withRootCauseInstanceOf(IllegalArgumentException.class)
+			.withStackTraceContaining("The Data Flow Server has no task platforms configured");
 	}
 
 	@Configuration
@@ -124,16 +124,15 @@ public class TaskLauncherFunctionApplicationTests {
 			when(launcherResource.getName()).thenReturn("default");
 
 			when(taskOperations.listPlatforms()).thenReturn(PagedModel.of(
-					Collections.singletonList(launcherResource), (PagedModel.PageMetadata) null));
+				Collections.singletonList(launcherResource), (PagedModel.PageMetadata) null));
 			return taskOperations;
 		}
-
 		@Bean
 		@Profile("nolaunchers")
 		TaskOperations taskOperationsNoLaunchers() {
 			TaskOperations taskOperations = mock(TaskOperations.class);
 			when(taskOperations.listPlatforms()).thenReturn(PagedModel.of(
-					Collections.emptyList(), (PagedModel.PageMetadata) null));
+				Collections.emptyList(), (PagedModel.PageMetadata) null));
 			return taskOperations;
 		}
 
@@ -145,7 +144,7 @@ public class TaskLauncherFunctionApplicationTests {
 		}
 	}
 
-	@SpringBootApplication
+	@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 	static class TaskLauncherFunctionTestApplication {
 	}
 }

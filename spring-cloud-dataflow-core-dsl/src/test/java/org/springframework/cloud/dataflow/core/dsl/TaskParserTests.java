@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,6 @@ import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 /**
  * Test the parser and visitor infrastructure. Check it accepts expected data and
@@ -44,14 +44,14 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
  * @author Eric Bottard
  * @author Corneil du Plessis
  */
-public class TaskParserTests {
+class TaskParserTests {
 
 	private TaskNode ctn;
 
 	private TaskAppNode appNode;
 
 	@Test
-	public void oneApp() {
+	void oneApp() {
 		TaskNode taskNode = parse("foo");
 		assertThat(taskNode.isComposed()).isFalse();
 		TaskAppNode appNode = taskNode.getTaskApp();
@@ -62,19 +62,19 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void hyphenatedAppName() {
+	void hyphenatedAppName() {
 		appNode = parse("gemfire-cq").getTaskApp();
 		assertThat(appNode.stringify(true)).isEqualTo("gemfire-cq:0>10");
 	}
 
 	@Test
-	public void oneAppWithParam() {
+	void oneAppWithParam() {
 		appNode = parse("foo --name=value").getTaskApp();
 		assertThat(appNode.stringify(true)).isEqualTo("foo --name=value:0>16");
 	}
 
 	@Test
-	public void oneAppWithTwoParams() {
+	void oneAppWithTwoParams() {
 		appNode = parse("foo --name=value --x=y").getTaskApp();
 
 		assertThat(appNode.getName()).isEqualTo("foo");
@@ -90,35 +90,35 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void testParameters() {
+	void parameters() {
 		String module = "gemfire-cq --query='Select * from /Stocks where symbol=''VMW''' --regionName=foo --foo=bar";
 		TaskAppNode gemfireApp = parse(module).getTaskApp();
 		Map<String, String> parameters = gemfireApp.getArgumentsAsMap();
-		assertThat(parameters.size()).isEqualTo(3);
-		assertThat(parameters.get("query")).isEqualTo("Select * from /Stocks where symbol='VMW'");
-		assertThat(parameters.get("regionName")).isEqualTo("foo");
-		assertThat(parameters.get("foo")).isEqualTo("bar");
+		assertThat(parameters).hasSize(3);
+		assertThat(parameters).containsEntry("query", "Select * from /Stocks where symbol='VMW'");
+		assertThat(parameters).containsEntry("regionName", "foo");
+		assertThat(parameters).containsEntry("foo", "bar");
 
 		module = "test";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters.size()).isEqualTo(0);
+		assertThat(parameters).isEmpty();
 
 		module = "foo --x=1 --y=two ";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters.size()).isEqualTo(2);
-		assertThat(parameters.get("x")).isEqualTo("1");
-		assertThat(parameters.get("y")).isEqualTo("two");
+		assertThat(parameters).hasSize(2);
+		assertThat(parameters).containsEntry("x", "1");
+		assertThat(parameters).containsEntry("y", "two");
 
 		module = "foo --x=1a2b --y=two ";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters.size()).isEqualTo(2);
-		assertThat(parameters.get("x")).isEqualTo("1a2b");
-		assertThat(parameters.get("y")).isEqualTo("two");
+		assertThat(parameters).hasSize(2);
+		assertThat(parameters).containsEntry("x", "1a2b");
+		assertThat(parameters).containsEntry("y", "two");
 
 		module = "foo --x=2";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters.size()).isEqualTo(1);
-		assertThat(parameters.get("x")).isEqualTo("2");
+		assertThat(parameters).hasSize(1);
+		assertThat(parameters).containsEntry("x", "2");
 
 		module = "--foo = bar";
 		try {
@@ -131,7 +131,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void testInvalidApps() {
+	void invalidApps() {
 		String config = "foo--x=13";
 		TaskParser parser = new TaskParser("t", config, true, true);
 		try {
@@ -144,23 +144,23 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void expressions_xd159() {
+	void expressions_xd159() {
 		appNode = parse("transform --expression=--payload").getTaskApp();
 		Map<String, String> props = appNode.getArgumentsAsMap();
-		assertThat(props.get("expression")).isEqualTo("--payload");
+		assertThat(props).containsEntry("expression", "--payload");
 	}
 
 	@Test
-	public void expressions_xd159_2() {
+	void expressions_xd159_2() {
 		// need quotes around an argument value with a space in it
 		checkForParseError("transform --expression=new StringBuilder(payload).reverse()", DSLMessage.TASK_MORE_INPUT,
 				27);
 		appNode = parse("transform --expression='new StringBuilder(payload).reverse()'").getTaskApp();
-		assertThat(appNode.getArgumentsAsMap().get("expression")).isEqualTo("new StringBuilder(payload).reverse()");
+		assertThat(appNode.getArgumentsAsMap()).containsEntry("expression", "new StringBuilder(payload).reverse()");
 	}
 
 	@Test
-	public void ensureTaskNamesValid_xd1344() {
+	void ensureTaskNamesValid_xd1344() {
 		// Similar rules to a java identifier but also allowed '-' after the first char
 		checkForIllegalTaskName("foo.bar", "task");
 		checkForIllegalTaskName("-bar", "task");
@@ -173,20 +173,20 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void expressions_xd159_3() {
+	void expressions_xd159_3() {
 		appNode = parse("transform --expression='new StringBuilder(payload).reverse()'").getTaskApp();
 		Map<String, String> props = appNode.getArgumentsAsMap();
-		assertThat(props.get("expression")).isEqualTo("new StringBuilder(payload).reverse()");
+		assertThat(props).containsEntry("expression", "new StringBuilder(payload).reverse()");
 	}
 
 	@Test
-	public void expressions_xd159_4() {
+	void expressions_xd159_4() {
 		appNode = parse("transform --expression=\"'Hello, world!'\"").getTaskApp();
 		Map<String, String> props = appNode.getArgumentsAsMap();
-		assertThat(props.get("expression")).isEqualTo("'Hello, world!'");
+		assertThat(props).containsEntry("expression", "'Hello, world!'");
 		appNode = parse("transform --expression='''Hello, world!'''").getTaskApp();
 		props = appNode.getArgumentsAsMap();
-		assertThat(props.get("expression")).isEqualTo("'Hello, world!'");
+		assertThat(props).containsEntry("expression", "'Hello, world!'");
 		// Prior to the change for XD-1613, this error should point to the comma:
 		// checkForParseError("foo | transform --expression=''Hello, world!'' | bar",
 		// DSLMessage.UNEXPECTED_DATA, 37);
@@ -195,21 +195,21 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void expressions_gh1() {
+	void expressions_gh1() {
 		appNode = parse("filter --expression=\"payload == 'foo'\"").getTaskApp();
 		Map<String, String> props = appNode.getArgumentsAsMap();
-		assertThat(props.get("expression")).isEqualTo("payload == 'foo'");
+		assertThat(props).containsEntry("expression", "payload == 'foo'");
 	}
 
 	@Test
-	public void expressions_gh1_2() {
+	void expressions_gh1_2() {
 		appNode = parse("filter --expression='new Foo()'").getTaskApp();
 		Map<String, String> props = appNode.getArgumentsAsMap();
-		assertThat(props.get("expression")).isEqualTo("new Foo()");
+		assertThat(props).containsEntry("expression", "new Foo()");
 	}
 
 	@Test
-	public void errorCases01() {
+	void errorCases01() {
 		checkForParseError(".", DSLMessage.EXPECTED_APPNAME, 0, ".");
 		assertThat(parse("foo", "a-_", true).getTaskApp().getName()).isEqualTo("a-_");
 		assertThat(parse("foo", "a_b", true).getTaskApp().getName()).isEqualTo("a_b");
@@ -217,13 +217,13 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void errorCases04() {
+	void errorCases04() {
 		checkForParseError("foo bar=yyy", DSLMessage.TASK_MORE_INPUT, 4, "bar");
 		checkForParseError("foo bar", DSLMessage.TASK_MORE_INPUT, 4, "bar");
 	}
 
 	@Test
-	public void shortArgValues_2499() {
+	void shortArgValues_2499() {
 		// This is the expected result when an argument value is missing:
 		checkForParseError("aaa --bbb= --ccc=ddd", DSLMessage.EXPECTED_ARGUMENT_VALUE, 11);
 		// From AbstractTokenizer.isArgValueIdentifierTerminator these are the 'special chars' that should
@@ -240,49 +240,49 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void errorCases05() {
+	void errorCases05() {
 		checkForParseError("foo --", DSLMessage.OOD, 6);
 		checkForParseError("foo --bar", DSLMessage.OOD, 9);
 		checkForParseError("foo --bar=", DSLMessage.OOD, 10);
 	}
 
 	@Test
-	public void errorCases06() {
+	void errorCases06() {
 		// Exception thrown by tokenizer, which doesn't know that the app name is missing
 		checkForParseError("|", DSLMessage.TASK_DOUBLE_OR_REQUIRED, 0);
 	}
 
 	// Parameters must be constructed via adjacent tokens
 	@Test
-	public void needAdjacentTokensForParameters() {
+	void needAdjacentTokensForParameters() {
 		checkForParseError("foo -- name=value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_NAME, 7);
 		checkForParseError("foo --name =value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_EQUALS, 11);
 		checkForParseError("foo --name= value", DSLMessage.NO_WHITESPACE_BEFORE_ARG_VALUE, 12);
 	}
 
 	@Test
-	public void testComposedOptionNameErros() {
+	void composedOptionNameErros() {
 		checkForParseError("foo --name.=value", DSLMessage.NOT_EXPECTED_TOKEN, 11);
 		checkForParseError("foo --name .sub=value", DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME, 11);
 		checkForParseError("foo --name. sub=value", DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME, 12);
 	}
 
 	@Test
-	public void testXD2416() {
+	void xd2416() {
 		appNode = parse("transform --expression='payload.replace(\"abc\", \"\")'").getTaskApp();
-		assertThat(appNode.getArgumentsAsMap().get("expression")).isEqualTo("payload.replace(\"abc\", \"\")");
+		assertThat(appNode.getArgumentsAsMap()).containsEntry("expression", "payload.replace(\"abc\", \"\")");
 
 		appNode = parse("transform --expression='payload.replace(\"abc\", '''')'").getTaskApp();
-		assertThat(appNode.getArgumentsAsMap().get("expression")).isEqualTo("payload.replace(\"abc\", '')");
+		assertThat(appNode.getArgumentsAsMap()).containsEntry("expression", "payload.replace(\"abc\", '')");
 	}
 
 	@Test
-	public void testUnbalancedSingleQuotes() {
+	void unbalancedSingleQuotes() {
 		checkForParseError("timestamp --format='YYYY", DSLMessage.NON_TERMINATING_QUOTED_STRING, 19);
 	}
 
 	@Test
-	public void testUnbalancedDoubleQuotes() {
+	void unbalancedDoubleQuotes() {
 		checkForParseError("timestamp --format=\"YYYY", DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 19);
 	}
 
@@ -299,7 +299,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void executableDsl() {
+	void executableDsl() {
 		TaskNode ctn = parse("foo", "appA && appB", true);
 		List<TaskApp> taskApps = ctn.getTaskApps();
 		assertThat(taskApps.get(0).getName()).isEqualTo("appA");
@@ -365,11 +365,11 @@ public class TaskParserTests {
 		assertThat(transitions.get(0).getStatusToCheckInDSLForm()).isEqualTo("0");
 
 		ctn = parse("AAA '0'->BBB");
-		transitions = ((TaskAppNode) ctn.getSequences().get(0).getSeriesElement(0)).getTransitions();
+		transitions = ((TaskAppNode) ((FlowNode) ctn.getSequences().get(0)).getSeriesElement(0)).getTransitions();
 		assertThat(transitions.get(0).getStatusToCheckInDSLForm()).isEqualTo("'0'");
 
 		ctn = parse("AAA *->BBB '*'->CCC");
-		transitions = ((TaskAppNode) ctn.getSequences().get(0).getSeriesElement(0)).getTransitions();
+		transitions = ((TaskAppNode) ((FlowNode) ctn.getSequences().get(0)).getSeriesElement(0)).getTransitions();
 		assertThat(transitions.get(0).getStatusToCheckInDSLForm()).isEqualTo("*");
 		assertThat(transitions.get(1).getStatusToCheckInDSLForm()).isEqualTo("'*'");
 
@@ -379,7 +379,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void isComposedTask() {
+	void isComposedTask() {
 		ctn = parse("appA 'foo' -> appB");
 		assertThat(ctn.isComposed()).isTrue();
 		assertThat(ctn.getTaskApp()).isNull();
@@ -390,7 +390,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void basics() {
+	void basics() {
 		Tokens tokens = new TaskTokenizer().getTokens("App1");
 		assertToken(TokenKind.IDENTIFIER, "App1", 0, 4, tokens.next());
 		tokens = new TaskTokenizer().getTokens("App1 && App2");
@@ -406,7 +406,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void tokenStreams() {
+	void tokenStreams() {
 		Tokens tokens = new TaskTokenizer().getTokens("App1 0->App2 1->:Bar");
 		assertTokens(tokens, TokenKind.IDENTIFIER, TokenKind.IDENTIFIER,
 				TokenKind.ARROW, TokenKind.IDENTIFIER, TokenKind.IDENTIFIER,
@@ -418,7 +418,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void singleApp() {
+	void singleApp() {
 		ctn = parse("FooApp");
 		assertThat(ctn.getTaskText()).isEqualTo("FooApp");
 		assertThat(ctn.getStartPos()).isEqualTo(0);
@@ -428,11 +428,11 @@ public class TaskParserTests {
 		assertThat(node.isSplit()).isFalse();
 		assertThat(node.isFlow()).isTrue();
 		assertFlow(node, "FooApp");
-		assertThat(node.getSeriesElement(0).isTaskApp()).isTrue();
+		assertThat(((FlowNode) node).getSeriesElement(0).isTaskApp()).isTrue();
 	}
 
 	@Test
-	public void twoAppFlow() {
+	void twoAppFlow() {
 		ctn = parse("FooApp  &&  BarApp");
 
 		assertThat(ctn.getTaskText()).isEqualTo("FooApp  &&  BarApp");
@@ -447,7 +447,7 @@ public class TaskParserTests {
 
 		FlowNode flow = (FlowNode) node;
 		List<LabelledTaskNode> series = flow.getSeries();
-		assertThat(series.size()).isEqualTo(2);
+		assertThat(series).hasSize(2);
 		assertThat(flow.getSeriesLength()).isEqualTo(2);
 		assertTaskApp(series.get(0), "FooApp");
 		assertTaskApp(flow.getSeriesElement(0), "FooApp");
@@ -456,7 +456,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void appsInTaskDef() {
+	void appsInTaskDef() {
 		ctn = parse("FooApp --p1=v1 --p2=v2");
 		ctn = parse("FooApp --p1=v1 --p2=v2 && BarApp --p3=v3");
 		ctn = parse("<FooApp || BarApp --p1=v1>");
@@ -476,7 +476,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void oneAppSplit() {
+	void oneAppSplit() {
 		ctn = parse("< FooApp>");
 
 		assertThat(ctn.getTaskText()).isEqualTo("< FooApp>");
@@ -486,20 +486,20 @@ public class TaskParserTests {
 
 		LabelledTaskNode node = ctn.getStart();
 		assertThat(node.isFlow()).isTrue();
-		node = node.getSeriesElement(0);
+		node = ((FlowNode) node).getSeriesElement(0);
 		assertThat(node.isSplit()).isTrue();
 		assertThat(node.isTaskApp()).isFalse();
 
 		SplitNode split = (SplitNode) node;
 		List<LabelledTaskNode> series = split.getSeries();
-		assertThat(series.size()).isEqualTo(1);
+		assertThat(series).hasSize(1);
 		assertThat(split.getSeriesLength()).isEqualTo(1);
 		assertFlow(series.get(0), "FooApp");
 		assertFlow(split.getSeriesElement(0), "FooApp");
 	}
 
 	@Test
-	public void twoAppSplit() {
+	void twoAppSplit() {
 		ctn = parse("< FooApp  ||    BarApp>");
 
 		assertThat(ctn.getTaskText()).isEqualTo("< FooApp  ||    BarApp>");
@@ -509,13 +509,13 @@ public class TaskParserTests {
 
 		LabelledTaskNode node = ctn.getStart();
 		assertThat(node.isFlow()).isTrue();
-		node = node.getSeriesElement(0);
+		node = ((FlowNode) node).getSeriesElement(0);
 		assertThat(node.isSplit()).isTrue();
 		assertThat(node.isTaskApp()).isFalse();
 
 		SplitNode split = (SplitNode) node;
 		List<LabelledTaskNode> series = split.getSeries();
-		assertThat(series.size()).isEqualTo(2);
+		assertThat(series).hasSize(2);
 		assertThat(split.getSeriesLength()).isEqualTo(2);
 		assertFlow(series.get(0), "FooApp");
 		assertFlow(split.getSeriesElement(0), "FooApp");
@@ -524,7 +524,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void appWithOneTransition() {
+	void appWithOneTransition() {
 		ctn = parse("App1 0->App2");
 		assertThat(ctn.getName()).isEqualTo("test");
 		assertThat(ctn.getTaskText()).isEqualTo("App1 0->App2");
@@ -533,8 +533,8 @@ public class TaskParserTests {
 		assertThat(ctn.stringify()).isEqualTo("App1 0->App2");
 		LabelledTaskNode firstNode = ctn.getStart();
 		assertThat(firstNode.isFlow()).isTrue();
-		List<TransitionNode> transitions = ((TaskAppNode) firstNode.getSeriesElement(0)).getTransitions();
-		assertThat(transitions.size()).isEqualTo(1);
+		List<TransitionNode> transitions = ((TaskAppNode) ((FlowNode) firstNode).getSeriesElement(0)).getTransitions();
+		assertThat(transitions).hasSize(1);
 		TransitionNode transition = transitions.get(0);
 		assertThat(transition.getStatusToCheck()).isEqualTo("0");
 		assertThat(transition.getTargetDslText()).isEqualTo("App2");
@@ -543,7 +543,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void appWithTwoTransitions() {
+	void appWithTwoTransitions() {
 		ctn = parse("App1 0->App2 'abc' ->   App3");
 		assertThat(ctn.getTaskText()).isEqualTo("App1 0->App2 'abc' ->   App3");
 		assertThat(ctn.getStartPos()).isEqualTo(0);
@@ -551,9 +551,9 @@ public class TaskParserTests {
 		assertThat(ctn.stringify()).isEqualTo("App1 0->App2 'abc'->App3");
 		LabelledTaskNode node = ctn.getStart();
 		assertThat(node.isFlow()).isTrue();
-		node = node.getSeriesElement(0);
+		node = ((FlowNode) node).getSeriesElement(0);
 		List<TransitionNode> transitions = ((TaskAppNode) node).getTransitions();
-		assertThat(transitions.size()).isEqualTo(2);
+		assertThat(transitions).hasSize(2);
 		TransitionNode transition = transitions.get(0);
 		assertThat(transition.getStatusToCheck()).isEqualTo("0");
 		assertThat(transition.isExitCodeCheck()).isTrue();
@@ -569,17 +569,17 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void appWithWildcardTransitions() {
+	void appWithWildcardTransitions() {
 		ctn = parse("App1 *->App2 '*'->App3");
 		assertThat(ctn.getTaskText()).isEqualTo("App1 *->App2 '*'->App3");
 		assertThat(ctn.getStartPos()).isEqualTo(0);
 		assertThat(ctn.getEndPos()).isEqualTo(22);
 		assertThat(ctn.stringify()).isEqualTo("App1 *->App2 '*'->App3");
 		LabelledTaskNode node = ctn.getStart();
-		node = node.getSeriesElement(0);
+		node = ((FlowNode) node).getSeriesElement(0);
 		assertThat(node.isTaskApp()).isTrue();
 		List<TransitionNode> transitions = ((TaskAppNode) node).getTransitions();
-		assertThat(transitions.size()).isEqualTo(2);
+		assertThat(transitions).hasSize(2);
 
 		TransitionNode transition = transitions.get(0);
 		assertThat(transition.getStatusToCheck()).isEqualTo("*");
@@ -596,7 +596,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void appWithLabelReferenceTransition() {
+	void appWithLabelReferenceTransition() {
 		ctn = parse("App1 'foo'->:something", false);
 		assertThat(ctn.getTaskText()).isEqualTo("App1 'foo'->:something");
 		assertThat(ctn.getStartPos()).isEqualTo(0);
@@ -604,8 +604,8 @@ public class TaskParserTests {
 		assertThat(ctn.stringify()).isEqualTo("App1 'foo'->:something");
 		LabelledTaskNode firstNode = ctn.getStart();
 		assertFlow(firstNode, "App1");
-		List<TransitionNode> transitions = ((TaskAppNode) firstNode.getSeriesElement(0)).getTransitions();
-		assertThat(transitions.size()).isEqualTo(1);
+		List<TransitionNode> transitions = ((TaskAppNode) ((FlowNode) firstNode).getSeriesElement(0)).getTransitions();
+		assertThat(transitions).hasSize(1);
 		TransitionNode transition = transitions.get(0);
 		assertThat(transition.getStatusToCheck()).isEqualTo("foo");
 		assertThat(transition.isExitCodeCheck()).isFalse();
@@ -616,7 +616,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void splitMainComposedTaskOverMultipleLines() {
+	void splitMainComposedTaskOverMultipleLines() {
 		ctn = parse("FooApp &&\nBarApp");
 		assertFlow(ctn.getStart(), "FooApp", "BarApp");
 		ctn = parse("FooApp\n&& BarApp");
@@ -634,7 +634,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void labelledElement() {
+	void labelledElement() {
 		ctn = parse("foo: appA");
 		LabelledTaskNode start = ctn.getStart();
 		assertThat(start.getLabelString()).isEqualTo("foo");
@@ -645,7 +645,7 @@ public class TaskParserTests {
 		ctn = parse("foo: <appA || appB>");
 		start = ctn.getStart();
 		assertThat(start.getLabelString()).isEqualTo("foo");
-		SplitNode s = (SplitNode) start.getSeriesElement(0);
+		SplitNode s = (SplitNode) ((FlowNode) start).getSeriesElement(0);
 		assertSplit(s, "appA", "appB");
 
 		ctn = parse("foo: appA && appB");
@@ -655,7 +655,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void taskCollectorVisitor() {
+	void taskCollectorVisitor() {
 		assertApps(parse("appA").getTaskApps(), "appA");
 		assertApps(parse("appA && appB && appC").getTaskApps(), "appA", "appB", "appC");
 		assertApps(parse("<appA || appB> && appC").getTaskApps(), "appA", "appB", "appC");
@@ -665,28 +665,28 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void transitionToOtherSequence() {
+	void transitionToOtherSequence() {
 		String spec = " appA 'fail'->:two && appB && appC;two: appD && appE";
 		assertGraph("[0:START][1:appA][2:appB][3:appC][4:END][9:appD][10:appE]"
 				+ "[0-1][1-2][2-3][3-4][fail:1-9][9-10][10-4]", spec);
 	}
 
 	@Test
-	public void singleSplitToGraph() {
+	void singleSplitToGraph() {
 		String spec = "<appA 'fail'-> appB>";
 		assertGraph("[0:START][1:appA][2:appB][3:END]"
 				+ "[0-1][fail:1-2][1-3][2-3]", spec);
 	}
 
 	@Test
-	public void secondarySequencesHaveFurtherTransitions() {
+	void secondarySequencesHaveFurtherTransitions() {
 		String spec = " appA 'fail'->:two && appB;two: appD 'fail2'->:three && appE;three: appF && appG";
 		assertGraph("[0:START][1:appA][2:appB][3:END][12:appD][13:appE][14:appF][15:appG]"
 				+ "[0-1][1-2][2-3][fail:1-12][12-13][13-3][fail2:12-14][14-15][15-3]", spec);
 	}
 
 	@Test
-	public void twoReferencesToSecondarySequence() {
+	void twoReferencesToSecondarySequence() {
 		String spec = "appA 'fail'->:two && appB 'fail2'->:two && appC;two: appD && appE";
 		assertGraph("[0:START][1:appA][2:appB][3:appC][4:END][9:appD][10:appE]"
 				+ "[0-1][1-2][2-3][3-4][fail:1-9][fail2:2-9][9-10][10-4]", spec);
@@ -694,7 +694,7 @@ public class TaskParserTests {
 
 	@Disabled
 	@Test
-	public void transitionToSplit() {
+	void transitionToSplit() {
 		String spec = "aa 'foo'->:split && bb && split: <cc || dd> && ee";
 		// lets consider this a limitation for now.
 		assertGraph("[0:START][1:aa][2:bb][3:cc][4:dd][5:ee][6:END]" + "[0-1][1-2]['foo':1-3][2-3][2-4][3-5][4-5][5-6]",
@@ -702,24 +702,24 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void transitionToNonResolvedLabel() {
+	void transitionToNonResolvedLabel() {
 		String spec = "aa 'foo'->:split && bb && cc";
 		TaskNode ctn = parse(spec, false);
 		List<TaskValidationProblem> validationProblems = ctn.validate();
-		assertThat(validationProblems.size()).isEqualTo(1);
+		assertThat(validationProblems).hasSize(1);
 		assertThat(validationProblems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
 		assertThat(validationProblems.get(0).getOffset()).isEqualTo(3);
 
 		spec = "<aa 'foo'->:split && bb && cc || dd>";
 		ctn = parse(spec, false);
 		validationProblems = ctn.validate();
-		assertThat(validationProblems.size()).isEqualTo(1);
+		assertThat(validationProblems).hasSize(1);
 		assertThat(validationProblems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_TRANSITION_TARGET_LABEL_UNDEFINED);
 		assertThat(validationProblems.get(0).getOffset()).isEqualTo(4);
 	}
 
 	@Test
-	public void visitors() {
+	void visitors() {
 		ctn = parse("appA");
 		TestVisitor tv = new TestVisitor();
 		ctn.accept(tv);
@@ -770,12 +770,12 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void multiline() {
+	void multiline() {
 		ctn = parse("appA 0->:label1 && appB\nlabel1: appC");
 	}
 
 	@Test
-	public void multiSequence() {
+	void multiSequence() {
 		TaskNode ctn = parse("appA\n  0->:foo\n  *->appB\n  && appE;foo: appC && appD");
 		LabelledTaskNode start = ctn.getStart(); // get the root of the AST starting appA
 		assertThat(start).isNotNull();
@@ -791,7 +791,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void validator() {
+	void validator() {
 		TaskValidatorVisitor validator = new TaskValidatorVisitor();
 		ctn = parse("appA");
 		ctn.accept(validator);
@@ -801,7 +801,7 @@ public class TaskParserTests {
 		ctn = parse("appA;appB", false);
 		ctn.accept(validator);
 		List<TaskValidationProblem> problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED);
 		assertThat(problems.get(0).getOffset()).isEqualTo(5);
 		assertThat(problems.get(0).toString()).isEqualTo("158E:(pos 5): secondary sequences must have labels or are unreachable");
@@ -816,7 +816,7 @@ public class TaskParserTests {
 		ctn = parse("appA;foo: appB\nappC", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_SECONDARY_SEQUENCES_MUST_BE_NAMED);
 		assertThat(problems.get(0).getOffset()).isEqualTo(15);
 		assertThat(problems.get(0).toString()).isEqualTo("158E:(pos 15): secondary sequences must have labels or are unreachable");
@@ -826,67 +826,67 @@ public class TaskParserTests {
 		ctn = parse("appA && appA", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
 		assertThat(problems.get(0).getOffset()).isEqualTo(8);
 		validator.reset();
 		ctn = parse("appA 'foo' -> appA", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
 		assertThat(problems.get(0).getOffset()).isEqualTo(14);
 		validator.reset();
 		ctn = parse("appA 'foo' -> appA: appB", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_LABEL_CLASHES_WITH_TASKAPP_NAME);
 		assertThat(problems.get(0).getOffset()).isEqualTo(14);
 		validator.reset();
 		ctn = parse("label1: appA 'foo' -> label1: appB", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_DUPLICATE_LABEL);
 		assertThat(problems.get(0).getOffset()).isEqualTo(22);
 		validator.reset();
 		ctn = parse("label1: appA 'foo' -> label1", false);
 		ctn.accept(validator);
 		problems = validator.getProblems();
-		assertThat(problems.size()).isEqualTo(1);
+		assertThat(problems).hasSize(1);
 		assertThat(problems.get(0).getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_APP_NAME_CLASHES_WITH_LABEL);
 		assertThat(problems.get(0).getOffset()).isEqualTo(22);
 	}
 
 	@Test
-	public void labels() {
+	void labels() {
 		// basic task
 		ctn = parse("aaa: appA");
 		LabelledTaskNode flow = ctn.getStart();
 		assertThat(flow.getLabelString()).isEqualTo("aaa");
-		TaskAppNode taskApp = (TaskAppNode) flow.getSeriesElement(0);
+		TaskAppNode taskApp = (TaskAppNode) ((FlowNode) flow).getSeriesElement(0);
 		assertThat(taskApp.getLabelString()).isEqualTo("aaa");
 
 		// flows
 		ctn = parse("aaa: appA && bbb: appB");
-		taskApp = (TaskAppNode) ctn.getStart().getSeriesElement(1);
+		taskApp = (TaskAppNode) ((FlowNode) ctn.getStart()).getSeriesElement(1);
 		assertThat(taskApp.getLabelString()).isEqualTo("bbb");
 
 		// splits
 		ctn = parse("outer:<aaa: appA || bbb: appB>");
-		flow = ctn.getStart();
+		flow = (FlowNode) ctn.getStart();
 		assertThat(flow.getLabelString()).isEqualTo("outer");
 		SplitNode s = (SplitNode) flow.getSeriesElement(0);
 		assertThat(s.getLabelString()).isEqualTo("outer");
-		taskApp = (TaskAppNode) (s.getSeriesElement(0).getSeriesElement(0));
+		taskApp = (TaskAppNode) (((FlowNode) s.getSeriesElement(0)).getSeriesElement(0));
 		assertThat(taskApp.getLabelString()).isEqualTo("aaa");
-		taskApp = (TaskAppNode) (s.getSeriesElement(1).getSeriesElement(0));
+		taskApp = (TaskAppNode) (((FlowNode) s.getSeriesElement(1)).getSeriesElement(0));
 		assertThat(taskApp.getLabelString()).isEqualTo("bbb");
 
 		// parentheses
 		ctn = parse("(aaa: appA && appB)");
-		taskApp = (TaskAppNode) ctn.getStart().getSeriesElement(0);
+		taskApp = (TaskAppNode) ((FlowNode) ctn.getStart()).getSeriesElement(0);
 		assertThat(taskApp.getLabelString()).isEqualTo("aaa");
 
 		checkForParseError("aaa: (appA)", DSLMessage.TASK_NO_LABELS_ON_PARENS, 5);
@@ -897,7 +897,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void badTransitions() {
+	void badTransitions() {
 		checkForParseError("App1 ->", DSLMessage.TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE, 5);
 		checkForParseError("App1 0->x ->", DSLMessage.TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE, 10);
 		checkForParseError("App1 ->xx", DSLMessage.TASK_ARROW_SHOULD_BE_PRECEDED_BY_CODE, 5);
@@ -905,7 +905,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void graphToText_1712() {
+	void graphToText_1712() {
 		assertGraph("[0:START][1:timestamp][2:END][0-1][1-2]", "timestamp");
 		// In issue 1712 the addition of an empty properties map to the link damages the
 		// generation of the DSL. It was expecting null if there are no properties.
@@ -919,9 +919,9 @@ public class TaskParserTests {
 		graph.links.get(1).properties = new HashMap<>();
 		assertThat(graph.toDSLText()).isEqualTo("timestamp");
 	}
-	
+
 	@Test
-	public void graphToText_3667() {
+	void graphToText_3667() {
 		assertGraph("[0:START][1:sql-executor-task:password=password:url=jdbc:postgresql://127.0.0.1:5432/postgres:script-location=/dataflow/scripts/test.sql:username=postgres]"+
 					"[2:END][0-1][1-2]","sql-executor-task --script-location=/dataflow/scripts/test.sql --username=postgres --password=password --url=jdbc:postgresql://127.0.0.1:5432/postgres");
 		
@@ -939,15 +939,15 @@ public class TaskParserTests {
 		ctn = parse("t1: timestamp --format=aabbcc 'FAILED'->t2: timestamp --format=ddeeff && t3: timestamp --format=gghhii");
 		graph = ctn.toGraph();
 		Node node = graph.nodes.get(2);
-		assertThat(node.properties.get("format")).isEqualTo("ddeeff");
+		assertThat(node.properties).containsEntry("format", "ddeeff");
 		assertThat(graph.toDSLText()).isEqualTo("t1: timestamp --format=aabbcc 'FAILED'->t2: timestamp --format=ddeeff && t3: timestamp --format=gghhii");
 		
 		assertGraph("[0:START][1:eee:timestamp:format=ttt][2:QQQQQ:timestamp:format=NOT-IN-TEXT][3:ooo:timestamp:format=yyyy][4:END][0-1][FAILED:1-2][1-3][3-4][2-4]",
 				    "eee: timestamp --format=ttt 'FAILED'->QQQQQ: timestamp --format=NOT-IN-TEXT && ooo: timestamp --format=yyyy");
 	}
-	
+
 	@Test
-	public void graphToTextSingleAppInSplit() {
+	void graphToTextSingleAppInSplit() {
 		// Note the graph here does not include anything special
 		// to preserve the split because the split is unnecessary
 		// and is removed when the text is recomputed for it.
@@ -990,7 +990,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void graphToText() {
+	void graphToText() {
 		assertGraph("[0:START][1:AppA][2:END][0-1][1-2]", "AppA");
 		checkDSLToGraphAndBackToDSL("AppA");
 		assertGraph("[0:START][1:AppA][2:AppB][3:END][0-1][1-2][2-3]", "AppA && AppB");
@@ -1028,7 +1028,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void textToGraphWithTransitions() {
+	void textToGraphWithTransitions() {
 		assertGraph("[0:START][1:AppA][2:AppE][3:AppB][4:END][0-1][0:1-2][1-3][3-4][2-4]", "AppA 0->AppE && AppB");
 		checkDSLToGraphAndBackToDSL("AppA 0->AppE && AppB");
 		assertGraph("[0:START][1:AppA][2:AppE][3:AppB][4:AppC][5:END][0-1][0:1-2][1-3][3-4][4-5][2-5]",
@@ -1042,13 +1042,13 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void graphToTextSplitWithTransition() {
+	void graphToTextSplitWithTransition() {
 		checkDSLToGraphAndBackToDSL("<Foo 'failed'->Kill || Bar>");
 		checkDSLToGraphAndBackToDSL("<AppA 'failed'->Kill || AppB> && AppC");
 	}
 
 	@Test
-	public void toDSLTextNestedSplits() {
+	void toDSLTextNestedSplits() {
 		checkDSLToGraphAndBackToDSL("<aaa || ccc || ddd> && eee");
 		checkDSLToGraphAndBackToDSL("<aaa || bbb && <ccc || ddd>> && eee");
 		checkDSLToGraphAndBackToDSL("<aaa && <bbb || ccc> && foo || ddd && eee> && fff");
@@ -1059,13 +1059,13 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void errorExpectDoubleOr() {
+	void errorExpectDoubleOr() {
 		checkForParseError("<aa | bb>", DSLMessage.TASK_DOUBLE_OR_REQUIRED, 4);
 		checkForParseError("<aa ||| bb>", DSLMessage.TASK_DOUBLE_OR_REQUIRED, 6);
 	}
 
 	@Test
-	public void modeError() {
+	void modeError() {
 		try {
 			new TaskParser("foo", "appA --p1=v1", false, true).parse();
 			fail("");
@@ -1073,21 +1073,18 @@ public class TaskParserTests {
 		catch (CheckPointedParseException cppe) {
 			assertThat(cppe.message).isEqualTo(DSLMessage.TASK_ARGUMENTS_NOT_ALLOWED_UNLESS_IN_APP_MODE);
 		}
-		try {
+		Assertions.assertDoesNotThrow(() -> {
 			new TaskParser("foo", "appA --p1=v1", true, true).parse();
-		}
-		catch (CheckPointedParseException cppe) {
-			fail("");
-		}
+		});
 	}
 
 	@Test
-	public void unexpectedDoubleAnd() {
+	void unexpectedDoubleAnd() {
 		checkForParseError("aa  &&&& bb", DSLMessage.EXPECTED_APPNAME, 6, "&&");
 	}
 
 	@Test
-	public void toDSLTextTransitions() {
+	void toDSLTextTransitions() {
 		// [SHOULD-VALIDATE] There is no real route to bbb
 		String spec = "aaa '*'->$END && bbb";
 		assertThat(parse(spec).toDSL()).isEqualTo(spec);
@@ -1095,27 +1092,27 @@ public class TaskParserTests {
 		checkDSLToGraphAndBackToDSL(spec);
 	}
 
-	@Test
 	// You can't draw this on the graph, it would end up looking like "aaa | '*' = $END ||
 	// bbb || ccc
-	public void toDSLTextTransitionsSplit() {
+	@Test
+	void toDSLTextTransitionsSplit() {
 		checkDSLToGraphAndBackToDSL("aaa '*'->$END && <bbb || ccc>");
 	}
 
 	@Test
-	public void toDSLTextTransitionsFlow() {
+	void toDSLTextTransitionsFlow() {
 		checkDSLToGraphAndBackToDSL("aaa '*'->$END && bbb && ccc");
 	}
 
 	@Test
-	public void toDSLTextSplitFlowSplit() {
+	void toDSLTextSplitFlowSplit() {
 		checkDSLToGraphAndBackToDSL("<a || b> && foo && <c || d>");
 		checkDSLToGraphAndBackToDSL("<a || b> && foo 'wibble'->$END && <c || d>");
 		checkDSLToGraphAndBackToDSL("<a || b> && foo 'wibble'->$FAIL && <c || d>");
 	}
 
 	@Test
-	public void toDSLTextFlowTransitions() {
+	void toDSLTextFlowTransitions() {
 		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill1 'FOO'->kill2");
 		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill && bbb && ccc");
 		checkDSLToGraphAndBackToDSL("aaa 'COMPLETED'->kill1 && bbb 'COMPLETED'->kill2 && ccc");
@@ -1123,39 +1120,39 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void toDSLTextSplitTransitions() {
+	void toDSLTextSplitTransitions() {
 		checkDSLToGraphAndBackToDSL("<aaa 'COMPLETED'->kill || bbb> && ccc");
 	}
 
 	@Test
-	public void toDSLTextLong() {
+	void toDSLTextLong() {
 		checkDSLToGraphAndBackToDSL(
 				"<aaa && fff || bbb && ggg && <ccc || ddd>> && eee && hhh && iii && <jjj || kkk && lll>");
 	}
 
 	@Test
-	public void syncBetweenSplits() {
+	void syncBetweenSplits() {
 		String spec = "<a || b> && <c || d>";
 		checkDSLToGraphAndBackToDSL(spec);
 		assertGraph("[0:START][1:a][2:b][3:SYNC][4:c][5:d][6:END]" + "[0-1][0-2][1-3][2-3][3-4][3-5][4-6][5-6]", spec);
 	}
 
 	@Test
-	public void toDSLTextManualSync() {
+	void toDSLTextManualSync() {
 		// Here foo is effectively acting as a SYNC node
 		String spec = "<a || b> && foo && <c || d>";
 		checkDSLToGraphAndBackToDSL(spec);
 	}
 
 	@Test
-	public void whitespace() {
+	void whitespace() {
 		assertThat(parse("A&&B").stringify()).isEqualTo("A && B");
 		assertThat(parse("<A||B>").stringify()).isEqualTo("<A || B>");
 		assertThat(parse("<A&&B||C>").stringify()).isEqualTo("<A && B || C>");
 	}
 
 	@Test
-	public void endTransition() {
+	void endTransition() {
 		String spec = "aaa 'broken'->$END";
 		assertGraph("[0:START][1:aaa][2:$END][3:END][0-1][broken:1-2][1-3]", spec);
 		checkDSLToGraphAndBackToDSL(spec);
@@ -1163,20 +1160,20 @@ public class TaskParserTests {
 
 	// TODO not quoted state transition names
 	@Test
-	public void missingQuotes() {
+	void missingQuotes() {
 		checkForParseError("appA BROKEN->$FAIL", DSLMessage.TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER, 5, "BROKEN");
 		checkForParseError("appA\n BROKEN->$FAIL", DSLMessage.TASK_UNQUOTED_TRANSITION_CHECK_MUST_BE_NUMBER, 6,
 				"BROKEN");
 	}
 
 	@Test
-	public void parentheses2() {
+	void parentheses2() {
 		TaskNode ctn = parse("<(jobA && jobB && jobC) || boo: jobC>");
 		assertThat(ctn.stringify()).isEqualTo("<jobA && jobB && jobC || boo: jobC>");
 	}
 
 	@Test
-	public void funnyJobNames() {
+	void funnyJobNames() {
 		ctn = parse("a-b-c");
 		assertFlow(ctn.getStart(), "a-b-c");
 		ctn = parse("a-b-c && d-e-f");
@@ -1185,7 +1182,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void names() {
+	void names() {
 		ctn = parse("aaaa: foo");
 		List<LabelledTaskNode> sequences = ctn.getSequences();
 		assertThat(sequences.get(0).getLabelString()).isEqualTo("aaaa");
@@ -1195,55 +1192,55 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void nestedSplit1() {
+	void nestedSplit1() {
 		TaskNode ctn = parse("<<jobA || jobB> || jobC>");
 		assertThat(ctn.stringify()).isEqualTo("<<jobA || jobB> || jobC>");
 		LabelledTaskNode start = ctn.getStart();
-		assertInstanceOf(FlowNode.class, start);
-		SplitNode split = (SplitNode) start.getSeriesElement(0);
-		LabelledTaskNode seriesElement = split.getSeriesElement(0).getSeriesElement(0);
-		assertInstanceOf(SplitNode.class, seriesElement);
+		assertThat(start instanceof FlowNode).isTrue();
+		SplitNode split = (SplitNode) ((FlowNode) start).getSeriesElement(0);
+		LabelledTaskNode seriesElement = ((FlowNode) split.getSeriesElement(0)).getSeriesElement(0);
+		assertThat(seriesElement instanceof SplitNode).isTrue();
 		SplitNode split2 = (SplitNode) seriesElement;
 		assertThat(split2.getSeriesLength()).isEqualTo(2);
 	}
 
 	@Test
-	public void nestedSplit2() {
+	void nestedSplit2() {
 		TaskNode ctn = parse("<jobA || <jobB || jobC> || jobD>");
 		assertThat(ctn.stringify()).isEqualTo("<jobA || <jobB || jobC> || jobD>");
 		LabelledTaskNode start = ctn.getStart();
 		assertThat(start.isFlow()).isTrue();
-		SplitNode split = (SplitNode) start.getSeriesElement(0);
+		SplitNode split = (SplitNode) ((FlowNode) start).getSeriesElement(0);
 		assertThat(split.getSeriesLength()).isEqualTo(3);
 		LabelledTaskNode seriesElement = split.getSeriesElement(1);
-		SplitNode splitSeriesElement = (SplitNode) seriesElement.getSeriesElement(0);
+		SplitNode splitSeriesElement = (SplitNode) ((FlowNode) seriesElement).getSeriesElement(0);
 		assertThat(splitSeriesElement.isSplit()).isTrue();
 		assertThat(splitSeriesElement.getSeriesLength()).isEqualTo(2);
 		assertThat(splitSeriesElement.stringify()).isEqualTo("<jobB || jobC>");
-		assertThat(((TaskAppNode) splitSeriesElement.getSeriesElement(0).getSeriesElement(0)).getName()).isEqualTo("jobB");
+		assertThat(((TaskAppNode) ((FlowNode) splitSeriesElement.getSeriesElement(0)).getSeriesElement(0)).getName()).isEqualTo("jobB");
 	}
 
 	@Test
-	public void singleTransition() {
+	void singleTransition() {
 		TaskNode ctn = parse("foo 'completed'->bar");
 		LabelledTaskNode start = ctn.getStart();
-		start = start.getSeriesElement(0);
-		assertInstanceOf(TaskAppNode.class, start);
+		start = ((FlowNode) start).getSeriesElement(0);
+		assertThat(start instanceof TaskAppNode).isTrue();
 		TaskAppNode ta = (TaskAppNode) start;
 		List<TransitionNode> transitions = ta.getTransitions();
-		assertThat(transitions.size()).isEqualTo(1);
+		assertThat(transitions).hasSize(1);
 		assertThat(transitions.get(0).getStatusToCheck()).isEqualTo("completed");
 		assertThat(transitions.get(0).getTargetApp().getName()).isEqualTo("bar");
 	}
 
 	@Test
-	public void doubleTransition() {
+	void doubleTransition() {
 		TaskNode ctn = parse("foo 'completed'->bar 'wibble'->wobble");
 		LabelledTaskNode start = ctn.getStart();
 		assertFlow(start, "foo");
 		TaskAppNode ta = (TaskAppNode) start.getSeriesElement(0);
 		List<TransitionNode> transitions = ta.getTransitions();
-		assertThat(transitions.size()).isEqualTo(2);
+		assertThat(transitions).hasSize(2);
 		assertThat(transitions.get(0).getStatusToCheck()).isEqualTo("completed");
 		assertThat(transitions.get(0).getTargetApp().getName()).isEqualTo("bar");
 		assertThat(transitions.get(1).getStatusToCheck()).isEqualTo("wibble");
@@ -1251,7 +1248,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void moreSophisticatedScenarios_gh712_1a() {
+	void moreSophisticatedScenarios_gh712_1a() {
 		TaskNode ctn = parse(
 				"<<jdbchdfs-local && spark-client || spark-cluster && two: spark-cluster> && timestamp || spark-yarn>");
 
@@ -1286,7 +1283,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void moreSophisticatedScenarios_gh712_1b() {
+	void moreSophisticatedScenarios_gh712_1b() {
 		TaskNode ctn = parse("<<AA || BB> && CC || DD>");
 		Graph graph = ctn.toGraph();
 		assertThat(graph.toVerboseString()).isEqualTo("[0:START][1:AA][2:BB][3:CC][4:DD][5:END]" +
@@ -1295,7 +1292,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void moreSophisticatedScenarios_gh712_1c() {
+	void moreSophisticatedScenarios_gh712_1c() {
 		TaskNode ctn = parse("<<AA || BB> && CC && DD || EE>");
 		Graph graph = ctn.toGraph();
 		assertThat(graph.toVerboseString()).isEqualTo("[0:START][1:AA][2:BB][3:CC][4:DD][5:EE][6:END]" +
@@ -1306,7 +1303,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void moreSophisticatedScenarios_gh712_1d() {
+	void moreSophisticatedScenarios_gh712_1d() {
 		TaskNode ctn = parse("<<AC && AD || AE && AF> && AG || AB>");
 		assertThat(ctn.toGraph().toDSLText()).isEqualTo("<<AC && AD || AE && AF> && AG || AB>");
 		// Now include a transition
@@ -1320,7 +1317,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void moreSophisticatedScenarios_gh712_1e() {
+	void moreSophisticatedScenarios_gh712_1e() {
 		TaskNode ctn = parse("<<AA || BB> && CC && DD || <EE || FF> && GG || HH>");
 		Graph graph = ctn.toGraph();
 		assertThat(graph.toVerboseString()).isEqualTo("[0:START][1:AA][2:BB][3:CC][4:DD][5:EE][6:FF][7:GG][8:HH][9:END]" +
@@ -1329,7 +1326,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void moreSophisticatedScenarios_gh712_1f() {
+	void moreSophisticatedScenarios_gh712_1f() {
 		// Multiple nested splits in parallel
 		TaskNode ctn = parse("<<AA || BB> && CC || <DD || EE> && FF && GG || HH>");
 		Graph graph = ctn.toGraph();
@@ -1341,14 +1338,14 @@ public class TaskParserTests {
 	// Case2: expecting a validation error on the parse because the second spark-cluster
 	// isn't labeled
 	@Test
-	public void moreSophisticatedScenarios_gh712_2() {
+	void moreSophisticatedScenarios_gh712_2() {
 		try {
 			parse("<<jdbchdfs-local && spark-client || spark-cluster && spark-cluster> && timestamp || spark-yarn>");
 			fail("");
 		}
 		catch (TaskValidationException tve) {
 			List<TaskValidationProblem> validationProblems = tve.getValidationProblems();
-			assertThat(validationProblems.size()).isEqualTo(1);
+			assertThat(validationProblems).hasSize(1);
 			TaskValidationProblem tvp = validationProblems.get(0);
 			assertThat(tvp.getOffset()).isEqualTo(53);
 			assertThat(tvp.getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
@@ -1357,7 +1354,7 @@ public class TaskParserTests {
 
 	// Case3: no graph when 1 label included?
 	@Test
-	public void moreSophisticatedScenarios_gh712_3() {
+	void moreSophisticatedScenarios_gh712_3() {
 		try {
 			parse("<1: jdbchdfs-local && spark-client && timestamp || spark-cluster && spark-cluster && timestamp || spark-yarn>");
 			fail("");
@@ -1365,7 +1362,7 @@ public class TaskParserTests {
 		catch (TaskValidationException tve) {
 			System.out.println(tve);
 			List<TaskValidationProblem> validationProblems = tve.getValidationProblems();
-			assertThat(validationProblems.size()).isEqualTo(2);
+			assertThat(validationProblems).hasSize(2);
 			TaskValidationProblem tvp = validationProblems.get(0);
 			assertThat(tvp.getOffset()).isEqualTo(68);
 			assertThat(tvp.getMessage()).isEqualTo(DSLMessage.TASK_VALIDATION_APP_NAME_ALREADY_IN_USE);
@@ -1376,7 +1373,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void wildcardTransition() {
+	void wildcardTransition() {
 		ctn = parse("foo '*'->wibble");
 		assertThat(ctn.toDSL()).isEqualTo("foo '*'->wibble");
 		ctn = parse("foo \"*\"->wibble");
@@ -1384,25 +1381,25 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void splitWithTransition() {
+	void splitWithTransition() {
 		String spec = "<foo 'completed'->kill || bar>";
 		ctn = parse(spec);
 		assertThat(ctn.toDSL()).isEqualTo(spec);
 	}
 
 	@Test
-	public void multiLine() {
+	void multiLine() {
 		TaskNode ctn = parse("<foo\n" + "  'completed'->kill\n" + "  '*'->custard\n" + "  || bar>");
 		assertThat(ctn.stringify()).isEqualTo("<foo 'completed'->kill '*'->custard || bar>");
 	}
 
 	@Test
-	public void emptyInput() {
+	void emptyInput() {
 		checkForParseError("", DSLMessage.OOD, 0);
 	}
 
 	@Test
-	public void toGraph$END() {
+	void toGraph$END() {
 		TaskNode ctn = parse("foo 'oranges'->$END");
 		assertThat(ctn.toDSL()).isEqualTo("foo 'oranges'->$END");
 		assertGraph("[0:START][1:foo][2:$END][3:END][0-1][oranges:1-2][1-3]", "foo 'oranges'->$END");
@@ -1410,7 +1407,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void toGraph$FAIL() {
+	void toGraph$FAIL() {
 		String spec = "foo 'oranges'->$FAIL";
 		assertThat(parse(spec).toDSL()).isEqualTo(spec);
 		assertGraph("[0:START][1:foo][2:$FAIL][3:END][0-1][oranges:1-2][1-3]", spec);
@@ -1421,7 +1418,7 @@ public class TaskParserTests {
 	// js = parse("<foo | completed=boo& bar> || boo");
 
 	@Test
-	public void toGraphWithTransition2() {
+	void toGraphWithTransition2() {
 		// The target transition node hoo is not elsewhere on the list
 		String definition = "<foo 'completed'->hoo || bar> && boo && goo";
 		assertGraph("[0:START][1:foo][2:hoo][3:bar][4:boo][5:goo][6:END]"
@@ -1430,7 +1427,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void spacesInProperties() {
+	void spacesInProperties() {
 		// If a property value in the graph has a space in, quote it when creating dsl
 		// If a transition code in the graph is not numeric or * then quote it
 		Graph graph = parse("aaa").toGraph();
@@ -1462,7 +1459,7 @@ public class TaskParserTests {
 		String dsl = "aaa --one=bar --two='b ar' 'tname'->bbb '*'->ccc 3->ddd";
 		graph = parse(dsl).toGraph();
 		n = graph.nodes.get(1);
-		assertThat(n.properties.get("two")).isEqualTo("b ar");
+		assertThat(n.properties).containsEntry("two", "b ar");
 		Link l = graph.links.get(1);
 		assertThat(l.getTransitionName()).isEqualTo("tname");
 		l = graph.links.get(2);
@@ -1473,7 +1470,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void wildcardTransitions() {
+	void wildcardTransitions() {
 		// When going from DSL to graph, unquote property values and exit codes
 		String dsl = "aaa 'tname'->bbb '*'->ccc 3->ddd";
 		assertGraph("[0:START][1:aaa][2:bbb][3:ccc][4:ddd][5:END][0-1][tname:1-2][*:1-3][3:1-4][1-5][2-5][3-5][4-5]",
@@ -1489,7 +1486,7 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void multiTransitionToSameTarget() {
+	void multiTransitionToSameTarget() {
 		String spec = "foo 'failed'->bbb && bar 'failed'->bbc";
 		assertGraph("[0:START][1:foo][2:bbb][3:bar][4:bbc][5:END][0-1][failed:1-2][1-3][failed:3-4][3-5][2-5][4-5]",
 				spec);
@@ -1497,13 +1494,13 @@ public class TaskParserTests {
 	}
 
 	@Test
-	public void extraneousDataError() {
+	void extraneousDataError() {
 		String jobSpecification = "<a || b> rubbish";
 		checkForParseError(jobSpecification, DSLMessage.TASK_MORE_INPUT, 9, "rubbish");
 	}
 
 	@Test
-	public void incorrectTransition() {
+	void incorrectTransition() {
 		checkForParseError("foo ||->bar", DSLMessage.TASK_MORE_INPUT, 4, "||");
 	}
 
@@ -1547,10 +1544,10 @@ public class TaskParserTests {
 	}
 
 	private void assertFlow(LabelledTaskNode node, String... expectedApps) {
-		assertInstanceOf(FlowNode.class, node);
+		assertThat(node instanceof FlowNode).isTrue();
 		FlowNode flow = (FlowNode) node;
 		List<LabelledTaskNode> series = flow.getSeries();
-		assertThat(series.size()).isEqualTo(expectedApps.length);
+		assertThat(series).hasSize(expectedApps.length);
 		assertThat(flow.getSeriesLength()).isEqualTo(expectedApps.length);
 		for (int a = 0; a < expectedApps.length; a++) {
 			assertTaskApp(series.get(a), expectedApps[a]);
@@ -1558,10 +1555,10 @@ public class TaskParserTests {
 	}
 
 	private void assertSplit(LabelledTaskNode node, String... expectedApps) {
-		assertInstanceOf(SplitNode.class, node);
+		assertThat(node instanceof SplitNode).isTrue();
 		SplitNode split = (SplitNode) node;
 		List<LabelledTaskNode> series = split.getSeries();
-		assertThat(series.size()).isEqualTo(expectedApps.length);
+		assertThat(series).hasSize(expectedApps.length);
 		assertThat(split.getSeriesLength()).isEqualTo(expectedApps.length);
 		for (int a = 0; a < expectedApps.length; a++) {
 			FlowNode f = (FlowNode) series.get(a);
@@ -1589,7 +1586,6 @@ public class TaskParserTests {
 	}
 
 	private void assertApps(List<TaskApp> taskApps, String... expectedTaskAppNames) {
-
 		assertThat(taskApps.size()).as("Expected " + expectedTaskAppNames.length + " but was " + taskApps.size() + ": " + taskApps).isEqualTo(expectedTaskAppNames.length);
 		Set<String> set2 = new HashSet<String>();
 		for (TaskApp taskApp : taskApps) {

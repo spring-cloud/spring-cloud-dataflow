@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
 public class OnOAuth2ClientCredentialsEnabledTests {
 

@@ -15,6 +15,19 @@
  */
 package org.springframework.cloud.dataflow.rest.client.dsl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -40,26 +53,13 @@ import org.springframework.cloud.skipper.domain.PackageIdentifier;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.PagedModel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyMap;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
-import static org.mockito.Mockito.isNull;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * @author Vinicius Carvalho
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
 @SuppressWarnings("unchecked")
-public class StreamDslTests {
+class StreamDslTests {
 
 	@Mock
 	private DataFlowOperations client;
@@ -77,14 +77,14 @@ public class StreamDslTests {
 	private final StreamApplication logApplication = new StreamApplication("log");
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		MockitoAnnotations.initMocks(this);
 		when(client.streamOperations()).thenReturn(this.streamOperations);
 		when(client.runtimeOperations()).thenReturn(this.runtimeOperations);
 	}
 
 	@Test
-	public void simpleDefinition() {
+	void simpleDefinition() {
 		StreamApplication time = new StreamApplication("time");
 		StreamApplication log = new StreamApplication("log");
 		Stream stream = Stream.builder(client).name("foo").source(time).sink(log).create()
@@ -93,7 +93,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithLabel() {
+	void definitionWithLabel() {
 		StreamApplication time = new StreamApplication("time").label("tick");
 		StreamApplication log = new StreamApplication("log");
 
@@ -103,7 +103,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithProcessor() {
+	void definitionWithProcessor() {
 		StreamApplication time = new StreamApplication("time").label("tick");
 		StreamApplication filter = new StreamApplication("filter");
 		StreamApplication log = new StreamApplication("log");
@@ -113,7 +113,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithProperties() {
+	void definitionWithProperties() {
 		StreamApplication time = new StreamApplication("time").label("tick")
 				.addProperty("fixed-delay", 5000);
 		StreamApplication log = new StreamApplication("log");
@@ -124,16 +124,16 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void definitionWithDeploymentProperties() {
+	void definitionWithDeploymentProperties() {
 		StreamApplication time = new StreamApplication("time").label("tick")
 				.addProperty("fixed-delay", "5000").addDeploymentProperty("count", 2);
 
 		Map<String, Object> deploymentProperties = time.getDeploymentProperties();
-		assertThat(deploymentProperties.get("deployer.tick.count")).isEqualTo(2);
+		assertThat(deploymentProperties).containsEntry("deployer.tick.count", 2);
 	}
 
 	@Test
-	public void definitionWithDeploymentPropertiesBuilder() {
+	void definitionWithDeploymentPropertiesBuilder() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"tick: time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -156,7 +156,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void deployWithCreate() {
+	void deployWithCreate() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -172,7 +172,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void deployWithDefinition() {
+	void deployWithDefinition() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -189,7 +189,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void getStatus() {
+	void getStatus() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("unknown");
@@ -211,7 +211,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void createStream() {
+	void createStream() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -225,7 +225,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void testDuplicateNameWithLabel() {
+	void duplicateNameWithLabel() {
 		StreamApplication filter2 = new StreamApplication("filter").label("filter2");
 		Stream.builder(client).name("test").source(timeApplication)
 				.processor(filterApplication).processor(filter2).sink(logApplication)
@@ -236,16 +236,16 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void testDuplicateNameNoLabel() {
-		assertThatThrownBy(()-> {
+	void duplicateNameNoLabel() {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
 			Stream.builder(client).name("test").source(timeApplication)
 				.processor(filterApplication).processor(filterApplication)
 				.sink(logApplication).create();
-		}).isInstanceOf(IllegalStateException.class);
+		});
 	}
 
 	@Test
-	public void update() {
+	void update() {
 		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
 				"time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
@@ -267,7 +267,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void logs() {
+	void logs() {
 		String streamLog = "Test stream log";
 		String appLog = "Test app log";
 		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
@@ -304,7 +304,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void rollback() {
+	void rollback() {
 		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
 				"time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
@@ -324,7 +324,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void manifest() {
+	void manifest() {
 		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
 				"time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
@@ -341,7 +341,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void history() {
+	void history() {
 		StreamDefinitionResource ticktockDefinition = new StreamDefinitionResource("ticktock", "time | log",
 				"time | log", "demo stream");
 		ticktockDefinition.setStatus("deploying");
@@ -358,7 +358,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void undeploy() {
+	void undeploy() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock", "time | log",
 				"time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -380,7 +380,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void destroy() {
+	void destroy() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");
@@ -401,7 +401,7 @@ public class StreamDslTests {
 	}
 
 	@Test
-	public void scaleApplicationInstances() {
+	void scaleApplicationInstances() {
 		StreamDefinitionResource resource = new StreamDefinitionResource("ticktock",
 				"time | log", "time | log", "demo stream");
 		resource.setStatus("deploying");

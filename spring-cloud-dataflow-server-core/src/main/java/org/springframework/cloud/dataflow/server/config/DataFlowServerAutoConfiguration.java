@@ -16,11 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.context.annotation.Import;
  *
  * @author Janne Valkealahti
  */
-@Configuration
+@AutoConfiguration
 @AutoConfigureBefore({JacksonAutoConfiguration.class})
 @ConditionalOnBean(EnableDataFlowServerConfiguration.Marker.class)
 @Import(DataFlowServerConfiguration.class)

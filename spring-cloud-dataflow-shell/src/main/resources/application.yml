@@ -6,3 +6,9 @@ spring:
 logging:
   pattern:
     console:
+  # file:
+  #   name: dataflow-shell.log
+  # level:
+  #   org:
+  #     springframework:
+  #       shell: debug

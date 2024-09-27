@@ -36,13 +36,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+
+
+// @checkstyle:off
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+// @checkstyle:on
 
 /**
  * Tests for {@link DefaultSkipperClient}.
@@ -98,7 +102,7 @@ public class DefaultSkipperClientTests {
 
 	@Test
 	public void testStatusReleaseNameNotFound() {
-		assertThrows(ReleaseNotFoundException.class, () -> {
+		assertThatExceptionOfType(ReleaseNotFoundException.class).isThrownBy(() -> {
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
@@ -113,7 +117,7 @@ public class DefaultSkipperClientTests {
 
 	@Test
 	public void testSkipperException() {
-		assertThrows(SkipperException.class, () -> {
+		assertThatExceptionOfType(SkipperException.class).isThrownBy(() -> {
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
@@ -153,7 +157,7 @@ public class DefaultSkipperClientTests {
 
 	@Test
 	public void testDeletePackageHasDeployedRelease() {
-		assertThrows(PackageDeleteException.class, () -> {
+		assertThatExceptionOfType(PackageDeleteException.class).isThrownBy(() -> {
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);

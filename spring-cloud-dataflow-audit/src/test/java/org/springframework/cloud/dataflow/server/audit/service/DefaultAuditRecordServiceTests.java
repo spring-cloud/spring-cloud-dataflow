@@ -22,7 +22,6 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -35,10 +34,8 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.core.AuditRecord;
 import org.springframework.data.domain.PageRequest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -52,28 +49,28 @@ import static org.mockito.Mockito.when;
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class DefaultAuditRecordServiceTests {
+class DefaultAuditRecordServiceTests {
 
     private AuditRecordRepository auditRecordRepository;
 
     @BeforeEach
-    public void setupMock() {
+    void setupMock() {
         this.auditRecordRepository = mock(AuditRecordRepository.class);
     }
 
     @Test
-    public void testInitializationWithNullParameters() {
+    void initializationWithNullParameters() {
         try {
             new DefaultAuditRecordService(null);
         } catch (IllegalArgumentException e) {
-            assertEquals("auditRecordRepository must not be null.", e.getMessage());
+            assertThat(e.getMessage()).isEqualTo("auditRecordRepository must not be null.");
             return;
         }
         fail("Expected an Exception to be thrown.");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecord() {
+    void testPopulateAndSaveAuditRecord() {
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
         auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234",
                 "my data", "test-platform");
@@ -84,41 +81,41 @@ public class DefaultAuditRecordServiceTests {
 
         AuditRecord auditRecord = argument.getValue();
 
-        assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-        assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
-        assertEquals("1234", auditRecord.getCorrelationId());
-        assertEquals("my data", auditRecord.getAuditData());
-        assertEquals("test-platform", auditRecord.getPlatformName());
+        assertThat(auditRecord.getAuditAction()).isEqualTo(AuditActionType.CREATE);
+        assertThat(auditRecord.getAuditOperation()).isEqualTo(AuditOperationType.SCHEDULE);
+        assertThat(auditRecord.getCorrelationId()).isEqualTo("1234");
+        assertThat(auditRecord.getAuditData()).isEqualTo("my data");
+        assertThat(auditRecord.getPlatformName()).isEqualTo("test-platform");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordWithNullAuditActionType() {
+    void populateAndSaveAuditRecordWithNullAuditActionType() {
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 
         try {
             auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, null, "1234", "my audit data", "test-platform");
         } catch (IllegalArgumentException e) {
-            assertEquals("auditActionType must not be null.", e.getMessage());
+            assertThat(e.getMessage()).isEqualTo("auditActionType must not be null.");
             return;
         }
         fail("Expected an Exception to be thrown.");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordWithNullAuditOperationType() {
+    void populateAndSaveAuditRecordWithNullAuditOperationType() {
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 
         try {
             auditRecordService.populateAndSaveAuditRecord(null, AuditActionType.CREATE, "1234", "my audit data", "test-platform");
         } catch (IllegalArgumentException e) {
-            assertEquals("auditOperationType must not be null.", e.getMessage());
+            assertThat(e.getMessage()).isEqualTo("auditOperationType must not be null.");
             return;
         }
         fail("Expected an Exception to be thrown.");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordWithMapData() throws JsonProcessingException {
+    void populateAndSaveAuditRecordWithMapData() throws JsonProcessingException {
         final ObjectMapper mapper = new ObjectMapper();
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, mapper);
 
@@ -135,15 +132,15 @@ public class DefaultAuditRecordServiceTests {
 
         final AuditRecord auditRecord = argument.getValue();
 
-        assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-        assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
-        assertEquals("1234", auditRecord.getCorrelationId());
-        assertEquals(mapper.convertValue(mapAuditData, JsonNode.class), mapper.readTree(auditRecord.getAuditData()));
-        assertEquals("test-platform", auditRecord.getPlatformName());
+        assertThat(auditRecord.getAuditAction()).isEqualTo(AuditActionType.CREATE);
+        assertThat(auditRecord.getAuditOperation()).isEqualTo(AuditOperationType.SCHEDULE);
+        assertThat(auditRecord.getCorrelationId()).isEqualTo("1234");
+        assertThat(mapper.readTree(auditRecord.getAuditData())).isEqualTo(mapper.convertValue(mapAuditData, JsonNode.class));
+        assertThat(auditRecord.getPlatformName()).isEqualTo("test-platform");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordUsingMapDataWithNullAuditActionType() {
+    void populateAndSaveAuditRecordUsingMapDataWithNullAuditActionType() {
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 
         final Map<String, Object> mapAuditData = new HashMap<>(2);
@@ -153,14 +150,14 @@ public class DefaultAuditRecordServiceTests {
             auditRecordService.populateAndSaveAuditRecordUsingMapData(AuditOperationType.SCHEDULE, null, "1234",
                     mapAuditData, null);
         } catch (IllegalArgumentException e) {
-            assertEquals("auditActionType must not be null.", e.getMessage());
+            assertThat(e.getMessage()).isEqualTo("auditActionType must not be null.");
             return;
         }
         fail("Expected an Exception to be thrown.");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordUsingMapDataWithNullAuditOperationType() {
+    void populateAndSaveAuditRecordUsingMapDataWithNullAuditOperationType() {
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
 
         final Map<String, Object> mapAuditData = new HashMap<>(2);
@@ -170,15 +167,15 @@ public class DefaultAuditRecordServiceTests {
             auditRecordService.populateAndSaveAuditRecordUsingMapData(null, AuditActionType.CREATE, "1234",
                     mapAuditData, null);
         } catch (IllegalArgumentException e) {
-            assertEquals("auditOperationType must not be null.", e.getMessage());
+            assertThat(e.getMessage()).isEqualTo("auditOperationType must not be null.");
             return;
         }
         fail("Expected an Exception to be thrown.");
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordUsingMapDataThrowingJsonProcessingException()
-            throws JsonProcessingException {
+    void populateAndSaveAuditRecordUsingMapDataThrowingJsonProcessingException()
+                                                  throws JsonProcessingException {
         final ObjectMapper objectMapper = mock(ObjectMapper.class);
         when(objectMapper.writeValueAsString(any(Object.class))).thenThrow(new JsonProcessingException("Error") {
             private static final long serialVersionUID = 1L;
@@ -199,17 +196,17 @@ public class DefaultAuditRecordServiceTests {
 
         AuditRecord auditRecord = argument.getValue();
 
-        assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-        assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
-        assertEquals("1234", auditRecord.getCorrelationId());
-        assertEquals("test-platform", auditRecord.getPlatformName());
-        assertEquals("Error serializing audit record data.  Data = {foo=bar}", auditRecord.getAuditData());
+        assertThat(auditRecord.getAuditAction()).isEqualTo(AuditActionType.CREATE);
+        assertThat(auditRecord.getAuditOperation()).isEqualTo(AuditOperationType.SCHEDULE);
+        assertThat(auditRecord.getCorrelationId()).isEqualTo("1234");
+        assertThat(auditRecord.getPlatformName()).isEqualTo("test-platform");
+        assertThat(auditRecord.getAuditData()).isEqualTo("Error serializing audit record data.  Data = {foo=bar}");
 
 
     }
 
     @Test
-    public void testPopulateAndSaveAuditRecordUsingSensitiveMapData() {
+    void populateAndSaveAuditRecordUsingSensitiveMapData() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository, objectMapper);
 
@@ -231,23 +228,23 @@ public class DefaultAuditRecordServiceTests {
 
         AuditRecord auditRecord = argument.getValue();
 
-        assertEquals(AuditActionType.CREATE, auditRecord.getAuditAction());
-        assertEquals(AuditOperationType.SCHEDULE, auditRecord.getAuditOperation());
-        assertEquals("1234", auditRecord.getCorrelationId());
+        assertThat(auditRecord.getAuditAction()).isEqualTo(AuditActionType.CREATE);
+        assertThat(auditRecord.getAuditOperation()).isEqualTo(AuditOperationType.SCHEDULE);
+        assertThat(auditRecord.getCorrelationId()).isEqualTo("1234");
 
-        assertEquals("test-platform", auditRecord.getPlatformName());
+        assertThat(auditRecord.getPlatformName()).isEqualTo("test-platform");
         System.out.println("auditData=" + auditRecord.getAuditData());
-        assertTrue(auditRecord.getAuditData().contains("\"******\""));
-        assertTrue(auditRecord.getAuditData().contains("\"bar\""));
-        assertTrue(auditRecord.getAuditData().contains("\"foo\""));
-        assertTrue(auditRecord.getAuditData().contains("\"spring.cloud.config.password\""));
-        assertTrue(auditRecord.getAuditData().contains("\"password\""));
-        assertFalse(auditRecord.getAuditData().contains("54321"));
-        assertFalse(auditRecord.getAuditData().contains("12345"));
+        assertThat(auditRecord.getAuditData()).contains("\"******\"");
+        assertThat(auditRecord.getAuditData()).contains("\"bar\"");
+        assertThat(auditRecord.getAuditData()).contains("\"foo\"");
+        assertThat(auditRecord.getAuditData()).contains("\"spring.cloud.config.password\"");
+        assertThat(auditRecord.getAuditData()).contains("\"password\"");
+        assertThat(auditRecord.getAuditData()).doesNotContain("54321");
+        assertThat(auditRecord.getAuditData()).doesNotContain("12345");
     }
 
     @Test
-    public void testFindAuditRecordByAuditOperationTypeAndAuditActionType() {
+    void findAuditRecordByAuditOperationTypeAndAuditActionType() {
         AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
         AuditActionType[] auditActionTypes = {AuditActionType.CREATE};
@@ -262,7 +259,7 @@ public class DefaultAuditRecordServiceTests {
     }
 
     @Test
-    public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullAuditActionType() {
+    void findAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullAuditActionType() {
         AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
         AuditOperationType[] auditOperationTypes = {AuditOperationType.STREAM};
@@ -276,7 +273,7 @@ public class DefaultAuditRecordServiceTests {
     }
 
     @Test
-    public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullOperationType() {
+    void findAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullOperationType() {
         AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
         AuditActionType[] auditActionTypes = {AuditActionType.CREATE};
@@ -290,7 +287,7 @@ public class DefaultAuditRecordServiceTests {
     }
 
     @Test
-    public void testFindAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullActionAndOperationType() {
+    void findAuditRecordByAuditOperationTypeAndAuditActionTypeWithNullActionAndOperationType() {
         AuditRecordService auditRecordService = new DefaultAuditRecordService(auditRecordRepository);
 
         PageRequest pageRequest = PageRequest.of(0, 1);

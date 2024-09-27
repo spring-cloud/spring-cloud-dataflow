@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.core.AuditOperationType;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepository;
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.data.domain.Page;
@@ -75,8 +74,6 @@ import org.springframework.util.StringUtils;
  */
 @Transactional
 public class DefaultAppRegistryService implements AppRegistryService {
-
-	public static final String METADATA_KEY_SUFFIX = "metadata";
 
 	protected static final Logger logger = LoggerFactory.getLogger(DefaultAppRegistryService.class);
 
@@ -227,8 +224,8 @@ public class DefaultAppRegistryService implements AppRegistryService {
 	}
 
 	@Override
-	public AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri, AppBootSchemaVersion bootVersion) {
-		return this.save(new AppRegistration(name, type, version, uri, metadataUri, bootVersion));
+	public AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri) {
+		return this.save(new AppRegistration(name, type, version, uri, metadataUri));
 	}
 
 	@Override
@@ -404,13 +401,14 @@ public class DefaultAppRegistryService implements AppRegistryService {
 		if (!registrations.containsKey(key) && registrations.containsKey(type + name + "latest")) {
 			key = type + name + "latest";
 		}
+		// Allow bootVersion in descriptor file (already in 5.0.x stream app descriptor)
 		if("bootVersion".equals(extra)) {
 			if (previous == null) {
 				throw new IllegalArgumentException("Expected uri for bootVersion:" + lineSplit[0]);
 			}
 			ApplicationType appType = ApplicationType.valueOf(type);
 			Assert.isTrue(appType == previous.getType() && name.equals(previous.getName()), "Expected previous to be same type and name for:" + lineSplit[0]);
-			previous.setBootVersion(AppBootSchemaVersion.fromBootVersion(lineSplit[1]));
+			// Do nothing with bootVersion though
 			return previous;
 		}
 		AppRegistration ar = registrations.getOrDefault(key, new AppRegistration());
@@ -434,8 +432,6 @@ public class DefaultAppRegistryService implements AppRegistryService {
 				} catch (Exception e) {
 					throw new IllegalArgumentException(e);
 				}
-			} else if (!"bootVersion".equals(extra)) {
-				throw new IllegalArgumentException("Invalid property: " + lineSplit[0]);
 			}
 		}
 		registrations.put(key, ar);

@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
@@ -29,7 +30,7 @@ import org.springframework.context.annotation.Configuration;
  * @author Eric Bottard
  * @author Christian Tzolov
  */
-@Configuration
+@AutoConfiguration
 public class ApplicationConfigurationMetadataResolverAutoConfiguration {
 
 	@Bean

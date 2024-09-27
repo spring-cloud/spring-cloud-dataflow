@@ -62,7 +62,7 @@ public class PackageWriterTests {
 
 		File zipFile = packageWriter.write(pkgtoWrite, outputDirectory);
 		assertThat(zipFile).exists();
-		assertThat(zipFile.getName()).isEqualTo("myapp-1.0.0.zip");
+		assertThat(zipFile).hasName("myapp-1.0.0.zip");
 		final AtomicInteger processedEntries = new AtomicInteger(3);
 		ZipUtil.iterate(zipFile, (inputStream, zipEntry) -> {
 			if (zipEntry.getName().equals("myapp-1.0.0/package.yml")) {

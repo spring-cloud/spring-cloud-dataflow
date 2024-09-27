@@ -22,7 +22,6 @@ import java.util.List;
 
 
 import org.springframework.cloud.dataflow.core.TaskManifest;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.Assert;
 
@@ -34,7 +33,7 @@ import org.springframework.util.Assert;
  */
 public class TaskJobExecutionRel {
 
-	private final AggregateTaskExecution taskExecution;
+	private final TaskExecution taskExecution;
 
 	private final List<Long> jobExecutionIds;
 
@@ -51,7 +50,7 @@ public class TaskJobExecutionRel {
 	 * @param taskManifest to be associated with the task execution.
 	 * @param composedTaskJobExecution to be associated with the task execution.
 	 */
-	public TaskJobExecutionRel(AggregateTaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
+	public TaskJobExecutionRel(TaskExecution taskExecution, List<Long> jobExecutionIds, TaskManifest taskManifest, TaskJobExecution composedTaskJobExecution) {
 		Assert.notNull(taskExecution, "taskExecution must not be null");
 		this.taskExecution = taskExecution;
 		this.taskManifest = taskManifest;
@@ -68,7 +67,7 @@ public class TaskJobExecutionRel {
 	/**
 	 * @return the taskExecution for this relationship.
 	 */
-	public AggregateTaskExecution getTaskExecution() {
+	public TaskExecution getTaskExecution() {
 		return taskExecution;
 	}
 

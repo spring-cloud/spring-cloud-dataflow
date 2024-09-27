@@ -14,15 +14,21 @@ management:
           autotime:
             enabled: true # true is default to Boot 2.3.2 at least.
             percentiles-histogram: true
-    export:
-      influx:
+  influx:
+    metrics:
+      export:
         enabled: false
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: false
         rsocket:
           enabled: false
-      wavefront:
+  wavefront:
+    metrics:
+      export:
         enabled: false
+
   endpoints:
     web:
       base-path: /management
@@ -52,18 +58,21 @@ server:
   error:
     include-message: always
 spring:
+  config:
+    use-legacy-processing: true
   mvc.async.request-timeout: 120000
   batch:
     initialize-schema: never
   jpa:
     properties:
       hibernate:
+        # continue using a single hibernate_sequence table
+        id.db_structure_naming_strategy: single
+        # use the sequence style identifier generator
         id.new_generator_mappings: true
-        # Statistics generation is required for publishing JPA micrometer metrics.
-        # generate_statistics: true
     hibernate:
       naming:
-        physical-strategy: org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
   flyway:
     enabled: true
@@ -79,6 +88,7 @@ spring:
     task:
       initialize:
         enable: false
+      transaction-manager: transactionManager
     dataflow:
       rdbms:
         initialize:

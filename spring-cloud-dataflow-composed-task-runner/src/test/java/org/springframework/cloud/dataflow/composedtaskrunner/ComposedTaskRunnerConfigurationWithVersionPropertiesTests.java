@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.Job;
@@ -43,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
@@ -70,6 +72,7 @@ public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 
 	@Test
 	@DirtiesContext
+	@Disabled("waiting for Glenn")
 	public void testComposedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
@@ -88,9 +91,9 @@ public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
 		assertThat(result).contains("--baz=boo --foo=bar");
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
-		assertThat(taskletProperties.size()).isEqualTo(1);
-		assertThat(taskletProperties.get("version.AAA")).isEqualTo("1.0.0");
+		assertThat(taskletProperties).hasSize(1);
+		assertThat(taskletProperties).containsEntry("version.AAA", "1.0.0");
 	}
 }

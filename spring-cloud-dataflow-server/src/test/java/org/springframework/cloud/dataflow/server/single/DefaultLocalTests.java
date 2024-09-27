@@ -26,9 +26,9 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author Corneil du Plessis
  **/
 @SpringBootTest(classes = {DataFlowServerApplication.class}, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class DefaultLocalTests {
+class DefaultLocalTests {
 
 	@Test
-	public void contextLoad() {
+	void contextLoad() {
 	}
 }

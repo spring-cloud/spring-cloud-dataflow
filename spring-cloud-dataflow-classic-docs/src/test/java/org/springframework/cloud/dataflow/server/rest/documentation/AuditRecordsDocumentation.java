@@ -16,8 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -28,8 +29,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@TestMethodOrder(MethodName.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class AuditRecordsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
@@ -73,7 +73,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 			)
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("size").description("The requested page size (optional)"),
 					parameterWithName("operations").description("Comma-separated list of Audit Operations (optional)"),

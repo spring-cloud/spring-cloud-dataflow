@@ -16,6 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -31,11 +40,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
-import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -75,14 +79,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.util.StreamUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * @author Mark Pollack
@@ -92,10 +93,10 @@ import static org.mockito.Mockito.when;
  * @author Corneil du Plessis
  */
 @SpringBootTest(classes = TestDependencies.class)
-@TestPropertySource(properties = { "spring.main.banner-mode=off"})
+@TestPropertySource(properties = {"spring.main.banner-mode=off"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class DefaultStreamServiceIntegrationTests {
+class DefaultStreamServiceIntegrationTests {
 
 	@Autowired
 	private StreamService streamService;
@@ -113,13 +114,13 @@ public class DefaultStreamServiceIntegrationTests {
 	private SkipperClient skipperClient;
 
 	@BeforeEach
-	public void before() throws URISyntaxException {
+	void before() throws URISyntaxException {
 		createTickTock();
 		this.skipperClient = MockUtils.configureMock(this.skipperClient);
 	}
 
 	@AfterEach
-	public void destroyStream() {
+	void destroyStream() {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setName("ticktock");
 		when(this.skipperClient.search(anyString(), anyBoolean())).thenReturn(Collections.singletonList(packageMetadata));
@@ -128,7 +129,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void validateSkipperDeploymentProperties() {
+	void validateSkipperDeploymentProperties() {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		// override log version to 1.2.0.RELEASE
@@ -146,7 +147,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void testInstallVersionOverride() throws IOException {
+	void installVersionOverride() throws IOException {
 
 		Map<String, String> deploymentProperties = createSkipperDeploymentProperties();
 		// override log to 1.2.0.RELEASE
@@ -185,7 +186,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void testUpdateStreamDslOnDeploy() throws IOException {
+	void updateStreamDslOnDeploy() throws IOException {
 
 		// Create stream
 		String originalDsl = "time --fixed-delay=100 --spring.cloud.config.password=5150 | log --level=DEBUG";
@@ -235,7 +236,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void testUpdateStreamDslOnUpgrade() throws IOException {
+	void updateStreamDslOnUpgrade() throws IOException {
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
@@ -274,7 +275,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void testUpdateStreamDslOnRollback() throws IOException {
+	void updateStreamDslOnRollback() throws IOException {
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
@@ -326,7 +327,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void testDeployHasActuatorProps() throws IOException {
+	void deployHasActuatorProps() throws IOException {
 
 		when(skipperClient.status(eq("ticktock"))).thenThrow(new ReleaseNotFoundException(""));
 
@@ -363,7 +364,7 @@ public class DefaultStreamServiceIntegrationTests {
 	}
 
 	@Test
-	public void testStreamInfo() throws IOException {
+	void streamInfo() throws IOException {
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock",
@@ -397,9 +398,9 @@ public class DefaultStreamServiceIntegrationTests {
 
 	private void createTickTock() throws URISyntaxException {
 		String timeUri = "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE";
-		appRegistryService.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(timeUri), null, null);
+		appRegistryService.save("time", ApplicationType.source, "1.2.0.RELEASE", new URI(timeUri), null);
 		String logUri = "maven://org.springframework.cloud.stream.app:log-sink-rabbit:1.1.1.RELEASE";
-		appRegistryService.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(logUri), null, null);
+		appRegistryService.save("log", ApplicationType.sink, "1.2.0.RELEASE", new URI(logUri), null);
 
 		// Create stream
 		StreamDefinition streamDefinition = new StreamDefinition("ticktock", "time | log");

@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.shell.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.cloud.dataflow.shell.Target;
 
@@ -28,7 +27,6 @@ import org.springframework.cloud.dataflow.shell.Target;
  * @since 2.10
  */
 @ConfigurationProperties("dataflow")
-@ConstructorBinding
 public class DataFlowShellProperties {
 
 	/** The uri of the Dataflow REST endpoint */

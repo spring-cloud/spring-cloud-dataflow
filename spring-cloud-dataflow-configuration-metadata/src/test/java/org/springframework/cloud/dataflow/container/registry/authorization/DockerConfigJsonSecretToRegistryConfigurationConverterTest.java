@@ -16,12 +16,18 @@
 
 package org.springframework.cloud.dataflow.container.registry.authorization;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -37,18 +43,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-
 /**
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
+class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 
 	@Mock
 	private RestTemplate mockRestTemplate;
@@ -59,14 +58,14 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 	private DockerConfigJsonSecretToRegistryConfigurationConverter converter;
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		MockitoAnnotations.initMocks(this);
 		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean(), anyMap())).thenReturn(mockRestTemplate);
 		converter = new DockerConfigJsonSecretToRegistryConfigurationConverter(new ContainerRegistryProperties(), containerImageRestTemplateFactory);
 	}
 
 	@Test
-	public void testConvertAnonymousRegistry() throws URISyntaxException {
+	void convertAnonymousRegistry() throws URISyntaxException {
 
 		when(mockRestTemplate.exchange(
 				eq(new URI("https://demo.repository.io/v2/")), eq(HttpMethod.GET), any(), eq(Map.class)))
@@ -76,7 +75,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
 		assertThat(result).hasSize(1);
-		assertThat(result.containsKey("demo.repository.io")).isTrue();
+		assertThat(result).containsKey("demo.repository.io");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
@@ -87,7 +86,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 	}
 
 	@Test
-	public void testConvertBasicAuthRegistry() throws URISyntaxException {
+	void convertBasicAuthRegistry() throws URISyntaxException {
 
 		when(mockRestTemplate.exchange(
 				eq(new URI("https://demo.repository.io/v2/_catalog")), eq(HttpMethod.GET), any(), eq(Map.class)))
@@ -108,7 +107,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 	}
 
 	@Test
-	public void testConvertDockerHubRegistry() throws URISyntaxException {
+	void convertDockerHubRegistry() throws URISyntaxException {
 
 		HttpHeaders authenticateHeader = new HttpHeaders();
 		authenticateHeader.add("Www-Authenticate", "Bearer realm=\"https://demo.repository.io/service/token\",service=\"demo-registry\",scope=\"registry:category:pull\"");
@@ -130,7 +129,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverterTest {
 		assertThat(registryConfiguration.getUser()).isEqualTo("testuser");
 		assertThat(registryConfiguration.getSecret()).isEqualTo("testpassword");
 		assertThat(registryConfiguration.getAuthorizationType()).isEqualTo(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
-		assertThat(registryConfiguration.getExtra().get("registryAuthUri")).isEqualTo("https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
+		assertThat(registryConfiguration.getExtra()).containsEntry("registryAuthUri", "https://demo.repository.io/service/token?service=demo-registry&scope=repository:{repository}:pull");
 
 	}
 

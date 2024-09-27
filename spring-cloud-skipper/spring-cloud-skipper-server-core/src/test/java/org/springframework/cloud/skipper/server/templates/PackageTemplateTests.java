@@ -25,6 +25,7 @@ import com.samskivert.mustache.Template;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -46,7 +47,6 @@ import org.springframework.util.StreamUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-
 /**
  * @author Mark Pollack
  * @author Chris Bono
@@ -66,8 +66,8 @@ public class PackageTemplateTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void testMustasche() throws IOException {
-		Yaml yaml = new Yaml(new SafeConstructor());
-		Map model = yaml.load(valuesResource.getInputStream());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
+		Map model = (Map) yaml.load(valuesResource.getInputStream());
 		String templateAsString = StreamUtils.copyToString(nestedMapResource.getInputStream(),
 				Charset.defaultCharset());
 		Template mustacheTemplate = Mustache.compiler().compile(templateAsString);

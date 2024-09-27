@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml" />
-    <!-- SmokeTests rely on output capture from this DAO - please leave as-is -->
-    <logger name="org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao" level="DEBUG"/>
     <logger name="org.testcontainers" level="ERROR"/>
     <logger name="com.github.dockerjava" level="ERROR"/>
 </configuration>

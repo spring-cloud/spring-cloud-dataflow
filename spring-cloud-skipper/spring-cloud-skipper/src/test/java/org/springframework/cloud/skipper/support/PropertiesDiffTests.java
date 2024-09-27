@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Janne Valkealahti
  * @author Corneil du Plessis
+ *
  */
 public class PropertiesDiffTests {
 
@@ -40,10 +41,10 @@ public class PropertiesDiffTests {
 		PropertiesDiff diff = PropertiesDiff.builder().left(left).right(right).build();
 
 		assertThat(diff.areEqual()).isTrue();
-		assertThat(diff.getAdded()).hasSize(0);
-		assertThat(diff.getRemoved()).hasSize(0);
-		assertThat(diff.getChanged()).hasSize(0);
-		assertThat(diff.getCommon()).hasSize(0);
+		assertThat(diff.getAdded()).isEmpty();
+		assertThat(diff.getRemoved()).isEmpty();
+		assertThat(diff.getChanged()).isEmpty();
+		assertThat(diff.getCommon()).isEmpty();
 	}
 
 	@Test

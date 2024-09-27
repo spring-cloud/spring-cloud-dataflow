@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
@@ -76,9 +77,9 @@ public class SkipperServerPlatformConfigurationTests {
 	}
 
 	@Nested
-	@SpringBootTest(classes = TestConfig.class,
+    @SpringBootTest(classes = TestConfig.class,
 			properties = {"spring.main.allow-bean-definition-overriding=true"})
-	public class SinglePlatformConfigurationTest {
+    public class SinglePlatformConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;

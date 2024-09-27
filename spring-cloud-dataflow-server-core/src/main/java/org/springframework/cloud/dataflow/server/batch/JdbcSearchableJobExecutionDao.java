@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2014 the original author or authors.
+ * Copyright 2006-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.batch;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.BatchStatus;
@@ -36,8 +38,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
+import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.core.convert.support.ConfigurableConversionService;
@@ -61,7 +62,7 @@ import org.springframework.util.StringUtils;
  */
 public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implements SearchableJobExecutionDao {
 
-	private static final String FIND_PARAMS_FROM_ID_5 = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING FROM %PREFIX%JOB_EXECUTION_PARAMS WHERE JOB_EXECUTION_ID = ?";
+	private static final String FIND_PARAMS_FROM_ID = "SELECT JOB_EXECUTION_ID, PARAMETER_NAME, PARAMETER_TYPE, PARAMETER_VALUE, IDENTIFYING FROM %PREFIX%JOB_EXECUTION_PARAMS WHERE JOB_EXECUTION_ID = ?";
 
 	private static final String GET_COUNT = "SELECT COUNT(1) from %PREFIX%JOB_EXECUTION";
 
@@ -95,66 +96,48 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String TASK_EXECUTION_ID_FILTER = "B.JOB_EXECUTION_ID = E.JOB_EXECUTION_ID AND B.TASK_EXECUTION_ID = ?";
 
-	private static final String FIND_JOB_EXECUTIONS_4 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION, JOB_CONFIGURATION_LOCATION"
+	private static final String FIND_JOB_EXECUTIONS = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION where JOB_INSTANCE_ID = ? order by JOB_EXECUTION_ID desc";
 
-	private static final String FIND_JOB_EXECUTIONS_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
-			+ " from %PREFIX%JOB_EXECUTION where JOB_INSTANCE_ID = ? order by JOB_EXECUTION_ID desc";
-
-	private static final String GET_LAST_EXECUTION_4 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION, JOB_CONFIGURATION_LOCATION"
+	private static final String GET_LAST_EXECUTION = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION E where JOB_INSTANCE_ID = ? and JOB_EXECUTION_ID in (SELECT max(JOB_EXECUTION_ID) from %PREFIX%JOB_EXECUTION E2 where E2.JOB_INSTANCE_ID = ?)";
 
-	private static final String GET_LAST_EXECUTION_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
-			+ " from %PREFIX%JOB_EXECUTION E where JOB_INSTANCE_ID = ? and JOB_EXECUTION_ID in (SELECT max(JOB_EXECUTION_ID) from %PREFIX%JOB_EXECUTION E2 where E2.JOB_INSTANCE_ID = ?)";
-
-	private static final String GET_RUNNING_EXECUTIONS_4 = "SELECT E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, "
-			+ "E.JOB_INSTANCE_ID, E.JOB_CONFIGURATION_LOCATION from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=? and E.START_TIME is not NULL and E.END_TIME is NULL order by E.JOB_EXECUTION_ID desc";
-
-	private static final String GET_RUNNING_EXECUTIONS_5 = "SELECT E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, "
+	private static final String GET_RUNNING_EXECUTIONS_BY_JOB_NAME = "SELECT E.JOB_EXECUTION_ID, E.START_TIME, E.END_TIME, E.STATUS, E.EXIT_CODE, E.EXIT_MESSAGE, E.CREATE_TIME, E.LAST_UPDATED, E.VERSION, "
 			+ "E.JOB_INSTANCE_ID from %PREFIX%JOB_EXECUTION E, %PREFIX%JOB_INSTANCE I where E.JOB_INSTANCE_ID=I.JOB_INSTANCE_ID and I.JOB_NAME=? and E.START_TIME is not NULL and E.END_TIME is NULL order by E.JOB_EXECUTION_ID desc";
 
-	private static final String GET_EXECUTION_BY_ID_4 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION, JOB_CONFIGURATION_LOCATION"
-			+ " from %PREFIX%JOB_EXECUTION where JOB_EXECUTION_ID = ?";
-
-	private static final String GET_EXECUTION_BY_ID_5 = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
+	private static final String GET_EXECUTION_BY_ID = "SELECT JOB_EXECUTION_ID, START_TIME, END_TIME, STATUS, EXIT_CODE, EXIT_MESSAGE, CREATE_TIME, LAST_UPDATED, VERSION"
 			+ " from %PREFIX%JOB_EXECUTION where JOB_EXECUTION_ID = ?";
 
 	private static final String FROM_CLAUSE_TASK_TASK_BATCH = "%TASK_PREFIX%TASK_BATCH B";
 
 	private static final String GET_JOB_EXECUTIONS_BY_TASK_IDS = "SELECT JOB_EXECUTION_ID, TASK_EXECUTION_ID from %TASK_PREFIX%TASK_BATCH WHERE TASK_EXECUTION_ID in (?)";
 
-	private PagingQueryProvider allExecutionsPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider allExecutionsPagingQueryProvider;
 
-	private PagingQueryProvider byJobNamePagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobNamePagingQueryProvider;
 
-	private PagingQueryProvider byStatusPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byStatusPagingQueryProvider;
 
-	private PagingQueryProvider byJobNameAndStatusPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobNameAndStatusPagingQueryProvider;
 
-	private PagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
-	private PagingQueryProvider executionsWithStepCountPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobNameWithStepCountPagingQueryProvider;
 
-	private PagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider executionsWithStepCountPagingQueryProvider;
 
-	private PagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byDateRangeWithStepCountPagingQueryProvider;
 
-	private PagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
+	private DataflowSqlPagingQueryProvider byJobInstanceIdWithStepCountPagingQueryProvider;
+
+	private DataflowSqlPagingQueryProvider byTaskExecutionIdWithStepCountPagingQueryProvider;
 
 	private final ConfigurableConversionService conversionService;
 
 	private DataSource dataSource;
 
-	private BatchVersion batchVersion;
 	private String taskTablePrefix;
 
 	public JdbcSearchableJobExecutionDao() {
-		this(BatchVersion.BATCH_4);
-	}
-
-	@SuppressWarnings("deprecation")
-	public JdbcSearchableJobExecutionDao(BatchVersion batchVersion) {
-		this.batchVersion = batchVersion;
 		conversionService = new DefaultConversionService();
 		conversionService.addConverter(new StringToDateConverter());
 	}
@@ -175,9 +158,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	 */
 	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		Assert.state(dataSource != null, "DataSource must be provided");
-
 		if (getJdbcTemplate() == null) {
 			setJdbcTemplate(new JdbcTemplate(dataSource));
 		}
@@ -187,22 +168,18 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 				return 0;
 			}
 		});
-
 		allExecutionsPagingQueryProvider = getPagingQueryProvider();
 		executionsWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, null);
 		byJobNamePagingQueryProvider = getPagingQueryProvider(NAME_FILTER);
 		byStatusPagingQueryProvider = getPagingQueryProvider(STATUS_FILTER);
 		byJobNameAndStatusPagingQueryProvider = getPagingQueryProvider(NAME_AND_STATUS_FILTER);
 		byJobNameWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, NAME_FILTER);
-		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
-				DATE_RANGE_FILTER);
-		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null,
-				JOB_INSTANCE_ID_FILTER);
+		byDateRangeWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, DATE_RANGE_FILTER);
+		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
 				getTaskQuery(FROM_CLAUSE_TASK_TASK_BATCH), TASK_EXECUTION_ID_FILTER);
 
 		super.afterPropertiesSet();
-
 	}
 
 	protected String getTaskQuery(String base) {
@@ -213,17 +190,17 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		Assert.notNull(job, "Job cannot be null.");
 		Assert.notNull(job.getId(), "Job Id cannot be null.");
 
-		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? FIND_JOB_EXECUTIONS_4 : FIND_JOB_EXECUTIONS_5;
-		return getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion, job), job.getId());
+		String sqlQuery = FIND_JOB_EXECUTIONS;
+		return getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(job), job.getId());
 
 	}
 
 	@Override
 	public JobExecution getLastJobExecution(JobInstance jobInstance) {
 		Long id = jobInstance.getId();
-		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_LAST_EXECUTION_4 : GET_LAST_EXECUTION_5;
+		String sqlQuery = GET_LAST_EXECUTION;
 		List<JobExecution> executions = getJdbcTemplate().query(getQuery(sqlQuery),
-				new JobExecutionRowMapper(batchVersion, jobInstance), id, id);
+				new JobExecutionRowMapper(jobInstance), id, id);
 
 		Assert.state(executions.size() <= 1, "There must be at most one latest job execution");
 
@@ -238,9 +215,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public Set<JobExecution> findRunningJobExecutions(String jobName) {
 		Set<JobExecution> result = new HashSet<>();
-		String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_RUNNING_EXECUTIONS_4
-				: GET_RUNNING_EXECUTIONS_5;
-		getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion), jobName);
+		String sqlQuery = GET_RUNNING_EXECUTIONS_BY_JOB_NAME;
+		getJdbcTemplate().query(getQuery(sqlQuery), new JobExecutionRowMapper(), jobName);
 
 		return result;
 	}
@@ -248,8 +224,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	@Override
 	public JobExecution getJobExecution(Long executionId) {
 		try {
-			String sqlQuery = batchVersion.equals(BatchVersion.BATCH_4) ? GET_EXECUTION_BY_ID_4 : GET_EXECUTION_BY_ID_5;
-			return getJdbcTemplate().queryForObject(getQuery(sqlQuery), new JobExecutionRowMapper(batchVersion),
+			String sqlQuery = GET_EXECUTION_BY_ID;
+			return getJdbcTemplate().queryForObject(getQuery(sqlQuery), new JobExecutionRowMapper(),
 					executionId);
 		}
 		catch (EmptyResultDataAccessException e) {
@@ -258,35 +234,37 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} for all job executions
+	 * @return a {@link DataflowSqlPagingQueryProvider} for all job executions
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider() throws Exception {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider() throws Exception {
 		return getPagingQueryProvider(null);
 	}
 
+
 	/**
-	 * @return a {@link PagingQueryProvider} for all job executions with the provided
+	 * @return a {@link DataflowSqlPagingQueryProvider} for all job executions with the provided
 	 * where clause
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String whereClause) throws Exception {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String whereClause) throws Exception {
 		return getPagingQueryProvider(null, whereClause);
 	}
 
+
 	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the query
+	 * @return a {@link DataflowSqlPagingQueryProvider} with a where clause to narrow the query
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String fromClause, String whereClause) throws Exception {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String fromClause, String whereClause) throws Exception {
 		return getPagingQueryProvider(null, fromClause, whereClause);
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the query
+	 * @return a {@link DataflowSqlPagingQueryProvider} with a where clause to narrow the query
 	 * @throws Exception if page provider is not created.
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause)
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String fields, String fromClause, String whereClause)
 			throws Exception {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
@@ -601,8 +579,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	}
 
-	protected JobParameters getJobParametersBatch5(Long executionId) {
-		Map<String, JobParameter> map = new HashMap<>();
+	//TODO: Boot3x followup - need to handle LocalDateTime and possibly Integer
+	protected JobParameters getJobParameters(Long executionId) {
+		Map<String, JobParameter<?>> map = new HashMap<>();
 		RowCallbackHandler handler = rs -> {
 			String parameterName = rs.getString("PARAMETER_NAME");
 
@@ -619,45 +598,35 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			boolean identifying = rs.getString("IDENTIFYING").equalsIgnoreCase("Y");
 
 			if (typedValue instanceof String) {
-				map.put(parameterName, new JobParameter((String) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, String.class, identifying));
 			}
 			else if (typedValue instanceof Integer) {
-				map.put(parameterName, new JobParameter(((Integer) typedValue).longValue(), identifying));
+				map.put(parameterName, new JobParameter(((Integer) typedValue).longValue(), Integer.class, identifying));
 			}
 			else if (typedValue instanceof Long) {
-				map.put(parameterName, new JobParameter((Long) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, Long.class, identifying));
 			}
 			else if (typedValue instanceof Float) {
-				map.put(parameterName, new JobParameter(((Float) typedValue).doubleValue(), identifying));
+				map.put(parameterName, new JobParameter(((Float) typedValue).doubleValue(), Float.class, identifying));
 			}
 			else if (typedValue instanceof Double) {
-				map.put(parameterName, new JobParameter((Double) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, Double.class, identifying));
 			}
 			else if (typedValue instanceof Timestamp) {
-				map.put(parameterName, new JobParameter(new Date(((Timestamp) typedValue).getTime()), identifying));
+				map.put(parameterName, new JobParameter(new Date(((Timestamp) typedValue).getTime()), Timestamp.class, identifying));
 			}
 			else if (typedValue instanceof Date) {
-				map.put(parameterName, new JobParameter((Date) typedValue, identifying));
+				map.put(parameterName, new JobParameter(typedValue, Date.class, identifying));
 			}
 			else {
 				map.put(parameterName,
-						new JobParameter(typedValue != null ? typedValue.toString() : "null", identifying));
+						new JobParameter(typedValue != null ? typedValue.toString() : "null", String.class, identifying));
 			}
 		};
 
-		getJdbcTemplate().query(getQuery(FIND_PARAMS_FROM_ID_5), handler, executionId);
+		getJdbcTemplate().query(getQuery(FIND_PARAMS_FROM_ID), handler, executionId);
 
 		return new JobParameters(map);
-	}
-
-	@Override
-	protected JobParameters getJobParameters(Long executionId) {
-		if (batchVersion == BatchVersion.BATCH_4) {
-			return super.getJobParameters(executionId);
-		}
-		else {
-			return getJobParametersBatch5(executionId);
-		}
 	}
 
 	JobExecution createJobExecutionFromResultSet(ResultSet rs, int rowNum) throws SQLException {
@@ -670,28 +639,25 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		jobExecution = new JobExecution(jobInstance, jobParameters);
 		jobExecution.setId(id);
 
-		jobExecution.setStartTime(rs.getTimestamp(2));
-		jobExecution.setEndTime(rs.getTimestamp(3));
+		jobExecution.setStartTime(rs.getObject(2, LocalDateTime.class));
+		jobExecution.setEndTime(rs.getObject(3, LocalDateTime.class));
 		jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 		jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-		jobExecution.setCreateTime(rs.getTimestamp(7));
-		jobExecution.setLastUpdated(rs.getTimestamp(8));
+		jobExecution.setCreateTime(rs.getObject(7, LocalDateTime.class));
+		jobExecution.setLastUpdated(rs.getObject(8, LocalDateTime.class));
 		jobExecution.setVersion(rs.getInt(9));
 		return jobExecution;
 	}
 
 	private final class JobExecutionRowMapper implements RowMapper<JobExecution> {
 
-		private final BatchVersion batchVersion;
-
 		private JobInstance jobInstance;
 
-		public JobExecutionRowMapper(BatchVersion batchVersion) {
-			this.batchVersion = batchVersion;
+		public JobExecutionRowMapper() {
+
 		}
 
-		public JobExecutionRowMapper(BatchVersion batchVersion, JobInstance jobInstance) {
-			this.batchVersion = batchVersion;
+		public JobExecutionRowMapper(JobInstance jobInstance) {
 			this.jobInstance = jobInstance;
 		}
 
@@ -700,20 +666,21 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			Long id = rs.getLong(1);
 			JobParameters jobParameters = getJobParameters(id);
 			JobExecution jobExecution;
-			String jobConfigurationLocation = batchVersion.equals(BatchVersion.BATCH_4) ? rs.getString(10) : null;
 			if (jobInstance == null) {
-				jobExecution = new JobExecution(id, jobParameters, jobConfigurationLocation);
+				jobExecution = new JobExecution(id, jobParameters);
 			}
 			else {
-				jobExecution = new JobExecution(jobInstance, id, jobParameters, jobConfigurationLocation);
+				jobExecution = new JobExecution(jobInstance, id, jobParameters);
 			}
-
-			jobExecution.setStartTime(rs.getTimestamp(2));
-			jobExecution.setEndTime(rs.getTimestamp(3));
+			Timestamp startTime = rs.getTimestamp(2);
+			Timestamp endTime = rs.getTimestamp(3);
+			Timestamp lastUpdatedTime = rs.getTimestamp(8);
+			jobExecution.setStartTime((startTime != null) ? startTime.toLocalDateTime() : null);
+			jobExecution.setEndTime((endTime != null) ? endTime.toLocalDateTime() : null);
 			jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 			jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-			jobExecution.setCreateTime(rs.getTimestamp(7));
-			jobExecution.setLastUpdated(rs.getTimestamp(8));
+			jobExecution.setCreateTime(rs.getTimestamp(7).toLocalDateTime());
+			jobExecution.setLastUpdated((lastUpdatedTime != null) ? lastUpdatedTime.toLocalDateTime() : null);
 			jobExecution.setVersion(rs.getInt(9));
 			return jobExecution;
 		}

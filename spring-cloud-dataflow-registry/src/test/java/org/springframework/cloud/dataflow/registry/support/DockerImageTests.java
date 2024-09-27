@@ -15,35 +15,29 @@
  */
 package org.springframework.cloud.dataflow.registry.support;
 
-/**
- * @author Mark Pollack
- * @author Corneil du Plessis
- */
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.MethodSource;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+
 /**
  * Test for DockerImage parsing methods Code from https://github.com/vmware/admiral
+ *
+ * @author Mark Pollack
+ * @author Corneil du Plessis
  */
-
 public class DockerImageTests {
 
-
 	static class DockerImageNames implements ArgumentsProvider {
+
 		@Override
 		public Stream<? extends Arguments> provideArguments(ExtensionContext extensionContext) throws Exception {
 			List<Arguments> data = new ArrayList<>();
@@ -55,12 +49,12 @@ public class DockerImageTests {
 			data.add(arguments("repo without tag", "repo", null, null, "repo", "library/repo", "latest"));
 			data.add(arguments("namespace and repo", "namespace/repo", null, "namespace", "repo", "namespace/repo",
 					"latest"));
-			data.add(arguments("host with dot and repo", "host.name/repo", "host.name", null, "repo", "repo",
-					"latest"));
+			data.add(
+					arguments("host with dot and repo", "host.name/repo", "host.name", null, "repo", "repo", "latest"));
 			data.add(arguments("host with colon and repo", "host:3000/repo", "host:3000", null, "repo", "repo",
 					"latest"));
-			data.add(arguments("host with colon, repo and tag", "host:3000/repo:tag", "host:3000", null, "repo",
-					"repo", "tag"));
+			data.add(arguments("host with colon, repo and tag", "host:3000/repo:tag", "host:3000", null, "repo", "repo",
+					"tag"));
 			data.add(arguments("official repo with default namespace", "registry.hub.docker.com/library/repo:tag",
 					"registry.hub.docker.com", "library", "repo", "library/repo", "tag"));
 			data.add(arguments("official repo with custom namespace", "registry.hub.docker.com/user/repo:tag",
@@ -77,17 +71,20 @@ public class DockerImageTests {
 
 			return data.stream();
 		}
-	}
 
+	}
 
 	@ParameterizedTest
 	@ArgumentsSource(DockerImageNames.class)
-	public void testDockerImageParsing(String description, String fullImageName, String expectedHost, String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
+	public void testDockerImageParsing(String description, String fullImageName, String expectedHost,
+			String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
 		DockerImage dockerImage = DockerImage.fromImageName(fullImageName);
-		assertEquals( expectedHost, dockerImage.getHost(), description + ": host");
-		assertEquals(expectedNamespace, dockerImage.getNamespace(), description + ": namespace");
-		assertEquals(expectedRepo, dockerImage.getRepository(), description + ": repository");
-		assertEquals(expectedNamespaceAndRepo, dockerImage.getNamespaceAndRepo(), description + ": namespace and repo");
-		assertEquals(expectedTag, dockerImage.getTag(), description + ": tag");
+		assertThat(dockerImage.getHost()).as(description + ": host").isEqualTo(expectedHost);
+		assertThat(dockerImage.getNamespace()).as(description + ": namespace").isEqualTo(expectedNamespace);
+		assertThat(dockerImage.getRepository()).as(description + ": repository").isEqualTo(expectedRepo);
+		assertThat(dockerImage.getNamespaceAndRepo()).as(description + ": namespace and repo")
+			.isEqualTo(expectedNamespaceAndRepo);
+		assertThat(dockerImage.getTag()).as(description + ": tag").isEqualTo(expectedTag);
 	}
+
 }

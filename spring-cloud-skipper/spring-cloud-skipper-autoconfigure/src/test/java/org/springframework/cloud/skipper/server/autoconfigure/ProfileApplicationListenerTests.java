@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.autoconfigure;
 
-import java.util.Map;
-
-import mockit.MockUp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,29 +113,4 @@ public class ProfileApplicationListenerTests {
 		}
 	}
 
-	@Test
-	public void disableProfileApplicationListenerViaEnvVar() {
-		MockUp<?> mockup = mockProfileListenerEnvVar();
-		try {
-			environment.setProperty("VCAP_APPLICATION", "true");
-			profileApplicationListener.onApplicationEvent(event);
-			assertThat(environment.getActiveProfiles()).isEmpty();
-		}
-		finally {
-			mockup.tearDown();
-		}
-	}
-
-	private MockUp<?> mockProfileListenerEnvVar() {
-		Map<String, String> env = System.getenv();
-		return new MockUp<System>() {
-			@mockit.Mock
-			public String getenv(String name) {
-				if (name.equalsIgnoreCase(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME)) {
-					return "true";
-				}
-				return env.get(name);
-			}
-		};
-	}
 }

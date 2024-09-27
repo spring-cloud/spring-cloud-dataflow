@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.TimeZone;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -28,7 +30,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
@@ -40,7 +41,6 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -63,6 +63,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/jobs/executions")
 @ExposesResourceFor(JobExecutionResource.class)
 public class JobExecutionController {
+
+	private static final Logger logger = LoggerFactory.getLogger(JobExecutionController.class);
 
 	private final Assembler jobAssembler = new Assembler();
 
@@ -113,14 +115,10 @@ public class JobExecutionController {
 	 */
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public JobExecutionResource view(@PathVariable("id") long id,
-			@RequestParam(name = "schemaTarget", required = false) String schemaTarget) throws NoSuchJobExecutionException {
-		if(!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
-		TaskJobExecution jobExecution = taskJobService.getJobExecution(id, schemaTarget);
+	public JobExecutionResource view(@PathVariable("id") long id) throws NoSuchJobExecutionException {
+		TaskJobExecution jobExecution = taskJobService.getJobExecution(id);
 		if (jobExecution == null) {
-			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exits for schema target %s", id, schemaTarget));
+			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exists", id));
 		}
 		return jobAssembler.toModel(jobExecution);
 	}
@@ -137,10 +135,8 @@ public class JobExecutionController {
 	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "stop=true")
 
 	public ResponseEntity<Void> stopJobExecution(
-			@PathVariable("executionId") long jobExecutionId,
-			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
-	) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
-		taskJobService.stopJobExecution(jobExecutionId, schemaTarget);
+			@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
+		taskJobService.stopJobExecution(jobExecutionId);
 		return ResponseEntity.ok().build();
 	}
 
@@ -155,11 +151,16 @@ public class JobExecutionController {
 	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Void> restartJobExecution(
-			@PathVariable("executionId") long jobExecutionId,
-			@RequestParam(value = "schemaTarget", required = false) String schemaTarget
-	) throws NoSuchJobExecutionException {
-		taskJobService.restartJobExecution(jobExecutionId, schemaTarget);
-		return ResponseEntity.ok().build();
+		@PathVariable("executionId") long jobExecutionId,
+		@RequestParam(value = "useJsonJobParameters", required = false) Boolean useJsonJobParameters)
+		throws NoSuchJobExecutionException {
+		try {
+			taskJobService.restartJobExecution(jobExecutionId, useJsonJobParameters);
+		} catch (NoSuchJobExecutionException e) {
+			logger.warn(e.getMessage(), e);
+			throw e;
+		}
+			return ResponseEntity.ok().build();
 	}
 
 	/**
@@ -192,12 +193,13 @@ public class JobExecutionController {
 		public JobExecutionResource instantiateModel(TaskJobExecution taskJobExecution) {
 			JobExecutionResource resource = new JobExecutionResource(taskJobExecution, timeZone);
 			try {
-				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId(), taskJobExecution.getSchemaTarget())).withSelfRel());
+				resource.add(linkTo(methodOn(JobExecutionController.class).view(taskJobExecution.getTaskId())).withSelfRel());
 				if (taskJobExecution.getJobExecution().isRunning()) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("stop"));
+					resource.add(linkTo(methodOn(JobExecutionController.class).stopJobExecution(taskJobExecution.getJobExecution().getJobId())).withRel("stop"));
 				}
 				if (!taskJobExecution.getJobExecution().getStatus().equals(BatchStatus.COMPLETED)) {
-					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), taskJobExecution.getSchemaTarget())).withRel("restart"));
+					// In this case we use null for the useJsonJobParameters parameter, so we use the configured job parameter serialization method specified by dataflow.
+					resource.add(linkTo(methodOn(JobExecutionController.class).restartJobExecution(taskJobExecution.getJobExecution().getJobId(), null)).withRel("restart"));
 				}
 			} catch (NoSuchJobExecutionException | JobExecutionNotRunningException e) {
 				throw new RuntimeException(e);

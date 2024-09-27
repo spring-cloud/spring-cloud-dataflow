@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.within;
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class ExecutionContextDeserializationTests {
+class ExecutionContextDeserializationTests {
 
 	@Test
-	public void testDeserializationOfBasicExecutionContext() throws IOException {
+	void deserializationOfBasicExecutionContext() throws IOException {
 
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
 
@@ -49,7 +49,7 @@ public class ExecutionContextDeserializationTests {
 		ExecutionContext executionContext = objectMapper.readValue(json,
 				new TypeReference<ExecutionContext>() {
 				});
-		assertThat(executionContext.entrySet().size()).isEqualTo(2);
+		assertThat(executionContext.entrySet()).hasSize(2);
 		assertThat(executionContext.get("batch.taskletType")).isEqualTo("org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1");
 		assertThat(executionContext.get("batch.stepType")).isEqualTo("org.springframework.batch.core.step.tasklet.TaskletStep");
 		assertThat(executionContext.isDirty()).isFalse();
@@ -64,7 +64,7 @@ public class ExecutionContextDeserializationTests {
 	 * @throws IOException
 	 */
 	@Test
-	public void testFaultyExecutionContext() throws IOException {
+	void faultyExecutionContext() throws IOException {
 
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
 
@@ -76,7 +76,7 @@ public class ExecutionContextDeserializationTests {
 		ExecutionContext executionContext = objectMapper.readValue(json,
 				new TypeReference<ExecutionContext>() {
 				});
-		assertThat(executionContext.entrySet().size()).isEqualTo(2);
+		assertThat(executionContext.entrySet()).hasSize(2);
 		assertThat(executionContext.get("batch.taskletType")).isEqualTo("org.springframework.cloud.task.app.timestamp.batch.TimestampBatchTaskConfiguration$1");
 		assertThat(executionContext.get("batch.stepType")).isEqualTo("org.springframework.batch.core.step.tasklet.TaskletStep");
 		assertThat(executionContext.isDirty()).isTrue();
@@ -84,7 +84,7 @@ public class ExecutionContextDeserializationTests {
 	}
 
 	@Test
-	public void testExecutionContextWithNonStringValues() throws IOException {
+	void executionContextWithNonStringValues() throws IOException {
 
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
 
@@ -96,7 +96,7 @@ public class ExecutionContextDeserializationTests {
 		final ExecutionContext executionContext = objectMapper.readValue(json,
 				new TypeReference<ExecutionContext>() {
 				});
-		assertThat(executionContext.entrySet().size()).isEqualTo(6);
+		assertThat(executionContext.entrySet()).hasSize(6);
 		assertThat(executionContext.getInt("barNumber")).isEqualTo(1234);
 		assertThat(executionContext.getString("barNumberAsString")).isEqualTo("1234");
 

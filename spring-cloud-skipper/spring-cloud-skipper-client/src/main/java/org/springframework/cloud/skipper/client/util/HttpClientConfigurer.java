@@ -17,14 +17,20 @@ package org.springframework.cloud.skipper.client.util;
 
 import java.net.URI;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -60,7 +66,7 @@ public class HttpClientConfigurer {
 
 	public HttpClientConfigurer basicAuthCredentials(String username, String password) {
 		final BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-		credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
+		credentialsProvider.setCredentials(new AuthScope(null, null, -1, null, null), new UsernamePasswordCredentials(username, password.toCharArray()));
 		httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
 		useBasicAuth = true;
@@ -75,9 +81,11 @@ public class HttpClientConfigurer {
 	 * @return a reference to {@code this} to enable chained method invocation
 	 */
 	public HttpClientConfigurer skipTlsCertificateVerification() {
-		httpClientBuilder.setSSLContext(HttpUtils.buildCertificateIgnoringSslContext());
-		httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
-
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("https", new SSLConnectionSocketFactory(HttpUtils.buildCertificateIgnoringSslContext(), NoopHostnameVerifier.INSTANCE))
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		httpClientBuilder.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
 		return this;
 	}
 
@@ -90,13 +98,12 @@ public class HttpClientConfigurer {
 	}
 
 	public HttpClientConfigurer targetHost(URI targetHost) {
-		this.targetHost = new HttpHost(targetHost.getHost(), targetHost.getPort(), targetHost.getScheme());
-
+		this.targetHost = new HttpHost(targetHost.getScheme(), targetHost.getHost(), targetHost.getPort());
 		return this;
 	}
 
 	public HttpClientConfigurer addInterceptor(HttpRequestInterceptor interceptor) {
-		httpClientBuilder.addInterceptorLast(interceptor);
+		httpClientBuilder.addRequestInterceptorLast(interceptor);
 
 		return this;
 	}

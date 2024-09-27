@@ -420,7 +420,7 @@ public class YamlConverterTests {
 
 	private void do_conversionTest(Mode mode, List<String> keyspaces, String input, String expectedOutput, Checker<YamlConversionStatus> statusChecker) throws Exception {
 		File propertiesFile = createFile("application.properties", input);
-		assertThat(propertiesFile.exists()).isTrue();
+		assertThat(propertiesFile).exists();
 		Builder builder = YamlConverter.builder().mode(mode).file(propertiesFile);
 		if (keyspaces != null) {
 			for (String keyspace : keyspaces) {

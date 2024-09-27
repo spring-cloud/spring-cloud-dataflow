@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,17 +38,15 @@ import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit tests for {@link ApplicationConfigurationMetadataResolver}.
  *
  * @author Eric Bottard
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-public class BootApplicationConfigurationMetadataResolverTests {
+class BootApplicationConfigurationMetadataResolverTests {
 
 	@Mock
 	private ContainerImageMetadataResolver containerImageMetadataResolver;
@@ -53,13 +54,13 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	private ApplicationConfigurationMetadataResolver resolver;
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		MockitoAnnotations.initMocks(this);
 		resolver = new BootApplicationConfigurationMetadataResolver(containerImageMetadataResolver);
 	}
 
 	@Test
-	public void appDockerResourceEmptyLabels() {
+	void appDockerResourceEmptyLabels() {
 		when(containerImageMetadataResolver.getImageLabels("test/test:latest")).thenReturn(new HashMap<>());
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new DockerResource("test/test:latest"));
@@ -67,7 +68,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appDockerResource() throws IOException {
+	void appDockerResource() throws IOException {
 		byte[] bytes = StreamUtils.copyToByteArray(new ClassPathResource(
 				"apps/no-visible-properties/META-INF/spring-configuration-metadata.json", getClass())
 						.getInputStream());
@@ -81,7 +82,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appDockerResourceBrokenFormat() {
+	void appDockerResourceBrokenFormat() {
 		byte[] bytes = "Invalid metadata json content1".getBytes();
 		Map<String, String> result = Collections.singletonMap(
 				"org.springframework.cloud.dataflow.spring-configuration-metadata.json",
@@ -93,24 +94,24 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void appSpecificVisiblePropsShouldBeVisible() {
+	void appSpecificVisiblePropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties).haveAtLeastOne(configPropertyIdentifiedAs("filter.expression"));
-		assertThat(properties).haveAtLeastOne(configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2"));
+		assertThat(properties).haveAtLeast(1, configPropertyIdentifiedAs("filter.expression"));
+		assertThat(properties).haveAtLeast(1, configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2"));
 	}
 
 	@Test
-	public void otherPropertiesShouldOnlyBeVisibleInExtensiveCall() {
+	void otherPropertiesShouldOnlyBeVisibleInExtensiveCall() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(properties).doNotHave(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"));
 		properties = resolver.listProperties(new ClassPathResource("apps/filter-processor", getClass()), true);
-		assertThat(properties).haveAtLeastOne(configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"));
+		assertThat(properties).haveAtLeast(1, configPropertyIdentifiedAs("some.prefix.hidden.by.default.secret"));
 	}
 
 	@Test
-	public void shouldReturnEverythingWhenNoDescriptors() {
+	void shouldReturnEverythingWhenNoDescriptors() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/no-visible-properties", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
@@ -120,7 +121,7 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void deprecatedErrorPropertiesShouldNotBeVisible() {
+	void deprecatedErrorPropertiesShouldNotBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/deprecated-error", getClass()));
 		List<ConfigurationMetadataProperty> full = resolver
@@ -130,30 +131,30 @@ public class BootApplicationConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void shouldReturnPortMappingProperties() {
+	void shouldReturnPortMappingProperties() {
 		Map<String, Set<String>> portNames = resolver.listPortNames(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(portNames).hasSize(2);
 		assertThat(portNames.get("inbound")).hasSize(3);
-		assertThat(portNames.get("inbound")).containsExactlyInAnyOrder("in1", "in2", "in3");
+		assertThat(portNames.get("inbound")).contains("in1", "in2", "in3");
 		assertThat(portNames.get("outbound")).hasSize(2);
-		assertThat(portNames.get("outbound")).containsExactlyInAnyOrder("out1", "out2");
+		assertThat(portNames.get("outbound")).contains("out1", "out2");
 	}
 
 	@Test
-	public void shouldReturnOptionGroupsProperties() {
+	void shouldReturnOptionGroupsProperties() {
 		Map<String, Set<String>> optionGroups = resolver.listOptionGroups(new ClassPathResource("apps/filter-processor", getClass()));
 		assertThat(optionGroups).hasSize(4);
 		assertThat(optionGroups.get("g1")).hasSize(3);
-		assertThat(optionGroups.get("g1")).containsExactlyInAnyOrder("foo1.bar1", "foo1.bar2", "foo1.bar3");
+		assertThat(optionGroups.get("g1")).contains("foo1.bar1", "foo1.bar2", "foo1.bar3");
 		assertThat(optionGroups.get("g2")).isEmpty();
 		assertThat(optionGroups.get("g1.sb1")).hasSize(1);
-		assertThat(optionGroups.get("g1.sb1")).containsExactly("foo2.bar1");
+		assertThat(optionGroups.get("g1.sb1")).contains("foo2.bar1");
 		assertThat(optionGroups.get("g1.sb2")).hasSize(2);
-		assertThat(optionGroups.get("g1.sb2")).containsExactlyInAnyOrder("foo3.bar1", "foo3.bar2");
+		assertThat(optionGroups.get("g1.sb2")).contains("foo3.bar1", "foo3.bar2");
 	}
 
 	@Test
-	public void appDockerResourceWithInboundOutboundPortMapping() {
+	void appDockerResourceWithInboundOutboundPortMapping() {
 		Map<String, String> result = new HashMap<>();
 		result.put("configuration-properties.inbound-ports", "input1,input2, input3");
 		result.put("configuration-properties.outbound-ports", "output1, output2");
@@ -161,13 +162,13 @@ public class BootApplicationConfigurationMetadataResolverTests {
 		Map<String, Set<String>> portNames = this.resolver.listPortNames(new DockerResource("test/test:latest"));
 		assertThat(portNames).hasSize(2);
 		assertThat(portNames.get("inbound")).hasSize(3);
-		assertThat(portNames.get("inbound")).containsExactlyInAnyOrder("input1", "input2", "input3");
+		assertThat(portNames.get("inbound")).contains("input1", "input2", "input3");
 		assertThat(portNames.get("outbound")).hasSize(2);
-		assertThat(portNames.get("outbound")).containsExactlyInAnyOrder("output1", "output2");
+		assertThat(portNames.get("outbound")).contains("output1", "output2");
 	}
 
 	private Condition<ConfigurationMetadataProperty> configPropertyIdentifiedAs(String name) {
-		return new Condition<>(item -> item.getId().equals(name), "configPropertyIdentifiedAs");
+		return new Condition<>(c -> name.equals(c.getId()), "id:" + name);
 	}
 
 }

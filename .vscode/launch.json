@@ -36,6 +36,16 @@
             "request": "attach",
             "hostName": "localhost",
             "port": 5005
+        },
+        {
+            "type": "java",
+            "name": "SKIPPER default",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "console": "internalConsole",
+            "mainClass": "org.springframework.cloud.skipper.server.app.SkipperServerApplication",
+            "projectName": "spring-cloud-skipper-server",
+            "args": ""
         }
     ]
 }

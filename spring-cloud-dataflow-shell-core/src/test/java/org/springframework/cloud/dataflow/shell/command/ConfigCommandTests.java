@@ -16,6 +16,13 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
@@ -23,9 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -55,12 +59,9 @@ import org.springframework.shell.table.Table;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Unit tests for {@link ConfigCommands}.
@@ -71,7 +72,7 @@ import static org.mockito.Mockito.when;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-public class ConfigCommandTests {
+class ConfigCommandTests {
 
 	private ConfigCommands configCommands;
 
@@ -84,7 +85,7 @@ public class ConfigCommandTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		if (this.mapper == null) {
 			this.mapper = new ObjectMapper();
 			this.mapper.registerModule(new Jdk8Module());
@@ -110,7 +111,7 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testInfo() throws IOException {
+	void testInfo() throws IOException {
 		if (!isWindows()) {
 			DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
 			AboutOperations aboutOperations = mock(AboutOperations.class);
@@ -141,7 +142,7 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testApiRevisionMismatch() throws Exception {
+	void apiRevisionMismatch() throws Exception {
 		RootResource value = new RootResource(-12);
 		value.add(Link.of("http://localhost:9393/dashboard", "dashboard"));
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
@@ -152,7 +153,7 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testModeWithSkipperShellAndSkipperServer() throws Exception {
+	void modeWithSkipperShellAndSkipperServer() throws Exception {
 		String expectedTargetMessage = "Successfully targeted http://localhost:9393/";
 		AboutResource aboutResource = new AboutResource();
 

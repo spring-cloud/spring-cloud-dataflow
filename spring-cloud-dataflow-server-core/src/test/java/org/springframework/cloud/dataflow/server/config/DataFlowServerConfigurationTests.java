@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,27 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.net.ConnectException;
 
+import javax.sql.DataSource;
+
 import org.h2.tools.Server;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizationAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.service.StreamValidationService;
@@ -44,30 +49,30 @@ import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfi
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
-import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.NestedExceptionUtils;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-
 /**
  * @author Glenn Renfro
  * @author Ilayaperumal Gopinathan
  * @author Gunnar Hillert
  * @author Michael Wirth
+ * @author Corneil du Plessis
  */
-public class DataFlowServerConfigurationTests {
+class DataFlowServerConfigurationTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
 			.withAllowBeanDefinitionOverriding(true)
 			.withUserConfiguration(
 					DataFlowServerConfigurationTests.TestConfiguration.class,
+					TransactionManagerCustomizationAutoConfiguration.class,
 					SecurityAutoConfiguration.class,
 					DataFlowServerAutoConfiguration.class,
 					DataFlowControllerAutoConfiguration.class,
@@ -86,18 +91,18 @@ public class DataFlowServerConfigurationTests {
 	 * Verify that embedded server starts if h2 url is specified with default properties.
 	 */
 	@Test
-	public void testStartEmbeddedH2Server() {
+	void startEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
 						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> {
-					assertTrue(context.containsBean("h2TcpServer"));
+					assertThat(context.containsBean("h2TcpServer")).isTrue();
 					Server server = context.getBean("h2TcpServer", Server.class);
-					assertTrue(server.isRunning(false));
+					assertThat(server.isRunning(false)).isTrue();
 
 					// Verify H2 Service is stopped
 					context.close();
-					assertFalse(server.isRunning(false));
+					assertThat(server.isRunning(false)).isFalse();
 				});
 	}
 
@@ -106,16 +111,16 @@ public class DataFlowServerConfigurationTests {
 	 * spring.dataflow.embedded.database.enabled is set to false.
 	 */
 	@Test
-	public void testDoNotStartEmbeddedH2Server() {
+	void doNotStartEmbeddedH2Server() {
 		contextRunner.withPropertyValues(
 						"spring.datasource.url=jdbc:h2:tcp://localhost:19092/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=false",
 						"spring.jpa.database=H2"
 				)
 				.run(context -> {
-					assertNotNull(context.getStartupFailure());
-					assertInstanceOf(BeanCreationException.class, context.getStartupFailure());
-					assertInstanceOf(ConnectException.class, NestedExceptionUtils.getRootCause(context.getStartupFailure()));
+					assertThat(context.getStartupFailure()).isNotNull();
+					assertThat(context.getStartupFailure()).isInstanceOf(BeanCreationException.class);
+					assertThat(NestedExceptionUtils.getRootCause(context.getStartupFailure())).isInstanceOf(ConnectException.class);
 				});
 	}
 
@@ -144,8 +149,8 @@ public class DataFlowServerConfigurationTests {
 		}
 
 		@Bean
-		public TaskRepositoryContainer taskRepositoryContainer() {
-			return mock(DefaultTaskRepositoryContainer.class);
+		public TaskRepository taskRepository() {
+			return mock(SimpleTaskRepository.class);
 		}
 
 		@Bean
@@ -171,6 +176,35 @@ public class DataFlowServerConfigurationTests {
 		@Bean
 		public ContainerRegistryService containerRegistryService() {
 			return mock(ContainerRegistryService.class);
+		}
+
+		@Bean
+		public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+			throws Exception {
+			JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(platformTransactionManager);
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobExplorer", x);
+			}
+			return factoryBean.getObject();
+		}
+
+		@Bean
+		public JobRepository jobRepository(DataSource dataSource,
+										   PlatformTransactionManager platformTransactionManager) throws Exception {
+			JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+			factoryBean.setDataSource(dataSource);
+			factoryBean.setTransactionManager(platformTransactionManager);
+
+			try {
+				factoryBean.afterPropertiesSet();
+			} catch (Throwable x) {
+				throw new RuntimeException("Exception creating JobRepository", x);
+			}
+			return factoryBean.getObject();
 		}
 	}
 }

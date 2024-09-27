@@ -59,7 +59,7 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 				Charset.defaultCharset());
 		List<SpringCloudDeployerApplicationManifest> applicationSpecList = this.applicationManifestReader
 				.read(manifestYaml);
-		assertThat(applicationSpecList.isEmpty()).isTrue();
+		assertThat(applicationSpecList).isEmpty();
 	}
 
 	private void assertTimeOrLogApp(SpringCloudDeployerApplicationManifest applicationSpec) {

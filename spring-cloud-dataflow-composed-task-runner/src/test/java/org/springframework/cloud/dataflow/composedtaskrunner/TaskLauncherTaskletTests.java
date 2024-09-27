@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,15 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -38,7 +36,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.scope.context.StepContext;
 import org.springframework.batch.item.ExecutionContext;
@@ -50,13 +47,11 @@ import org.springframework.cloud.dataflow.composedtaskrunner.properties.Composed
 import org.springframework.cloud.dataflow.composedtaskrunner.support.ComposedTaskException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.TaskExecutionTimeoutException;
 import org.springframework.cloud.dataflow.composedtaskrunner.support.UnexpectedTaskExecutionException;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaTaskExecutionDaoFactoryBean;
 import org.springframework.cloud.dataflow.rest.client.DataFlowClientException;
 import org.springframework.cloud.dataflow.rest.client.DataFlowOperations;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
@@ -83,14 +78,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.ResourceAccessException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		org.springframework.cloud.dataflow.composedtaskrunner.TaskLauncherTaskletTests.TestConfiguration.class})
@@ -134,7 +129,7 @@ public class TaskLauncherTaskletTests {
 		this.taskRepositoryInitializer.afterPropertiesSet();
 		this.taskOperations = mock(TaskOperations.class);
 		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean =
-				new MultiSchemaTaskExecutionDaoFactoryBean(this.dataSource, "TASK_");
+			new TaskExecutionDaoFactoryBean(this.dataSource);
 		this.taskRepository = new SimpleTaskRepository(taskExecutionDaoFactoryBean);
 		this.taskExplorer = new SimpleTaskExplorer(taskExecutionDaoFactoryBean);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(500);
@@ -152,9 +147,6 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 
 		mockReturnValForTaskExecution(2L);
 		chunkContext = chunkContext();
@@ -164,9 +156,6 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 	}
 
 	@Test
@@ -182,11 +171,10 @@ public class TaskLauncherTaskletTests {
 				environment,
 				mapper
 		);
-		Exception exception = assertThrows(
-				ComposedTaskException.class,
+		assertThatThrownBy(
 				() -> execute(taskLauncherTasklet, null, chunkContext())
-		);
-		AssertionsForClassTypes.assertThat(exception.getMessage()).isEqualTo(
+		).isInstanceOf(ComposedTaskException.class)
+			.hasMessage(
 				"Unable to connect to Data Flow Server to execute task operations. " +
 						"Verify that Data Flow Server's tasks/definitions endpoint can be accessed.");
 	}
@@ -205,9 +193,6 @@ public class TaskLauncherTaskletTests {
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(2L);
-		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		assertThat(((List<?>) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
@@ -231,7 +216,6 @@ public class TaskLauncherTaskletTests {
 		ExecutionContext executionContext = chunkContext.getStepContext().getStepExecution().getExecutionContext();
 		logger.info("execution-context:{}", executionContext.entrySet());
 		assertThat(executionContext.get("task-execution-id")).isEqualTo(2L);
-		assertThat(executionContext.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		assertThat(executionContext.get("task-arguments")).as("task-arguments not null").isNotNull();
 		assertThat(((List<?>) executionContext.get("task-arguments")).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=1");
 	}
@@ -257,7 +241,6 @@ public class TaskLauncherTaskletTests {
 		executionContext = chunkContext.getStepContext().getStepExecution().getExecutionContext();
 		taskArguments = (List<String>) executionContext.get("task-arguments");
 		assertThat(executionContext.get("task-execution-id")).isEqualTo(2L);
-		assertThat(executionContext.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
 		assertThat(((List<?>) taskArguments).get(0)).isEqualTo("--spring.cloud.task.parent-execution-id=88");
 	}
 
@@ -269,15 +252,16 @@ public class TaskLauncherTaskletTests {
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(TaskExecutionTimeoutException.class, () -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Timeout occurred during " +
-				"startup of task with Execution Id 1");
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(TaskExecutionTimeoutException.class)
+			.hasMessage("Timeout occurred during startup of task with Execution Id 1");
 
 		createCompleteTaskExecution(0);
 		this.composedTaskProperties.setMaxStartWaitTime(500);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
 		TaskLauncherTasklet taskLauncherTaskletNoTimeout = getTaskExecutionTasklet();
-		assertDoesNotThrow(() -> execute(taskLauncherTaskletNoTimeout, null, chunkContext));
+		execute(taskLauncherTaskletNoTimeout, null, chunkContext);
+		// expect no exception
 	}
 
 	@Test
@@ -288,9 +272,9 @@ public class TaskLauncherTaskletTests {
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(TaskExecutionTimeoutException.class, () -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Timeout occurred while " +
-				"processing task with Execution Id 1");
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(TaskExecutionTimeoutException.class)
+			.hasMessage("Timeout occurred while processing task with Execution Id 1");
 	}
 
 	@Test
@@ -306,10 +290,9 @@ public class TaskLauncherTaskletTests {
 						ArgumentMatchers.any());
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(DataFlowClientException.class,
+		assertThatThrownBy(
 				() -> taskLauncherTasklet.execute(null, chunkContext)
-		);
-		Assertions.assertThat(exception.getMessage()).isEqualTo(ERROR_MESSAGE);
+		).isInstanceOf(DataFlowClientException.class).hasMessage(ERROR_MESSAGE);
 	}
 
 	@Test
@@ -323,9 +306,9 @@ public class TaskLauncherTaskletTests {
 				ArgumentMatchers.any());
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
-		Throwable exception = assertThrows(ResourceAccessException.class,
-				() -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo(ERROR_MESSAGE);
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(ResourceAccessException.class)
+			.hasMessage(ERROR_MESSAGE);
 	}
 
 	@Test
@@ -335,13 +318,13 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		createCompleteTaskExecution(1, "This is the exit message of the task itself.");
-		UnexpectedTaskExecutionException exception = assertThrows(UnexpectedTaskExecutionException.class,
-				() -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a non zero exit code.");
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a non zero exit code.");
-		Assertions.assertThat(exception.getExitCode()).isEqualTo(1);
-		Assertions.assertThat(exception.getExitMessage()).isEqualTo("This is the exit message of the task itself.");
-		Assertions.assertThat(exception.getEndTime()).isNotNull();
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(UnexpectedTaskExecutionException.class)
+			.hasMessage("Task returned a non zero exit code.")
+			.matches(x -> ((UnexpectedTaskExecutionException) x).getExitCode() == 1)
+			.matches(x -> ((UnexpectedTaskExecutionException) x).getExitMessage()
+				.equals("This is the exit message of the task itself."))
+			.matches(x -> ((UnexpectedTaskExecutionException) x).getEndTime() != null);
 	}
 
 	private RepeatStatus execute(TaskLauncherTasklet taskLauncherTasklet, StepContribution contribution,
@@ -361,9 +344,9 @@ public class TaskLauncherTaskletTests {
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
 		getCompleteTaskExecutionWithNull();
-		Throwable exception = assertThrows(UnexpectedTaskExecutionException.class,
-				() -> execute(taskLauncherTasklet, null, chunkContext));
-		Assertions.assertThat(exception.getMessage()).isEqualTo("Task returned a null exit code.");
+		assertThatThrownBy(() -> execute(taskLauncherTasklet, null, chunkContext))
+			.isInstanceOf(UnexpectedTaskExecutionException.class)
+			.hasMessage("Task returned a null exit code.");
 	}
 
 	@Test
@@ -395,13 +378,10 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
 		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
 	}
@@ -417,13 +397,10 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get("task-execution-id")).isEqualTo(1L);
 		assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
-		Assertions.assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
 	}
@@ -440,19 +417,16 @@ public class TaskLauncherTaskletTests {
 		ChunkContext chunkContext = chunkContext();
 		mockReturnValForTaskExecution(1L);
 		execute(taskLauncherTasklet, null, chunkContext);
-		Assertions.assertThat(chunkContext.getStepContext()
-				.getStepExecution().getExecutionContext()
-				.get("task-execution-id")).isEqualTo(1L);
 		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
-				.get("schema-target")).isEqualTo(SchemaVersionTarget.defaultTarget().getName());
+				.get("task-execution-id")).isEqualTo(1L);
 		boolean value = chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE);
-		Assertions.assertThat(chunkContext.getStepContext()
+		assertThat(chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.containsKey(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isTrue();
-		Assertions.assertThat((Boolean)chunkContext.getStepContext()
+		assertThat((Boolean) chunkContext.getStepContext()
 				.getStepExecution().getExecutionContext()
 				.get(TaskLauncherTasklet.IGNORE_EXIT_MESSAGE)).isFalse();
 	}
@@ -478,7 +452,7 @@ public class TaskLauncherTaskletTests {
 	private void createCompleteTaskExecution(int exitCode, String... message) {
 		TaskExecution taskExecution = this.taskRepository.createTaskExecution();
 		this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(),
-				exitCode, new Date(),  message != null && message.length > 0 ? message[0] : "");
+				exitCode, LocalDateTime.now(),  message != null && message.length > 0 ? message[0] : "");
 	}
 
 	private void createAndStartCompleteTaskExecution(int exitCode, JobExecution jobExecution) {
@@ -486,12 +460,13 @@ public class TaskLauncherTaskletTests {
 		JdbcTaskBatchDao taskBatchDao = new JdbcTaskBatchDao(this.dataSource);
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		this.taskRepository.completeTaskExecution(taskExecution.getExecutionId(),
-				exitCode, new Date(), "");
+				exitCode, LocalDateTime.now(), "");
 	}
 
 	private TaskExecution getCompleteTaskExecutionWithNull() {
 		TaskExecution taskExecution = this.taskRepository.createTaskExecution();
-		taskExecutionDao.completeTaskExecution(taskExecution.getExecutionId(), null, new Date(), "hello", "goodbye");
+		taskExecutionDao.completeTaskExecution(taskExecution.getExecutionId(), null, LocalDateTime.now(),
+			"hello", "goodbye");
 		return taskExecution;
 	}
 
@@ -517,11 +492,9 @@ public class TaskLauncherTaskletTests {
 		StepContext stepContext = new StepContext(stepExecution);
 		return new ChunkContext(stepContext);
 	}
+
 	private void mockReturnValForTaskExecution(long executionId) {
-		mockReturnValForTaskExecution(executionId, SchemaVersionTarget.defaultTarget().getName());
-	}
-	private void mockReturnValForTaskExecution(long executionId, String schemaTarget) {
-		Mockito.doReturn(new LaunchResponseResource(executionId, schemaTarget))
+		Mockito.doReturn(new LaunchResponseResource(executionId))
 				.when(this.taskOperations)
 				.launch(ArgumentMatchers.anyString(),
 						ArgumentMatchers.any(),
@@ -529,7 +502,6 @@ public class TaskLauncherTaskletTests {
 	}
 
 	@Configuration
-	@EnableBatchProcessing
 	@EnableConfigurationProperties(ComposedTaskProperties.class)
 	public static class TestConfiguration {
 

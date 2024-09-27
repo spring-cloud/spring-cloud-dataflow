@@ -16,7 +16,7 @@
 package org.springframework.cloud.dataflow.common.test.docker.compose.matchers;
 
 import static java.util.stream.Collectors.toMap;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.hamcrest.Matchers.hasEntry;
 
 import java.util.HashMap;
 import java.util.Map;

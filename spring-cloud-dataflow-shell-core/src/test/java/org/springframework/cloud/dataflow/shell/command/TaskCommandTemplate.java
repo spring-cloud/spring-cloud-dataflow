@@ -27,7 +27,7 @@ import org.springframework.shell.table.Table;
 import org.springframework.shell.table.TableModel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Helper methods for task commands to execute in the shell.
@@ -284,7 +284,7 @@ public class TaskCommandTemplate {
 		tasks.add(taskName);
 		String createMsg = "Created";
 
-		assertThat(result.toString()).isEqualTo(createMsg + " new task '" + taskName + "'");
+		assertThat(result).hasToString(createMsg + " new task '" + taskName + "'");
 
 		verifyExists(taskName, actualDefinition);
 	}

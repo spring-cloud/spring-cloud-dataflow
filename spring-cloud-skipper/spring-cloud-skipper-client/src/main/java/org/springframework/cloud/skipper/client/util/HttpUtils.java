@@ -21,11 +21,10 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.hc.core5.ssl.SSLContexts;
 
 /**
- * Provides utilities for the Apache {@link HttpClient}, used to make REST calls
+ * Provides utilities for the Apache {@code HttpClient}, used to make REST calls
  *
  * @author Gunnar Hillert
  */

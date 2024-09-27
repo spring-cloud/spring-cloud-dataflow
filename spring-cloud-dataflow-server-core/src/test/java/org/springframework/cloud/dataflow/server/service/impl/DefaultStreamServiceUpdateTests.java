@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -23,11 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
-import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -47,8 +45,11 @@ import org.springframework.cloud.dataflow.server.support.TestResourceUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.StreamUtils;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * @author Mark Pollack
@@ -82,15 +83,15 @@ public class DefaultStreamServiceUpdateTests {
 	private StreamValidationService streamValidationService;
 
 	@Test
-	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
+	void createUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
-				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.1"),
-				null, null);
+				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:5.0.0"),
+				null);
 		testCreateUpdateRequests();
 	}
 
 	@Test
-	public void testCreateUpdateRequestsWithoutRegisteredApp() throws IOException {
+	void createUpdateRequestsWithoutRegisteredApp() throws IOException {
 		try {
 			testCreateUpdateRequests();
 			fail("IllegalStateException is expected.");

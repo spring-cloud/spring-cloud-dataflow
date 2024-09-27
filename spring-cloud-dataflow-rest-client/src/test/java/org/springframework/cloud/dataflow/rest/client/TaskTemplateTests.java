@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -27,38 +30,35 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 /**
  * Test the {@link TaskTemplate} implementation of {@link TaskOperations}.
  *
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class TaskTemplateTests {
+class TaskTemplateTests {
 
 	private static final String CURRENT_TASK_EXECUTION_LINK = "tasks/executions/current";
 
 	private RestTemplate restTemplate;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		restTemplate = mock(RestTemplate.class);
 	}
 
 	@Test
-	public void testOldDataFlow() {
+	void oldDataFlow() {
 		validateExecutionLinkNotPresent("1.6.0");
 	}
 
 	@Test
-	public void testMinDataFlow() {
+	void minDataFlow() {
 		validateExecutionLinkPresent("1.7.0");
 	}
 
 	@Test
-	public void testFutureDataFlow() {
+	void futureDataFlow() {
 		validateExecutionLinkPresent("1.8.0");
 		validateExecutionLinkPresent("1.9.0");
 		validateExecutionLinkPresent("2.0.0");

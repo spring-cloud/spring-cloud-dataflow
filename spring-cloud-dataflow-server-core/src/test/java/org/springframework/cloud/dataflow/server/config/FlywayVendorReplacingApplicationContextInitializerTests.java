@@ -40,9 +40,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * handles the '{vendor} token.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
 @Testcontainers(disabledWithoutDocker = true)
-public class FlywayVendorReplacingApplicationContextInitializerTests {
+class FlywayVendorReplacingApplicationContextInitializerTests {
 	private final static Logger logger = LoggerFactory.getLogger(FlywayVendorReplacingApplicationContextInitializerTests.class);
 	@Container
 	private static final MariaDBContainer<?> MARIADB_CONTAINER = new MariaDBContainer<>("mariadb:10.4")
@@ -50,8 +51,9 @@ public class FlywayVendorReplacingApplicationContextInitializerTests {
 			.withDatabaseName("dataflow")
 			.withUsername("spring")
 			.withPassword("spring");
+
 	@BeforeEach
-	public void  setup() {
+	void setup() {
 		MARIADB_CONTAINER.followOutput(new Slf4jLogConsumer(logger));
 	}
 	@Test

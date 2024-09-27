@@ -54,8 +54,8 @@ public class KubernetesPlatformPropertiesTest {
 		assertThat(k8sAccounts).hasSize(2);
 		assertThat(k8sAccounts).containsKeys("dev", "qa");
 		assertThat(devK8sClient.getNamespace()).isEqualTo("dev1");
-		assertThat(devK8sClient.getMasterUrl().toString()).isEqualTo("https://192.168.0.1:8443");
-		assertThat(qaK8sClient.getMasterUrl().toString()).isEqualTo("https://192.168.0.2:8443");
+		assertThat(devK8sClient.getMasterUrl()).hasToString("https://192.168.0.1:8443");
+		assertThat(qaK8sClient.getMasterUrl()).hasToString("https://192.168.0.2:8443");
 		assertThat(qaK8sClient.getNamespace()).isEqualTo("qaNamespace");
 		assertThat(k8sAccounts.get("dev").getImagePullPolicy()).isEqualTo(ImagePullPolicy.Always);
 		assertThat(k8sAccounts.get("dev").getEntryPointStyle()).isEqualTo(EntryPointStyle.exec);

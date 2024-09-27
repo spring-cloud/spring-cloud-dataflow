@@ -18,76 +18,77 @@ package org.springframework.cloud.dataflow.shell.command;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * @author Mark Fisher
  * @author Corneil du Plessis
  */
-public class AssertionsTests {
+class AssertionsTests {
 
 	@Test
-	public void atMostOneWithNone() {
+	void atMostOneWithNone() {
 		Assertions.atMostOneOf("foo", null, "bar", null);
 	}
 
 	@Test
-	public void atMostOneWithOne() {
+	void atMostOneWithOne() {
 		Assertions.atMostOneOf("foo", "x", "bar", null);
 	}
 
 	@Test
-	public void atMostOneWithTwo() {
-		assertThrows(IllegalStateException.class, () -> {
+	void atMostOneWithTwo() {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
 			Assertions.atMostOneOf("foo", "x", "bar", "y");
 		});
 	}
 
 	@Test
-	public void atMostOneWithOddArgs() {
-		assertThrows(IllegalArgumentException.class, () -> {
+	void atMostOneWithOddArgs() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			Assertions.atMostOneOf("foo", "x", "bar", null, "oops");
 		});
 	}
 
 	@Test
-	public void atMostOneWithNonStringKey() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			assertEquals(1, Assertions.atMostOneOf("foo", null, 99, "y"));
+	void atMostOneWithNonStringKey() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			assertThat(Assertions.atMostOneOf("foo", null, 99, "y")).isEqualTo(1);
 		});
 	}
 
 	@Test
-	public void exactlyOneWithNone() {
-		assertThrows(IllegalStateException.class, () -> {
-			assertEquals(1, Assertions.exactlyOneOf("foo", null, "bar", null, "baz", null));
-		});
+	void exactlyOneWithNone() {
+		assertThatThrownBy(() -> {
+			assertThat(Assertions.exactlyOneOf("foo", null, "bar", null, "baz", null)).isEqualTo(1);
+		}).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
-	public void exactlyOneWithOne() {
-		assertEquals(1, Assertions.exactlyOneOf("foo", null, "bar", "y", "baz", null));
+	void exactlyOneWithOne() {
+		assertThat(Assertions.exactlyOneOf("foo", null, "bar", "y", "baz", null)).isEqualTo(1);
 	}
 
 	@Test
-	public void exactlyOneWithTwo() {
-		assertThrows(IllegalStateException.class, () -> {
-			assertEquals(1, Assertions.exactlyOneOf("foo", "x", "bar", "y", "baz", null));
-		});
+	void exactlyOneWithTwo() {
+		assertThatThrownBy(() -> {
+			assertThat(Assertions.exactlyOneOf("foo", "x", "bar", "y", "baz", null)).isEqualTo(1);
+		}).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
-	public void exactlyOneWithOddArgs() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			assertEquals(1, Assertions.exactlyOneOf("foo", null, "bar", "y", "oops"));
-		});
+	void exactlyOneWithOddArgs() {
+		assertThatThrownBy(() -> {
+			assertThat(Assertions.exactlyOneOf("foo", null, "bar", "y", "oops")).isEqualTo(1);
+		}).isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void exactlyOneWithNonStringKey() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			assertEquals(1, Assertions.exactlyOneOf("foo", null, 99, "y"));
-		});
+	void exactlyOneWithNonStringKey() {
+		assertThatThrownBy(() -> {
+			assertThat(Assertions.exactlyOneOf("foo", null, 99, "y")).isEqualTo(1);
+		}).isInstanceOf(IllegalArgumentException.class);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2023 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +24,12 @@ import java.util.Map;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.batch.BatchDataSourceInitializer;
+import org.springframework.boot.autoconfigure.batch.BatchDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -37,12 +41,14 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
+import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -57,10 +63,9 @@ import org.springframework.cloud.dataflow.registry.service.DefaultAppRegistrySer
 import org.springframework.cloud.dataflow.registry.support.AppResourceCommon;
 import org.springframework.cloud.dataflow.rest.support.jackson.ISO8601DateFormatWithMilliSeconds;
 import org.springframework.cloud.dataflow.rest.support.jackson.Jackson2DataflowModule;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
-import org.springframework.cloud.dataflow.server.config.AggregateDataFlowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.batch.JobService;
+import org.springframework.cloud.dataflow.server.config.DataFlowTaskConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobExecutionThinController;
@@ -68,23 +73,16 @@ import org.springframework.cloud.dataflow.server.controller.JobInstanceControlle
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
-import org.springframework.cloud.dataflow.server.controller.SchemaController;
-import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
-import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
-import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
-import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
@@ -109,13 +107,15 @@ import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.configuration.TaskProperties;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
+import org.springframework.cloud.task.repository.support.TaskExecutionDaoFactoryBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
@@ -138,9 +138,8 @@ import static org.mockito.Mockito.mock;
 @Configuration
 @EnableSpringDataWebSupport
 @Import({
-		SchemaServiceConfiguration.class,
-		AggregateTaskConfiguration.class,
-		AggregateDataFlowTaskConfiguration.class
+		DataflowTaskConfiguration.class,
+		DataFlowTaskConfiguration.class
 })
 @ImportAutoConfiguration({
 		HibernateJpaAutoConfiguration.class,
@@ -164,6 +163,41 @@ import static org.mockito.Mockito.mock;
 		TaskProperties.class, ComposedTaskRunnerConfigurationProperties.class})
 @EnableMapRepositories(basePackages = "org.springframework.cloud.dataflow.server.job")
 public class JobDependencies {
+
+	@Bean
+	public JobExplorer jobExplorer(DataSource dataSource, PlatformTransactionManager platformTransactionManager)
+		throws Exception {
+		JobExplorerFactoryBean factoryBean = new JobExplorerFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobExplorer", x);
+		}
+		return factoryBean.getObject();
+	}
+
+	@Bean
+	public JobRepository jobRepository(DataSource dataSource,
+									   PlatformTransactionManager platformTransactionManager) throws Exception{
+		JobRepositoryFactoryBean factoryBean = new JobRepositoryFactoryBean();
+		factoryBean.setDataSource(dataSource);
+		factoryBean.setTransactionManager(platformTransactionManager);
+
+		try {
+			factoryBean.afterPropertiesSet();
+		} catch (Throwable x) {
+			throw new RuntimeException("Exception creating JobRepository", x);
+		}
+		return factoryBean.getObject();
+	}
+
+	@Bean
+	public DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao(
+		DataSource dataSource) {
+		return new DefaultDataFlowTaskExecutionQueryDao(dataSource);
+	}
 
 	@Bean
 	public Jackson2ObjectMapperBuilderCustomizer dataflowObjectMapperBuilderCustomizer() {
@@ -201,13 +235,13 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public JobStepExecutionController jobStepExecutionController(JobServiceContainer jobServiceContainer) {
-		return new JobStepExecutionController(jobServiceContainer);
+	public JobStepExecutionController jobStepExecutionController(JobService jobService) {
+		return new JobStepExecutionController(jobService);
 	}
 
 	@Bean
-	public JobStepExecutionProgressController jobStepExecutionProgressController(JobServiceContainer jobServiceContainer, TaskJobService taskJobService) {
-		return new JobStepExecutionProgressController(jobServiceContainer, taskJobService);
+	public JobStepExecutionProgressController jobStepExecutionProgressController(JobService jobService, TaskJobService taskJobService) {
+		return new JobStepExecutionProgressController(jobService, taskJobService);
 	}
 
 	@Bean
@@ -216,27 +250,18 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public SchemaController schemaController(SchemaService schemaService) {
-		return new SchemaController(schemaService);
-	}
-
-	@Bean
 	public TaskExecutionController taskExecutionController(
-			AggregateTaskExplorer explorer,
-			AggregateExecutionSupport aggregateExecutionSupport,
+			DataflowTaskExplorer explorer,
 			TaskExecutionService taskExecutionService,
 			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeleteService taskDeleteService,
 			TaskJobService taskJobService
 	) {
 		return new TaskExecutionController(
 				explorer,
-				aggregateExecutionSupport,
 				taskExecutionService,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionInfoService,
 				taskDeleteService,
 				taskJobService
@@ -244,8 +269,8 @@ public class JobDependencies {
 	}
 
 	@Bean
-	public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer, TaskJobService taskJobService) {
-		return new TaskExecutionThinController(aggregateTaskExplorer, taskJobService);
+	public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer dataflowTaskExplorer) {
+		return new TaskExecutionThinController(dataflowTaskExplorer);
 	}
 
 	@Bean
@@ -263,6 +288,27 @@ public class JobDependencies {
 		return new DefaultLauncherService(launcherRepository);
 	}
 
+	@Bean
+	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
+		TaskExecutionService taskExecutionService,
+		TaskJobService taskJobService,
+		DataflowTaskExplorer taskExplorer) {
+		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer);
+	}
+
+	@Bean
+	public TaskDefinitionController taskDefinitionController(
+		DataflowTaskExplorer explorer, TaskDefinitionRepository repository,
+		TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
+		TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider
+	) {
+		return new TaskDefinitionController(explorer,
+			repository,
+			taskSaveService,
+			taskDeleteService,
+			taskDefinitionAssemblerProvider
+		);
+	}
 
 	@Bean
 	public TaskLogsController taskLogsController(TaskExecutionService taskExecutionService) {
@@ -271,39 +317,33 @@ public class JobDependencies {
 
 	@Bean
 	public TaskJobService taskJobExecutionRepository(
-			JobServiceContainer jobServiceContainer,
-			AggregateTaskExplorer taskExplorer,
+			JobService jobService,
+			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskExecutionService taskExecutionService,
 			LauncherRepository launcherRepository,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			AggregateJobQueryDao aggregateJobQueryDao,
-			TaskDefinitionReader taskDefinitionReader
+			TaskConfigurationProperties taskConfigurationProperties
 	) {
 		return new DefaultTaskJobService(
-				jobServiceContainer,
+				jobService,
 				taskExplorer,
 				taskDefinitionRepository,
 				taskExecutionService,
 				launcherRepository,
-				aggregateExecutionSupport,
-				aggregateJobQueryDao,
-				taskDefinitionReader
-		);
+				taskConfigurationProperties);
 	}
 
 	@Bean
 	public TaskDeleteService deleteTaskService(
-			AggregateTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
-			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSource dataSource
 	) {
@@ -314,11 +354,10 @@ public class JobDependencies {
 				taskDefinitionRepository,
 				taskDeploymentRepository,
 				auditRecordService,
-				dataflowTaskExecutionDaoContainer,
-				dataflowJobExecutionDaoContainer,
-				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionDao,
+				dataflowJobExecutionDao,
+				dataflowTaskExecutionMetadataDao,
 				schedulerService,
-				schemaService,
 				taskConfigurationProperties,
 				dataSource
 		);
@@ -332,11 +371,8 @@ public class JobDependencies {
 
 	@Bean
 	public TaskExecutionCreationService taskExecutionRepositoryService(
-			TaskRepositoryContainer taskRepositoryContainer,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader
-	) {
-		return new DefaultTaskExecutionRepositoryService(taskRepositoryContainer, aggregateExecutionSupport, taskDefinitionReader);
+			TaskRepository taskRepository) {
+		return new DefaultTaskExecutionRepositoryService(taskRepository);
 	}
 
 	@Bean
@@ -353,48 +389,44 @@ public class JobDependencies {
 			ApplicationContext applicationContext,
 			LauncherRepository launcherRepository,
 			AuditRecordService auditRecordService,
-			TaskRepositoryContainer taskRepositoryContainer,
+			TaskRepository taskRepository,
 			TaskExecutionInfoService taskExecutionInfoService,
 			TaskDeploymentRepository taskDeploymentRepository,
 			TaskExecutionCreationService taskExecutionRepositoryService,
 			TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-			AggregateTaskExplorer taskExplorer,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+			DataflowTaskExplorer taskExplorer,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
 			OAuth2TokenUtilsService oauth2TokenUtilsService,
 			TaskSaveService taskSaveService,
 			TaskConfigurationProperties taskConfigurationProperties,
-			AggregateExecutionSupport aggregateExecutionSupport,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties,
-			TaskDefinitionRepository taskDefinitionRepository,
-			TaskDefinitionReader taskDefinitionReader
+			TaskDefinitionRepository taskDefinitionRepository
 	) {
 		return new DefaultTaskExecutionService(
 				applicationContext.getEnvironment(),
 				launcherRepository,
 				auditRecordService,
-				taskRepositoryContainer,
+				taskRepository,
 				taskExecutionInfoService,
 				taskDeploymentRepository,
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
-				dataflowTaskExecutionDaoContainer,
-				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao,
 				dataflowTaskExecutionQueryDao,
 				oauth2TokenUtilsService,
 				taskSaveService, taskConfigurationProperties,
-				aggregateExecutionSupport,
 				composedTaskRunnerConfigurationProperties);
 	}
 
 	@Bean
 	public TaskExecutionInfoService taskDefinitionRetriever(
 			AppRegistryService registry,
-			AggregateTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskConfigurationProperties taskConfigurationProperties,
 			LauncherRepository launcherRepository,
@@ -412,28 +444,13 @@ public class JobDependencies {
 				composedTaskRunnerConfigurationProperties
 		);
 	}
+
 	@Bean
-	public TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider(
-		TaskExecutionService taskExecutionService,
-		TaskJobService taskJobService,
-		AggregateTaskExplorer taskExplorer,
-		AggregateExecutionSupport aggregateExecutionSupport
-	) {
-		return new DefaultTaskDefinitionAssemblerProvider(taskExecutionService, taskJobService, taskExplorer, aggregateExecutionSupport);
+	public TaskRepository taskRepository(DataSource dataSource) {
+		TaskExecutionDaoFactoryBean taskExecutionDaoFactoryBean = new TaskExecutionDaoFactoryBean(dataSource, "TASK_");
+		return new SimpleTaskRepository(taskExecutionDaoFactoryBean);
 	}
-	@Bean
-	public TaskDefinitionController taskDefinitionController(
-		AggregateTaskExplorer explorer, TaskDefinitionRepository repository,
-		TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
-		TaskDefinitionAssemblerProvider taskDefinitionAssemblerProvider
-	) {
-		return new TaskDefinitionController(explorer,
-			repository,
-			taskSaveService,
-			taskDeleteService,
-			taskDefinitionAssemblerProvider
-		);
-	}
+
 	@Bean
 	@Primary
 	public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
@@ -442,9 +459,9 @@ public class JobDependencies {
 
 
 	@Bean
-	public BatchDataSourceInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
-																					  ResourceLoader resourceLoader, BatchProperties properties) {
-		return new BatchDataSourceInitializer(dataSource, resourceLoader, properties);
+	public BatchDataSourceScriptDatabaseInitializer batchRepositoryInitializerForDefaultDBForServer(DataSource dataSource,
+																									BatchProperties properties) {
+		return new BatchDataSourceScriptDatabaseInitializer(dataSource, properties.getJdbc());
 	}
 
 	@Bean

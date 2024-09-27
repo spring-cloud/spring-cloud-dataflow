@@ -16,12 +16,14 @@
 
 package org.springframework.cloud.dataflow.container.registry;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
@@ -42,6 +44,7 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -54,8 +57,9 @@ import static org.mockito.Mockito.when;
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-public class DefaultContainerImageMetadataResolverTest {
+class DefaultContainerImageMetadataResolverTest {
 
 	@Mock
 	private RestTemplate mockRestTemplate;
@@ -68,7 +72,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	private ContainerRegistryService containerRegistryService;
 
 	@BeforeEach
-	public void init() {
+	void init() {
 		MockitoAnnotations.initMocks(this);
 
 		when(containerImageRestTemplateFactory.getContainerRestTemplate(anyBoolean(), anyBoolean(), anyMap())).thenReturn(mockRestTemplate);
@@ -95,7 +99,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabelsInvalidImageName() {
+	void getImageLabelsInvalidImageName() {
 		assertThatExceptionOfType(ContainerRegistryException.class).isThrownBy(() -> {
 			DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 			resolver.getImageLabels(null);
@@ -103,7 +107,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabels() throws JsonProcessingException {
+	void getImageLabels() throws JsonProcessingException {
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
@@ -115,11 +119,11 @@ public class DefaultContainerImageMetadataResolverTest {
 
 		Map<String, String> labels = resolver.getImageLabels("test/image:latest");
 		assertThat(labels).hasSize(1);
-		assertThat(labels.get("boza")).isEqualTo("koza");
+		assertThat(labels).containsEntry("boza", "koza");
 	}
 
 	@Test
-	public void getImageLabelsFromPrivateRepository() throws JsonProcessingException {
+	void getImageLabelsFromPrivateRepository() throws JsonProcessingException {
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
@@ -131,11 +135,11 @@ public class DefaultContainerImageMetadataResolverTest {
 
 		Map<String, String> labels = resolver.getImageLabels("my-private-repository.com:5000/test/image:latest");
 		assertThat(labels).hasSize(1);
-		assertThat(labels.get("boza")).isEqualTo("koza");
+		assertThat(labels).containsEntry("boza", "koza");
 	}
 
 	@Test
-	public void getImageLabelsMissingRegistryConfiguration() {
+	void getImageLabelsMissingRegistryConfiguration() {
 		assertThatExceptionOfType(ContainerRegistryException.class).isThrownBy(() -> {
 			DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 			resolver.getImageLabels("somehost:8083/test/image:latest");
@@ -143,18 +147,18 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabelsMissingRegistryAuthorizer() {
+	void getImageLabelsMissingRegistryAuthorizer() {
 		assertThatExceptionOfType(ContainerRegistryException.class).isThrownBy(() -> {
 			DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
-					new ContainerRegistryService(containerImageRestTemplateFactory,
-							new ContainerImageParser(), registryConfigurationMap, Collections.emptyList()));
+				new ContainerRegistryService(containerImageRestTemplateFactory,
+					new ContainerImageParser(), registryConfigurationMap, Collections.emptyList()));
 
 			resolver.getImageLabels("test/image:latest");
 		});
 	}
 
 	@Test
-	public void getImageLabelsMissingAuthorizationHeader() {
+	void getImageLabelsMissingAuthorizationHeader() {
 		assertThatExceptionOfType(ContainerRegistryException.class).isThrownBy(() -> {
 			RegistryAuthorizer registryAuthorizer = mock(RegistryAuthorizer.class);
 
@@ -162,41 +166,41 @@ public class DefaultContainerImageMetadataResolverTest {
 			when(registryAuthorizer.getAuthorizationHeaders(any(ContainerImage.class), any())).thenReturn(null);
 
 			DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
-					new ContainerRegistryService(containerImageRestTemplateFactory, new ContainerImageParser(), registryConfigurationMap, Collections.singletonList(registryAuthorizer)));
+				new ContainerRegistryService(containerImageRestTemplateFactory, new ContainerImageParser(), registryConfigurationMap, Arrays.asList(registryAuthorizer)));
 
 			resolver.getImageLabels("test/image:latest");
 		});
 	}
 
 	@Test
-	public void getImageLabelsInvalidManifestResponse() {
+	void getImageLabelsInvalidManifestResponse() {
 		assertThatExceptionOfType(ContainerRegistryException.class).isThrownBy(() -> {
 			DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
 			Map<String, Object> manifestResponseWithoutConfig = Collections.emptyMap();
 			mockManifestRestTemplateCall(manifestResponseWithoutConfig, "registry-1.docker.io",
-					null, "test/image", "latest");
+				null, "test/image", "latest");
 
 			resolver.getImageLabels("test/image:latest");
 		});
 	}
 
 	@Test
-	public void getImageLabelsInvalidDigest() {
+	void getImageLabelsInvalidDigest() {
 		assertThatExceptionOfType(ContainerRegistryException.class).isThrownBy(() -> {
 			DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
 			String emptyDigest = "";
 			Map<String, Object> manifestResponse = Collections.singletonMap("config", Collections.singletonMap("digest", emptyDigest));
 			mockManifestRestTemplateCall(manifestResponse, "registry-1.docker.io", null,
-					"test/image", "latest");
+				"test/image", "latest");
 
 			resolver.getImageLabels("test/image:latest");
 		});
 	}
 
 	@Test
-	public void getImageLabelsWithInvalidLabels() throws JsonProcessingException {
+	void getImageLabelsWithInvalidLabels() throws JsonProcessingException {
 
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(this.containerRegistryService);
 
@@ -212,7 +216,7 @@ public class DefaultContainerImageMetadataResolverTest {
 	}
 
 	@Test
-	public void getImageLabelsWithMixedOCIResponses() throws JsonProcessingException {
+	void getImageLabelsWithMixedOCIResponses() throws JsonProcessingException {
 		DefaultContainerImageMetadataResolver resolver = new MockedDefaultContainerImageMetadataResolver(
 				this.containerRegistryService);
 		String ociInCompatible = "{\"schemaVersion\": 1,\"name\": \"test/image\"}";

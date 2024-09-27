@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,12 @@ package org.springframework.cloud.dataflow.tasklauncher.sink.kafka;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.cloud.task.batch.configuration.TaskBatchAutoConfiguration;
 import org.springframework.context.annotation.Import;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {BatchAutoConfiguration.class, TaskBatchAutoConfiguration.class, DataSourceAutoConfiguration.class})
 @Import({ org.springframework.cloud.dataflow.tasklauncher.sink.TaskLauncherSinkConfiguration.class })
 public class SpringCloudDataflowTasklauncherSinkKafkaApplication {
 

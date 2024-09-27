@@ -23,6 +23,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
@@ -36,7 +37,6 @@ import org.springframework.cloud.skipper.deployer.kubernetes.KubernetesPlatformP
 import org.springframework.cloud.skipper.domain.Deployer;
 import org.springframework.cloud.skipper.domain.Platform;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -44,7 +44,7 @@ import org.springframework.web.client.RestTemplate;
  * @author Ilayaperumal Gopinathan
  * @author David Turanski
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(KubernetesPlatformProperties.class)
 public class KubernetesPlatformAutoConfiguration {
 
@@ -83,7 +83,7 @@ public class KubernetesPlatformAutoConfiguration {
 						kubernetesProperties.getAppAdmin());
 		Deployer deployer = new Deployer(account, "kubernetes", kubernetesAppDeployer, actuatorOperations);
 		deployer.setDescription(
-				String.format("master url = [%s], namespace = [%s], api version = [%s]",
+				"master url = [%s], namespace = [%s], api version = [%s]".formatted(
 						kubernetesClient.getMasterUrl(), kubernetesClient.getNamespace(),
 						kubernetesClient.getApiVersion()));
 		return deployer;

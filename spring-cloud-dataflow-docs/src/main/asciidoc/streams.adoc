@@ -206,8 +206,8 @@ applications built with the RabbitMQ binder, you could do the following:
 ====
 [source,bash]
 ----
-dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:3.2.1
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+dataflow:>app register --name http --type source --uri maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 ----
 ====
 
@@ -218,8 +218,8 @@ For example, to register the snapshot versions of the `http` and `log` applicati
 ====
 [source,bash]
 ----
-source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:3.2.1
-sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0
+sink.log=maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 ----
 ====
 
@@ -340,20 +340,20 @@ The following table includes the `dataflow.spring.io` links to the stream applic
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |RabbitMQ + Maven
-|https://dataflow.spring.io/rabbitmq-maven-latest
-|https://dataflow.spring.io/rabbitmq-maven-latest-snapshot
+|https://dataflow.spring.io/rabbitmq-maven-5-0-x
+|https://dataflow.spring.io/rabbitmq-maven-5-0-x-snapshot
 
 |RabbitMQ + Docker
-|https://dataflow.spring.io/rabbitmq-docker-latest
-|https://dataflow.spring.io/rabbitmq-docker-latest-snapshot
+|https://dataflow.spring.io/rabbitmq-docker-5-0-x
+|https://dataflow.spring.io/rabbitmq-docker-5-0-x-snapshot
 
 |Apache Kafka + Maven
-|https://dataflow.spring.io/kafka-maven-latest
-|https://dataflow.spring.io/kafka-maven-latest-snapshot
+|https://dataflow.spring.io/kafka-maven-5-0-x
+|https://dataflow.spring.io/kafka-maven-5-0-x-snapshot
 
 |Apache Kafka + Docker
-|https://dataflow.spring.io/kafka-docker-latest
-|https://dataflow.spring.io/kafka-docker-latest-snapshot
+|https://dataflow.spring.io/kafka-docker-5-0-x
+|https://dataflow.spring.io/kafka-docker-5-0-x-snapshot
 |======================
 
 NOTE: By default, the out-of-the-box app's actuator endpoints are secured. You can disable security by deploying streams by setting the following property: `[small]#app.*.spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration#`
@@ -370,12 +370,12 @@ The following table includes the `dataflow.spring.io` links to the task applicat
 |Artifact Type |Stable Release |SNAPSHOT Release
 
 |Maven
-|https://dataflow.spring.io/task-maven-latest
-|https://dataflow.spring.io/task-maven-latest-snapshot
+|https://dataflow.spring.io/task-maven-3-0-x
+|https://dataflow.spring.io/task-maven-3-0-x-snapshot
 
 |Docker
-|https://dataflow.spring.io/task-docker-latest
-|https://dataflow.spring.io/task-docker-latest-snapshot
+|https://dataflow.spring.io/task-docker-3-0-x
+|https://dataflow.spring.io/task-docker-3-0-x-snapshot
 |======================
 
 For more information about the available out-of-the-box stream applications see the https://cloud.spring.io/spring-cloud-task-app-starters/[Spring Cloud Stream Applications] project page.
@@ -387,7 +387,7 @@ As an example, if you would like to register all out-of-the-box stream applicati
 ====
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-latest
+$ dataflow:>app import --uri https://dataflow.spring.io/kafka-maven-5-0-x
 ----
 ====
 
@@ -396,7 +396,7 @@ Alternatively, you can register all the stream applications with the Rabbit bind
 ====
 [source,bash,subs=attributes]
 ----
-$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-latest
+$ dataflow:>app import --uri https://dataflow.spring.io/rabbitmq-maven-5-0-x
 ----
 ====
 
@@ -486,9 +486,9 @@ The following listing shows the exposed properties for the `time` application:
 ----
 dataflow:> app info --name time --type source
 Information about source application 'time':
-Version: '3.2.1':
+Version: '5.0.0':
 Default application version: 'true':
-Resource URI: maven://org.springframework.cloud.stream.app:time-source-rabbit:3.2.1
+Resource URI: maven://org.springframework.cloud.stream.app:time-source-rabbit:5.0.0
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -521,9 +521,9 @@ The following listing shows the exposed properties for the `log` application:
 ----
 dataflow:> app info --name log --type sink
 Information about sink application 'log':
-Version: '3.2.1':
+Version: '5.0.0':
 Default application version: 'true':
-Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+Resource URI: maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 ╔══════════════════════════════╤══════════════════════════════╤══════════════════════════════╤══════════════════════════════╗
 ║         Option Name          │         Description          │           Default            │             Type             ║
 ╠══════════════════════════════╪══════════════════════════════╪══════════════════════════════╪══════════════════════════════╣
@@ -790,13 +790,13 @@ Stream Deployment properties: {
 ----
 ====
 
-Then the following command updates the stream to use the `3.2.1` version of the log application.
+Then the following command updates the stream to use the `5.0.0` version of the log application.
 Before updating the stream with the specific version of the application, we need to make sure that the application is registered with that version:
 
 ====
 [source,bash]
 ----
-dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.2.1
+dataflow:>app register --name log --type sink --uri maven://org.springframework.cloud.stream.app:log-sink-rabbit:5.0.0
 Successfully registered application 'sink:log'
 ----
 ====
@@ -806,7 +806,7 @@ Then we can update the application:
 ====
 [source,bash]
 ----
-dataflow:>stream update --name httptest --properties version.log=3.2.1
+dataflow:>stream update --name httptest --properties version.log=5.0.0
 ----
 ====
 
@@ -829,11 +829,11 @@ Stream Deployment properties: {
     "spring.cloud.deployer.indexed" : "true",
     "spring.cloud.deployer.count" : "1",
     "spring.cloud.deployer.group" : "httptest",
-    "maven://org.springframework.cloud.stream.app:log-sink-rabbit" : "3.2.1"
+    "maven://org.springframework.cloud.stream.app:log-sink-rabbit" : "5.0.0"
   },
   "http" : {
     "spring.cloud.deployer.group" : "httptest",
-    "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "3.2.1"
+    "maven://org.springframework.cloud.stream.app:http-source-rabbit" : "5.0.0"
   }
 }
 ----

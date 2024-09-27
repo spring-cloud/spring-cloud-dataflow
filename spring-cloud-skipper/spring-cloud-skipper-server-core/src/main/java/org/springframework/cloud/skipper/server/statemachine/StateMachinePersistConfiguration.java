@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.cloud.skipper.server.statemachine;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperEvents;
@@ -29,7 +30,6 @@ import org.springframework.statemachine.data.jpa.JpaRepositoryStateMachinePersis
 import org.springframework.statemachine.data.jpa.JpaStateMachineRepository;
 import org.springframework.statemachine.kryo.KryoStateMachineSerialisationService;
 import org.springframework.statemachine.persist.StateMachineRuntimePersister;
-import org.springframework.statemachine.support.Function;
 import org.springframework.util.ObjectUtils;
 
 /**

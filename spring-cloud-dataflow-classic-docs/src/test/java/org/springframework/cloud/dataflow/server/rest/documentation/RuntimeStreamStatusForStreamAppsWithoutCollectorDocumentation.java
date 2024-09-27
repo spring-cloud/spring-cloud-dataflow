@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.MediaType;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@Disabled
 public class RuntimeStreamStatusForStreamAppsWithoutCollectorDocumentation extends BaseDocumentation {
 
 	@Test

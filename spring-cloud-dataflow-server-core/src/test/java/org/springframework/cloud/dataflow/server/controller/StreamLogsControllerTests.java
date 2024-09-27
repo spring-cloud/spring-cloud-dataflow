@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,11 +44,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class StreamLogsControllerTests {
+class StreamLogsControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -68,7 +68,7 @@ public class StreamLogsControllerTests {
 	private SkipperClient skipperClient;
 
 	@BeforeEach
-	public void setupMocks() {
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		for (AppRegistration appRegistration : this.appRegistrationRepository.findAll()) {
@@ -79,7 +79,7 @@ public class StreamLogsControllerTests {
 	}
 
 	@Test
-	public void testGetLogs() throws Exception {
+	void getLogs() throws Exception {
 		when(this.skipperClient.getLog("ticktock4")).thenReturn(new LogInfo(Collections.emptyMap()));
 		mockMvc.perform(
 				get("/streams/logs/ticktock4").accept(MediaType.APPLICATION_JSON))

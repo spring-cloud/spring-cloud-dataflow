@@ -39,9 +39,18 @@ public interface JobOperations {
 	 * Restarts a job by id
 	 *
 	 * @param id           job execution id
-	 * @param schemaTarget the schema target for the job execution
 	 */
-	void executionRestart(long id, String schemaTarget);
+	void executionRestart(long id);
+
+	/**
+	 * Restarts a job by id
+	 *
+	 * @param id job execution id
+	 * @param useJsonJobParameters if true {@link org.springframework.batch.core.JobParameters} will be serialized to JSON.
+	 *                             Default is {@code Null} which will serialize the {@link org.springframework.batch.core.JobParameters}
+	 *                             to the default specified in SCDF's configuration.
+	 */
+	void executionRestart(long id, Boolean useJsonJobParameters);
 
 	/**
 	 * @return the list job executions without step executions known to the system.
@@ -74,28 +83,25 @@ public interface JobOperations {
 	 * Return the {@link JobExecutionResource} for the id specified.
 	 *
 	 * @param id           identifier of the job execution
-	 * @param schemaTarget the schema target for the job execution
 	 * @return {@link JobExecutionResource}
 	 */
-	JobExecutionResource jobExecution(long id, String schemaTarget);
+	JobExecutionResource jobExecution(long id);
 
 	/**
 	 * Return the {@link JobInstanceResource} for the id specified.
 	 *
 	 * @param id           identifier of the job instance
-	 * @param schemaTarget the schema target for the job instance
 	 * @return {@link JobInstanceResource}
 	 */
-	JobInstanceResource jobInstance(long id, String schemaTarget);
+	JobInstanceResource jobInstance(long id);
 
 	/**
 	 * List step executions known for a specific job execution id.
 	 *
 	 * @param jobExecutionId the id of the job execution.
-	 * @param schemaTarget   the schema target for the job execution
 	 * @return the paged list of step executions
 	 */
-	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget);
+	PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId);
 
 	/**
 	 * Return StepExecutionProgressInfoResource for a specific job execution id and step
@@ -103,9 +109,8 @@ public interface JobOperations {
 	 *
 	 * @param jobExecutionId  the id of the job execution for the step to be returned.
 	 * @param stepExecutionId the id step execution to be returned.
-	 * @param schemaTarget    the schema target of the job execution.
 	 * @return the step execution progress info
 	 */
-	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget);
+	StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId);
 
 }

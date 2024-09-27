@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,15 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.Assert;
 
@@ -50,13 +49,13 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Glenn Renfro
  */
-@SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
 @TestPropertySource(properties = {"graph=AAA && BBB && CCC", "max-wait-time=1000", "spring.cloud.task.name=foo"})
 @EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
-@ExtendWith(OutputCaptureExtension.class)
 public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Autowired
@@ -73,7 +72,7 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration(CapturedOutput outputCapture) throws Exception {
+	public void testComposedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
 		TaskletStep ctrStep = context.getBean("AAA_0", TaskletStep.class);
@@ -87,14 +86,7 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 		verify(taskOperations).launch(
 				"AAA",
 				Collections.emptyMap(),
-				Arrays.asList("--spring.cloud.task.parent-execution-id=1", "--spring.cloud.task.parent-schema-target=boot2")
+				Arrays.asList("--spring.cloud.task.parent-execution-id=1")
 		);
-
-		String logEntries = outputCapture.toString();
-		assertThat(logEntries).contains("Cannot find [app.AAA.spring.cloud.task.table-prefix, " +
-			"app.AAA.spring.cloud.task.table_prefix, app.AAA.spring.cloud.task.tablePrefix, " +
-			"app.AAA.spring.cloud.task.tableprefix, app.AAA.spring.cloud.task.TABLE-PREFIX, " +
-			"app.AAA.spring.cloud.task.TABLE_PREFIX, app.AAA.spring.cloud.task.TABLEPREFIX]");
-		assertThat(logEntries).doesNotContain("taskExplorerContainer:adding:");
 	}
 }

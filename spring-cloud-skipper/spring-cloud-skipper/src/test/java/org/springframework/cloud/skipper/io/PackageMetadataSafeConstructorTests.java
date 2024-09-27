@@ -66,8 +66,7 @@ public class PackageMetadataSafeConstructorTests {
 		DumperOptions options = new DumperOptions();
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(), representer);
 		PackageMetadata packageMetadata =  yaml.load(testYaml);
 		assertThat(packageMetadata.getApiVersion()).isEqualTo("skipper.spring.io/v1");
 		assertThat(packageMetadata.getOrigin()).isEqualTo("null");
@@ -91,8 +90,7 @@ public class PackageMetadataSafeConstructorTests {
 		DumperOptions options = new DumperOptions();
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(), representer);
 		assertThatThrownBy( () -> yaml.load("!!org.springframework.cloud.skipper.domain.PackageMetadata\n" +
 			"apiVersion: !!javax.script.ScriptEngineManager [!!java.lang.String [\"helloworld\"]]"))
 			.isInstanceOf(YAMLException.class);

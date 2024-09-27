@@ -50,13 +50,13 @@ import org.springframework.cloud.skipper.server.repository.jpa.AppDeployerDataRe
 import org.springframework.cloud.skipper.server.repository.jpa.PackageMetadataRepository;
 import org.springframework.cloud.skipper.server.repository.jpa.RepositoryRepository;
 import org.springframework.test.context.ActiveProfiles;
-
+// @checkstyle:off
+import static junit.framework.TestCase.fail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
-
+// @checkstyle:on
 /**
  * Tests ReleaseService methods.
  * @author Mark Pollack
@@ -161,17 +161,17 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 		List<AppStatus> appStatuses = info.getStatus().getAppStatusList();
 		assertThat(appStatuses).isNotNull();
-		assertThat(appStatuses.size()).isEqualTo(1);
+		assertThat(appStatuses).hasSize(1);
 
 		AppStatus appStatus = appStatuses.iterator().next();
 		assertThat(appStatus.getDeploymentId()).isEqualTo("logrelease.log-v1");
 		assertThat(appStatus.getState()).isEqualTo(DeploymentState.deployed);
-		assertThat(appStatus.getInstances().size()).isEqualTo(1);
+		assertThat(appStatus.getInstances()).hasSize(1);
 
 		AppInstanceStatus appInstanceState = appStatus.getInstances().values().iterator().next();
-		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_RELEASE_NAME_ATTRIBUTE)).isEqualTo("logrelease");
-		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_RELEASE_VERSION_ATTRIBUTE)).isEqualTo("1");
-		assertThat(appInstanceState.getAttributes().get(DefaultReleaseManager.SKIPPER_APPLICATION_NAME_ATTRIBUTE)).isEqualTo("log");
+		assertThat(appInstanceState.getAttributes()).containsEntry(DefaultReleaseManager.SKIPPER_RELEASE_NAME_ATTRIBUTE, "logrelease");
+		assertThat(appInstanceState.getAttributes()).containsEntry(DefaultReleaseManager.SKIPPER_RELEASE_VERSION_ATTRIBUTE, "1");
+		assertThat(appInstanceState.getAttributes()).containsEntry(DefaultReleaseManager.SKIPPER_APPLICATION_NAME_ATTRIBUTE, "log");
 	}
 
 	@Test
@@ -230,7 +230,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 
 	@Test
 	public void testStatusReleaseDoesNotExist() {
-		assertThrows(ReleaseNotFoundException.class, () -> {
+		assertThatExceptionOfType(ReleaseNotFoundException.class).isThrownBy(() -> {
 			releaseService.status("notexist");
 		});
 	}
@@ -334,9 +334,9 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 				packageIdentifier.getPackageName(), packageIdentifier.getPackageVersion());
 
 		assertThat(releasePackage).isNotNull();
-		assertThat(releasePackage.size()).isEqualTo(1);
+		assertThat(releasePackage).hasSize(1);
 
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(3);
 
 		// Install
 		Release release = install(installRequest);
@@ -344,7 +344,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		// Delete
 		delete(releaseName, true);
 
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(0);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).isEmpty();
 	}
 
 	@Test
@@ -362,7 +362,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		packageIdentifier.setPackageVersion("1.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(3);
 
 		// Install
 		Release release = install(installRequest);
@@ -377,7 +377,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		catch (SkipperException se) {
 		}
 		assertReleaseStatus(releaseName, StatusCode.DEPLOYED);
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(3);
 	}
 
 	@Test
@@ -400,8 +400,8 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		List<PackageMetadata> releasePackage = this.packageMetadataRepository.findByNameAndVersionOrderByApiVersionDesc(
 				logPackageIdentifier.getPackageName(), logPackageIdentifier.getPackageVersion());
 		assertThat(releasePackage).isNotNull();
-		assertThat(releasePackage.size()).isEqualTo(1);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(releasePackage).hasSize(1);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
 
 		// Install 2 releases (RELEASE_ONE, RELEASE_TWO) from the same "log" package
 		install(RELEASE_ONE, logPackageIdentifier);
@@ -423,7 +423,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		// Verify that neither the releases nor the package have been deleted
 		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
 		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
 
 		// Install a third release (RELEASE_THREE) from the same package (log)
 		install(RELEASE_THREE, logPackageIdentifier);
@@ -443,7 +443,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
 		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
 		assertReleaseStatus(RELEASE_THREE, StatusCode.DEPLOYED);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
 
 		// Delete releases two and three without without deleting their package.
 		delete(RELEASE_TWO, !DELETE_RELEASE_PACKAGE);
@@ -457,14 +457,14 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 		assertReleaseStatus(RELEASE_THREE, StatusCode.DELETED);
 
 		// Package "log" still has 3 registered versions
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
 
 		// Attempt to delete release one together with its package
 		delete(RELEASE_ONE, DELETE_RELEASE_PACKAGE);
 
 		// Successful deletion of release and its package.
 		assertReleaseStatus(RELEASE_ONE, StatusCode.DELETED);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName()).size()).isEqualTo(0);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).isEmpty();
 	}
 
 	private Release install(String releaseName, PackageIdentifier packageIdentifier) throws InterruptedException {
@@ -477,7 +477,7 @@ public class ReleaseServiceTests extends AbstractIntegrationTest {
 	}
 
 	private void assertReleaseStatus(String releaseName, StatusCode expectedStatusCode) {
-		assertThat(this.releaseRepository.findByNameIgnoreCaseContaining(releaseName).size()).isEqualTo(1);
+		assertThat(this.releaseRepository.findByNameIgnoreCaseContaining(releaseName)).hasSize(1);
 		assertThat(this.releaseRepository.findByNameIgnoreCaseContaining(releaseName).iterator().next()
 				.getInfo().getStatus().getStatusCode()).isEqualTo(expectedStatusCode);
 	}

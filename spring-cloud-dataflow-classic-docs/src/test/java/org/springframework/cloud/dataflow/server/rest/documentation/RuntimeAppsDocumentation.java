@@ -49,8 +49,8 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
 	public void setup() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.sink, "log", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
+		registerApp(ApplicationType.sink, "log", "5.0.0");
 		createStream("mystream", "http | log", true);
 	}
 

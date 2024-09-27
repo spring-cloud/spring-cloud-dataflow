@@ -32,7 +32,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -49,11 +49,11 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void appDefault() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "4.0.0");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 
 		this.mockMvc.perform(RestDocumentationRequestBuilders
-						.put("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.2.0.RELEASE")
+			.put("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "4.0.0")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isAccepted())
 				.andDo(
@@ -65,17 +65,16 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 								)
 						)
 				);
-		unregisterApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		unregisterApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+		unregisterApp(ApplicationType.source, "http", "4.0.0");
+		unregisterApp(ApplicationType.source, "http", "5.0.0");
 	}
 
 	@Test
 	public void registeringAnApplicationVersion() throws Exception {
 		this.mockMvc.perform(
-						post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "1.1.0.RELEASE")
-								.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
-								.queryParam("bootVersion", "2"))
-				.andExpect(status().isCreated())
+				post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "4.0.0").queryParam("uri",
+						"maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
+			).andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
 								pathParameters(
@@ -84,19 +83,17 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("name").description("The name of the application to register"),
 										parameterWithName("version").description("The version of the application to register")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("uri").description("URI where the application bits reside"),
 										parameterWithName("metadata-uri").optional()
 												.description("URI where the application metadata jar can be found"),
 										parameterWithName("force").optional()
-												.description("Must be true if a registration with the same name and type already exists, otherwise an error will occur"),
-										parameterWithName("bootVersion").optional()
-												.description("Spring Boot version. Value of 2 or 3. Must be supplied of greater than 2.")
+												.description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
 								)
 						)
 				);
 
-		unregisterApp(ApplicationType.source, "http", "1.1.0.RELEASE");
+		unregisterApp(ApplicationType.source, "http", "4.0.0");
 	}
 
 
@@ -104,12 +101,12 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void bulkRegisteringApps() throws Exception {
 		this.mockMvc.perform(
 						post("/apps")
-								.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
+					.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
 								.param("force", "false"))
 				.andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
-								requestParameters(
+								queryParameters(
 										parameterWithName("uri").optional().description("URI where a properties file containing registrations can be fetched. Exclusive with `apps`."),
 										parameterWithName("apps").optional().description("Inline set of registrations. Exclusive with `uri`."),
 										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
@@ -121,8 +118,8 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getApplicationsFiltered() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.source, "time", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
+		registerApp(ApplicationType.source, "time", "5.0.0");
 		this.mockMvc.perform(
 						get("/apps")
 								.param("search", "")
@@ -134,7 +131,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("search").description("The search string performed on the name (optional)"),
 								parameterWithName("type")
 										.description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())),
@@ -157,7 +154,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void getSingleApplication() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 		this.mockMvc.perform(
 						get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON)
 								.param("exhaustive", "false"))
@@ -168,7 +165,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("type").description("The type of application to query. One of " + Arrays.asList(ApplicationType.values())),
 										parameterWithName("name").description("The name of the application to query")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("exhaustive").optional()
 												.description("Return all application properties, including common Spring Boot properties")
 								),
@@ -180,7 +177,6 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										fieldWithPath("version").description("The version of the application"),
 										fieldWithPath("versions").description("All the registered versions of the application"),
 										fieldWithPath("defaultVersion").description("If true, the application is the default version"),
-										fieldWithPath("bootVersion").description("The version of Spring Boot the application targets (2, 3)"),
 										subsectionWithPath("options").description("The options of the application (Array)"),
 										fieldWithPath("shortDescription").description("The description of the application"),
 										fieldWithPath("inboundPortNames").description("Inbound port names of the application"),
@@ -196,8 +192,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	public void registeringAnApplication() throws Exception {
 		this.mockMvc.perform(
 						post("/apps/{type}/{name}", ApplicationType.source, "http")
-								.param("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:1.1.0.RELEASE")
-								.queryParam("bootVersion", "2")
+					.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0")
 				)
 				.andExpect(status().isCreated())
 				.andDo(
@@ -206,10 +201,9 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 										parameterWithName("type").description("The type of application to register. One of " + Arrays.asList(ApplicationType.values())),
 										parameterWithName("name").description("The name of the application to register")
 								),
-								requestParameters(
+								queryParameters(
 										parameterWithName("uri").description("URI where the application bits reside"),
 										parameterWithName("metadata-uri").optional().description("URI where the application metadata jar can be found"),
-										parameterWithName("bootVersion").optional().description("The Spring Boot version of the application.Default is 2"),
 										parameterWithName("force").optional().description("Must be true if a registration with the same name and type already exists, otherwise an error will occur")
 								)
 						)
@@ -220,10 +214,10 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void unregisteringAnApplication() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 
 		this.mockMvc.perform(
-						delete("/apps/{type}/{name}/{version}", ApplicationType.source, "http", "1.2.0.RELEASE"))
+				delete("/apps/{type}/{name}/{version}", ApplicationType.source, "http", "5.0.0"))
 				.andExpect(status().isOk())
 				.andDo(
 						this.documentationHandler.document(
@@ -238,8 +232,8 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
 	public void unregisteringAllApplications() throws Exception {
-		registerApp(ApplicationType.source, "http", "1.2.0.RELEASE");
-		registerApp(ApplicationType.source, "http", "1.3.0.RELEASE");
+		registerApp(ApplicationType.source, "http", "4.0.0");
+		registerApp(ApplicationType.source, "http", "5.0.0");
 		this.mockMvc.perform(
 						delete("/apps"))
 				.andExpect(status().isOk()

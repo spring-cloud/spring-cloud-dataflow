@@ -31,12 +31,12 @@ import org.springframework.core.io.Resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-public class TaskAnalyzerTests {
+class TaskAnalyzerTests {
 
 	private final TaskAnalyzer analyzer = new TaskAnalyzer();
 
 	@Test
-	public void testDeploymentProperties() {
+	void deploymentProperties() {
 		AppDefinition leftAd = new AppDefinition("name1", new HashMap<>());
 		Resource leftResource = new ClassPathResource("path1");
 		Map<String, String> leftDeploymentProperties = new HashMap<>();
@@ -73,10 +73,10 @@ public class TaskAnalyzerTests {
 		assertThat(report.getMergedDeploymentProperties()).hasSize(1);
 		assertThat(report.getMergedDeploymentProperties()).contains(entry("key1", "value2"));
 	}
-	
-	
+
+
 	@Test
-	public void testAnalyze() {
+	void testAnalyze() {
 
 		Map<String, String> leftDeploymentProperties = new HashMap<>();
 		leftDeploymentProperties.put("key1", "value1");

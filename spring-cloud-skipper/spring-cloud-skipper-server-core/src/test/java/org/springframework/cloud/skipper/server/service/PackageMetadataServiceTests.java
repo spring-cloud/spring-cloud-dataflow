@@ -33,7 +33,6 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.statemachine.boot.autoconfigure.StateMachineJpaRepositoriesAutoConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * @author Mark Pollack
  * @author Corneil du Plessis

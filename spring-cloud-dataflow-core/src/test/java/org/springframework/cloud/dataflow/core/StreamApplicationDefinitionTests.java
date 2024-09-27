@@ -16,31 +16,30 @@
 
 package org.springframework.cloud.dataflow.core;
 
-
-
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Patrick Peralta
  * @author Mark Fisher
+ * @author Corneil du Plessis
  */
-public class StreamApplicationDefinitionTests {
+class StreamApplicationDefinitionTests {
 
 	private static final String OUTPUT_BINDING_KEY = "spring.cloud.stream.bindings.output";
 
 	@Test
-	public void testBuilder() {
+	void builder() {
 		StreamAppDefinition definition = new StreamAppDefinition.Builder().setRegisteredAppName("time")
 				.setLabel("label").setApplicationType(ApplicationType.source).setProperty(OUTPUT_BINDING_KEY, "channel").build("ticktock");
 
-		assertEquals("ticktock", definition.getStreamName());
-		assertEquals("time", definition.getRegisteredAppName());
-		assertEquals("label", definition.getName());
-		assertEquals(ApplicationType.source, definition.getApplicationType());
-		assertEquals(1, definition.getProperties().size());
-		assertEquals("channel", definition.getProperties().get(OUTPUT_BINDING_KEY));
+		assertThat(definition.getStreamName()).isEqualTo("ticktock");
+		assertThat(definition.getRegisteredAppName()).isEqualTo("time");
+		assertThat(definition.getName()).isEqualTo("label");
+		assertThat(definition.getApplicationType()).isEqualTo(ApplicationType.source);
+		assertThat(definition.getProperties()).hasSize(1);
+		assertThat(definition.getProperties()).containsEntry(OUTPUT_BINDING_KEY, "channel");
 	}
 
 }

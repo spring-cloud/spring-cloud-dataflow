@@ -19,9 +19,11 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.FixMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.runners.MethodSorters;
 
 import org.springframework.cloud.skipper.domain.LogInfo;
 
@@ -37,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@TestMethodOrder(MethodName.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class StreamLogsDocumentation extends BaseDocumentation {
 
 	@Test

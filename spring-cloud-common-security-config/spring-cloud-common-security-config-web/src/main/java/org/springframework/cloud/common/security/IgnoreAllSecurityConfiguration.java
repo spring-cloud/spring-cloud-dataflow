@@ -42,7 +42,7 @@ public class IgnoreAllSecurityConfiguration implements WebSecurityConfigurer<Web
 
 	@Override
 	public void configure(WebSecurity builder) {
-		builder.ignoring().antMatchers("/**");
+		builder.ignoring().requestMatchers("/**");
 	}
 
 }

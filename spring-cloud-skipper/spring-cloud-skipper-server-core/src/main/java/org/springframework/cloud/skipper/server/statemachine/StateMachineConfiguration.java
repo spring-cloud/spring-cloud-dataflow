@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachine
 import org.springframework.cloud.skipper.server.statemachine.SkipperStateMachineService.SkipperVariables;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.statemachine.StateMachinePersist;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
@@ -77,9 +76,6 @@ public class StateMachineConfiguration {
 	public static class SkipperStateMachineFactoryConfig extends StateMachineConfigurerAdapter<SkipperStates, SkipperEvents> {
 
 		@Autowired
-		private TaskExecutor skipperStateMachineTaskExecutor;
-
-		@Autowired
 		private ReleaseService releaseService;
 
 		@Autowired
@@ -101,7 +97,6 @@ public class StateMachineConfiguration {
 		public void configure(StateMachineConfigurationConfigurer<SkipperStates, SkipperEvents> config) throws Exception {
 			config
 				.withConfiguration()
-					.taskExecutor(skipperStateMachineTaskExecutor)
 					// this is to simply add logging for state enters
 					.listener(new StateMachineListenerAdapter<SkipperStates, SkipperEvents>() {
 						@Override

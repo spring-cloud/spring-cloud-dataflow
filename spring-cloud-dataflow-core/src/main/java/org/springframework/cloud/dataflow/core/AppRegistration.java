@@ -20,14 +20,11 @@ import java.net.URI;
 import java.util.HashSet;
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.util.Assert;
 
 /**
@@ -78,12 +75,6 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 	 */
 	private Boolean defaultVersion = false;
 
-	/**
-	 * Boot version to identify Task / Batch Schema.
-	 */
-	@Enumerated(EnumType.STRING)
-	private AppBootSchemaVersion bootVersion;
-
 	@Transient
 	private HashSet<String> versions;
 
@@ -132,21 +123,6 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 		this.version = version;
 		this.uri = uri;
 		this.metadataUri = metadataUri;
-	}
-
-	/**
-	 * Construct an {@code AppRegistration} object.
-	 *
-	 * @param name app name
-	 * @param type app type
-	 * @param version app version
-	 * @param uri URI for the app resource
-	 * @param metadataUri URI for the app metadata resource
-	 * @param bootVersion The bootVersion of the application.
-	 */
-	public AppRegistration(String name, ApplicationType type, String version, URI uri, URI metadataUri, AppBootSchemaVersion bootVersion) {
-		this(name,type,version,uri,metadataUri);
-		this.bootVersion = bootVersion;
 	}
 
 	/**
@@ -201,14 +177,6 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 		this.metadataUri = metadataUri;
 	}
 
-	public AppBootSchemaVersion getBootVersion() {
-		return bootVersion == null ? AppBootSchemaVersion.defaultVersion() : bootVersion;
-	}
-
-	public void setBootVersion(AppBootSchemaVersion bootVersion) {
-		this.bootVersion = bootVersion;
-	}
-
 	public Boolean isDefaultVersion() {
 		return this.defaultVersion;
 	}
@@ -229,8 +197,7 @@ public class AppRegistration extends AbstractEntity implements Comparable<AppReg
 	public String toString() {
 		return "AppRegistration{" + "name='" + this.getName() + '\'' + ", type='" + this.getType()
 				+ '\'' + ", version='" + this.getVersion() + '\'' + ", uri=" + this.getUri()
-				+ ", metadataUri=" + this.getMetadataUri() +
-				", bootVersion='" + this.getBootVersion().getBootVersion() + '}';
+				+ ", metadataUri=" + this.getMetadataUri() + '}';
 	}
 
 	@Override

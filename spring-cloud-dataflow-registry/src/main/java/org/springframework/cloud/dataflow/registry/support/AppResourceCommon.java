@@ -101,9 +101,9 @@ public class AppResourceCommon {
 	/**
 	 * Parse the version number from a {@link UrlResource}. It can match a simple
 	 * {@code <artifactId>-<version>.jar} formatted name. For example, a resource ending in
-	 * {@code file-sink-rabbit-1.2.0.RELEASE.jar} will return {@code 1.2.0.RELEASE}. Snapshot
-	 * builds of the form {@code file-sink-rabbit-1.2.0.BUILD-SNAPSHOT.jar} and
-	 * {@code file-sink-rabbit-1.2.0-SNAPSHOT.jar} and {@code file-sink-rabbit-1.2.0-SNAPSHOT-metadata.jar} are also supported
+	 * {@code file-sink-rabbit-5.0.0.jar} will return {@code 5.0.0}. Snapshot
+	 * builds of the form {@code file-sink-rabbit-5.0.1-SNAPSHOT.jar} and
+	 * {@code file-sink-rabbit-5.0.1-SNAPSHOT-metadata.jar} are also supported
 	 * @param urlResource
 	 * @return
 	 */

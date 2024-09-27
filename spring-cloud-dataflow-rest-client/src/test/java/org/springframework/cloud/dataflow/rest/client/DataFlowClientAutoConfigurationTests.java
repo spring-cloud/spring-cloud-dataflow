@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientProperties;
 import org.springframework.cloud.dataflow.rest.client.dsl.StreamBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -30,14 +31,16 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+
 /**
  * @author Vinicius Carvalho
  * @author Corneil du Plessis
  */
-public class DataFlowClientAutoConfigurationTests {
+class DataFlowClientAutoConfigurationTests {
 
 	@Test
-	public void contextLoads() throws Exception {
+	void contextLoads() throws Exception {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
 				"--spring.cloud.dataflow.client.enableDsl=true",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration");
@@ -50,7 +53,7 @@ public class DataFlowClientAutoConfigurationTests {
 	}
 
 	@Test
-	public void usingAuthentication() throws Exception {
+	void usingAuthentication() throws Exception {
 		ConfigurableApplicationContext applicationContext = SpringApplication.run(TestApplication.class,
 				"--spring.cloud.dataflow.client.authentication.basic.username=foo",
 				"--spring.cloud.dataflow.client.authentication.basic.password=bar",
@@ -67,7 +70,7 @@ public class DataFlowClientAutoConfigurationTests {
 		applicationContext.close();
 	}
 
-	@SpringBootApplication
+	@SpringBootApplication(exclude= {DataSourceAutoConfiguration.class})
 	static class TestApplication {
 
 		@Bean

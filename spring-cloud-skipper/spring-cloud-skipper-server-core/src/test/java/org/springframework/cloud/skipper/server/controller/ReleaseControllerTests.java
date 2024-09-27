@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletContext;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +77,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 	@Test
 	public void deployTickTock() throws Exception {
-		Release release = install("ticktock", "1.0.0", "myTicker");
+		Release release = install("ticktock", "4.0.0", "myTicker");
 		assertReleaseIsDeployedSuccessfully("myTicker", 1);
 		assertThat(release.getVersion()).isEqualTo(1);
 	}
@@ -89,7 +88,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		InstallRequest installRequest = new InstallRequest();
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		packageIdentifier.setRepositoryName("notused");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		InstallProperties installProperties = createInstallProperties(releaseName);
@@ -105,7 +104,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Deploy
 		String releaseName = "test1";
-		Release release = install("log", "1.0.0", releaseName);
+		Release release = install("log", "4.0.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Undeploy
@@ -118,8 +117,9 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	public void getReleaseLogs() throws Exception {
 		// Deploy
 		String releaseName = "testLogs";
-		install("log", "1.0.0", releaseName);
-		MvcResult result = mockMvc.perform(get("/api/release/logs/" + releaseName)).andExpect(status().isOk()).andReturn();
+		install("log", "4.0.0", releaseName);
+		MvcResult result = mockMvc.perform(get("/api/release/logs/" + releaseName)).andDo(print())
+				.andExpect(status().isOk()).andReturn();
 		assertThat(result.getResponse().getContentAsString()).isNotEmpty();
 	}
 
@@ -134,11 +134,11 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Deploy
 		String releaseNameOne = "test1";
-		Release release = install("log", "1.0.0", releaseNameOne);
+		Release release = install("log", "4.0.0", releaseNameOne);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		String releaseNameTwo = "test2";
-		Release release2 = install("log", "1.0.0", releaseNameTwo);
+		Release release2 = install("log", "4.0.0", releaseNameTwo);
 		assertThat(release2.getVersion()).isEqualTo(1);
 
 		// Undeploy
@@ -146,20 +146,20 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 				.andExpect(status().isConflict()).andReturn();
 
 		assertThat(result.getResolvedException().getMessage())
-				.contains("Can not delete Package Metadata [log:1.0.0] in Repository [test]. Not all releases of " +
+				.contains("Can not delete Package Metadata [log:4.0.0] in Repository [test]. Not all releases of " +
 						"this package have the status DELETED. Active Releases [test2]");
 
-		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
+		assertThat(this.packageMetadataRepository.findByName("log")).hasSize(5);
 
 		// Delete the 'release2' only not the package.
 		mockMvc.perform(delete("/api/release/" + releaseNameTwo))
-				.andExpect(status().isOk()).andReturn();
-		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(3);
+				.andDo(print()).andExpect(status().isOk()).andReturn();
+		assertThat(this.packageMetadataRepository.findByName("log")).hasSize(5);
 
 		// Second attempt to delete 'release1' along with its package 'log'.
 		mockMvc.perform(delete("/api/release/" + releaseNameOne + "/package"))
-				.andExpect(status().isOk()).andReturn();
-		assertThat(this.packageMetadataRepository.findByName("log").size()).isEqualTo(0);
+				.andDo(print()).andExpect(status().isOk()).andReturn();
+		assertThat(this.packageMetadataRepository.findByName("log")).isEmpty();
 
 	}
 
@@ -168,7 +168,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Deploy
 		String releaseName = "test2";
-		Release release = install("log", "1.0.0", releaseName);
+		Release release = install("log", "5.0.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Check manifest
@@ -177,7 +177,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Upgrade
 		String releaseVersion = "2";
-		release = upgrade("log", "1.1.0", releaseName);
+		release = upgrade("log", "4.0.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(2);
 
 		// Check manifest
@@ -207,11 +207,11 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	@Test
 	public void packageDeployAndUpgrade() throws Exception {
 		String releaseName = "myLog";
-		Release release = install("log", "1.0.0", releaseName);
+		Release release = install("log", "5.0.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Upgrade
-		release = upgrade("log", "1.1.0", releaseName);
+		release = upgrade("log", "4.0.0", releaseName);
 
 		assertThat(release.getVersion()).isEqualTo(2);
 	}
@@ -224,11 +224,11 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	@Test
 	public void packageDeployAndUpgradeAndCancel() throws Exception {
 		String releaseName = "myTestapp";
-		Release release = install("testapp", "1.0.0", releaseName);
+		Release release = install("testapp", "2.9.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Upgrade
-		release = upgrade("testapp", "1.1.0", releaseName, false);
+		release = upgrade("testapp", "2.9.1", releaseName, false);
 		assertThat(release.getVersion()).isEqualTo(2);
 
 		// Cancel
@@ -250,7 +250,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	public void packageUpgradeWithNoDifference() throws Exception {
 		String releaseName = "myPackage";
 		String packageName = "log";
-		String packageVersion = "1.0.0";
+		String packageVersion = "5.0.0";
 		Release release = install(packageName, packageVersion, releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
@@ -280,8 +280,8 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		assertThat(appStatusCopy.getState()).isNotNull();
 		assertThat(appStatusCopy.getState()).isEqualTo(appStatusWithGeneralState.getState());
 
-		assertThat(appStatusWithGeneralState.getInstances().size()).isEqualTo(0);
-		assertThat(appStatusCopy.getInstances().size()).isEqualTo(0);
+		assertThat(appStatusWithGeneralState.getInstances()).isEmpty();
+		assertThat(appStatusCopy.getInstances()).isEmpty();
 
 		// Test AppStatus with instances
 		AppStatus appStatusWithInstances = AppStatus.of("id666").generalState(null)
@@ -305,15 +305,15 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 		appStatusCopy = DefaultReleaseManager.copyStatus(appStatusWithInstances);
 		appStatusCopy.getInstances().get("instance666").getAttributes().put("key2", "value2");
 
-		assertThat(appStatusWithInstances.getInstances().get("instance666").getAttributes().size()).isEqualTo(1);
-		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().size()).isEqualTo(2);
-		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes().get("key2")).isEqualTo("value2");
+		assertThat(appStatusWithInstances.getInstances().get("instance666").getAttributes()).hasSize(1);
+		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes()).hasSize(2);
+		assertThat(appStatusCopy.getInstances().get("instance666").getAttributes()).containsEntry("key2", "value2");
 
 	}
 
 	@Test
 	public void getFromAndPostToActuator() throws Exception {
-		install("ticktock", "1.0.0", "myTicker");
+		install("ticktock", "4.0.0", "myTicker");
 		assertReleaseIsDeployedSuccessfully("myTicker", 1);
 
 		mockMvc

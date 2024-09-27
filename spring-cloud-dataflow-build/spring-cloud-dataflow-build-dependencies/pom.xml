@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-build-dependencies</artifactId>
-	<version>2.11.6-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<name>Spring Cloud Dataflow Build Dependencies</name>
 	<packaging>pom</packaging>
 	<description>Spring Cloud Dataflow Build Dependencies: an internal BOM for use with Spring
@@ -14,70 +14,37 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-dependencies</artifactId>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<version>2.7.18</version>
+		<version>3.3.0</version>
 		<relativePath/>
 	</parent>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.7.18</spring-boot.version>
-		<spring-framework.version>5.3.39</spring-framework.version>
-		<spring-cloud.version>2021.0.9</spring-cloud.version>
-		<spring-security.version>5.7.12</spring-security.version>
-		<spring-shell.version>2.1.13</spring-shell.version>
-		<commons-text.version>1.10.0</commons-text.version>
-		<testcontainers.version>1.19.8</testcontainers.version>
+		<spring-boot.version>3.3.0</spring-boot.version>
+		<spring-cloud.version>2023.0.2</spring-cloud.version>
+		<spring-shell.version>3.2.5</spring-shell.version>
+		<commons-io.version>2.16.1</commons-io.version>
+		<commons-text.version>1.12.0</commons-text.version>
 		<!-- Specific version overrides to deal w/ CVEs -->
-		<tomcat.version>9.0.93</tomcat.version>
-		<bouncycastle.version>1.78.1</bouncycastle.version>
-		<spring-kafka.version>2.9.13</spring-kafka.version>
-		<netty.version>4.1.113.Final</netty.version>
-		<reactor-bom.version>2020.0.47</reactor-bom.version>
-		<rsocket.version>1.1.4</rsocket.version>
-		<snakeyaml.version>1.33</snakeyaml.version>
-		<jackson-bom.version>2.17.2</jackson-bom.version>
-		<json-smart.version>2.4.11</json-smart.version>
-		<nimbus-jose-jwt.version>9.37.3</nimbus-jose-jwt.version>
-		<snappy-java.version>1.1.10.6</snappy-java.version>
-		<commons-compress.version>1.26.1</commons-compress.version>
-		<commons-io.version>2.15.1</commons-io.version>
-		<postgresql.version>42.7.2</postgresql.version>
-		<prometheus-rsocket.version>1.5.2</prometheus-rsocket.version>
+		<nimbus-jose-jwt.version>9.39.3</nimbus-jose-jwt.version>
+		<snappy-java.version>1.1.10.5</snappy-java.version>
+		<commons-compress.version>1.26.2</commons-compress.version>
+		<prometheus-rsocket.version>2.0.0-M1</prometheus-rsocket.version>
 		<java-cfenv.version>2.3.0</java-cfenv.version>
 		<spring-cloud-services-starter-config-client.version>3.5.4</spring-cloud-services-starter-config-client.version>
 		<kubernetes-fabric8-client.version>5.12.4</kubernetes-fabric8-client.version>
-		<junit.version>4.13.2</junit.version>
-		<mockito.version>4.11.0</mockito.version>
-		<logback.version>1.2.13</logback.version>
+		<junit-jupiter.version>5.10.3</junit-jupiter.version>
+		<junit.version>4.13.1</junit.version>
 		<json-path.version>2.9.0</json-path.version>
-		<guava.version>32.1.3-jre</guava.version>
+		<!--Specific Spring framework javadoc version for attach-javadocs plugin-->
+		<javadoc-spring.version>6.1.3</javadoc-spring.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${guava.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>4.13.2</version>
-			</dependency>
-			<dependency>
-				<groupId>net.minidev</groupId>
-				<artifactId>json-smart</artifactId>
-				<version>${json-smart.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
 				<version>${nimbus-jose-jwt.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.yaml</groupId>
-				<artifactId>snakeyaml</artifactId>
-				<version>${snakeyaml.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xerial.snappy</groupId>
@@ -90,41 +57,9 @@
 				<version>${commons-compress.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.testcontainers</groupId>
-				<artifactId>testcontainers-bom</artifactId>
-				<version>${testcontainers.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.commons</groupId>
-						<artifactId>commons-compress</artifactId>
-					</exclusion>
-				</exclusions>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
 				<groupId>io.fabric8</groupId>
 				<artifactId>kubernetes-client-bom</artifactId>
 				<version>${kubernetes-fabric8-client.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-framework-bom</artifactId>
-				<version>${spring-framework.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-bom</artifactId>
-				<version>${spring-security.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -143,14 +78,14 @@
 				<scope>import</scope>
 			</dependency>
 			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>${commons-io.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-text</artifactId>
 				<version>${commons-text.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>${postgresql.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.micrometer.prometheus</groupId>
@@ -192,21 +127,15 @@
 				<artifactId>spring-cloud-services-starter-config-client</artifactId>
 				<version>${spring-cloud-services-starter-config-client.version}</version>
 			</dependency>
-			<!-- Provide Bouncycastle dep. mgmt. -->
 			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk18on</artifactId>
-				<version>${bouncycastle.version}</version>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk18on</artifactId>
-				<version>${bouncycastle.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcutil-jdk18on</artifactId>
-				<version>${bouncycastle.version}</version>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-api</artifactId>
+				<version>${junit-jupiter.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

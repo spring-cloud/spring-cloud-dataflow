@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Janne Valkealahti
  * @author Corneil du Plessis
+ *
  */
 @SpringBootTest(classes = SkipperClientConfigurationTests.TestConfig.class)
 public class SkipperClientConfigurationTests {

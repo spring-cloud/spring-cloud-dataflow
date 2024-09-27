@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -38,10 +42,7 @@ import org.springframework.cloud.dataflow.shell.config.DataFlowShell;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.shell.table.TableModel;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for {@link RuntimeCommands}.
@@ -50,7 +51,7 @@ import static org.mockito.Mockito.when;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-public class RuntimeCommandsTests {
+class RuntimeCommandsTests {
 
 	private RuntimeCommands runtimeCommands;
 
@@ -67,7 +68,7 @@ public class RuntimeCommandsTests {
 	private AppStatusResource appStatusResource3;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		MockitoAnnotations.openMocks(this);
 		when(dataFlowOperations.runtimeOperations()).thenReturn(runtimeOperations);
 		DataFlowShell dataFlowShell = new DataFlowShell();
@@ -111,7 +112,7 @@ public class RuntimeCommandsTests {
 	}
 
 	@Test
-	public void testStatusWithSummary() {
+	void statusWithSummary() {
 		Collection<AppStatusResource> data = new ArrayList<>();
 		data.add(appStatusResource1);
 		data.add(appStatusResource2);
@@ -130,7 +131,7 @@ public class RuntimeCommandsTests {
 	}
 
 	@Test
-	public void testStatusWithoutSummary() {
+	void statusWithoutSummary() {
 		Collection<AppStatusResource> data = new ArrayList<>();
 		data.add(appStatusResource1);
 		data.add(appStatusResource2);
@@ -148,7 +149,7 @@ public class RuntimeCommandsTests {
 	}
 
 	@Test
-	public void testStatusByModuleId() {
+	void statusByModuleId() {
 		when(runtimeOperations.status("1")).thenReturn(appStatusResource1);
 		Object[][] expected = new String[][] { { "1", "deployed", "2" }, { "10", "deployed" }, { "20", "deployed" } };
 		TableModel model = runtimeCommands.list(false, new String[] { "1" }).getModel();
@@ -161,20 +162,20 @@ public class RuntimeCommandsTests {
 	}
 
 	@Test
-	public void testActuatorGet() {
+	void actuatorGet() {
 		String json = "{ \"name\": \"foo\" }";
 		when(runtimeOperations.getFromActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info")).thenReturn(json);
 		assertThat(runtimeCommands.getFromActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info")).isEqualTo(json);
 	}
 
 	@Test
-	public void testActuatorPostWithoutData() {
+	void actuatorPostWithoutData() {
 		runtimeCommands.postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info", null);
 		verify(runtimeOperations).postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0", "info", Collections.emptyMap());
 	}
 
 	@Test
-	public void testActuatorPostWithData() throws Exception {
+	void actuatorPostWithData() throws Exception {
 		SummaryInfo summaryInfo = new SummaryInfo();
 		summaryInfo.setName("highLevel");
 		summaryInfo.getDetails().add(new DetailInfo("line1 details"));
@@ -194,7 +195,7 @@ public class RuntimeCommandsTests {
 	}
 
 	@Test
-	public void testActuatorPostWithInvalidData() {
+	void actuatorPostWithInvalidData() {
 		assertThatThrownBy(() -> runtimeCommands.postToActuator("flipflop3.log-v1", "flipflop3.log-v1-0",
 				"info", "{invalidJsonStr}")).isInstanceOf(RuntimeException.class).hasMessageContaining("Unable to parse 'data' into map:");
 	}

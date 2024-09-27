@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2023 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.composedtaskrunner.support;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.springframework.batch.core.UnexpectedJobExecutionException;
 import org.springframework.boot.ExitCodeGenerator;
@@ -55,12 +55,12 @@ public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionExce
 	/**
 	 * Time of when the task was started.
 	 */
-	private Date startTime;
+	private LocalDateTime startTime;
 
 	/**
 	 * Timestamp of when the task was completed/terminated.
 	 */
-	private Date endTime;
+	private LocalDateTime endTime;
 
 	/**
 	 * Message returned from the task or stacktrace.
@@ -160,12 +160,12 @@ public class UnexpectedTaskExecutionException extends UnexpectedJobExecutionExce
 		return this.taskName;
 	}
 
-	public Date getStartTime() {
-		return (this.startTime != null) ? (Date) this.startTime.clone() : null;
+	public LocalDateTime getStartTime() {
+		return (this.startTime != null) ? this.startTime: null;
 	}
 
-	public Date getEndTime() {
-		return (this.endTime != null) ? (Date) this.endTime.clone() : null;
+	public LocalDateTime getEndTime() {
+		return (this.endTime != null) ? this.endTime : null;
 	}
 
 	public String getExitMessage() {

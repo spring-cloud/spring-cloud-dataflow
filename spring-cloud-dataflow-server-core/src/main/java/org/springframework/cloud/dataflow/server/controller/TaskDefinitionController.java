@@ -29,17 +29,17 @@ import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionAwareTaskDefinition;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -78,7 +78,7 @@ public class TaskDefinitionController {
 
 	private final TaskDeleteService taskDeleteService;
 
-	private final AggregateTaskExplorer explorer;
+	private final DataflowTaskExplorer explorer;
 
 	private final TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider;
 
@@ -95,7 +95,7 @@ public class TaskDefinitionController {
 	 * @param taskDeleteService               handles Task deletion related operations.
 	 * @param taskDefinitionAssemblerProvider the task definition assembler provider to use.
 	 */
-	public TaskDefinitionController(AggregateTaskExplorer taskExplorer, TaskDefinitionRepository repository,
+	public TaskDefinitionController(DataflowTaskExplorer taskExplorer, TaskDefinitionRepository repository,
 									TaskSaveService taskSaveService, TaskDeleteService taskDeleteService,
 									TaskDefinitionAssemblerProvider<? extends TaskDefinitionResource> taskDefinitionAssemblerProvider) {
 		Assert.notNull(taskExplorer, "taskExplorer must not be null");
@@ -199,7 +199,7 @@ public class TaskDefinitionController {
 				.stream()
 				.collect(Collectors.toMap(TaskDefinition::getTaskName, Function.identity()));
 
-		List<AggregateTaskExecution> taskExecutions = null;
+		List<TaskExecution> taskExecutions = null;
 		if (!taskDefinitionMap.isEmpty()) {
 			taskExecutions = this.explorer.getLatestTaskExecutionsByTaskNames(taskDefinitionMap.keySet().toArray(new String[0]));
 		}
@@ -250,7 +250,7 @@ public class TaskDefinitionController {
 	) {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));
-		final AggregateTaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
+		final TaskExecution taskExecution = this.explorer.getLatestTaskExecutionForTaskName(name);
 		final RepresentationModelAssembler<TaskExecutionAwareTaskDefinition, ? extends TaskDefinitionResource> taskAssembler =
 				this.taskDefinitionAssemblerProvider.getTaskDefinitionAssembler(manifest);
 		TaskDefinitionResource taskDefinitionResource;
@@ -277,13 +277,13 @@ public class TaskDefinitionController {
 	}
 
 	class TaskDefinitionConverter implements Function<TaskDefinition, TaskExecutionAwareTaskDefinition> {
-		final Map<String, AggregateTaskExecution> taskExecutions;
+		final Map<String, TaskExecution> taskExecutions;
 
-		public TaskDefinitionConverter(List<AggregateTaskExecution> taskExecutions) {
+		public TaskDefinitionConverter(List<TaskExecution> taskExecutions) {
 			super();
 			if (taskExecutions != null) {
 				this.taskExecutions = new HashMap<>(taskExecutions.size());
-				for (AggregateTaskExecution taskExecution : taskExecutions) {
+				for (TaskExecution taskExecution : taskExecutions) {
 					this.taskExecutions.put(taskExecution.getTaskName(), taskExecution);
 				}
 			} else {
@@ -293,7 +293,7 @@ public class TaskDefinitionController {
 
 		@Override
 		public TaskExecutionAwareTaskDefinition apply(TaskDefinition source) {
-			AggregateTaskExecution lastTaskExecution = null;
+			TaskExecution lastTaskExecution = null;
 
 			if (taskExecutions != null) {
 				lastTaskExecution = taskExecutions.get(source.getName());

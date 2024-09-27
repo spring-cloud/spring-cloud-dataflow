@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.autoconfigure;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
@@ -26,6 +27,7 @@ import org.springframework.context.annotation.Bean;
  *
  * @author Ilayaperumal Gopinathan
  */
+@AutoConfiguration
 public class StreamDefinitionServiceAutoConfiguration {
 
 

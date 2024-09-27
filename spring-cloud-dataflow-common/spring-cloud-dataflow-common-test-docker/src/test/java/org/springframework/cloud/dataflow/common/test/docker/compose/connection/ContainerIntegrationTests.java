@@ -15,29 +15,24 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static com.jayway.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeThat;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerComposeExecArgument.arguments;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerComposeExecOption.noOptions;
-
-import com.github.zafarkhaja.semver.Version;
-import com.jayway.awaitility.core.ConditionFactory;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+
+import org.awaitility.core.ConditionFactory;
 import org.junit.Test;
-import org.mockito.internal.matchers.GreaterOrEqual;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ProjectName;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.State;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DefaultDockerCompose;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerExecutable;
+
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerComposeExecArgument.arguments;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerComposeExecOption.noOptions;
 
 public class ContainerIntegrationTests {
 

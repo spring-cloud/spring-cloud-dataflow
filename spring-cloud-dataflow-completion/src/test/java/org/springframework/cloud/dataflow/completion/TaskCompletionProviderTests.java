@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.completion;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Corneil du Plessis
  */
 @SuppressWarnings("unchecked")
-
 @SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class }, properties = {
 		"spring.main.allow-bean-definition-overriding=true" })
 public class TaskCompletionProviderTests {
@@ -51,42 +50,46 @@ public class TaskCompletionProviderTests {
 	@Test
 	// <TAB> => basic,plum,etc
 	public void testEmptyStartShouldProposeSourceApps() {
-		assertThat(completionProvider.complete("", 1)).has(Proposals.proposalThatHasAll("basic", "plum"));
-		assertThat(completionProvider.complete("", 1)).doNotHave(Proposals.proposalThatIs("log"));
+		assertThat(completionProvider.complete("", 1)).has(Proposals.all("basic", "plum"));
+		assertThat(completionProvider.complete("", 1)).doNotHave(Proposals.proposal("log"));
 	}
 
 	@Test
 	// b<TAB> => basic
 	public void testUnfinishedAppNameShouldReturnCompletions() {
-		assertThat(completionProvider.complete("b", 1)).have(Proposals.proposalThatIs("basic"));
-		assertThat(completionProvider.complete("ba", 1)).have(Proposals.proposalThatIs("basic"));
-		assertThat(completionProvider.complete("pl", 1)).doNotHave(Proposals.proposalThatIs("basic"));
+		assertThat(completionProvider.complete("b", 1)).has(Proposals.all("basic"));
+		assertThat(completionProvider.complete("ba", 1)).has(Proposals.all("basic"));
+		assertThat(completionProvider.complete("pl", 1)).doNotHave(Proposals.proposal("basic"));
 	}
 
 	@Test
 	// basic<TAB> => basic --foo=, etc
 	public void testValidTaskDefinitionShouldReturnAppOptions() {
-		assertThat(completionProvider.complete("basic ", 1)).has(Proposals.proposalThatHasAny("basic --expression=", "basic --expresso="));
+		assertThat(completionProvider.complete("basic ", 1))
+				.has(Proposals.all("basic --expression=", "basic --expresso="));
 		// Same as above, no final space
-		assertThat(completionProvider.complete("basic", 1)).has(Proposals.proposalThatHasAll("basic --expression=", "basic --expresso="));
+		assertThat(completionProvider.complete("basic", 1))
+				.has(Proposals.all("basic --expression=", "basic --expresso="));
 	}
 
 	@Test
 	// file | filter -<TAB> => file | filter --foo,etc
 	public void testOneDashShouldReturnTwoDashes() {
-		assertThat(completionProvider.complete("basic -", 1)).has(Proposals.proposalThatHasAll("basic --expression=", "basic --expresso="));
+		assertThat(completionProvider.complete("basic -", 1))
+				.has(Proposals.all("basic --expression=", "basic --expresso="));
 	}
 
 	@Test
 	// basic --<TAB> => basic --foo,etc
 	public void testTwoDashesShouldReturnOptions() {
-		assertThat(completionProvider.complete("basic --", 1)).has(Proposals.proposalThatHasAll("basic --expression=", "basic --expresso="));
+		assertThat(completionProvider.complete("basic --", 1))
+				.has(Proposals.all("basic --expression=", "basic --expresso="));
 	}
 
 	@Test
 	// file --p<TAB> => file --preventDuplicates=, file --pattern=
 	public void testUnfinishedOptionNameShouldComplete() {
-		assertThat(completionProvider.complete("basic --foo", 1)).have(Proposals.proposalThatIs("basic --fooble="));
+		assertThat(completionProvider.complete("basic --foo", 1)).has(Proposals.all("basic --fooble="));
 	}
 
 	@Test
@@ -98,13 +101,15 @@ public class TaskCompletionProviderTests {
 	@Test
 	// plum --use-ssl=<TAB> => propose true|false
 	public void testValueHintForBooleans() {
-		assertThat(completionProvider.complete("plum --use-ssl=", 1)).has(Proposals.proposalThatHasAll("plum --use-ssl=true", "plum --use-ssl=false"));
+		assertThat(completionProvider.complete("plum --use-ssl=", 1))
+				.has(Proposals.all("plum --use-ssl=true", "plum --use-ssl=false"));
 	}
 
 	@Test
 	// basic --enum-value=<TAB> => propose enum values
 	public void testValueHintForEnums() {
-		assertThat(completionProvider.complete("basic --expresso=", 1)).has(Proposals.proposalThatHasAll("basic --expresso=SINGLE", "basic --expresso=DOUBLE"));
+		assertThat(completionProvider.complete("basic --expresso=", 1))
+				.has(Proposals.all("basic --expresso=SINGLE", "basic --expresso=DOUBLE"));
 	}
 
 	@Test
@@ -124,7 +129,7 @@ public class TaskCompletionProviderTests {
 	 */
 	@Test
 	public void testClosedSetValuesShouldBeExclusive() {
-		assertThat(completionProvider
-			.complete("basic --expresso=s", 1)).doNotHave(Proposals.proposalThatStartsWith("basic --expresso=s --fooble"));
+		assertThat(completionProvider.complete("basic --expresso=s", 1))
+				.doNotHave(Proposals.proposal(s -> s.startsWith("basic --expresso=s --fooble")));
 	}
 }

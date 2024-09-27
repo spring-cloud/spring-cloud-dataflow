@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.dataflow.core;
 
-import javax.persistence.AttributeConverter;
-import javax.persistence.Converter;
+import jakarta.persistence.AttributeConverter;
+import jakarta.persistence.Converter;
 
 /**
  * JPA 2.1 {@link AttributeConverter} for the {@link AuditActionType} enumeration.

@@ -34,13 +34,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = LocalPlatformPropertiesTests.TestConfig.class)
 @ActiveProfiles("local-platform-properties")
-public class LocalPlatformPropertiesTests {
+class LocalPlatformPropertiesTests {
 
 	@Autowired
 	private LocalPlatformProperties localPlatformProperties;
 
 	@Test
-	public void deserializationTest() {
+	void deserializationTest() {
 		Map<String, LocalDeployerProperties> localAccounts = this.localPlatformProperties.getAccounts();
 		assertThat(localAccounts).hasSize(2);
 		assertThat(localAccounts).containsKeys("localDev", "localDevDebug");

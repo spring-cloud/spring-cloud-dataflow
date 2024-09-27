@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 the original author or authors.
+ * Copyright 2018-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,14 @@ public class TaskConfigurationProperties {
 	 * from secrets vs having dataflow pass them via properties.
 	 */
 	private boolean useKubernetesSecretsForDbCredentials;
+
+	/**
+	 * Controls the style that Dataflow reconstitutes job parameters when re-running a
+	 * failed batch job. The style will be taken from Spring Batch's
+	 * DefaultJobParametersConverter when set to false or JsonJobParametersConverter when true.
+	 */
+
+	private boolean useJsonJobParameters = false;
 
 	@Deprecated
 	public String getComposedTaskRunnerUri() {
@@ -188,5 +196,13 @@ public class TaskConfigurationProperties {
 
 	public void setExecutionDeleteChunkSize(int executionDeleteChunkSize) {
 		this.executionDeleteChunkSize = executionDeleteChunkSize;
+	}
+
+	public boolean isUseJsonJobParameters() {
+		return useJsonJobParameters;
+	}
+
+	public void setUseJsonJobParameters(boolean useJsonJobParameters) {
+		this.useJsonJobParameters = useJsonJobParameters;
 	}
 }

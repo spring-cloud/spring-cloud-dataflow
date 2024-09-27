@@ -15,14 +15,23 @@
  */
 package org.springframework.cloud.dataflow.server.completion;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import org.hamcrest.FeatureMatcher;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,11 +61,6 @@ import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.Assert;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.mock;
-
 /**
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
@@ -65,7 +69,7 @@ import static org.mockito.Mockito.mock;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @SuppressWarnings("unchecked")
-public class TabOnTapCompletionProviderTests {
+class TabOnTapCompletionProviderTests {
 
 	@Autowired
 	private StreamCompletionProvider completionProvider;
@@ -76,41 +80,43 @@ public class TabOnTapCompletionProviderTests {
 	@Autowired
 	private StreamDefinitionService streamDefinitionService;
 
-	private static org.hamcrest.Matcher<CompletionProposal> proposalThat(org.hamcrest.Matcher<String> matcher) {
-		return new FeatureMatcher<CompletionProposal, String>(matcher, "a proposal whose text", "text") {
-			@Override
-			protected String featureValueOf(CompletionProposal actual) {
-				return actual.getText();
-			}
-		};
+	private static Condition<CompletionProposal> hasText(String text) {
+		return new Condition<>(p -> Objects.equals(p.getText(), text), "text:" + text);
+	}
+	private static boolean hasAll(List<? extends CompletionProposal> proposals, Collection<String> items) {
+		Set<String> proposalTexts = proposals.stream().map(CompletionProposal::getText).collect(Collectors.toSet());
+		return items.stream().allMatch(proposalTexts::contains);
+	}
+	private static Condition<List<? extends CompletionProposal>> all(String ... text) {
+		Set<String> items = new HashSet<>(Arrays.asList(text));
+		return new Condition<>(proposals -> hasAll(proposals, items), "text:" + items);
 	}
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.streamDefinitionRepository.save(new StreamDefinition("foo", "time | transform | log"));
 		this.streamDefinitionRepository.save(new StreamDefinition("bar", "time | log"));
 		this.completionProvider
 				.addCompletionRecoveryStrategy(new TapOnDestinationRecoveryStrategy(streamDefinitionRepository, this.streamDefinitionService));
 	}
 
-	@Test
 	// :foo ==> add appropriate app names
-	public void testAppNamesAfterStreamName() {
-		assertThat(completionProvider.complete(":foo", 1),
-				hasItems(proposalThat(is(":foo.time")), proposalThat(is(":foo.transform"))));
+	@Test
+	void appNamesAfterStreamName() {
+
+		assertThat(completionProvider.complete(":foo", 1)).has(all(":foo.time", ":foo.transform"));
 	}
 
-	@Test
 	// :foo. ==> add appropriate app names
-	public void testAppNamesAfterStreamNameWithDotAfterStreamName() {
-		assertThat(completionProvider.complete(":foo.", 1),
-				hasItems(proposalThat(is(":foo.time")), proposalThat(is(":foo.transform"))));
+	@Test
+	void appNamesAfterStreamNameWithDotAfterStreamName() {
+		assertThat(completionProvider.complete(":foo.", 1)).has(all(":foo.time", ":foo.transform"));
 	}
 
-	@Test
 	// : ==> add stream name
-	public void testStreamNameAfterColon() {
-		assertThat(completionProvider.complete(":", 1), hasItems(proposalThat(is(":foo")), proposalThat(is(":bar"))));
+	@Test
+	void streamNameAfterColon() {
+		assertThat(completionProvider.complete(":", 1)).has(all(":foo", ":bar"));
 	}
 
 	/**

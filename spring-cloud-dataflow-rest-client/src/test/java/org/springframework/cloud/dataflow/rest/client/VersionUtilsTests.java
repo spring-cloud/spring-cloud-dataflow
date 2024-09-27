@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class VersionUtilsTests {
+class VersionUtilsTests {
 
 	@Test
-	public void testNullAndBlank() {
+	void nullAndBlank() {
 		String threePartVersion = VersionUtils.getThreePartVersion(null);
 		assertThat(threePartVersion).isEmpty();
 
@@ -40,7 +40,7 @@ public class VersionUtilsTests {
 	}
 
 	@Test
-	public void badFormat() {
+	void badFormat() {
 		String threePartVersion = VersionUtils.getThreePartVersion("1.3");
 		assertThat(threePartVersion).isEmpty();
 
@@ -56,7 +56,7 @@ public class VersionUtilsTests {
 	}
 
 	@Test
-	public void testValid() {
+	void valid() {
 
 		String threePartVersion = VersionUtils.getThreePartVersion("1.3.4");
 		assertThat(threePartVersion).isEqualTo("1.3.4");

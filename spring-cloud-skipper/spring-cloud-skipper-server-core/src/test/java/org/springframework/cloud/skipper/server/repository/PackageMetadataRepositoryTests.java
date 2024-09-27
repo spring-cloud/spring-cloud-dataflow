@@ -107,7 +107,7 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 				this.repositoryRepository.findByName(repoName3).getId(), "1.0.1");
 		List<PackageMetadata> packageMetadataList = this.packageMetadataRepository
 				.findByNameAndVersionOrderByApiVersionDesc("package1", "1.0.0");
-		assertThat(packageMetadataList.size()).isEqualTo(3);
+		assertThat(packageMetadataList).hasSize(3);
 		assertThat(packageMetadataList.get(0).getName()).isEqualTo("package1");
 		assertThat(packageMetadataList.get(0).getVersion()).isEqualTo("1.0.0");
 		assertThat(packageMetadataList.get(0).getRepositoryId()).isEqualTo(this.repositoryRepository.findByName(repoName2)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,19 @@
 
 package org.springframework.cloud.dataflow.rest.support.jackson;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.item.ExecutionContext;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
-
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.item.ExecutionContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * Tests that the {@link ExecutionContextJacksonMixIn} works as expected.
@@ -40,7 +36,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOf
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class StepExecutionJacksonMixInTests {
+class StepExecutionJacksonMixInTests {
 
 	/**
 	 * Assert that without using the {@link ExecutionContextJacksonMixIn} Jackson does not
@@ -49,18 +45,14 @@ public class StepExecutionJacksonMixInTests {
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
 	@Test
-	public void testSerializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
+	void serializationOfSingleStepExecutionWithoutMixin() throws JsonProcessingException {
 		assertThatExceptionOfType(JsonMappingException.class).isThrownBy(() -> {
-			final ObjectMapper objectMapper = new ObjectMapper();
-			final StepExecution stepExecution = getStepExecution();
-			final String result = objectMapper.writeValueAsString(stepExecution);
-			DocumentContext parsed = JsonPath.parse(result);
-			Object dirty = parsed.read("$['executionContext']['dirty']");
-			assertThat(dirty).isExactlyInstanceOf(Boolean.class);
-			assertThat((Boolean) dirty).isTrue();
-			Object empty = parsed.read("$['executionContext']['empty']");
-			assertThat(empty).isExactlyInstanceOf(Boolean.class);
-			assertThat((Boolean) empty).isFalse();
+		final ObjectMapper objectMapper = new ObjectMapper();
+
+		final StepExecution stepExecution = getStepExecution();
+		final String result = objectMapper.writeValueAsString(stepExecution);
+
+			assertThat(result).contains("\"executionContext\":{\"dirty\":true,\"empty\":false}");
 		});
 	}
 
@@ -71,9 +63,10 @@ public class StepExecutionJacksonMixInTests {
 	 * @throws JsonProcessingException if a Json generation error occurs.
 	 */
 	@Test
-	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
+	void serializationOfSingleStepExecution() throws JsonProcessingException {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
 
 		objectMapper.addMixIn(StepExecution.class, StepExecutionJacksonMixIn.class);
 		objectMapper.addMixIn(ExecutionContext.class, ExecutionContextJacksonMixIn.class);
@@ -81,28 +74,19 @@ public class StepExecutionJacksonMixInTests {
 		final StepExecution stepExecution = getStepExecution();
 		final String result = objectMapper.writeValueAsString(stepExecution);
 
-		DocumentContext parsed = JsonPath.parse(result);
-		Object dirty = parsed.read("$['executionContext']['dirty']");
-		assertThat(dirty).isExactlyInstanceOf(Boolean.class);
-		assertThat((Boolean) dirty).isTrue();
-		Object empty = parsed.read("$['executionContext']['empty']");
-		assertThat(empty).isExactlyInstanceOf(Boolean.class);
-		assertThat((Boolean) empty).isFalse();
-		Object values = parsed.read("$['executionContext']['values']", List.class);
-		assertThat(values).isInstanceOf(List.class);
-		Map<String, Object> valueMap = ((List<Map<String, Object>>) values).stream()
-			.flatMap(map -> map.entrySet().stream())
-			.collect(Collectors.toMap(o -> o.getKey(), o -> o.getValue()));
-		assertThat(valueMap).containsEntry("counter", 1234);
-		assertThat(valueMap).containsEntry("myDouble", 1.123456);
-		assertThat(valueMap).containsEntry("Josh", 4444444444L);
-		assertThat(valueMap).containsEntry("awesomeString", "Yep");
-		assertThat(valueMap).containsEntry("hello", "world");
-		assertThat(valueMap).containsEntry("counter2", 9999);
+		assertThat(result).doesNotContain("\"executionContext\":{\"dirty\":true,\"empty\":false}");
+		assertThat(result).contains("\"executionContext\":{\"dirty\":true,\"empty\":false,\"values\":[{");
+
+		assertThat(result).contains("{\"counter\":1234}");
+		assertThat(result).contains("{\"myDouble\":1.123456}");
+		assertThat(result).contains("{\"Josh\":4444444444}");
+		assertThat(result).contains("{\"awesomeString\":\"Yep\"}");
+		assertThat(result).contains("{\"hello\":\"world\"");
+		assertThat(result).contains("{\"counter2\":9999}");
 	}
 
 	private StepExecution getStepExecution() {
-		JobExecution jobExecution = new JobExecution(1L, null, "hi");
+		JobExecution jobExecution = new JobExecution(1L, new JobParameters());
 		final StepExecution stepExecution = new StepExecution("step1", jobExecution);
 		jobExecution.createStepExecution("step1");
 		final ExecutionContext executionContext = stepExecution.getExecutionContext();

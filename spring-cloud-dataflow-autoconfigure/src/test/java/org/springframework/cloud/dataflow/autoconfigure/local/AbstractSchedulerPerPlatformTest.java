@@ -16,7 +16,8 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
+import static org.mockito.Mockito.mock;
+
 import org.cloudfoundry.operations.CloudFoundryOperations;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,10 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAut
 import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectionProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
@@ -41,12 +43,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 
-import static org.mockito.Mockito.mock;
+import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 
 /**
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 		classes = AbstractSchedulerPerPlatformTest.AutoConfigurationApplication.class)
 @DirtiesContext
@@ -73,6 +76,11 @@ public abstract class AbstractSchedulerPerPlatformTest {
 		@Bean
 		public TaskDeploymentReader taskDeploymentReader() {
 			return mock(TaskDeploymentReader.class);
+		}
+
+		@Bean
+		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao() {
+			return mock(DataflowTaskExecutionQueryDao.class);
 		}
 
 		@Configuration

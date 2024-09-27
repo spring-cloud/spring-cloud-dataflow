@@ -22,6 +22,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.util.Assert;
+
 public class DockerExecutable implements Executable {
 	private static final Logger log = LoggerFactory.getLogger(DockerExecutable.class);
 
@@ -57,9 +59,12 @@ public class DockerExecutable implements Executable {
 	}
 
 	@Override
-	public Process execute(String... commands) throws IOException {
+	public Process execute(boolean composeCommand, String... commands) throws IOException {
 		List<String> args = new ArrayList<>();
 		args.add(dockerPath());
+		if(composeCommand) {
+			args.add("compose");
+		}
 		args.addAll(Arrays.asList(commands));
 
 		return dockerConfiguration().configuredDockerComposeProcess()

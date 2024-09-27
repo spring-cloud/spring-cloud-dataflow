@@ -16,23 +16,17 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.persistence.EntityManager;
-import javax.servlet.Filter;
-import javax.sql.DataSource;
+import jakarta.persistence.EntityManager;
+import jakarta.servlet.Filter;
 
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskConfiguration;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
-import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryImpl;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.schema.service.SchemaServiceConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesConfiguration;
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
@@ -43,7 +37,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -72,9 +65,8 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		FeaturesConfiguration.class,
 		WebConfiguration.class,
 		H2ServerConfiguration.class,
-		SchemaServiceConfiguration.class,
-		AggregateTaskConfiguration.class,
-		AggregateDataFlowTaskConfiguration.class
+		DataflowTaskConfiguration.class,
+		DataFlowTaskConfiguration.class
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 @ComponentScan(basePackages = {"org.springframework.cloud.dataflow.schema.service", "org.springframework.cloud.dataflow.aggregate.task"})
@@ -91,11 +83,9 @@ public class DataFlowServerConfiguration {
 	}
 
 	@Bean
-	@Primary
-	public PlatformTransactionManager transactionManager(
-			ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+	PlatformTransactionManager transactionManager(TransactionManagerCustomizers transactionManagerCustomizers) {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();
-		transactionManagerCustomizers.ifAvailable((customizers) -> customizers.customize(transactionManager));
+		transactionManagerCustomizers.customize(transactionManager);
 		return transactionManager;
 	}
 

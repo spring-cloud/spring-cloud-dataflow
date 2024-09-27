@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
@@ -82,8 +83,8 @@ public class ComposedTaskRunnerConfigurationWithAppArgumentsPropertiesTests {
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
 		assertThat(result).contains("--arg1=value1", "--arg2=value2", "--arg3=value3");
-		assertThat(result.size()).isEqualTo(3);
+		assertThat(result).hasSize(3);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
-		assertThat(taskletProperties.size()).isEqualTo(0);
+		assertThat(taskletProperties).isEmpty();
 	}
 }

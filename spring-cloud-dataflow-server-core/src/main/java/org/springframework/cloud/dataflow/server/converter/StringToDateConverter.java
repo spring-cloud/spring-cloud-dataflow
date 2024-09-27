@@ -16,8 +16,11 @@
 package org.springframework.cloud.dataflow.server.converter;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
+import org.springframework.cglib.core.Local;
 import org.springframework.core.convert.converter.Converter;
 
 /**
@@ -31,11 +34,16 @@ import org.springframework.core.convert.converter.Converter;
  * @since 2.11.2
  */
 @Deprecated
-public class StringToDateConverter extends AbstractDateTimeConverter implements Converter<String, Date> {
+public class StringToDateConverter extends AbstractDateTimeConverter implements Converter<String, LocalDateTime> {
 
 	@Override
-	public Date convert(String source) {
-		return Date.from(super.instantFormatter.parse(source, Instant::from));
+	public LocalDateTime convert(String source) {
+		DateTimeFormatter dateTimeFormat =
+			DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
+		//Next parse the date from the @RequestParam, specifying the TO type as a TemporalQuery:
+		return dateTimeFormat.parse(source, LocalDateTime::from);
+//		return LocalDateTime.from(super.localDateTimeFormatter.parse(source, Instant::from));
 	}
 
 }

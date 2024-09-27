@@ -19,10 +19,10 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
-
+//@checkstyle:off
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+//@checkstyle:on
 public class DurationUtilsTests {
 
 	@Test
@@ -101,7 +101,7 @@ public class DurationUtilsTests {
 
 	@Test
 	public void convertWhenBadFormatShouldThrowException() {
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			convert("10foo");
 		});
 	}

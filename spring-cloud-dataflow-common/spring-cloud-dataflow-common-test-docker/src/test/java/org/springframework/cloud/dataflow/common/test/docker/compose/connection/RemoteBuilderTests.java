@@ -15,8 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 
@@ -86,7 +85,7 @@ public class RemoteBuilderTests {
 		ProcessBuilder process = dockerMachine.configuredDockerComposeProcess();
 
 		Map<String, String> environment = process.environment();
-		expectedEnvironment.forEach((var, val) -> assertThat(environment, hasEntry(var, val)));
+		expectedEnvironment.forEach((var, val) -> assertThat(environment).containsEntry(var, val));
 	}
 
 }

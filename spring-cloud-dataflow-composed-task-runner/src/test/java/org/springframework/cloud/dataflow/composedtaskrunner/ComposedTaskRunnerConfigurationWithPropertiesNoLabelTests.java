@@ -43,6 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
@@ -89,9 +90,9 @@ public class ComposedTaskRunnerConfigurationWithPropertiesNoLabelTests {
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
 		assertThat(result).contains("--baz=boo --foo=bar");
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
-		assertThat(taskletProperties.size()).isEqualTo(1);
-		assertThat(taskletProperties.get("app.AAA.format")).isEqualTo("yyyy");
+		assertThat(taskletProperties).hasSize(1);
+		assertThat(taskletProperties).containsEntry("app.AAA.format", "yyyy");
 	}
 }
