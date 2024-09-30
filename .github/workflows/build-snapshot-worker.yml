@@ -116,7 +116,7 @@ jobs:
             ${{ runner.os }}-m2-${{ matrix.db }}
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - uses: jvalkeal/setup-maven@v1
         with:
