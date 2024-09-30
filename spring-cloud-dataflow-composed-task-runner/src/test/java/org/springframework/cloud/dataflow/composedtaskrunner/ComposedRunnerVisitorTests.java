@@ -69,14 +69,14 @@ public class ComposedRunnerVisitorTests {
 	private ConfigurableApplicationContext applicationContext;
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		if (this.applicationContext != null) {
 			this.applicationContext.close();
 		}
 	}
 
 	@Test
-	public void singleTest() {
+	void singleTest() {
 		setupContextForGraph("AAA");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		assertThat(stepExecutions).hasSize(1);
@@ -85,7 +85,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void singleTestForuuIDIncrementer() {
+	void singleTestForuuIDIncrementer() {
 		setupContextForGraph("AAA", "--uuIdInstanceEnabled=true");
 		Collection<StepExecution> stepExecutions = getStepExecutions(true);
 		assertThat(stepExecutions).hasSize(1);
@@ -94,7 +94,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testFailedGraph() {
+	void failedGraph() {
 		setupContextForGraph("failedStep && AAA");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		assertThat(stepExecutions).hasSize(1);
@@ -103,7 +103,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testEmbeddedFailedGraph() {
+	void embeddedFailedGraph() {
 		setupContextForGraph("AAA && failedStep && BBB");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		assertThat(stepExecutions).hasSize(2);
@@ -127,7 +127,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequential() {
+	void sequential() {
 		setupContextForGraph("AAA && BBB && CCC");
 		List<StepExecution> stepExecutions = getSortedStepExecutions(getStepExecutions());
 		assertThat(stepExecutions).hasSize(3);
@@ -142,7 +142,7 @@ public class ComposedRunnerVisitorTests {
 
 	@ParameterizedTest
 	@ValueSource(ints = {1, 2, 3})
-	public void splitTest(int threadCorePoolSize) {
+	void splitTest(int threadCorePoolSize) {
 		setupContextForGraph("<AAA||BBB||CCC>", "--splitThreadCorePoolSize=" + threadCorePoolSize);
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -154,7 +154,7 @@ public class ComposedRunnerVisitorTests {
 
 	@ParameterizedTest
 	@ValueSource(ints = {2, 5})
-	public void nestedSplit(int threadCorePoolSize) {
+	void nestedSplit(int threadCorePoolSize) {
 		setupContextForGraph("<<AAA || BBB > && CCC || DDD>", "--splitThreadCorePoolSize=" + threadCorePoolSize);
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -166,7 +166,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void nestedSplitThreadPoolSize() {
+	void nestedSplitThreadPoolSize() {
 		assertThatThrownBy(() ->
 				setupContextForGraph("<<AAA || BBB > && CCC || <DDD || EEE> && FFF>", "--splitThreadCorePoolSize=2")
 		).hasCauseInstanceOf(BeanCreationException.class)
@@ -174,9 +174,9 @@ public class ComposedRunnerVisitorTests {
 				"depth of split flows 3. Try setting the composed task property " +
 				"`splitThreadCorePoolSize`");
 	}
-	
+
 	@Test
-	public void sequentialNestedSplitThreadPoolSize() {
+	void sequentialNestedSplitThreadPoolSize() {
 		setupContextForGraph("<<AAA || BBB> || <CCC || DDD>> && <EEE || FFF>", "--splitThreadCorePoolSize=3");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -188,10 +188,10 @@ public class ComposedRunnerVisitorTests {
 		assertThat(stepNames).contains("EEE_0");
 		assertThat(stepNames).contains("FFF_0");
 	}
-	
+
 
 	@Test
-	public void twoSplitTest() {
+	void twoSplitTest() {
 		setupContextForGraph("<AAA||BBB||CCC> && <DDD||EEE>");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -204,7 +204,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequentialAndSplit() {
+	void sequentialAndSplit() {
 		setupContextForGraph("AAA && <BBB||CCC||DDD> && EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -221,7 +221,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequentialTransitionAndSplit() {
+	void sequentialTransitionAndSplit() {
 		setupContextForGraph("AAA && FFF 'FAILED' -> EEE && <BBB||CCC> && DDD");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -238,13 +238,13 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequentialTransitionAndSplitFailedInvalid() {
+	void sequentialTransitionAndSplitFailedInvalid() {
 		verifyExceptionThrown(INVALID_FLOW_MSG,
 				"AAA && failedStep 'FAILED' -> EEE '*' -> FFF && <BBB||CCC> && DDD");
 	}
 
 	@Test
-	public void testSequentialTransitionAndSplitFailed() {
+	void sequentialTransitionAndSplitFailed() {
 		setupContextForGraph("AAA && failedStep 'FAILED' -> EEE && FFF && <BBB||CCC> && DDD");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -255,7 +255,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequentialAndFailedSplit() {
+	void sequentialAndFailedSplit() {
 		setupContextForGraph("AAA && <BBB||failedStep||DDD> && EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -267,7 +267,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequentialAndSplitWithFlow() {
+	void sequentialAndSplitWithFlow() {
 		setupContextForGraph("AAA && <BBB && FFF||CCC||DDD> && EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -286,7 +286,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testFailedBasicTransition() {
+	void failedBasicTransition() {
 		setupContextForGraph("failedStep 'FAILED' -> AAA * -> BBB");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -296,7 +296,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSuccessBasicTransition() {
+	void successBasicTransition() {
 		setupContextForGraph("AAA 'FAILED' -> BBB * -> CCC");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -306,13 +306,13 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSuccessBasicTransitionWithSequence() {
+	void successBasicTransitionWithSequence() {
 		verifyExceptionThrown(INVALID_FLOW_MSG,
 				"AAA 'FAILED' -> BBB * -> CCC && DDD && EEE");
 	}
 
 	@Test
-	public void testSuccessBasicTransitionWithTransition() {
+	void successBasicTransitionWithTransition() {
 		setupContextForGraph("AAA 'FAILED' -> BBB && CCC 'FAILED' -> DDD '*' -> EEE");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -327,13 +327,13 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void testSequenceFollowedBySuccessBasicTransitionSequence() {
+	void sequenceFollowedBySuccessBasicTransitionSequence() {
 		verifyExceptionThrown(INVALID_FLOW_MSG,
 				"DDD && AAA 'FAILED' -> BBB * -> CCC && EEE");
 	}
 
 	@Test
-	public void testWildCardOnlyInLastPosition() {
+	void wildCardOnlyInLastPosition() {
 		setupContextForGraph("AAA 'FAILED' -> BBB && CCC * -> DDD ");
 		Collection<StepExecution> stepExecutions = getStepExecutions();
 		Set<String> stepNames = getStepNames(stepExecutions);
@@ -349,7 +349,7 @@ public class ComposedRunnerVisitorTests {
 
 
 	@Test
-	public void failedStepTransitionWithDuplicateTaskNameTest() {
+	void failedStepTransitionWithDuplicateTaskNameTest() {
 		verifyExceptionThrown(
 				"Problems found when validating 'failedStep " +
 						"'FAILED' -> BBB  && CCC && BBB && EEE': " +
@@ -359,7 +359,7 @@ public class ComposedRunnerVisitorTests {
 	}
 
 	@Test
-	public void successStepTransitionWithDuplicateTaskNameTest() {
+	void successStepTransitionWithDuplicateTaskNameTest() {
 		verifyExceptionThrown(
 				"Problems found when validating 'AAA 'FAILED' -> " +
 						"BBB  * -> CCC && BBB && EEE': [166E:(pos 33): " +

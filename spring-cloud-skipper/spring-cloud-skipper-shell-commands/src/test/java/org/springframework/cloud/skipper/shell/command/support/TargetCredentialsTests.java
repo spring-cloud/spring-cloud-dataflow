@@ -24,10 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class TargetCredentialsTests {
+class TargetCredentialsTests {
 
 	@Test
-	public void testToString() throws Exception {
+	void testToString() throws Exception {
 		TargetCredentials targetCredentials = new TargetCredentials(true);
 		assertThat(targetCredentials.toString()).isEqualTo("[Uses OAuth2 Access Token]");
 		targetCredentials = new TargetCredentials("username", "password");

@@ -67,8 +67,9 @@ public class ShellCommandRunner {
 		//       reflection until we refactor to use new shell testing system
 		Object rawResult = ReflectionTestUtils.invokeMethod(this.shell, "evaluate", new ParsedLineInput(parsedLine));
 		if (!this.validateCommandSuccess) {
-			assertThat(rawResult).isNotNull();
-			assertThat(rawResult).isNotInstanceOf(Exception.class);
+			assertThat(rawResult)
+					.isNotNull()
+					.isNotInstanceOf(Exception.class);
 		}
 		if (rawResult instanceof Exception) {
 			throw new RuntimeException((Exception) rawResult);

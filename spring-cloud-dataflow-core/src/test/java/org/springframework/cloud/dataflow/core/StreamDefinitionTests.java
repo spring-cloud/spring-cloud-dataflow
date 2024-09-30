@@ -98,8 +98,9 @@ class StreamDefinitionTests {
 		assertThat(source.getName()).isEqualTo("foo");
 		assertThat(source.getStreamName()).isEqualTo("test");
 		Map<String, String> sourceParameters = source.getProperties();
-		assertThat(sourceParameters).hasSize(3);
-		assertThat(sourceParameters).containsEntry("bar", "payload.matches('hello')");
+		assertThat(sourceParameters)
+				.hasSize(3)
+				.containsEntry("bar", "payload.matches('hello')");
 	}
 
 	@Test
@@ -112,8 +113,9 @@ class StreamDefinitionTests {
 		assertThat(filter.getName()).isEqualTo("filter");
 		assertThat(filter.getStreamName()).isEqualTo("test");
 		Map<String, String> filterParameters = filter.getProperties();
-		assertThat(filterParameters).hasSize(5);
-		assertThat(filterParameters).containsEntry("expression", "payload.matches('hello world')");
+		assertThat(filterParameters)
+				.hasSize(5)
+				.containsEntry("expression", "payload.matches('hello world')");
 	}
 
 	@Test
@@ -127,14 +129,16 @@ class StreamDefinitionTests {
 		assertThat(source.getStreamName()).isEqualTo("test");
 		assertThat(source.getApplicationType()).isEqualTo(ApplicationType.source);
 		Map<String, String> sourceParameters = source.getProperties();
-		assertThat(sourceParameters).hasSize(4);
-		assertThat(sourceParameters).containsEntry("x", "1");
-		assertThat(sourceParameters).containsEntry("y", "two");
+		assertThat(sourceParameters)
+				.hasSize(4)
+				.containsEntry("x", "1")
+				.containsEntry("y", "two");
 		assertThat(sink.getName()).isEqualTo("bar");
 		assertThat(sink.getStreamName()).isEqualTo("test");
 		Map<String, String> sinkParameters = sink.getProperties();
-		assertThat(sinkParameters).hasSize(3);
-		assertThat(sinkParameters).containsEntry("z", "3");
+		assertThat(sinkParameters)
+				.hasSize(3)
+				.containsEntry("z", "3");
 		assertThat(sink.getApplicationType()).isEqualTo(ApplicationType.sink);
 	}
 

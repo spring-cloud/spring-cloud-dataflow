@@ -49,12 +49,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class})
-@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
-"composed-task-properties=" + ComposedTaskRunnerConfigurationWithVersionPropertiesTests.COMPOSED_TASK_PROPS ,
+@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC", "max-wait-time=1010",
+		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithVersionPropertiesTests.COMPOSED_TASK_PROPS,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
 		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -73,7 +73,7 @@ public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 	@Test
 	@DirtiesContext
 	@Disabled("waiting for Glenn")
-	public void testComposedConfiguration() throws Exception {
+	void composedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
 		job.execute(jobExecution);
@@ -90,10 +90,12 @@ public class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
-		assertThat(result).contains("--baz=boo --foo=bar");
-		assertThat(result).hasSize(1);
+		assertThat(result)
+				.contains("--baz=boo --foo=bar")
+				.hasSize(1);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
-		assertThat(taskletProperties).hasSize(1);
-		assertThat(taskletProperties).containsEntry("version.AAA", "1.0.0");
+		assertThat(taskletProperties)
+				.hasSize(1)
+				.containsEntry("version.AAA", "1.0.0");
 	}
 }

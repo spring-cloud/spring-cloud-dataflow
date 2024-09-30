@@ -65,7 +65,7 @@ for RECIPE in $RECIPES; do
     esac
     echo "Command:$CMD, Recipe:$RECIPE_CLASS in $MODULE_DIR"
     pushd "$MODULE_DIR" > /dev/null
-        $ROOT_DIR/mvnw -s $ROOT_DIR/.settings.xml org.openrewrite.maven:rewrite-maven-plugin:$CMD -Drewrite.activeRecipes="$RECIPE_CLASS" -Drewrite.recipeArtifactCoordinates="$RECIPE_COORD" $RECIPE_ARGS $MAVEN_ARGS -N -f . | tee ${MODULE_DIR}/rewrite.log
+        $ROOT_DIR/mvnw -s $ROOT_DIR/.settings.xml org.openrewrite.maven:rewrite-maven-plugin:$CMD -Drewrite.activeRecipes="$RECIPE_CLASS" -Drewrite.recipeArtifactCoordinates="$RECIPE_COORD" $RECIPE_ARGS $MAVEN_ARGS --non-recursive -f . | tee ${MODULE_DIR}/rewrite.log
         RC=$?
         ERRORS=$(grep -c -F ERROR ${MODULE_DIR}/rewrite.log)
         rm -f ${MODULE_DIR}/rewrite.log

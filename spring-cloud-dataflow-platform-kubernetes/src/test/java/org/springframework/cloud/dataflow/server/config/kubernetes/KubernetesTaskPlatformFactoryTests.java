@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author David Turanski
  * @author Ilayaperumal Gopinathan
  **/
-public class KubernetesTaskPlatformFactoryTests {
+class KubernetesTaskPlatformFactoryTests {
 
 	@Test
-	public void kubernetesTaskPlatformNoScheduler() {
+	void kubernetesTaskPlatformNoScheduler() {
 		KubernetesPlatformProperties platformProperties = new KubernetesPlatformProperties();
 		KubernetesDeployerProperties deployerProperties = new KubernetesDeployerProperties();
 		KubernetesTaskLauncherProperties taskLauncherProperties = new KubernetesTaskLauncherProperties();
@@ -60,7 +60,7 @@ public class KubernetesTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void kubernetesTaskPlatformWithScheduler() {
+	void kubernetesTaskPlatformWithScheduler() {
 		KubernetesPlatformProperties platformProperties = new KubernetesPlatformProperties();
 		KubernetesDeployerProperties deployerProperties = new KubernetesDeployerProperties();
 		deployerProperties.getLimits().setMemory("5555Mi");
@@ -90,7 +90,7 @@ public class KubernetesTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void kubernetesTaskPlatformWithMultipleAccounts() {
+	void kubernetesTaskPlatformWithMultipleAccounts() {
 		KubernetesPlatformProperties platformProperties = new KubernetesPlatformProperties();
 		KubernetesDeployerProperties deployerProperties = new KubernetesDeployerProperties();
 		deployerProperties.getLimits().setMemory("5555Mi");

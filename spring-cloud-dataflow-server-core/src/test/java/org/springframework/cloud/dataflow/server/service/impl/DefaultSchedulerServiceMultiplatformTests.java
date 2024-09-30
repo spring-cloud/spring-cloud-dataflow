@@ -181,7 +181,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	void testSchedule() {
+	void schedule() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
@@ -272,7 +272,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	void testGetSchedule() {
+	void getSchedule() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -306,7 +306,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	void testUnschedule() {
+	void unschedule() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,

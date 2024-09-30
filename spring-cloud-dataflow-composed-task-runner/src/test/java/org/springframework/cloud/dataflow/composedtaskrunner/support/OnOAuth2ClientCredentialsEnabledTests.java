@@ -30,31 +30,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class OnOAuth2ClientCredentialsEnabledTests {
+class OnOAuth2ClientCredentialsEnabledTests {
 
 	private AnnotationConfigApplicationContext context;
 
 	@AfterEach
-	public void teardown() {
+	void teardown() {
 		if (this.context != null) {
 			this.context.close();
 		}
 	}
 
 	@Test
-	public void noPropertySet() throws Exception {
+	void noPropertySet() throws Exception {
 		this.context = load(Config.class);
 		assertThat(context.containsBean("myBean")).isEqualTo(false);
 	}
 
 	@Test
-	public void propertyClientId() throws Exception {
+	void propertyClientId() throws Exception {
 		this.context = load(Config.class, "oauth2-client-credentials-client-id:12345");
 		assertThat(context.containsBean("myBean")).isEqualTo(true);
 	}
 
 	@Test
-	public void clientIdOnlyWithNoValue() throws Exception {
+	void clientIdOnlyWithNoValue() throws Exception {
 		this.context = load(Config.class, "oauth2-client-credentials-client-id:");
 		assertThat(context.containsBean("myBean")).isEqualTo(false);
 	}

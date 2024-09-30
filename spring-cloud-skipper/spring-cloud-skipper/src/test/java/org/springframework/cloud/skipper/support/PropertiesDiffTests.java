@@ -32,10 +32,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Corneil du Plessis
  *
  */
-public class PropertiesDiffTests {
+class PropertiesDiffTests {
 
 	@Test
-	public void testEmptyMaps() {
+	void emptyMaps() {
 		Map<String, String> left = new HashMap<>();
 		Map<String, String> right = new HashMap<>();
 		PropertiesDiff diff = PropertiesDiff.builder().left(left).right(right).build();
@@ -48,7 +48,7 @@ public class PropertiesDiffTests {
 	}
 
 	@Test
-	public void testAddedRemovedChanging() {
+	void addedRemovedChanging() {
 		Map<String, String> left = new HashMap<>();
 		left.put("key1", "value1");
 		left.put("key2", "value21");
@@ -67,7 +67,7 @@ public class PropertiesDiffTests {
 	}
 
 	@Test
-	public void testChangedValues() {
+	void changedValues() {
 		Map<String, String> left = new HashMap<>();
 		left.put("key1", "value1");
 		Map<String, String> right = new HashMap<>();

@@ -51,15 +51,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class})
-@TestPropertySource(properties = {"graph=ComposedTest-l1 && ComposedTest-l2 && ComposedTest-l11","max-wait-time=1010",
-	"composed-task-app-properties.app.l1.AAA.format=yyyy",
-	"composed-task-app-properties.app.l11.AAA.format=yyyy",
-	"composed-task-app-properties.app.l2.AAA.format=yyyy",
-	"interval-time-between-checks=1100",
-	"composed-task-arguments=--baz=boo",
-	"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
+@TestPropertySource(properties = {"graph=ComposedTest-l1 && ComposedTest-l2 && ComposedTest-l11", "max-wait-time=1010",
+		"composed-task-app-properties.app.l1.AAA.format=yyyy",
+		"composed-task-app-properties.app.l11.AAA.format=yyyy",
+		"composed-task-app-properties.app.l2.AAA.format=yyyy",
+		"interval-time-between-checks=1100",
+		"composed-task-arguments=--baz=boo",
+		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 	private static final Logger logger = LoggerFactory.getLogger(ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests.class);
 	@Autowired
 	private JobRepository jobRepository;
@@ -75,7 +75,7 @@ public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration() throws Exception {
+	void composedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 			"ComposedTest", new JobParameters());
 		job.execute(jobExecution);
@@ -98,12 +98,14 @@ public class ComposedTaskRunnerConfigurationWithPropertiesWithLabelTests {
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-l1_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
-		assertThat(result).contains("--baz=boo");
-		assertThat(result).hasSize(1);
+		assertThat(result)
+				.contains("--baz=boo")
+				.hasSize(1);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
 		logger.info("taskletProperties:{}", taskletProperties);
 		assertThat(taskletProperties.keySet()).containsExactly("app.l1.AAA.format");
-		assertThat(taskletProperties).hasSize(1);
-		assertThat(taskletProperties).containsEntry("app.l1.AAA.format", "yyyy");
+		assertThat(taskletProperties)
+				.hasSize(1)
+				.containsEntry("app.l1.AAA.format", "yyyy");
 	}
 }

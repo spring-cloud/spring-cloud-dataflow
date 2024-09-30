@@ -1863,8 +1863,9 @@ public class DataFlowIT {
 				List<BatchStatus> batchStatuses = new ArrayList<>();
 				jobExecutionResources.stream().forEach(
 						jobExecutionResource -> batchStatuses.add(jobExecutionResource.getJobExecution().getStatus()));
-				assertThat(batchStatuses).contains(BatchStatus.FAILED);
-				assertThat(batchStatuses).contains(BatchStatus.COMPLETED);
+				assertThat(batchStatuses)
+						.contains(BatchStatus.FAILED)
+						.contains(BatchStatus.COMPLETED);
 			});
 		}
 	}

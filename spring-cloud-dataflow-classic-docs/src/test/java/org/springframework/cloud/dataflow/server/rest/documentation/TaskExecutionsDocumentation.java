@@ -53,9 +53,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class TaskExecutionsDocumentation extends BaseDocumentation {
+class TaskExecutionsDocumentation extends BaseDocumentation {
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
@@ -65,7 +65,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		cleanupTaskExecutions("taskA");
 		cleanupTaskExecutions("taskB");
 		destroyTaskDefinition("taskA");
@@ -74,7 +74,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void launchTaskBoot3() throws Exception {
+	void launchTaskBoot3() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions/launch")
 								.queryParam("name", "taskA")
@@ -99,7 +99,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void launchTask() throws Exception {
+	void launchTask() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions")
 								.queryParam("name", "taskA")
@@ -120,7 +120,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getTaskCurrentCount() throws Exception {
+	void getTaskCurrentCount() throws Exception {
 		this.mockMvc.perform(
 						get("/tasks/executions/current")
 				)
@@ -136,7 +136,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getTaskDisplayDetail() throws Exception {
+	void getTaskDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 						get("/tasks/executions/{id}", "1")
 				)
@@ -170,7 +170,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getTaskDisplayDetailByExternalId() throws Exception {
+	void getTaskDisplayDetailByExternalId() throws Exception {
 		final AtomicReference<String> externalExecutionId = new AtomicReference<>(null);
 		documentation.dontDocument(() -> {
 			MvcResult mvcResult = this.mockMvc.perform(
@@ -220,8 +220,9 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 						)
 				));
 	}
+
 	@Test
-	public void listTaskExecutions() throws Exception {
+	void listTaskExecutions() throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 						post("/tasks/executions")
 								.queryParam("name", "taskB")
@@ -266,7 +267,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listTaskThinExecutions() throws Exception {
+	void listTaskThinExecutions() throws Exception {
 		documentation.dontDocument(() -> this.mockMvc.perform(
 				post("/tasks/executions")
 					.queryParam("name", "taskB")
@@ -311,7 +312,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listTaskExecutionsByName() throws Exception {
+	void listTaskExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/tasks/executions")
 								.queryParam("name", "taskB")
@@ -334,7 +335,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void stopTask() throws Exception {
+	void stopTask() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions")
 								.queryParam("name", "taskA")
@@ -355,7 +356,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void taskExecutionRemove() throws Exception {
+	void taskExecutionRemove() throws Exception {
 
 		documentation.dontDocument(() -> this.mockMvc.perform(
 						post("/tasks/executions")
@@ -375,7 +376,7 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void taskExecutionRemoveAndTaskDataRemove() throws Exception {
+	void taskExecutionRemoveAndTaskDataRemove() throws Exception {
 		this.mockMvc.perform(
 						delete("/tasks/executions/{ids}?action=CLEANUP,REMOVE_DATA", "1,2"))
 				.andExpect(status().isOk())

@@ -89,7 +89,7 @@ import static org.mockito.Mockito.mock;
  */
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		org.springframework.cloud.dataflow.composedtaskrunner.TaskLauncherTaskletTests.TestConfiguration.class})
-public class TaskLauncherTaskletTests {
+class TaskLauncherTaskletTests {
 	private final static Logger logger = LoggerFactory.getLogger(TaskLauncherTaskletTests.class);
 	private static final String TASK_NAME = "testTask1_0";
 
@@ -117,7 +117,7 @@ public class TaskLauncherTaskletTests {
 
 
 	@BeforeEach
-	public void setup() throws Exception{
+	void setup() throws Exception{
 		if (this.mapper == null) {
 			this.mapper = new ObjectMapper();
 			this.mapper.registerModule(new Jdk8Module());
@@ -137,7 +137,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTasklet() {
+	void taskLauncherTasklet() {
 		createCompleteTaskExecution(0);
 		TaskLauncherTasklet taskLauncherTasklet =
 				getTaskExecutionTasklet();
@@ -160,7 +160,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testInvalidTaskOperations() {
+	void invalidTaskOperations() {
 		TaskLauncherTasklet taskLauncherTasklet = new TestTaskLauncherTasklet(
 				null,
 				null,
@@ -181,7 +181,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletWithTaskExecutionId() {
+	void taskLauncherTaskletWithTaskExecutionId() {
 		TaskProperties taskProperties = new TaskProperties();
 		taskProperties.setExecutionid(88L);
 		mockReturnValForTaskExecution(2L);
@@ -200,7 +200,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletWithoutTaskExecutionId() {
+	void taskLauncherTaskletWithoutTaskExecutionId() {
 
 		mockReturnValForTaskExecution(2L);
 		ChunkContext chunkContext = chunkContext();
@@ -223,7 +223,7 @@ public class TaskLauncherTaskletTests {
 	@SuppressWarnings("unchecked")
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletWithTaskExecutionIdWithPreviousParentID() {
+	void taskLauncherTaskletWithTaskExecutionIdWithPreviousParentID() {
 
 		TaskProperties taskProperties = new TaskProperties();
 		taskProperties.setExecutionid(88L);
@@ -246,7 +246,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletStartTimeout() {
+	void taskLauncherTaskletStartTimeout() {
 		mockReturnValForTaskExecution(1L);
 		this.composedTaskProperties.setMaxStartWaitTime(500);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
@@ -266,7 +266,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletTimeout() {
+	void taskLauncherTaskletTimeout() {
 		mockReturnValForTaskExecution(1L);
 		this.composedTaskProperties.setMaxWaitTime(500);
 		this.composedTaskProperties.setIntervalTimeBetweenChecks(1000);
@@ -279,7 +279,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testInvalidTaskName() {
+	void invalidTaskName() {
 		final String ERROR_MESSAGE =
 				"Could not find task definition named " + TASK_NAME;
 		VndErrors errors = new VndErrors("message", ERROR_MESSAGE, Link.of("ref"));
@@ -297,7 +297,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testNoDataFlowServer() {
+	void noDataFlowServer() {
 		final String ERROR_MESSAGE =
 				"I/O error on GET request for \"http://localhost:9393\": Connection refused; nested exception is java.net.ConnectException: Connection refused";
 		Mockito.doThrow(new ResourceAccessException(ERROR_MESSAGE))
@@ -313,7 +313,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletFailure() {
+	void taskLauncherTaskletFailure() {
 		mockReturnValForTaskExecution(1L);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
@@ -339,7 +339,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletNullResult() {
+	void taskLauncherTaskletNullResult() {
 		mockReturnValForTaskExecution(1L);
 		TaskLauncherTasklet taskLauncherTasklet = getTaskExecutionTasklet();
 		ChunkContext chunkContext = chunkContext();
@@ -350,7 +350,7 @@ public class TaskLauncherTaskletTests {
 	}
 
 	@Test
-	public void testTaskOperationsConfiguredWithMissingPassword() {
+	void taskOperationsConfiguredWithMissingPassword() {
 		try {
 			final ComposedTaskProperties composedTaskProperties = new ComposedTaskProperties();
 			composedTaskProperties.setDataflowServerUsername("foo");
@@ -369,7 +369,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletIgnoreExitMessage() {
+	void taskLauncherTaskletIgnoreExitMessage() {
 		createCompleteTaskExecution(0);
 
 		TaskLauncherTasklet taskLauncherTasklet =
@@ -388,7 +388,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletIgnoreExitMessageViaProperties() {
+	void taskLauncherTaskletIgnoreExitMessageViaProperties() {
 		createCompleteTaskExecution(0);
 
 		TaskLauncherTasklet taskLauncherTasklet =
@@ -407,7 +407,7 @@ public class TaskLauncherTaskletTests {
 
 	@Test
 	@DirtiesContext
-	public void testTaskLauncherTaskletIgnoreExitMessageViaCommandLineOverride() {
+	void taskLauncherTaskletIgnoreExitMessageViaCommandLineOverride() {
 		createCompleteTaskExecution(0);
 
 		TaskLauncherTasklet taskLauncherTasklet =
@@ -433,7 +433,7 @@ public class TaskLauncherTaskletTests {
 
 
 	@Test
-	public void testTaskOperationsConfiguredWithMissingUsername() {
+	void taskOperationsConfiguredWithMissingUsername() {
 		try {
 			final ComposedTaskProperties composedTaskProperties = new ComposedTaskProperties();
 			composedTaskProperties.setDataflowServerPassword("bar");

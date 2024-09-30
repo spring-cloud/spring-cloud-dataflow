@@ -34,7 +34,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class DockerImageTests {
+class DockerImageTests {
 
 	static class DockerImageNames implements ArgumentsProvider {
 
@@ -76,7 +76,7 @@ public class DockerImageTests {
 
 	@ParameterizedTest
 	@ArgumentsSource(DockerImageNames.class)
-	public void testDockerImageParsing(String description, String fullImageName, String expectedHost,
+	void dockerImageParsing(String description, String fullImageName, String expectedHost,
 			String expectedNamespace, String expectedRepo, String expectedNamespaceAndRepo, String expectedTag) {
 		DockerImage dockerImage = DockerImage.fromImageName(fullImageName);
 		assertThat(dockerImage.getHost()).as(description + ": host").isEqualTo(expectedHost);

@@ -45,24 +45,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @DirtiesContext
-public class RuntimeAppsDocumentation extends BaseDocumentation {
+class RuntimeAppsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.source, "http", "5.0.0");
 		registerApp(ApplicationType.sink, "log", "5.0.0");
 		createStream("mystream", "http | log", true);
 	}
 
 	@AfterEach
-	public void cleanup() throws Exception {
+	void cleanup() throws Exception {
 		destroyStream("mystream");
 		unregisterApp(ApplicationType.source, "http");
 		unregisterApp(ApplicationType.sink, "log");
 	}
 
 	@Test
-	public void listRuntimeStreamStatus() throws Exception {
+	void listRuntimeStreamStatus() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/streams")
 						.accept(MediaType.APPLICATION_JSON)
@@ -72,7 +72,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listRuntimeStreamStatusV2() throws Exception {
+	void listRuntimeStreamStatusV2() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/streams/status")
 						.accept(MediaType.APPLICATION_JSON)
@@ -82,7 +82,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listAllApps() throws Exception {
+	void listAllApps() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/apps")
 						.accept(MediaType.APPLICATION_JSON)
@@ -92,7 +92,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listSingleAppAllInstances() throws Exception {
+	void listSingleAppAllInstances() throws Exception {
 
 		Info info = new Info();
 		info.setStatus(new Status());
@@ -120,7 +120,7 @@ public class RuntimeAppsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getSingleAppSingleInstance() throws Exception {
+	void getSingleAppSingleInstance() throws Exception {
 
 		Info info = new Info();
 		info.setStatus(new Status());

@@ -26,7 +26,7 @@ import org.springframework.cloud.skipper.server.config.SkipperServerProperties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DeployerConfigurationMetadataResolverTests {
+class DeployerConfigurationMetadataResolverTests {
 
 	//todo: Brittle. This breaks if you add a deployer property
 	private static final int ALL_LOCAL_DEPLOYER_PROPERTIES = 26;
@@ -36,7 +36,7 @@ public class DeployerConfigurationMetadataResolverTests {
 
 
 	@Test
-	public void testNoFiltersFindsAll() {
+	void noFiltersFindsAll() {
 		this.contextRunner
 				.run((context) -> {
 					SkipperServerProperties skipperServerProperties = context.getBean(SkipperServerProperties.class);
@@ -49,7 +49,7 @@ public class DeployerConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void testExcludeGroup() {
+	void excludeGroup() {
 		this.contextRunner
 				.withPropertyValues(
 						"spring.cloud.skipper.server.deployer-properties.group-excludes=spring.cloud.deployer.local.port-range"
@@ -65,7 +65,7 @@ public class DeployerConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void testExcludeProperty() {
+	void excludeProperty() {
 		this.contextRunner
 				.withPropertyValues(
 						"spring.cloud.skipper.server.deployer-properties.property-excludes=spring.cloud.deployer.local.port-range.low"
@@ -81,7 +81,7 @@ public class DeployerConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void testIncludeGroup() {
+	void includeGroup() {
 		this.contextRunner
 				.withPropertyValues(
 						"spring.cloud.skipper.server.deployer-properties.group-includes=spring.cloud.deployer.local.port-range"
@@ -97,7 +97,7 @@ public class DeployerConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void testIncludeProperty() {
+	void includeProperty() {
 		this.contextRunner
 				.withPropertyValues(
 						"spring.cloud.skipper.server.deployer-properties.property-includes=spring.cloud.deployer.local.port-range.low"
@@ -113,7 +113,7 @@ public class DeployerConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void testIncludeMultipleProperty() {
+	void includeMultipleProperty() {
 		this.contextRunner
 				.withPropertyValues(
 						"spring.cloud.skipper.server.deployer-properties.property-includes=spring.cloud.deployer.local.port-range.low,spring.cloud.deployer.local.port-range.high"
@@ -129,7 +129,7 @@ public class DeployerConfigurationMetadataResolverTests {
 	}
 
 	@Test
-	public void testIncludeGroupExcludeProperty() {
+	void includeGroupExcludeProperty() {
 		this.contextRunner
 				.withPropertyValues(
 						"spring.cloud.skipper.server.deployer-properties.group-includes=spring.cloud.deployer.local.port-range",

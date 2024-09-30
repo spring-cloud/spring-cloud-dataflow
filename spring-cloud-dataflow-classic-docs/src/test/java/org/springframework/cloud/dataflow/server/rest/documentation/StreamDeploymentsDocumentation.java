@@ -23,10 +23,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.MethodName;
 import org.junit.jupiter.api.Test;
-import org.junit.runners.MethodSorters;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.springframework.cloud.dataflow.rest.UpdateStreamRequest;
 import org.springframework.cloud.skipper.domain.PackageIdentifier;
@@ -52,12 +52,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@TestMethodOrder(MethodName.class)
 @DirtiesContext
 public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.mockMvc.perform(
 				post("/apps/{type}/time", "source")
 						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE")
@@ -83,7 +83,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void scale() throws Exception {
+	void scale() throws Exception {
 		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
 		this.mockMvc.perform(
 				post("/streams/deployments/scale/{streamName}/{appName}/instances/{count}", "timelog", "log", 1)
@@ -101,7 +101,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void unDeploy() throws Exception {
+	void unDeploy() throws Exception {
 		this.mockMvc.perform(
 				delete("/streams/deployments/{timelog}", "timelog"))
 				.andExpect(status().isOk())
@@ -112,7 +112,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void unDeployAll() throws Exception {
+	void unDeployAll() throws Exception {
 		this.mockMvc.perform(
 				delete("/streams/deployments"))
 				.andExpect(status().isOk())
@@ -121,7 +121,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 
 
 	@Test
-	public void info() throws Exception {
+	void info() throws Exception {
 		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
 		this.mockMvc.perform(
 				get("/streams/deployments/{timelog}?reuse-deployment-properties=true", "timelog")
@@ -137,7 +137,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void deploy() throws Exception {
+	void deploy() throws Exception {
 		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
 		this.mockMvc.perform(
 				post("/streams/deployments/{timelog}", "timelog")
@@ -151,7 +151,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void streamUpdate() throws Exception {
+	void streamUpdate() throws Exception {
 		String json = "{\"app.time.timestamp.format\":\"YYYY\"}";
 		this.mockMvc.perform(
 				post("/streams/deployments/{timelog1}", "timelog1")
@@ -186,7 +186,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void rollback() throws Exception {
+	void rollback() throws Exception {
 		final RollbackRequest rollbackRequest = new RollbackRequest();
 		rollbackRequest.setReleaseName("timelog1");
 		this.mockMvc.perform(
@@ -200,7 +200,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void history() throws Exception {
+	void history() throws Exception {
 		when(springDataflowServer.getSkipperClient().history(anyString()))
 				.thenReturn(Collections.singletonList(new Release()));
 
@@ -214,7 +214,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void manifest() throws Exception {
+	void manifest() throws Exception {
 		this.mockMvc.perform(
 				get("/streams/deployments/manifest/{name}/{version}", "timelog1", 1)
 						.contentType(MediaType.APPLICATION_JSON))
@@ -226,7 +226,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void platformList() throws Exception {
+	void platformList() throws Exception {
 		this.mockMvc.perform(
 				get("/streams/deployments/platform/list")
 						.contentType(MediaType.APPLICATION_JSON))

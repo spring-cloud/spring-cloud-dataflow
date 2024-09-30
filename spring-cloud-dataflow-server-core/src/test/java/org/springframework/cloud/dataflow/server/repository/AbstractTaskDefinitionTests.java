@@ -117,7 +117,7 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testFindAll() {
+	public void findAll() {
 		assertThat(repository.findAll().iterator()).isExhausted();
 
 		initializeRepository();
@@ -155,7 +155,7 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testCount() {
+	public void count() {
 		assertThat(repository.count()).isEqualTo(0);
 
 		initializeRepository();
@@ -209,7 +209,7 @@ public abstract class AbstractTaskDefinitionTests {
 	}
 
 	@Test
-	public void testDeleteAll() {
+	public void deleteAll() {
 		initializeRepository();
 
 		assertThat(repository.count()).isEqualTo(3);

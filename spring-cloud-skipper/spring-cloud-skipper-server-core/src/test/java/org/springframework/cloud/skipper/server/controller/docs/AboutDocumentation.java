@@ -29,10 +29,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class AboutDocumentation extends BaseDocumentation {
+class AboutDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getMetaInformation() throws Exception {
+	void getMetaInformation() throws Exception {
 		this.mockMvc.perform(get("/api/about").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						responseFields(

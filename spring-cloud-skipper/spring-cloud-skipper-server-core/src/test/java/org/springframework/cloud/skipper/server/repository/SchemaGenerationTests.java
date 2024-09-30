@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @ActiveProfiles("repo-test")
 @Transactional
-public class SchemaGenerationTests extends AbstractIntegrationTest {
+class SchemaGenerationTests extends AbstractIntegrationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(SkipperServerConfiguration.class);
 
@@ -56,7 +56,7 @@ public class SchemaGenerationTests extends AbstractIntegrationTest {
 	private LocalContainerEntityManagerFactoryBean fb;
 
 	@Test
-	public void generateSchemaDdlFiles() throws Exception {
+	void generateSchemaDdlFiles() throws Exception {
 
 		final PersistenceUnitInfo persistenceUnitInfo = fb.getPersistenceUnitInfo();
 		final File tempDir = Files.createTempDirectory("skipper-sql-").toFile();

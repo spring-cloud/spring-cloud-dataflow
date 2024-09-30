@@ -50,7 +50,7 @@ class ArgumentSanitizerTest {
 	}
 
 	@Test
-	void testSanitizeArguments() {
+	void sanitizeArguments() {
 		final List<String> arguments = new ArrayList<>();
 
 		for (String key : keys) {

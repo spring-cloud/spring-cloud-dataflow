@@ -80,7 +80,7 @@ public abstract class AbstractSkipperSmokeTest {
 
 
 	@Test
-	public void testStart() {
+	public void start() {
 		logger.info("started:{}", getClass().getSimpleName());
 		AppDeployerData deployerData = new AppDeployerData();
 		deployerData.setDeploymentDataUsingMap(Collections.singletonMap("a", "b"));

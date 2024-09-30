@@ -35,17 +35,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = CloudFoundryPlatformPropertiesTest.TestConfig.class)
 @ActiveProfiles("platform-properties")
-public class CloudFoundryPlatformPropertiesTest {
+class CloudFoundryPlatformPropertiesTest {
 
 	@Autowired
 	private CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
 
 	@Test
-	public void deserializationTest() {
+	void deserializationTest() {
 		Map<String, CloudFoundryPlatformProperties.CloudFoundryProperties> cfAccounts = this.cloudFoundryPlatformProperties
 				.getAccounts();
-		assertThat(cfAccounts).hasSize(2);
-		assertThat(cfAccounts).containsKeys("dev", "qa");
+		assertThat(cfAccounts)
+				.hasSize(2)
+				.containsKeys("dev", "qa");
 		assertThat(cfAccounts.get("dev").getConnection().getOrg()).isEqualTo("myOrg");
 		assertThat(cfAccounts.get("dev").getConnection().getClientId()).isEqualTo("id1");
 		assertThat(cfAccounts.get("dev").getConnection().getClientSecret()).isEqualTo("secret1");

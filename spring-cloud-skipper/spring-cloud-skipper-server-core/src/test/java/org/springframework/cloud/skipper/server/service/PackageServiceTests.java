@@ -61,7 +61,7 @@ import static org.assertj.core.api.Assertions.fail;
  */
 @ActiveProfiles("repo-test")
 @Transactional
-public class PackageServiceTests extends AbstractIntegrationTest {
+class PackageServiceTests extends AbstractIntegrationTest {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageServiceTests.class);
 
@@ -75,7 +75,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	private RepositoryRepository repositoryRepository;
 
 	@Test
-	public void testExceptions() {
+	void exceptions() {
 		PackageMetadata packageMetadata = new PackageMetadata();
 		packageMetadata.setName("noname");
 		packageMetadata.setVersion("noversion");
@@ -88,7 +88,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void download() {
+	void download() {
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log", "1.0.0");
 		// Other tests may have caused the file to be loaded into the database, ensure we start
 		// fresh.
@@ -115,7 +115,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void upload() throws Exception {
+	void upload() throws Exception {
 		// Create throw away repository, treated to be a 'local' database repo by default for now.
 		Repository repository = new Repository();
 		repository.setName("database-repo");
@@ -165,7 +165,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void testPackageNameVersionMismatch() throws IOException {
+	void packageNameVersionMismatch() throws IOException {
 		UploadRequest uploadRequest = new UploadRequest();
 		uploadRequest.setRepoName("local");
 		uploadRequest.setName("buggy");
@@ -192,7 +192,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void testInvalidVersions() throws IOException {
+	void invalidVersions() throws IOException {
 		UploadRequest uploadRequest = new UploadRequest();
 		uploadRequest.setRepoName("local");
 		uploadRequest.setName("log");
@@ -227,7 +227,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void deserializePackage() {
+	void deserializePackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("log",
 				"1.0.0");
 		assertThat(packageService).isNotNull();
@@ -242,7 +242,7 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void deserializeNestedPackage() {
+	void deserializeNestedPackage() {
 		PackageMetadata packageMetadata = this.packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("ticktock",
 				"1.0.0");
 		assertThat(packageService).isNotNull();
@@ -289,11 +289,13 @@ public class PackageServiceTests extends AbstractIntegrationTest {
 		Map<String, Object> spec = (Map<String, Object>) logConfigValueMap.get("spec");
 		assertThat(spec).hasSize(2);
 		Map<String, String> applicationProperties = (Map<String, String>) spec.get("applicationProperties");
-		assertThat(applicationProperties).hasSize(1);
-		assertThat(applicationProperties).contains(entry("log.level", "DEBUG"));
+		assertThat(applicationProperties)
+				.hasSize(1)
+				.contains(entry("log.level", "DEBUG"));
 		Map<String, String> deploymentProperties = (Map<String, String>) spec.get("deploymentProperties");
-		assertThat(deploymentProperties).hasSize(1);
-		assertThat(deploymentProperties).contains(entry("memory", "1024m"));
+		assertThat(deploymentProperties)
+				.hasSize(1)
+				.contains(entry("memory", "1024m"));
 
 	}
 }

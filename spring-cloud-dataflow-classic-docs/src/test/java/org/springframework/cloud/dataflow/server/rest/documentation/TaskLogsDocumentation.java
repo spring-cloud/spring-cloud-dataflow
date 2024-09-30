@@ -19,11 +19,9 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import java.time.Duration;
 
 import org.awaitility.Awaitility;
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runners.MethodSorters;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
@@ -45,10 +43,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class TaskLogsDocumentation extends BaseDocumentation {
+class TaskLogsDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getLogsByTaskId() throws Exception {
+	void getLogsByTaskId() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		String taskName = "taskA";
 		documentation.dontDocument( () -> this.mockMvc.perform(

@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Corneil du Plessis
  */
 @ActiveProfiles("repo-test")
-public class RepositoryInitializationServiceTest extends AbstractIntegrationTest {
+class RepositoryInitializationServiceTest extends AbstractIntegrationTest {
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
@@ -39,7 +39,7 @@ public class RepositoryInitializationServiceTest extends AbstractIntegrationTest
 	private PackageMetadataRepository packageMetadataRepository;
 
 	@Test
-	public void initialize() throws Exception {
+	void initialize() throws Exception {
 		assertThat(repositoryRepository.count()).isEqualTo(2);
 		assertThat(repositoryRepository.findByName("test").getUrl()).isEqualTo("classpath:/repositories/binaries/test");
 		// Note, this is a brittle assertion.

@@ -240,7 +240,7 @@ class TaskControllerTests {
 	}
 
 	@Test
-	void testSave() throws Exception {
+	void save() throws Exception {
 		assertThat(repository.count()).isZero();
 		this.registry.save("task", ApplicationType.task, "1.0.0", new URI("https://fake.example.com/"), null);
 		mockMvc.perform(post("/tasks/definitions").param("name", "myTask").param("definition", "task")
@@ -529,7 +529,7 @@ class TaskControllerTests {
 	}
 
 	@Test
-	void testLaunch() throws Exception {
+	void launch() throws Exception {
 		repository.save(new TaskDefinition("myTask", "foo"));
 		this.registry.save("foo", ApplicationType.task,
 				"1.0.0", new URI("file:src/test/resources/apps/foo-task"), null);

@@ -50,7 +50,7 @@ public class TaskServiceUtilsTests {
 
 
 	@Test
-	void testCreateComposedTaskDefinition() {
+	void createComposedTaskDefinition() {
 		assertThat(TaskServiceUtils.createComposedTaskDefinition(BASE_GRAPH)).isEqualTo("composed-task-runner --graph=\"AAA && BBB\"");
 	}
 
@@ -78,8 +78,9 @@ public class TaskServiceUtilsTests {
 		taskDeploymentProperties = TaskServiceUtils.establishComposedTaskProperties(
 				taskDeploymentProperties,
 				node);
-		assertThat(taskDeploymentProperties).hasSize(1);
-		assertThat(taskDeploymentProperties).containsEntry("app.composed-task-runner.composed-task-properties", "app.test-BBB.app.BBB.timestamp.format=aformat, deployer.test-BBB.deployer.BBB.foo=bar");
+		assertThat(taskDeploymentProperties)
+				.hasSize(1)
+				.containsEntry("app.composed-task-runner.composed-task-properties", "app.test-BBB.app.BBB.timestamp.format=aformat, deployer.test-BBB.deployer.BBB.foo=bar");
 	}
 
 	@Test
@@ -163,7 +164,7 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	void testExtractAppProperties() {
+	void extractAppProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		taskDeploymentProperties.put("app.test.foo", "bar");
 		taskDeploymentProperties.put("test.none", "boo");
@@ -172,9 +173,10 @@ public class TaskServiceUtilsTests {
 		Map<String, String> result = TaskServiceUtils.extractAppProperties("test",
 				taskDeploymentProperties);
 
-		assertThat(result).hasSize(2);
-		assertThat(result).containsEntry("foo", "bar");
-		assertThat(result).containsEntry("test", "baz");
+		assertThat(result)
+				.hasSize(2)
+				.containsEntry("foo", "bar")
+				.containsEntry("test", "baz");
 	}
 
 	@Test
@@ -188,13 +190,14 @@ public class TaskServiceUtilsTests {
 		Map<String, String> result = TaskServiceUtils.extractAppProperties("myappname", "myapplabel",
 				taskDeploymentProperties);
 
-		assertThat(result).hasSize(2);
-		assertThat(result).containsEntry("foo", "bar");
-		assertThat(result).containsEntry("myprop", "baz");
+		assertThat(result)
+				.hasSize(2)
+				.containsEntry("foo", "bar")
+				.containsEntry("myprop", "baz");
 	}
 
 	@Test
-	void testMergeAndExpandAppProperties() {
+	void mergeAndExpandAppProperties() {
 		TaskDefinition taskDefinition = new TaskDefinition("testTask", "testApp");
 		Map<String, String> appDeploymentProperties = new HashMap<>();
 		appDeploymentProperties.put("propA", "valA");

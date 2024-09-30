@@ -55,17 +55,17 @@ import static org.mockito.Mockito.verify;
  * @author Glenn Renfro
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes={EmbeddedDataSourceConfiguration.class,
+@ContextConfiguration(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
-@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
-		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS ,
+@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC", "max-wait-time=1010",
+		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
-		"transaction-isolation-level=ISOLATION_READ_COMMITTED","spring.cloud.task.closecontext-enabled=true",
-		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest","max-start-wait-time=1011"})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-public class ComposedTaskRunnerConfigurationWithPropertiesTests {
+		"transaction-isolation-level=ISOLATION_READ_COMMITTED", "spring.cloud.task.closecontext-enabled=true",
+		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest", "max-start-wait-time=1011"})
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+class ComposedTaskRunnerConfigurationWithPropertiesTests {
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -88,7 +88,7 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration() throws Exception {
+	void composedConfiguration() throws Exception {
 		assertThat(composedTaskProperties.isSkipTlsCertificateVerification()).isFalse();
 
 

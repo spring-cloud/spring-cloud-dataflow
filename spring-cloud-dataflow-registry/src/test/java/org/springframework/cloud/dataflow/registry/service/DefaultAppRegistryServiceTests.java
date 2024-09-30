@@ -111,7 +111,7 @@ class DefaultAppRegistryServiceTests {
 	}
 
 	@Test
-	void testFindAll() {
+	void findAll() {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
 		AppRegistration fooSink = appRegistration("foo", ApplicationType.sink, false);
 		AppRegistration barSource = appRegistration("bar", ApplicationType.source, true);
@@ -119,9 +119,10 @@ class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistryService.findAll();
 
-		assertThat(registrations).haveAtLeast(1, same("foo", ApplicationType.source, URI.create("classpath:/foo-source"), URI.create("classpath:/foo-source-metadata")));
-		assertThat(registrations).haveAtLeast(1, same("bar", ApplicationType.source, URI.create("classpath:/bar-source"), URI.create("classpath:/bar-source-metadata")));
-		assertThat(registrations).haveAtLeast(1, same("foo", ApplicationType.sink, URI.create("classpath:/foo-sink"), null));
+		assertThat(registrations)
+				.haveAtLeast(1, same("foo", ApplicationType.source, URI.create("classpath:/foo-source"), URI.create("classpath:/foo-source-metadata")))
+				.haveAtLeast(1, same("bar", ApplicationType.source, URI.create("classpath:/bar-source"), URI.create("classpath:/bar-source-metadata")))
+				.haveAtLeast(1, same("foo", ApplicationType.sink, URI.create("classpath:/foo-sink"), null));
 	}
 
 	static Condition<AppRegistration> appRegistrationWith(String name, URI uri, URI metadata, ApplicationType type) {
@@ -231,7 +232,7 @@ class DefaultAppRegistryServiceTests {
 	}
 
 	@Test
-	void testImportAll() {
+	void importAll() {
 
 		final boolean overwrite = true;
 
@@ -263,9 +264,10 @@ class DefaultAppRegistryServiceTests {
 
 		registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations).haveAtLeast(1, same("foo", ApplicationType.source, URI.create("http:/foo-source-1.0.0"),URI.create("http:/foo-source-metadata-1.0.0")));
-		assertThat(registrations).haveAtLeast(1, same("bar", ApplicationType.source, URI.create("http:/bar-source-1.0.0"), URI.create("http:/bar-source-metadata-1.0.0")));
-		assertThat(registrations).haveAtLeast(1, same("foo", ApplicationType.sink, URI.create("http:/foo-sink-1.0.0"), null));
+		assertThat(registrations)
+				.haveAtLeast(1, same("foo", ApplicationType.source, URI.create("http:/foo-source-1.0.0"),URI.create("http:/foo-source-metadata-1.0.0")))
+				.haveAtLeast(1, same("bar", ApplicationType.source, URI.create("http:/bar-source-1.0.0"), URI.create("http:/bar-source-metadata-1.0.0")))
+				.haveAtLeast(1, same("foo", ApplicationType.sink, URI.create("http:/foo-sink-1.0.0"), null));
 	}
 
 	@Test
@@ -285,10 +287,11 @@ class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
+		assertThat(registrations)
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")))
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
 	}
 
 	@Test
@@ -309,10 +312,11 @@ class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
+		assertThat(registrations)
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")))
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
 
 	}
 
@@ -333,10 +337,11 @@ class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
+		assertThat(registrations)
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")))
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
 
 	}
 
@@ -357,10 +362,11 @@ class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
+		assertThat(registrations)
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")))
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.0.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.1.RELEASE")));
 
 	}
 
@@ -380,9 +386,10 @@ class DefaultAppRegistryServiceTests {
 		verify(appRegistrationRepository, times(3)).save(appRegistrationCaptor.capture());
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")));
-		assertThat(registrations).haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"),null));
-		assertThat(registrations).haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")));
+		assertThat(registrations)
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.1.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:jar:metadata:2.0.1.RELEASE")))
+				.haveAtLeast(1, same("time", ApplicationType.source, URI.create("maven://org.springframework.cloud.stream.app:time-source-rabbit:2.0.0.RELEASE"),null))
+				.haveAtLeast(1, same("log", ApplicationType.sink, URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:2.0.2.RELEASE"), URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:2.0.2.RELEASE")));
 
 	}
 
@@ -397,13 +404,14 @@ class DefaultAppRegistryServiceTests {
 
 		List<AppRegistration> registrations = appRegistrationCaptor.getAllValues();
 
-		assertThat(registrations).haveAtLeast(1, same("foo", ApplicationType.source, URI.create("docker:springcloudstream/foo-source-kafka:latest"), URI.create("maven://org.springframework.cloud.stream.app:foo-source-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT")));
-		assertThat(registrations).haveAtLeast(1, same("foo", ApplicationType.sink, URI.create("docker:springcloudstream/foo-sink-kafka:latest"), URI.create("maven://org.springframework.cloud.stream.app:foo-sink-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT")));
+		assertThat(registrations)
+				.haveAtLeast(1, same("foo", ApplicationType.source, URI.create("docker:springcloudstream/foo-source-kafka:latest"), URI.create("maven://org.springframework.cloud.stream.app:foo-source-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT")))
+				.haveAtLeast(1, same("foo", ApplicationType.sink, URI.create("docker:springcloudstream/foo-sink-kafka:latest"), URI.create("maven://org.springframework.cloud.stream.app:foo-sink-kafka:jar:metadata:2.1.2.BUILD-SNAPSHOT")));
 
 	}
 
 	@Test
-	void testDelete() throws URISyntaxException {
+	void delete() throws URISyntaxException {
 		AppRegistration fooSource = appRegistration("foo", ApplicationType.source, true);
 		appRegistryService.delete(fooSource.getName(), fooSource.getType(), fooSource.getVersion());
 		verify(appRegistrationRepository, times(1))
@@ -412,7 +420,7 @@ class DefaultAppRegistryServiceTests {
 	}
 
 	@Test
-	void testDeleteAll() throws URISyntaxException {
+	void deleteAll() throws URISyntaxException {
 		List<AppRegistration> appsToDelete = Collections.emptyList();
 		appRegistryService.deleteAll(appsToDelete);
 		verify(appRegistrationRepository, times(1)).deleteAll(appsToDelete);

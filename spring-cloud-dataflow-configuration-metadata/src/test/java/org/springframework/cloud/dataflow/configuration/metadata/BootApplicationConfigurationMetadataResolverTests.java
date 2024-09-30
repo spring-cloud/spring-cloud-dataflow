@@ -97,8 +97,9 @@ class BootApplicationConfigurationMetadataResolverTests {
 	void appSpecificVisiblePropsShouldBeVisible() {
 		List<ConfigurationMetadataProperty> properties = resolver
 				.listProperties(new ClassPathResource("apps/filter-processor", getClass()));
-		assertThat(properties).haveAtLeast(1, configPropertyIdentifiedAs("filter.expression"));
-		assertThat(properties).haveAtLeast(1, configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2"));
+		assertThat(properties)
+				.haveAtLeast(1, configPropertyIdentifiedAs("filter.expression"))
+				.haveAtLeast(1, configPropertyIdentifiedAs("some.other.property.included.prefix.expresso2"));
 	}
 
 	@Test

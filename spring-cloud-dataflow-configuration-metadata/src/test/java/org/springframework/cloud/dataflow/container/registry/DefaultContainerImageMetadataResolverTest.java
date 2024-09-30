@@ -118,8 +118,9 @@ class DefaultContainerImageMetadataResolverTest {
 				"registry-1.docker.io", null, "test/image", "123");
 
 		Map<String, String> labels = resolver.getImageLabels("test/image:latest");
-		assertThat(labels).hasSize(1);
-		assertThat(labels).containsEntry("boza", "koza");
+		assertThat(labels)
+				.hasSize(1)
+				.containsEntry("boza", "koza");
 	}
 
 	@Test
@@ -134,8 +135,9 @@ class DefaultContainerImageMetadataResolverTest {
 				"my-private-repository.com", "5000", "test/image", "123");
 
 		Map<String, String> labels = resolver.getImageLabels("my-private-repository.com:5000/test/image:latest");
-		assertThat(labels).hasSize(1);
-		assertThat(labels).containsEntry("boza", "koza");
+		assertThat(labels)
+				.hasSize(1)
+				.containsEntry("boza", "koza");
 	}
 
 	@Test
@@ -230,8 +232,9 @@ class DefaultContainerImageMetadataResolverTest {
 				"sha256:efc06d6096cc88697e477abb0b3479557e1bec688c36813383f1a8581f87d9f8");
 
 		Map<String, String> labels = resolver.getImageLabels("my-private-repository.com:5000/test/image:latest");
-		assertThat(labels).isNotEmpty();
-		assertThat(labels).containsEntry("boza", "koza");
+		assertThat(labels)
+				.isNotEmpty()
+				.containsEntry("boza", "koza");
 	}
 
 	private void mockManifestRestTemplateCall(Map<String, Object> mapToReturn, String registryHost,

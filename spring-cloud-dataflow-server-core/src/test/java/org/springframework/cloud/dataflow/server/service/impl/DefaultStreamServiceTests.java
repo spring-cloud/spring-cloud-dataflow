@@ -220,9 +220,10 @@ public class DefaultStreamServiceTests {
 
 		verify(this.skipperStreamDeployer, times(1)).streamsStates(any());
 
-		assertThat(resultStates).isNotNull();
-		assertThat(resultStates).hasSize(1);
-		assertThat(resultStates).containsEntry(streamDefinition, DeploymentState.deployed);
+		assertThat(resultStates)
+				.isNotNull()
+				.hasSize(1)
+				.containsEntry(streamDefinition, DeploymentState.deployed);
 	}
 
 	@Test

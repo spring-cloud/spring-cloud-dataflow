@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Glenn Renfro
  */
-public class ComposedTaskStepExecutionListenerTests {
+class ComposedTaskStepExecutionListenerTests {
 
 	private TaskExplorer taskExplorer;
 
@@ -44,14 +44,14 @@ public class ComposedTaskStepExecutionListenerTests {
 	private ComposedTaskStepExecutionListener taskListener;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.taskExplorer = mock(TaskExplorer.class);
 		this.stepExecution = getStepExecution();
 		this.taskListener = new ComposedTaskStepExecutionListener(taskExplorer);
 	}
 
 	@Test
-	public void testSuccessfulRun() {
+	void successfulRun() {
 		TaskExecution taskExecution = getDefaultTaskExecution(0, null);
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
 		populateExecutionContext(taskExecution.getTaskName(),111L);
@@ -59,7 +59,7 @@ public class ComposedTaskStepExecutionListenerTests {
 	}
 
 	@Test
-	public void testExitMessageRunSuccess() {
+	void exitMessageRunSuccess() {
 		ExitStatus expectedTaskStatus = new ExitStatus("TEST_EXIT_MESSAGE");
 		TaskExecution taskExecution = getDefaultTaskExecution(0,
 				expectedTaskStatus.getExitCode());
@@ -70,7 +70,7 @@ public class ComposedTaskStepExecutionListenerTests {
 	}
 
 	@Test
-	public void testExitMessageRunFail() {
+	void exitMessageRunFail() {
 		ExitStatus expectedTaskStatus = new ExitStatus("TEST_EXIT_MESSAGE");
 		TaskExecution taskExecution = getDefaultTaskExecution(1,
 				expectedTaskStatus.getExitCode());
@@ -81,7 +81,7 @@ public class ComposedTaskStepExecutionListenerTests {
 	}
 
 	@Test
-	public void testFailedRun() {
+	void failedRun() {
 		TaskExecution taskExecution = getDefaultTaskExecution(1, null);
 		when(this.taskExplorer.getTaskExecution(anyLong())).thenReturn(taskExecution);
 		populateExecutionContext(taskExecution.getTaskName(), 111L);

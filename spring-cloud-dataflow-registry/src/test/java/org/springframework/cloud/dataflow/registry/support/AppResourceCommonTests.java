@@ -168,7 +168,7 @@ class AppResourceCommonTests {
 	}
 
 	@Test
-	void testGetResourceWithoutVersion() {
+	void getResourceWithoutVersion() {
 		assertThat(appResourceCommon.getResourceWithoutVersion(
 				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec:5.0.0")))
 				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec");
@@ -181,14 +181,14 @@ class AppResourceCommonTests {
 	}
 
 	@Test
-	void testGetResource() {
+	void getResource() {
 		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:5.0.0";
 		Resource resource = appResourceCommon.getResource(mavenUri);
 		assertThat(resource).isInstanceOf(MavenResource.class);
 	}
 
 	@Test
-	void testGetResourceVersion() {
+	void getResourceVersion() {
 		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:5.0.0";
 		String version = appResourceCommon.getResourceVersion(appResourceCommon.getResource(mavenUri));
 		assertThat(version).isEqualTo("5.0.0");

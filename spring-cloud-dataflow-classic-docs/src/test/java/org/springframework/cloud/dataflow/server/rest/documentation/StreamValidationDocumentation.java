@@ -25,12 +25,10 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runners.MethodSorters;
 
 /**
  * Documentation for the /streams/validation endpoint.
@@ -40,12 +38,12 @@ import org.junit.runners.MethodSorters;
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class StreamValidationDocumentation extends BaseDocumentation {
+class StreamValidationDocumentation extends BaseDocumentation {
 
 	private static boolean setUpIsDone = false;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.mockMvc.perform(
 				post("/apps/{type}/time", "source")
 						.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE")
@@ -59,7 +57,7 @@ public class StreamValidationDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void validateStream() throws Exception {
+	void validateStream() throws Exception {
 		this.mockMvc.perform(
 			post("/streams/definitions")
 					.param("name", "timelog")

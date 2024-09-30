@@ -76,7 +76,7 @@ class TaskAnalyzerTests {
 
 
 	@Test
-	void testAnalyze() {
+	void analyze() {
 
 		Map<String, String> leftDeploymentProperties = new HashMap<>();
 		leftDeploymentProperties.put("key1", "value1");

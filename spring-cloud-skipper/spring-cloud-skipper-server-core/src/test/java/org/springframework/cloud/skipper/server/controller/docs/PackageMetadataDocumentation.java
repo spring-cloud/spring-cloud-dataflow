@@ -41,10 +41,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
-public class PackageMetadataDocumentation extends BaseDocumentation {
+class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllPackageMetadata() throws Exception {
+	void getAllPackageMetadata() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -101,7 +101,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataDetails() throws Exception {
+	void getPackageMetadataDetails() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -145,7 +145,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataSearchFindByName() throws Exception {
+	void getPackageMetadataSearchFindByName() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -189,7 +189,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataSearchFindByNameContainingIgnoreCase() throws Exception {
+	void getPackageMetadataSearchFindByNameContainingIgnoreCase() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -241,7 +241,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataSummary() throws Exception {
+	void getPackageMetadataSummary() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());

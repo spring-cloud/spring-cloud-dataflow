@@ -42,17 +42,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-public class ApiDocumentation extends BaseDocumentation {
+class ApiDocumentation extends BaseDocumentation {
 
 	@Test
-	public void headers() throws Exception {
+	void headers() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(responseHeaders(headerWithName("Content-Type")
 						.description("The Content-Type of the payload, e.g. " + "`application/hal+json`"))));
 	}
 
 	@Test
-	public void errors() throws Exception {
+	void errors() throws Exception {
 		this.mockMvc
 				.perform(get("/error").requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/apps").requestAttr(
@@ -72,7 +72,7 @@ public class ApiDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void index() throws Exception {
+	void index() throws Exception {
 		this.mockMvc.perform(get("/"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(links(

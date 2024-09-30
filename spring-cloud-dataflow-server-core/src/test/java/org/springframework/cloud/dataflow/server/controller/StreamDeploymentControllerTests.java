@@ -101,7 +101,7 @@ class StreamDeploymentControllerTests {
 	}
 
 	@Test
-	void testScaleApplicationInstances() {
+	void scaleApplicationInstances() {
 		this.controller.scaleApplicationInstances("ticktock", "time", 666, null);
 		verify(streamService).scaleApplicationInstances(eq("ticktock"), eq("time"), eq(666), isNull());
 
@@ -115,7 +115,7 @@ class StreamDeploymentControllerTests {
 	}
 
 	@Test
-	void testUpdateStream() {
+	void updateStream() {
 		Map<String, String> deploymentProperties = new HashMap<>();
 		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "ticktock");
 		deploymentProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.0");

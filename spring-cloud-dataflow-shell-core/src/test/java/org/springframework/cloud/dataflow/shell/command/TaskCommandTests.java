@@ -247,7 +247,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	void testTaskExecutionList() {
+	void taskExecutionList() {
 		logger.info("Retrieve Task Execution List Test");
 		Object result = task().taskExecutionList();
 		Table table = (Table) result;
@@ -276,7 +276,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	void testTaskExecutionListByName() {
+	void taskExecutionListByName() {
 		logger.info("Retrieve Task Execution List By Name Test");
 		task().create("mytask", "timestamp");
 		Object result = task().taskExecutionListByName("mytask");

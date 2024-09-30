@@ -51,7 +51,7 @@ class JdbcDataflowTaskExecutionDaoTests {
 
 	@Test
 	@DirtiesContext
-	void testGetTaskExecutionIdsByTaskName() {
+	void getTaskExecutionIdsByTaskName() {
 		String taskName = UUID.randomUUID().toString();
 		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName, 4);
 		taskExecutions.forEach(taskRepository::createTaskExecution);
@@ -61,7 +61,7 @@ class JdbcDataflowTaskExecutionDaoTests {
 
 	@Test
 	@DirtiesContext
-	void testGetAllTaskExecutionIds() {
+	void getAllTaskExecutionIds() {
 		String taskName1 = UUID.randomUUID().toString();
 		List<TaskExecution> taskExecutions = createSampleTaskExecutions(taskName1, 4);
 		String taskName2 = UUID.randomUUID().toString();

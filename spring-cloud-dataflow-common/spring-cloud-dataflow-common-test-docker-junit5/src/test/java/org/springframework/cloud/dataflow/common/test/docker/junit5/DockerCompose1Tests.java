@@ -25,10 +25,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 @DockerCompose(locations = {"src/test/resources/docker-compose-1.yml"})
-public class DockerCompose1Tests  {
+class DockerCompose1Tests {
 
 	@Test
-	public void testCompose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
+	void compose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
 		assertThat(dockerComposeInfo).isNotNull();
 		assertThat(dockerComposeInfo.id("").getRule()).isNotNull();
 		assertThat(dockerComposeInfo.id("").getRule().containers().container("testservice1")).isNotNull();

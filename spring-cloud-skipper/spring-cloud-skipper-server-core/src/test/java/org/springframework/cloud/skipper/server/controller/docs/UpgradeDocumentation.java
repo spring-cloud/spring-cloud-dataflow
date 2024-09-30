@@ -44,10 +44,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class UpgradeDocumentation extends BaseDocumentation {
+class UpgradeDocumentation extends BaseDocumentation {
 
 	@Test
-	public void upgradeRelease() throws Exception {
+	void upgradeRelease() throws Exception {
 		Release release = createTestRelease();
 
 		final String packageVersion = "1.1.0";

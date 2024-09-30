@@ -113,11 +113,12 @@ class DeploymentPropertiesUtilsTests {
 		List<String> props = DeploymentPropertiesUtils.parseParamList("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
 				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww,special=koza=boza,more", ",");
 
-		assertThat(props).contains("app.foo.bar=v");
-		assertThat(props).contains(" app.other.key = value  ");
-		assertThat(props).contains(" app.foo.wizz=v2  ");
-		assertThat(props).contains(" deployer.foo.pot=fern");
-		assertThat(props).contains(" deployer.other.cow = meww,special=koza=boza,more");
+		assertThat(props)
+				.contains("app.foo.bar=v")
+				.contains(" app.other.key = value  ")
+				.contains(" app.foo.wizz=v2  ")
+				.contains(" deployer.foo.pot=fern")
+				.contains(" deployer.other.cow = meww,special=koza=boza,more");
 
 		try {
 			DeploymentPropertiesUtils.parseParamList("a=b", " ");
@@ -128,72 +129,83 @@ class DeploymentPropertiesUtilsTests {
 		}
 
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b c=d", " ");
-		assertThat(props).contains("c=d");
-		assertThat(props).contains("a=b");
+		assertThat(props)
+				.contains("c=d")
+				.contains("a=b");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b    c=d   ", " ");
 
-		assertThat(props).contains("a=b");
-		assertThat(props).contains("c=d");
+		assertThat(props)
+				.contains("a=b")
+				.contains("c=d");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("foo1=bar1 foo2=bar2 foo3=bar3 xxx3", " ");
-		assertThat(props).contains("foo1=bar1");
-		assertThat(props).contains("foo2=bar2");
-		assertThat(props).contains("foo3=bar3 xxx3");
+		assertThat(props)
+				.contains("foo1=bar1")
+				.contains("foo2=bar2")
+				.contains("foo3=bar3 xxx3");
 	}
 
 	@Test
 	void parseArgumentTestsWithQuotes() {
 
 		List<String> props = DeploymentPropertiesUtils.parseArgumentList("a=\"b c\" e=f g=h", " ");
-		assertThat(props).contains("a=\"b c\"");
-		assertThat(props).contains("e=f");
-		assertThat(props).contains("g=h");
+		assertThat(props)
+				.contains("a=\"b c\"")
+				.contains("e=f")
+				.contains("g=h");
 		props = DeploymentPropertiesUtils.parseArgumentList("--composedTaskArguments=\"1.timestamp.format=YYYY " +
 				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\" " +
 				"a=b c=d --foo=bar", " ");
-		assertThat(props).contains("--composedTaskArguments=\"1.timestamp.format=YYYY " +
-				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\"");
-		assertThat(props).contains("a=b");
-		assertThat(props).contains("c=d");
-		assertThat(props).contains("--foo=bar");
+		assertThat(props)
+				.contains("--composedTaskArguments=\"1.timestamp.format=YYYY " +
+				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\"")
+				.contains("a=b")
+				.contains("c=d")
+				.contains("--foo=bar");
 	}
 
 	@Test
 	void parseArgumentTestsWithMultipleQuotes() {
 
 		List<String> props = DeploymentPropertiesUtils.parseArgumentList("arg2=\"Argument 2\" arg3=val3", " ");
-		assertThat(props).contains("arg2=\"Argument 2\"");
-		assertThat(props).contains("arg3=val3");
+		assertThat(props)
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("arg0=val0 arg1=val1 arg2=\"Argument 2\" arg3=val3", " ");
-		assertThat(props).contains("arg0=val0");
-		assertThat(props).contains("arg1=val1");
-		assertThat(props).contains("arg2=\"Argument 2\"");
-		assertThat(props).contains("arg3=val3");
+		assertThat(props)
+				.contains("arg0=val0")
+				.contains("arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=val3", " ");
-		assertThat(props).contains("-arg1=val1");
-		assertThat(props).contains("arg2=\"Argument 2\"");
-		assertThat(props).contains("arg3=val3");
+		assertThat(props)
+				.contains("-arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=val3 arg4=\"Argument 4\"", " ");
-		assertThat(props).contains("-arg1=val1");
-		assertThat(props).contains("arg2=\"Argument 2\"");
-		assertThat(props).contains("arg3=val3");
-		assertThat(props).contains("arg4=\"Argument 4\"");
+		assertThat(props)
+				.contains("-arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3")
+				.contains("arg4=\"Argument 4\"");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=\"val3\" arg4=\"Argument 4\"", " ");
-		assertThat(props).contains("-arg1=val1");
-		assertThat(props).contains("arg2=\"Argument 2\"");
-		assertThat(props).contains("arg3=\"val3\"");
-		assertThat(props).contains("arg4=\"Argument 4\"");
+		assertThat(props)
+				.contains("-arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=\"val3\"")
+				.contains("arg4=\"Argument 4\"");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=\"val1\" arg2=\"Argument 2\" arg3=\"val3\" arg4=\"Argument 4\"", " ");
-		assertThat(props).contains("-arg1=\"val1\"");
-		assertThat(props).contains("arg2=\"Argument 2\"");
-		assertThat(props).contains("arg3=\"val3\"");
-		assertThat(props).contains("arg4=\"Argument 4\"");
+		assertThat(props)
+				.contains("-arg1=\"val1\"")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=\"val3\"")
+				.contains("arg4=\"Argument 4\"");
 
 	}
 
@@ -260,16 +272,18 @@ class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
-	void testParseDeploymentProperties() throws IOException {
+	void parseDeploymentProperties() throws IOException {
 		File file = Files.createTempFile(null, ".yaml").toFile();
 		FileCopyUtils.copy("app.foo1:\n  bar1: spam".getBytes(), file);
 
 		Map<String, String> props = DeploymentPropertiesUtils.parseDeploymentProperties("app.foo2=bar2", file, 0);
-		assertThat(props).hasSize(1);
-		assertThat(props).containsEntry("app.foo2", "bar2");
+		assertThat(props)
+				.hasSize(1)
+				.containsEntry("app.foo2", "bar2");
 
 		props = DeploymentPropertiesUtils.parseDeploymentProperties("foo2=bar2", file, 1);
-		assertThat(props).hasSize(1);
-		assertThat(props).containsEntry("app.foo1.bar1", "spam");
+		assertThat(props)
+				.hasSize(1)
+				.containsEntry("app.foo1.bar1", "spam");
 	}
 }

@@ -35,10 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class TaskPlatformDocumentation extends BaseDocumentation {
+class TaskPlatformDocumentation extends BaseDocumentation {
 
 	@Test
-	public void listTaskPlatforms() throws Exception {
+	void listTaskPlatforms() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/platforms")
 						.param("page", "0")

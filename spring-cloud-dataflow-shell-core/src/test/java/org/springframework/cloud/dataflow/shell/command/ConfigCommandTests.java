@@ -111,7 +111,7 @@ class ConfigCommandTests {
 	}
 
 	@Test
-	void testInfo() throws IOException {
+	void info() throws IOException {
 		if (!isWindows()) {
 			DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
 			AboutOperations aboutOperations = mock(AboutOperations.class);

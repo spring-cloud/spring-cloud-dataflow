@@ -55,10 +55,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
+@SuppressWarnings({"NewClassNamingConvention","SameParameterValue"})
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
-public class JobStepExecutionsDocumentation extends BaseDocumentation {
+class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
@@ -70,7 +70,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		initialize();
 		createJobExecution(JOB_NAME, BatchStatus.STARTED);
@@ -84,7 +84,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 
 	@Test
-	public void listStepExecutionsForJob() throws Exception {
+	void listStepExecutionsForJob() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps", "1")
 								.param("page", "0")
@@ -105,7 +105,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void stepDetail() throws Exception {
+	void stepDetail() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps/{stepid}", "1", "1"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
@@ -126,7 +126,7 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	@Disabled("TODO: Boot3x followup : Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
 	@Test
-	public void stepProgress() throws Exception {
+	void stepProgress() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps/{stepid}/progress", "1", "1"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(

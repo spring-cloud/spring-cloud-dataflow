@@ -28,10 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-public class RuntimeStreamStatusForStreamAppsWithoutCollectorDocumentation extends BaseDocumentation {
+class RuntimeStreamStatusForStreamAppsWithoutCollectorDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getMetricsWithoutCollectorRunning() throws Exception {
+	void getMetricsWithoutCollectorRunning() throws Exception {
 		this.mockMvc.perform(get("/runtime/streams")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

@@ -48,14 +48,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class})
-@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
+@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC", "max-wait-time=1010",
 		"skip-tls-certificate-verification=true",
 		"composed-task-app-properties.app.AAA.format=yyyy",
 		"interval-time-between-checks=1100",
 		"composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
 		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest"})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-public class ComposedTaskRunnerConfigurationWithPropertiesNoLabelTests {
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+class ComposedTaskRunnerConfigurationWithPropertiesNoLabelTests {
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -71,7 +71,7 @@ public class ComposedTaskRunnerConfigurationWithPropertiesNoLabelTests {
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration() throws Exception {
+	void composedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
 		job.execute(jobExecution);
@@ -89,10 +89,12 @@ public class ComposedTaskRunnerConfigurationWithPropertiesNoLabelTests {
 
 		TaskLauncherTasklet tasklet = ComposedTaskRunnerTaskletTestUtils.getTaskletLauncherTasklet(context, "ComposedTest-AAA_0");
 		List<String> result = ComposedTaskRunnerTaskletTestUtils.getTaskletArgumentsViaReflection(tasklet);
-		assertThat(result).contains("--baz=boo --foo=bar");
-		assertThat(result).hasSize(1);
+		assertThat(result)
+				.contains("--baz=boo --foo=bar")
+				.hasSize(1);
 		Map<String, String> taskletProperties = ComposedTaskRunnerTaskletTestUtils.getTaskletPropertiesViaReflection(tasklet);
-		assertThat(taskletProperties).hasSize(1);
-		assertThat(taskletProperties).containsEntry("app.AAA.format", "yyyy");
+		assertThat(taskletProperties)
+				.hasSize(1)
+				.containsEntry("app.AAA.format", "yyyy");
 	}
 }

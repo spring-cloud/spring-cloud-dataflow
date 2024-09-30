@@ -37,12 +37,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class ComposedTaskPropertiesTests {
+class ComposedTaskPropertiesTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
 	@Test
-	public void testGettersAndSetters() throws URISyntaxException{
+	void gettersAndSetters() throws URISyntaxException{
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		properties.setComposedTaskProperties("aaa");
 		properties.setComposedTaskArguments("bbb");
@@ -75,19 +75,19 @@ public class ComposedTaskPropertiesTests {
 	}
 
 	@Test
-	public void testDataflowServerURIDefaults() {
+	void dataflowServerURIDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		assertThat(properties.getDataflowServerUri()).hasToString("http://localhost:9393");
 	}
 
 	@Test
-	public void testSkipSslVerificationDefaults() {
+	void skipSslVerificationDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		assertThat(properties.isSkipTlsCertificateVerification()).isFalse();
 	}
 
 	@Test
-	public void testThreadDefaults() {
+	void threadDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		assertThat(properties.getSplitThreadCorePoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_CORE_POOL_SIZE_DEFAULT);
 		assertThat(properties.getSplitThreadKeepAliveSeconds()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT);
@@ -101,7 +101,7 @@ public class ComposedTaskPropertiesTests {
 	}
 
 	@Test
-	public void testComposedTaskAppArguments() {
+	void composedTaskAppArguments() {
 		this.contextRunner
 				.withInitializer(context -> {
 					Map<String, Object> map = new HashMap<>();
@@ -126,7 +126,7 @@ public class ComposedTaskPropertiesTests {
 	}
 
 	@Test
-	public void testAssignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
+	void assignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
 		this.contextRunner
 				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=client_secret_post")
 				.withUserConfiguration(Config1.class).run((context) -> {

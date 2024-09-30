@@ -70,7 +70,7 @@ class DefaultAuditRecordServiceTests {
     }
 
     @Test
-    void testPopulateAndSaveAuditRecord() {
+    void populateAndSaveAuditRecord() {
         final AuditRecordService auditRecordService = new DefaultAuditRecordService(this.auditRecordRepository);
         auditRecordService.populateAndSaveAuditRecord(AuditOperationType.SCHEDULE, AuditActionType.CREATE, "1234",
                 "my data", "test-platform");

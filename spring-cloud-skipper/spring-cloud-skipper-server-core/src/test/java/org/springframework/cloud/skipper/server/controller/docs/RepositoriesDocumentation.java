@@ -30,11 +30,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-@ActiveProfiles({ "repository" })
-public class RepositoriesDocumentation extends BaseDocumentation {
+@ActiveProfiles({"repository"})
+class RepositoriesDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllRepositories() throws Exception {
+	void getAllRepositories() throws Exception {
 		this.mockMvc.perform(
 				get("/api/repositories")
 						.param("page", "0")
@@ -60,7 +60,7 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getSingleRepository() throws Exception {
+	void getSingleRepository() throws Exception {
 
 		this.mockMvc.perform(
 				get("/api/repositories/search/findByName?name={name}", "local"))

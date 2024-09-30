@@ -56,7 +56,7 @@ import static org.mockito.Mockito.verify;
 		StepBeanDefinitionRegistrar.class})
 @TestPropertySource(properties = {"graph=AAA && BBB && CCC", "max-wait-time=1000", "spring.cloud.task.name=foo"})
 @EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
-public class ComposedTaskRunnerConfigurationNoPropertiesTests {
+class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -72,7 +72,7 @@ public class ComposedTaskRunnerConfigurationNoPropertiesTests {
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration() throws Exception {
+	void composedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
 		TaskletStep ctrStep = context.getBean("AAA_0", TaskletStep.class);

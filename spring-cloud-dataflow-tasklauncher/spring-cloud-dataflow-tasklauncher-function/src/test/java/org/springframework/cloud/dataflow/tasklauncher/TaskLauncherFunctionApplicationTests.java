@@ -52,7 +52,7 @@ import static org.mockito.Mockito.when;
  * @author Corneil du Plessis
  */
 @SpringBootTest
-public class TaskLauncherFunctionApplicationTests {
+class TaskLauncherFunctionApplicationTests {
 
 	@Autowired
 	private TaskLauncherFunction taskLauncherFunction;
@@ -61,7 +61,7 @@ public class TaskLauncherFunctionApplicationTests {
 	private TaskOperations taskOperations;
 
 	@Test
-	public void successfulLaunch() {
+	void successfulLaunch() {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(1);
@@ -73,7 +73,7 @@ public class TaskLauncherFunctionApplicationTests {
 	}
 
 	@Test
-	public void taskPlatformAtCapacity() {
+	void taskPlatformAtCapacity() {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		setCurrentExecutionState(3);
@@ -81,7 +81,7 @@ public class TaskLauncherFunctionApplicationTests {
 	}
 
 	@Test
-	public void platformMismatch() {
+	void platformMismatch() {
 		LaunchRequest launchRequest = new LaunchRequest();
 		launchRequest.setTaskName("someTask");
 		launchRequest
@@ -102,7 +102,7 @@ public class TaskLauncherFunctionApplicationTests {
 	}
 
 	@Test
-	public void noLaunchersConfigured() {
+	void noLaunchersConfigured() {
 		ApplicationContextRunner contextRunner = new ApplicationContextRunner().withUserConfiguration(TaskLauncherFunctionApplicationTests.TestConfig.class);
 		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> contextRunner
 				.withPropertyValues("spring.profiles.active=nolaunchers")

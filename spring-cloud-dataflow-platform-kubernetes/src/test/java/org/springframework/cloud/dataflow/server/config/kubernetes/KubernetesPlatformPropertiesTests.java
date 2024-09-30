@@ -41,20 +41,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 
 @SpringBootTest(classes = KubernetesPlatformPropertiesTests.TestConfig.class,
-        properties = { "spring.cloud.kubernetes.client.namespace=default" })
+		properties = {"spring.cloud.kubernetes.client.namespace=default"})
 @ActiveProfiles("kubernetes-platform-properties")
-public class KubernetesPlatformPropertiesTests {
+class KubernetesPlatformPropertiesTests {
 
 	@Autowired
 	private KubernetesPlatformProperties kubernetesPlatformProperties;
 
 	@Test
-	public void deserializationTest() {
+	void deserializationTest() {
 		Map<String, KubernetesDeployerProperties> k8sAccounts = this.kubernetesPlatformProperties.getAccounts();
 		KubernetesClient devK8sClient = KubernetesClientFactory.getKubernetesClient(k8sAccounts.get("dev"));
 		KubernetesClient qaK8sClient = KubernetesClientFactory.getKubernetesClient(k8sAccounts.get("qa"));
-		assertThat(k8sAccounts).hasSize(2);
-		assertThat(k8sAccounts).containsKeys("dev", "qa");
+		assertThat(k8sAccounts)
+				.hasSize(2)
+				.containsKeys("dev", "qa");
 		assertThat(devK8sClient.getNamespace()).isEqualTo("dev1");
 		assertThat(devK8sClient.getMasterUrl()).hasToString("https://192.168.0.1:8443");
 		assertThat(qaK8sClient.getMasterUrl()).hasToString("https://192.168.0.2:8443");

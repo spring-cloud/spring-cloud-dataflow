@@ -53,11 +53,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
+@SuppressWarnings({"NewClassNamingConvention","SameParameterValue"})
 
-@SpringBootTest(classes = { EmbeddedDataSourceConfiguration.class })
+@SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
-public class JobInstancesDocumentation extends BaseDocumentation {
+class JobInstancesDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
@@ -66,14 +66,14 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	private TaskBatchDao taskBatchDao;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		initialize();
 		createJobExecution(JOB_NAME, BatchStatus.STARTED);
 	}
 
 	@Test
-	public void listJobInstances() throws Exception {
+	void listJobInstances() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/instances")
 						.param("name", JOB_NAME)
@@ -95,7 +95,7 @@ public class JobInstancesDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void jobDisplayDetail() throws Exception {
+	void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/instances/{id}", "1"))
 				.andDo(print())

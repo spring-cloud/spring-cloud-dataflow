@@ -35,7 +35,7 @@ class JobUtilsTests {
 	 * {@link JobUtils#isJobExecutionRestartable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
-	void testIsJobExecutionRestartable() {
+	void isJobExecutionRestartable() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		assertThat(JobUtils.isJobExecutionRestartable(jobExecution)).isFalse();
 	}
@@ -45,7 +45,7 @@ class JobUtilsTests {
 	 * {@link JobUtils#isJobExecutionAbandonable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
-	void testIsJobExecutionAbandonable() {
+	void isJobExecutionAbandonable() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		assertThat(JobUtils.isJobExecutionAbandonable(jobExecution)).isFalse();
 	}
@@ -55,7 +55,7 @@ class JobUtilsTests {
 	 * {@link JobUtils#isJobExecutionStoppable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
-	void testIsJobExecutionStoppable() {
+	void isJobExecutionStoppable() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		assertThat(JobUtils.isJobExecutionStoppable(jobExecution)).isTrue();
 	}

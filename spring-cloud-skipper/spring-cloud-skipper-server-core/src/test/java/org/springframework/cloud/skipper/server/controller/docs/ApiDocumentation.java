@@ -40,17 +40,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
-public class ApiDocumentation extends BaseDocumentation {
+class ApiDocumentation extends BaseDocumentation {
 
 	@Test
-	public void headers() throws Exception {
+	void headers() throws Exception {
 		this.mockMvc.perform(get("/api")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(responseHeaders(headerWithName("Content-Type")
 						.description("The `Content-Type` of the payload (for example `application/hal+json`)."))));
 	}
 
 	@Test
-	public void errors() throws Exception {
+	void errors() throws Exception {
 		this.mockMvc
 				.perform(get("/error").requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
 						.requestAttr(RequestDispatcher.ERROR_EXCEPTION, new IllegalArgumentException())
@@ -72,7 +72,7 @@ public class ApiDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void index() throws Exception {
+	void index() throws Exception {
 		this.mockMvc.perform(get("/api")).andExpect(status().isOk()).andDo(this.documentationHandler.document(links(
 				//TODO investigate
 				linkWithRel("jpaRepositoryStates").ignored(),

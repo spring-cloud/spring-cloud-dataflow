@@ -35,13 +35,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 @SpringBootTest(classes = SkipperClientConfigurationTests.TestConfig.class)
-public class SkipperClientConfigurationTests {
+class SkipperClientConfigurationTests {
 
 	@Autowired
 	private ApplicationContext context;
 
 	@Test
-	public void testDefaultRestTemplateBeanName() {
+	void defaultRestTemplateBeanName() {
 		assertThat(context.containsBean(SkipperClientConfiguration.SKIPPERCLIENT_RESTTEMPLATE_BEAN_NAME)).isTrue();
 	}
 

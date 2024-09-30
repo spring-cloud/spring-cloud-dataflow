@@ -74,8 +74,9 @@ class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest {
 		String b = "{\"auths\":{\"demo.repository.io\":{}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result).hasSize(1);
-		assertThat(result).containsKey("demo.repository.io");
+		assertThat(result)
+				.hasSize(1)
+				.containsKey("demo.repository.io");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
@@ -95,8 +96,9 @@ class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest {
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result).hasSize(1);
-		assertThat(result).containsKey("demo.repository.io");
+		assertThat(result)
+				.hasSize(1)
+				.containsKey("demo.repository.io");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 
@@ -116,8 +118,9 @@ class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest {
 		String b = "{\"auths\":{\"demo.repository.io:5050\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result).hasSize(1);
-		assertThat(result).containsKey("demo.repository.io:5050");
+		assertThat(result)
+				.hasSize(1)
+				.containsKey("demo.repository.io:5050");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io:5050");
 
@@ -141,8 +144,9 @@ class DockerConfigJsonSecretToContainerRegistryConfigurationConverterTest {
 		String b = "{\"auths\":{\"demo.repository.io\":{\"username\":\"testuser\",\"password\":\"testpassword\",\"auth\":\"YWRtaW46SGFyYm9yMTIzNDU=\"}}}";
 		Map<String, ContainerRegistryConfiguration> result = converter.convert(b);
 
-		assertThat(result).hasSize(1);
-		assertThat(result).containsKey("demo.repository.io");
+		assertThat(result)
+				.hasSize(1)
+				.containsKey("demo.repository.io");
 
 		ContainerRegistryConfiguration registryConfiguration = result.get("demo.repository.io");
 

@@ -53,7 +53,7 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Corneil du Plessis
  */
 @SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
-public class PackageTemplateTests {
+class PackageTemplateTests {
 
 	private final Logger logger = LoggerFactory.getLogger(PackageTemplateTests.class);
 
@@ -65,7 +65,7 @@ public class PackageTemplateTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testMustasche() throws IOException {
+	void mustasche() throws IOException {
 		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 		Map model = (Map) yaml.load(valuesResource.getInputStream());
 		String templateAsString = StreamUtils.copyToString(nestedMapResource.getInputStream(),

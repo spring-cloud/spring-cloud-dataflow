@@ -33,12 +33,12 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class SpringCloudDeployerApplicationManifestReaderTests {
+class SpringCloudDeployerApplicationManifestReaderTests {
 
 	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader = new SpringCloudDeployerApplicationManifestReader();
 
 	@Test
-	public void readTests() throws IOException {
+	void readTests() throws IOException {
 		String manifestYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "manifest.yml").getInputStream(),
 				Charset.defaultCharset());
@@ -53,7 +53,7 @@ public class SpringCloudDeployerApplicationManifestReaderTests {
 	}
 
 	@Test
-	public void testNonMatchingManifestReader() throws IOException {
+	void nonMatchingManifestReader() throws IOException {
 		String manifestYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "erroneous-manifest.yml").getInputStream(),
 				Charset.defaultCharset());

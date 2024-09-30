@@ -16,13 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runners.MethodSorters;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 
@@ -44,22 +42,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class TaskValidationDocumentation extends BaseDocumentation {
+class TaskValidationDocumentation extends BaseDocumentation {
 
-    @BeforeEach
-    public void setup() throws Exception {
+	@BeforeEach
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
         createTaskDefinition("taskC");
     }
 
-    @AfterEach
-    public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
         destroyTaskDefinition("taskC");
         unregisterApp(ApplicationType.task, "timestamp");
     }
 
-    @Test
-    public void validateTask() throws Exception {
+	@Test
+	void validateTask() throws Exception {
         this.mockMvc.perform(
             get("/tasks/validation/{name}", "taskC"))
             .andExpect(status().isOk())

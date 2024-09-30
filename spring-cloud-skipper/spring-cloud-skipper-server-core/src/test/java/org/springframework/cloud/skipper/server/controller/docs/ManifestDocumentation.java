@@ -35,10 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class ManifestDocumentation extends BaseDocumentation {
+class ManifestDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getManifestOfRelease() throws Exception {
+	void getManifestOfRelease() throws Exception {
 		Release release = createTestRelease();
 		when(this.releaseService.manifest(release.getName())).thenReturn(release.getManifest());
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -53,7 +53,7 @@ public class ManifestDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getManifestOfReleaseForVersion() throws Exception {
+	void getManifestOfReleaseForVersion() throws Exception {
 		Release release = createTestRelease();
 
 		when(this.releaseService.manifest(release.getName(), 1)).thenReturn(release.getManifest());

@@ -39,10 +39,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-public class PackageReaderTests {
+class PackageReaderTests {
 
 	@Test
-	public void read() throws IOException {
+	void read() throws IOException {
 		Resource resource = new ClassPathResource("/repositories/sources/test/ticktock/ticktock-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 

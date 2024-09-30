@@ -25,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Integration tests for TaskCompletionProvider.
  * <p>
@@ -40,31 +41,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Corneil du Plessis
  */
 @SuppressWarnings("unchecked")
-@SpringBootTest(classes = { CompletionConfiguration.class, CompletionTestsMocks.class }, properties = {
-		"spring.main.allow-bean-definition-overriding=true" })
-public class TaskCompletionProviderTests {
+@SpringBootTest(classes = {CompletionConfiguration.class, CompletionTestsMocks.class}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"})
+class TaskCompletionProviderTests {
 
 	@Autowired
 	private TaskCompletionProvider completionProvider;
 
-	@Test
 	// <TAB> => basic,plum,etc
-	public void testEmptyStartShouldProposeSourceApps() {
+	@Test
+	void emptyStartShouldProposeSourceApps() {
 		assertThat(completionProvider.complete("", 1)).has(Proposals.all("basic", "plum"));
 		assertThat(completionProvider.complete("", 1)).doNotHave(Proposals.proposal("log"));
 	}
 
-	@Test
 	// b<TAB> => basic
-	public void testUnfinishedAppNameShouldReturnCompletions() {
+	@Test
+	void unfinishedAppNameShouldReturnCompletions() {
 		assertThat(completionProvider.complete("b", 1)).has(Proposals.all("basic"));
 		assertThat(completionProvider.complete("ba", 1)).has(Proposals.all("basic"));
 		assertThat(completionProvider.complete("pl", 1)).doNotHave(Proposals.proposal("basic"));
 	}
 
-	@Test
 	// basic<TAB> => basic --foo=, etc
-	public void testValidTaskDefinitionShouldReturnAppOptions() {
+	@Test
+	void validTaskDefinitionShouldReturnAppOptions() {
 		assertThat(completionProvider.complete("basic ", 1))
 				.has(Proposals.all("basic --expression=", "basic --expresso="));
 		// Same as above, no final space
@@ -72,48 +73,48 @@ public class TaskCompletionProviderTests {
 				.has(Proposals.all("basic --expression=", "basic --expresso="));
 	}
 
-	@Test
 	// file | filter -<TAB> => file | filter --foo,etc
-	public void testOneDashShouldReturnTwoDashes() {
+	@Test
+	void oneDashShouldReturnTwoDashes() {
 		assertThat(completionProvider.complete("basic -", 1))
 				.has(Proposals.all("basic --expression=", "basic --expresso="));
 	}
 
-	@Test
 	// basic --<TAB> => basic --foo,etc
-	public void testTwoDashesShouldReturnOptions() {
+	@Test
+	void twoDashesShouldReturnOptions() {
 		assertThat(completionProvider.complete("basic --", 1))
 				.has(Proposals.all("basic --expression=", "basic --expresso="));
 	}
 
-	@Test
 	// file --p<TAB> => file --preventDuplicates=, file --pattern=
-	public void testUnfinishedOptionNameShouldComplete() {
+	@Test
+	void unfinishedOptionNameShouldComplete() {
 		assertThat(completionProvider.complete("basic --foo", 1)).has(Proposals.all("basic --fooble="));
 	}
 
-	@Test
 	// file | counter --name=<TAB> => nothing
-	public void testInGenericOptionValueCantProposeAnything() {
+	@Test
+	void inGenericOptionValueCantProposeAnything() {
 		assertThat(completionProvider.complete("basic --expression=", 1)).isEmpty();
 	}
 
-	@Test
 	// plum --use-ssl=<TAB> => propose true|false
-	public void testValueHintForBooleans() {
+	@Test
+	void valueHintForBooleans() {
 		assertThat(completionProvider.complete("plum --use-ssl=", 1))
 				.has(Proposals.all("plum --use-ssl=true", "plum --use-ssl=false"));
 	}
 
-	@Test
 	// basic --enum-value=<TAB> => propose enum values
-	public void testValueHintForEnums() {
+	@Test
+	void valueHintForEnums() {
 		assertThat(completionProvider.complete("basic --expresso=", 1))
 				.has(Proposals.all("basic --expresso=SINGLE", "basic --expresso=DOUBLE"));
 	}
 
 	@Test
-	public void testUnrecognizedPrefixesDontBlowUp() {
+	void unrecognizedPrefixesDontBlowUp() {
 		assertThat(completionProvider.complete("foo", 1)).isEmpty();
 		assertThat(completionProvider.complete("foo --", 1)).isEmpty();
 		assertThat(completionProvider.complete("http --notavalidoption", 1)).isEmpty();
@@ -128,7 +129,7 @@ public class TaskCompletionProviderTests {
 	 * "--expresso=s --other.prop"
 	 */
 	@Test
-	public void testClosedSetValuesShouldBeExclusive() {
+	void closedSetValuesShouldBeExclusive() {
 		assertThat(completionProvider.complete("basic --expresso=s", 1))
 				.doNotHave(Proposals.proposal(s -> s.startsWith("basic --expresso=s --fooble")));
 	}

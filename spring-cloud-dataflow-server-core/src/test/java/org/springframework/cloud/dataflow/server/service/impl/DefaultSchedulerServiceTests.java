@@ -176,7 +176,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	void testSchedule(){
+	void schedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
@@ -295,7 +295,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	void testUnschedule(){
+	void unschedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -321,7 +321,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	void testList(){
+	void list(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -337,7 +337,7 @@ public class DefaultSchedulerServiceTests {
 	}
 
 	@Test
-	void testGetSchedule(){
+	void getSchedule(){
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,

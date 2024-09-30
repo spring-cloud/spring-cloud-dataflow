@@ -51,10 +51,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class PackageWriterTests {
+class PackageWriterTests {
 
 	@Test
-	public void test() throws IOException {
+	void test() throws IOException {
 		PackageWriter packageWriter = new DefaultPackageWriter();
 		Package pkgtoWrite = createSimplePackage();
 		Path tempPath = Files.createTempDirectory("tests");

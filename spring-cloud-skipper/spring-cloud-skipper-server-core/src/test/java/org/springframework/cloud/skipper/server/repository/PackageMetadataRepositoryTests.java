@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
+class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
@@ -41,29 +41,33 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 	private RepositoryRepository repositoryRepository;
 
 	@Test
-	public void basicCrud() {
+	void basicCrud() {
 		PackageMetadataCreator.createTwoPackages(this.packageMetadataRepository);
 		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findAll();
-		assertThat(packages).isNotEmpty();
-		assertThat(packages).hasSize(2);
+		assertThat(packages)
+				.isNotEmpty()
+				.hasSize(2);
 		List<PackageMetadata> packagesNamed1 = this.packageMetadataRepository.findByNameRequired("package1");
-		assertThat(packagesNamed1).isNotEmpty();
-		assertThat(packagesNamed1).hasSize(1);
+		assertThat(packagesNamed1)
+				.isNotEmpty()
+				.hasSize(1);
 		assertThat(packagesNamed1.get(0).getOrigin()).isEqualTo("www.package-repos.com/repo1");
 		assertThat(packagesNamed1.get(0).getMaintainer()).isEqualTo("Alan Hale Jr.");
 		List<PackageMetadata> packagesNamed2 = this.packageMetadataRepository.findByNameRequired("package2");
-		assertThat(packagesNamed2).isNotEmpty();
-		assertThat(packagesNamed2).hasSize(1);
+		assertThat(packagesNamed2)
+				.isNotEmpty()
+				.hasSize(1);
 		assertThat(packagesNamed2.get(0).getMaintainer()).isEqualTo("Bob Denver");
 		assertThat(packagesNamed2.get(0).getOrigin()).isEqualTo("www.package-repos.com/repo2");
 	}
 
 	@Test
-	public void verifyMultipleVersions() {
+	void verifyMultipleVersions() {
 		PackageMetadataCreator.createPackageWithMultipleVersions(this.packageMetadataRepository);
 		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findAll();
-		assertThat(packages).isNotEmpty();
-		assertThat(packages).hasSize(4);
+		assertThat(packages)
+				.isNotEmpty()
+				.hasSize(4);
 		PackageMetadata latestPackage1 = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc("package1");
 		assertThat(latestPackage1.getVersion()).isEqualTo("2.0.0");
 		PackageMetadata latestPackage2 = this.packageMetadataRepository.findFirstByNameOrderByVersionDesc("package2");
@@ -78,21 +82,24 @@ public class PackageMetadataRepositoryTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void findByNameQueries() {
+	void findByNameQueries() {
 		PackageMetadataCreator.createPackageWithMultipleVersions(this.packageMetadataRepository);
 		Iterable<PackageMetadata> packages = this.packageMetadataRepository.findByNameContainingIgnoreCase("PACK");
-		assertThat(packages).isNotEmpty();
-		assertThat(packages).hasSize(4);
+		assertThat(packages)
+				.isNotEmpty()
+				.hasSize(4);
 		Iterable<PackageMetadata> packages2 = this.packageMetadataRepository.findByNameContainingIgnoreCase("age");
-		assertThat(packages2).isNotEmpty();
-		assertThat(packages2).hasSize(4);
+		assertThat(packages2)
+				.isNotEmpty()
+				.hasSize(4);
 		Iterable<PackageMetadata> packages3 = this.packageMetadataRepository.findByNameContainingIgnoreCase("1");
-		assertThat(packages3).isNotEmpty();
-		assertThat(packages3).hasSize(2);
+		assertThat(packages3)
+				.isNotEmpty()
+				.hasSize(2);
 	}
 
 	@Test
-	public void findByNameAndVersionWithMultipleRepos() {
+	void findByNameAndVersionWithMultipleRepos() {
 		String repoName1 = "local1";
 		String repoName2 = "remote1";
 		String repoName3 = "remote2";

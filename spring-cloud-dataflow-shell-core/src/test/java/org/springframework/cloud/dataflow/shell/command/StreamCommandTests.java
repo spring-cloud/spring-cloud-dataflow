@@ -116,7 +116,7 @@ class StreamCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	void testValidate() throws InterruptedException {
+	void validate() throws InterruptedException {
 		Thread.sleep(2000);
 		String streamName = generateUniqueStreamOrTaskName();
 		Info info = new Info();

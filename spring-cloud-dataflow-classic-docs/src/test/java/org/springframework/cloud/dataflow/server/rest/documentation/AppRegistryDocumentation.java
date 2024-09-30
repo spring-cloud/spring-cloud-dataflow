@@ -45,10 +45,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-public class AppRegistryDocumentation extends BaseDocumentation {
+class AppRegistryDocumentation extends BaseDocumentation {
 
 	@Test
-	public void appDefault() throws Exception {
+	void appDefault() throws Exception {
 		registerApp(ApplicationType.source, "http", "4.0.0");
 		registerApp(ApplicationType.source, "http", "5.0.0");
 
@@ -70,7 +70,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void registeringAnApplicationVersion() throws Exception {
+	void registeringAnApplicationVersion() throws Exception {
 		this.mockMvc.perform(
 				post("/apps/{type}/{name}/{version:.+}", ApplicationType.source, "http", "4.0.0").queryParam("uri",
 						"maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
@@ -98,7 +98,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 
 
 	@Test
-	public void bulkRegisteringApps() throws Exception {
+	void bulkRegisteringApps() throws Exception {
 		this.mockMvc.perform(
 						post("/apps")
 					.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
@@ -117,7 +117,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getApplicationsFiltered() throws Exception {
+	void getApplicationsFiltered() throws Exception {
 		registerApp(ApplicationType.source, "http", "5.0.0");
 		registerApp(ApplicationType.source, "time", "5.0.0");
 		this.mockMvc.perform(
@@ -153,7 +153,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getSingleApplication() throws Exception {
+	void getSingleApplication() throws Exception {
 		registerApp(ApplicationType.source, "http", "5.0.0");
 		this.mockMvc.perform(
 						get("/apps/{type}/{name}", ApplicationType.source, "http").accept(MediaType.APPLICATION_JSON)
@@ -189,7 +189,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void registeringAnApplication() throws Exception {
+	void registeringAnApplication() throws Exception {
 		this.mockMvc.perform(
 						post("/apps/{type}/{name}", ApplicationType.source, "http")
 					.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0")
@@ -213,7 +213,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void unregisteringAnApplication() throws Exception {
+	void unregisteringAnApplication() throws Exception {
 		registerApp(ApplicationType.source, "http", "5.0.0");
 
 		this.mockMvc.perform(
@@ -231,7 +231,7 @@ public class AppRegistryDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void unregisteringAllApplications() throws Exception {
+	void unregisteringAllApplications() throws Exception {
 		registerApp(ApplicationType.source, "http", "4.0.0");
 		registerApp(ApplicationType.source, "http", "5.0.0");
 		this.mockMvc.perform(

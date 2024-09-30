@@ -40,14 +40,14 @@ import static org.mockito.Mockito.when;
 class OAuth2AccessTokenProvidingClientHttpRequestInterceptorTests {
 
 	@Test
-	void testOAuth2AccessTokenProvidingClientHttpRequestInterceptorWithEmptyConstructior() {
+	void oAuth2AccessTokenProvidingClientHttpRequestInterceptorWithEmptyConstructior() {
 		assertThatThrownBy(() -> new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(""))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("staticOauthAccessToken must not be null or empty.");
 	}
 
 	@Test
-	void testOAuth2AccessTokenProvidingClientHttpRequestInterceptorWithStaticTokenConstructor() {
+	void oAuth2AccessTokenProvidingClientHttpRequestInterceptorWithStaticTokenConstructor() {
 		final OAuth2AccessTokenProvidingClientHttpRequestInterceptor interceptor =
 				new OAuth2AccessTokenProvidingClientHttpRequestInterceptor("foobar");
 
@@ -56,17 +56,18 @@ class OAuth2AccessTokenProvidingClientHttpRequestInterceptorTests {
 	}
 
 	@Test
-	void testInterceptWithStaticToken() throws IOException {
+	void interceptWithStaticToken() throws IOException {
 		final OAuth2AccessTokenProvidingClientHttpRequestInterceptor interceptor =
 				new OAuth2AccessTokenProvidingClientHttpRequestInterceptor("foobar");
 		final HttpHeaders headers = setupTest(interceptor);
 
-		assertThat(headers).hasSize(1);
-		assertThat(headers).contains(entry("Authorization", Collections.singletonList("Bearer foobar")));
+		assertThat(headers)
+				.hasSize(1)
+				.contains(entry("Authorization", Collections.singletonList("Bearer foobar")));
 	}
 
 	@Test
-	void testInterceptWithAuthentication() throws IOException {
+	void interceptWithAuthentication() throws IOException {
 		final OAuth2TokenUtilsService oauth2TokenUtilsService = mock(OAuth2TokenUtilsService.class);
 		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn("foo-bar-123-token");
 
@@ -74,12 +75,13 @@ class OAuth2AccessTokenProvidingClientHttpRequestInterceptorTests {
 			new OAuth2AccessTokenProvidingClientHttpRequestInterceptor(oauth2TokenUtilsService);
 		final HttpHeaders headers = setupTest(interceptor);
 
-		assertThat(headers).hasSize(1);
-		assertThat(headers).contains(entry("Authorization", Collections.singletonList("Bearer foo-bar-123-token")));
+		assertThat(headers)
+				.hasSize(1)
+				.contains(entry("Authorization", Collections.singletonList("Bearer foo-bar-123-token")));
 	}
 
 	@Test
-	void testInterceptWithAuthenticationAndStaticToken() throws IOException {
+	void interceptWithAuthenticationAndStaticToken() throws IOException {
 		final OAuth2TokenUtilsService oauth2TokenUtilsService = mock(OAuth2TokenUtilsService.class);
 		when(oauth2TokenUtilsService.getAccessTokenOfAuthenticatedUser()).thenReturn("foo-bar-123-token");
 
@@ -87,8 +89,9 @@ class OAuth2AccessTokenProvidingClientHttpRequestInterceptorTests {
 				new OAuth2AccessTokenProvidingClientHttpRequestInterceptor("foobar");
 		final HttpHeaders headers = setupTest(interceptor);
 
-		assertThat(headers).hasSize(1);
-		assertThat(headers).contains(entry("Authorization", Collections.singletonList("Bearer foobar")));
+		assertThat(headers)
+				.hasSize(1)
+				.contains(entry("Authorization", Collections.singletonList("Bearer foobar")));
 	}
 
 	private HttpHeaders setupTest( OAuth2AccessTokenProvidingClientHttpRequestInterceptor interceptor) throws IOException {

@@ -75,8 +75,9 @@ class TaskSanitizerTest {
 		Map<String, String> deploymentProps = sanitizedTaskManifest.getTaskDeploymentRequest().getDeploymentProperties();
 		assertThat(sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties()).containsEntry("secret", "******");
 		assertThat(sanitizedTaskManifest.getTaskDeploymentRequest().getDefinition().getProperties()).containsEntry("user.key", "******");
-		assertThat(deploymentProps).containsEntry("secret", "******");
-		assertThat(deploymentProps).containsEntry("user.key", "******");
+		assertThat(deploymentProps)
+				.containsEntry("secret", "******")
+				.containsEntry("user.key", "******");
 
 	}
 }

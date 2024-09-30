@@ -68,7 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SuppressWarnings("NewClassNamingConvention")
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
-public class JobExecutionsDocumentation extends BaseDocumentation {
+class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
@@ -84,7 +84,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		initialize();
 		createJobExecution(JOB_NAME, BatchStatus.STARTED);
@@ -106,7 +106,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listJobExecutions() throws Exception {
+	void listJobExecutions() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions")
 								.queryParam("page", "0")
@@ -127,7 +127,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutions() throws Exception {
+	void listThinJobExecutions() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
 								.queryParam("page", "0")
@@ -148,7 +148,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByJobInstanceId() throws Exception {
+	void listThinJobExecutionsByJobInstanceId() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
 								.queryParam("page", "0")
@@ -172,7 +172,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByTaskExecutionId() throws Exception {
+	void listThinJobExecutionsByTaskExecutionId() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
 								.queryParam("page", "0")
@@ -196,7 +196,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByDate() throws Exception {
+	void listThinJobExecutionsByDate() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
 								.queryParam("page", "0")
@@ -223,7 +223,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listJobExecutionsByName() throws Exception {
+	void listJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions")
 								.queryParam("name", JOB_NAME)
@@ -247,7 +247,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByName() throws Exception {
+	void listThinJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
 								.queryParam("name", JOB_NAME)
@@ -271,7 +271,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void jobDisplayDetail() throws Exception {
+	void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}", "2")
 				)
@@ -306,7 +306,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void jobStop() throws Exception {
+	void jobStop() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "1")
 						.queryParam("stop", "true")
 				)
@@ -320,7 +320,7 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void jobRestart() throws Exception {
+	void jobRestart() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "2")
 						.queryParam("restart", "true")
 						.queryParam("useJsonJobParameters", "true")

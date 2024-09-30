@@ -56,19 +56,19 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SpringJUnitConfig(classes={EmbeddedDataSourceConfiguration.class,
-	DataFlowTestConfiguration.class,StepBeanDefinitionRegistrar.class,
-	ComposedTaskRunnerConfiguration.class,
-	StepBeanDefinitionRegistrar.class})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-@TestPropertySource(properties = {"graph=FOOBAR","max-wait-time=1000", "increment-instance-enabled=true", "spring.cloud.task.name=footest"})
-public class ComposedTaskRunnerStepFactoryTests {
+@SpringJUnitConfig(classes = {EmbeddedDataSourceConfiguration.class,
+		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
+		ComposedTaskRunnerConfiguration.class,
+		StepBeanDefinitionRegistrar.class})
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+@TestPropertySource(properties = {"graph=FOOBAR", "max-wait-time=1000", "increment-instance-enabled=true", "spring.cloud.task.name=footest"})
+class ComposedTaskRunnerStepFactoryTests {
 
 	@Autowired
 	ComposedTaskRunnerStepFactory stepFactory;
 
 	@Test
-	public void testStep() throws Exception {
+	void step() throws Exception {
 		Step step = stepFactory.getObject();
 		assertThat(step).isNotNull();
 		assertThat(step.getName()).isEqualTo("FOOBAR_0");

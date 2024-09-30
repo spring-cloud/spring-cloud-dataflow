@@ -40,10 +40,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class AuditRecordsDocumentation extends BaseDocumentation {
+class AuditRecordsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		this.mockMvc.perform(
 			post("/apps/{type}/time", "source")
 					.param("uri", "maven://org.springframework.cloud.stream.app:time-source-rabbit:1.2.0.RELEASE"))
@@ -61,7 +61,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listAllAuditRecords() throws Exception {
+	void listAllAuditRecords() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records")
 				.param("page", "0")
@@ -91,7 +91,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getAuditRecord() throws Exception {
+	void getAuditRecord() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/{id}", "5"))
 			.andExpect(status().isOk())
@@ -114,7 +114,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getAuditActionTypes() throws Exception {
+	void getAuditActionTypes() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/audit-action-types"))
 			.andExpect(status().isOk()
@@ -122,7 +122,7 @@ public class AuditRecordsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getAuditOperationTypes() throws Exception {
+	void getAuditOperationTypes() throws Exception {
 		this.mockMvc.perform(
 			get("/audit-records/audit-operation-types"))
 			.andExpect(status().isOk()

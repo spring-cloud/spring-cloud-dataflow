@@ -41,24 +41,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
+@SuppressWarnings({"NewClassNamingConvention","SameParameterValue"})
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class TaskSchedulerDocumentation extends BaseDocumentation {
+class TaskSchedulerDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		createTaskDefinition("mytaskname");
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		destroyTaskDefinition("mytaskname");
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
 	@Test
-	public void createSchedule() throws Exception {
+	void createSchedule() throws Exception {
 		this.mockMvc.perform(
 				post("/tasks/schedules")
 						.queryParam("scheduleName", "myschedule")
@@ -79,7 +79,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void deleteSchedule() throws Exception {
+	void deleteSchedule() throws Exception {
 		this.mockMvc.perform(
 				delete("/tasks/schedules/{scheduleName}", "mytestschedule"))
 				.andExpect(status().isOk())
@@ -89,7 +89,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listFilteredSchedules() throws Exception {
+	void listFilteredSchedules() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/schedules/instances/{task-definition-name}", "FOO")
 						.queryParam("page", "0")
@@ -112,7 +112,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listAllSchedules() throws Exception {
+	void listAllSchedules() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/schedules")
 						.queryParam("page", "0")

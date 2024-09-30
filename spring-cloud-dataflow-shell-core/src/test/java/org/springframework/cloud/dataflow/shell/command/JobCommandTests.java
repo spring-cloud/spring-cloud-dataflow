@@ -51,8 +51,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.shell.table.Table;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Glenn Renfro
@@ -129,7 +127,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	void testJobExecutionList() {
+	void jobExecutionList() {
 		logger.info("Retrieve Job Execution List Test");
 		Table table = getTable(job().jobExecutionList());
 		verifyColumnNumber(table, 7);
@@ -144,7 +142,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
  	 	}
 
 	@Test
-	void testJobExecutionListByName() {
+	void jobExecutionListByName() {
 		logger.info("Retrieve Job Execution List By Name Test");
 		Table table = getTable(job().jobExecutionListByName(JOB_NAME_FOOBAR));
 		verifyColumnNumber(table, 7);
@@ -162,9 +160,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Job Execution Detail by Id");
 		Table table = getTable(job().executionDisplay(getFirstJobExecutionIdFromTable()));
 		verifyColumnNumber(table, 2);
-		assertEquals(19,
-				table.getModel().getRowCount(),
-				"Number of expected rows returned from the table is incorrect");
+		assertThat(table.getModel().getRowCount()).as("Number of expected rows returned from the table is incorrect").isEqualTo(19);
 		int rowNumber = 0;
 		checkCell(table, rowNumber++, 0, "Key ");
 		checkCell(table, rowNumber++, 0, "Job Execution Id ");
@@ -185,14 +181,11 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, rowNumber++, 0, "Job Parameters ");
 		int paramRowOne = rowNumber;
 
-		assertTrue(checkModelColumn(paramRowOne, table, "-foo(java.lang.String) "),
-			"the table did not contain the correct job parameters for job parameter value foo");
+		assertThat(checkModelColumn(paramRowOne, table, "-foo(java.lang.String) ")).as("the table did not contain the correct job parameters for job parameter value foo").isTrue();
 
-		assertTrue(checkModelColumn(paramRowOne, table, "bar(java.lang.String) "),
-			"the table did not contain the correct job parameters for job parameter value bar");
+		assertThat(checkModelColumn(paramRowOne, table, "bar(java.lang.String) ")).as("the table did not contain the correct job parameters for job parameter value bar").isTrue();
 
-		assertTrue(checkModelColumn(paramRowOne, table, "baz(java.lang.Long) "),
-			"the table did not contain the correct job parameters for job parameter value baz");
+		assertThat(checkModelColumn(paramRowOne, table, "baz(java.lang.Long) ")).as("the table did not contain the correct job parameters for job parameter value baz").isTrue();
 
 	}
 
@@ -228,7 +221,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	void testJobStepExecutionList() {
+	void jobStepExecutionList() {
 		logger.info("Retrieve Job Step Execution List Test");
 
 		Table table = getTable(job().jobStepExecutionList(getFirstJobExecutionIdFromTable()));
@@ -242,7 +235,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	void testJobStepExecutionProgress() {
+	void jobStepExecutionProgress() {
 		logger.info("Retrieve Job Step Execution Progress Test");
 
 		long jobExecutionId = getFirstJobExecutionIdFromTable();

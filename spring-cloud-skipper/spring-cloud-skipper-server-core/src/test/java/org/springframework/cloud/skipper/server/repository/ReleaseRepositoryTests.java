@@ -47,7 +47,7 @@ import static org.assertj.core.api.Assertions.fail;
  */
 @ActiveProfiles("repo-test")
 @Transactional
-public class ReleaseRepositoryTests extends AbstractIntegrationTest {
+class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 	private static final Long REMOTE_REPO = 1L;
 
@@ -66,7 +66,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 	private RepositoryRepository repositoryRepository;
 
 	@Test
-	public void verifyFindByMethods() {
+	void verifyFindByMethods() {
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
 		packageMetadata1.setKind("SpringCloudDeployerApplication");
@@ -249,8 +249,9 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		// findAll
 		Iterable<Release> releases = this.releaseRepository.findAll();
-		assertThat(releases).isNotEmpty();
-		assertThat(releases).hasSize(17);
+		assertThat(releases)
+				.isNotEmpty()
+				.hasSize(17);
 
 		Long packageMetadataId1 = this.packageMetadataRepository.findByName("package1").get(0).getId();
 		Long packageMetadataId2 = this.packageMetadataRepository.findByName("package2").get(0).getId();
@@ -285,8 +286,9 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		// findReleaseRevisions
 		List<Release> releaseRevisions = this.releaseRepository.findReleaseRevisions(release1.getName(), 2);
-		assertThat(releaseRevisions).isNotEmpty();
-		assertThat(releaseRevisions).hasSize(2);
+		assertThat(releaseRevisions)
+				.isNotEmpty()
+				.hasSize(2);
 		assertThat(releaseRevisions.get(0).getName()).isEqualTo(release3.getName());
 		assertThat(releaseRevisions.get(0).getVersion()).isEqualTo(release3.getVersion());
 		assertThat(releaseRevisions.get(0).getInfo().getStatus().getStatusCode())
@@ -299,8 +301,9 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 		// findByNameIgnoreCaseContainingOrderByNameAscVersionDesc
 		List<Release> orderByVersion = this.releaseRepository
 				.findByNameIgnoreCaseContainingOrderByNameAscVersionDesc(release4.getName());
-		assertThat(orderByVersion).isNotEmpty();
-		assertThat(orderByVersion).hasSize(2);
+		assertThat(orderByVersion)
+				.isNotEmpty()
+				.hasSize(2);
 		assertThat(orderByVersion.get(0).getName()).isEqualTo(release5.getName());
 		assertThat(orderByVersion.get(0).getVersion()).isEqualTo(release5.getVersion());
 		assertThat(orderByVersion.get(0).getInfo().getStatus().getStatusCode()).isEqualTo(release5.getInfo()
@@ -312,17 +315,20 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 
 		// findByNameIgnoreCaseContaining
 		List<Release> byNameLike = this.releaseRepository.findByNameIgnoreCaseContaining("stable");
-		assertThat(byNameLike).isNotEmpty();
-		assertThat(byNameLike).hasSize(5);
+		assertThat(byNameLike)
+				.isNotEmpty()
+				.hasSize(5);
 
 		// findLatestDeployedOrFailed
 		List<Release> deployedOrFailed = this.releaseRepository.findLatestDeployedOrFailed("stable");
-		assertThat(deployedOrFailed).isNotEmpty();
-		assertThat(deployedOrFailed).hasSize(2);
+		assertThat(deployedOrFailed)
+				.isNotEmpty()
+				.hasSize(2);
 
 		List<Release> deployedOrFailedAll = this.releaseRepository.findLatestDeployedOrFailed("");
-		assertThat(deployedOrFailedAll).isNotEmpty();
-		assertThat(deployedOrFailedAll).hasSize(9);
+		assertThat(deployedOrFailedAll)
+				.isNotEmpty()
+				.hasSize(9);
 
 		Release latestDeletedRelease1 = this.releaseRepository.findLatestReleaseIfDeleted(release1.getName());
 		assertThat(latestDeletedRelease1).isNull();
@@ -430,7 +436,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void verifydeleteIfAllReleasesDeleted() {
+	void verifydeleteIfAllReleasesDeleted() {
 
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
@@ -502,7 +508,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void verifydeletePackageFromRemoteRepository() {
+	void verifydeletePackageFromRemoteRepository() {
 
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
@@ -529,7 +535,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void verifyReleaseNotFoundByName() {
+	void verifyReleaseNotFoundByName() {
 		String releaseName = "random";
 		try {
 			this.releaseRepository.findLatestRelease(releaseName);
@@ -541,7 +547,7 @@ public class ReleaseRepositoryTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void verifyReleaseNotFoundByNameAndVersion() {
+	void verifyReleaseNotFoundByNameAndVersion() {
 		String releaseName = "random";
 		int version = 1;
 		try {

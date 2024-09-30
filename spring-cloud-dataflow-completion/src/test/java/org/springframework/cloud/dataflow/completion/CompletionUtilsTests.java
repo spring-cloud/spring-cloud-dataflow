@@ -27,18 +27,19 @@ import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+
 /**
  * Unit tests for CompletionUtils.
  *
  * @author Eric Bottard
  * @author Corneil du Plessis
  */
-public class CompletionUtilsTests {
+class CompletionUtilsTests {
 
 	final StreamDefinitionService streamDefinitionService  = new DefaultStreamDefinitionService();
 
 	@Test
-	public void testLabelQualification() {
+	void labelQualification() {
 		StreamDefinition streamDefinition = new StreamDefinition("foo", "http | filter");
 		LinkedList<StreamAppDefinition> appDefinitions = this.streamDefinitionService.getAppDefinitions(streamDefinition);
 		assertThat(CompletionUtils.maybeQualifyWithLabel("filter", appDefinitions))

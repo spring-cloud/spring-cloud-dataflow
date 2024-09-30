@@ -67,7 +67,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @ActiveProfiles({"repo-test", "local"})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReleaseControllerTests extends AbstractControllerTests {
+class ReleaseControllerTests extends AbstractControllerTests {
 
 	@MockBean
 	private ActuatorService actuatorService;
@@ -76,14 +76,14 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	private RepositoryRepository repositoryRepository;
 
 	@Test
-	public void deployTickTock() throws Exception {
+	void deployTickTock() throws Exception {
 		Release release = install("ticktock", "4.0.0", "myTicker");
 		assertReleaseIsDeployedSuccessfully("myTicker", 1);
 		assertThat(release.getVersion()).isEqualTo(1);
 	}
 
 	@Test
-	public void packageDeployRequest() throws Exception {
+	void packageDeployRequest() throws Exception {
 		String releaseName = "myLogRelease";
 		InstallRequest installRequest = new InstallRequest();
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
@@ -100,7 +100,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void checkDeployStatus() throws Exception {
+	void checkDeployStatus() throws Exception {
 
 		// Deploy
 		String releaseName = "test1";
@@ -114,7 +114,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void getReleaseLogs() throws Exception {
+	void getReleaseLogs() throws Exception {
 		// Deploy
 		String releaseName = "testLogs";
 		install("log", "4.0.0", releaseName);
@@ -125,7 +125,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 
 
 	@Test
-	public void checkDeleteReleaseWithPackage() throws Exception {
+	void checkDeleteReleaseWithPackage() throws Exception {
 
 		// Make the test repo Local
 		Repository repo = this.repositoryRepository.findByName("test");
@@ -164,7 +164,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void releaseRollbackAndUndeploy() throws Exception {
+	void releaseRollbackAndUndeploy() throws Exception {
 
 		// Deploy
 		String releaseName = "test2";
@@ -205,7 +205,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void packageDeployAndUpgrade() throws Exception {
+	void packageDeployAndUpgrade() throws Exception {
 		String releaseName = "myLog";
 		Release release = install("log", "5.0.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
@@ -217,12 +217,12 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void cancelNonExistingRelease() throws Exception {
+	void cancelNonExistingRelease() throws Exception {
 		cancel("myLog2", HttpStatus.OK.value(), false);
 	}
 
 	@Test
-	public void packageDeployAndUpgradeAndCancel() throws Exception {
+	void packageDeployAndUpgradeAndCancel() throws Exception {
 		String releaseName = "myTestapp";
 		Release release = install("testapp", "2.9.0", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
@@ -236,7 +236,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void testStatusReportsErrorForMissingRelease() throws Exception {
+	void statusReportsErrorForMissingRelease() throws Exception {
 		// In a real container the response is carried over into the error dispatcher, but
 		// in the mock a new one is created so we have to assert the status at this
 		// intermediate point
@@ -247,7 +247,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void packageUpgradeWithNoDifference() throws Exception {
+	void packageUpgradeWithNoDifference() throws Exception {
 		String releaseName = "myPackage";
 		String packageName = "log";
 		String packageVersion = "5.0.0";
@@ -272,7 +272,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void testMutableAttributesAppInstanceStatus() {
+	void mutableAttributesAppInstanceStatus() {
 		// Test AppStatus with general State set
 		AppStatus appStatusWithGeneralState = AppStatus.of("id666").generalState(DeploymentState.deployed).build();
 		AppStatus appStatusCopy = DefaultReleaseManager.copyStatus(appStatusWithGeneralState);
@@ -312,7 +312,7 @@ public class ReleaseControllerTests extends AbstractControllerTests {
 	}
 
 	@Test
-	public void getFromAndPostToActuator() throws Exception {
+	void getFromAndPostToActuator() throws Exception {
 		install("ticktock", "4.0.0", "myTicker");
 		assertReleaseIsDeployedSuccessfully("myTicker", 1);
 

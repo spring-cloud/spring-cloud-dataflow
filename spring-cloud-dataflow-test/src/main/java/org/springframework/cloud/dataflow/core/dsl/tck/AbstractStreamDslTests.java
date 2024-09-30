@@ -102,7 +102,7 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testStreamNameAsAppName() {
+	public void streamNameAsAppName() {
 		String streamName = "bar";
 		String stream = "bar = foo | bar";
 		StreamNode sn = parse(stream);
@@ -162,7 +162,7 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testParameters() {
+	public void parameters() {
 		String app = "gemfire-cq --query='Select * from /Stocks where symbol=''VMW''' --regionName=foo --foo=bar";
 		StreamNode ast = parse(app);
 		AppNode gemfireApp = ast.getApp("gemfire-cq");
@@ -204,7 +204,7 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testInvalidApps() {
+	public void invalidApps() {
 		String config = "test | foo--x=13";
 		try {
 			parse("t", config);
@@ -277,12 +277,12 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testUnbalancedSingleQuotes() {
+	public void unbalancedSingleQuotes() {
 		checkForParseError("foo | bar --expression='select foo", DSLMessage.NON_TERMINATING_QUOTED_STRING, 23);
 	}
 
 	@Test
-	public void testUnbalancedDoubleQuotes() {
+	public void unbalancedDoubleQuotes() {
 		checkForParseError("foo | bar --expression=\"select foo", DSLMessage.NON_TERMINATING_DOUBLE_QUOTED_STRING, 23);
 	}
 
@@ -537,7 +537,7 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testSourceDestinationArgs() {
+	public void sourceDestinationArgs() {
 		StreamNode sn = parse(":test --group=test > file");
 		assertThat("[(test:1>5 --group=test)>(AppNode:file:21>25)]").isEqualTo(sn.stringify(true));
 	}
@@ -551,14 +551,14 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testComposedOptionNameErros() {
+	public void composedOptionNameErros() {
 		checkForParseError("foo --name.=value", DSLMessage.NOT_EXPECTED_TOKEN, 11);
 		checkForParseError("foo --name .sub=value", DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME, 11);
 		checkForParseError("foo --name. sub=value", DSLMessage.NO_WHITESPACE_IN_DOTTED_NAME, 12);
 	}
 
 	@Test
-	public void testXD2416() {
+	public void xd2416() {
 		StreamNode ast = parse("http | transform --expression='payload.replace(\"abc\", \"\")' | log");
 		assertThat((String) ast.getAppNodes().get(1).getArgumentsAsProperties().get("expression"))
 			.isEqualTo("payload" + ".replace(\"abc\", \"\")");
@@ -569,14 +569,14 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testParseUnboundStreamApp() {
+	public void parseUnboundStreamApp() {
 		StreamNode sn = parse("foo");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertThat(appNodes.get(0).isUnboundStreamApp()).isTrue();
 	}
 
 	@Test
-	public void testParseUnboundStreamApps() {
+	public void parseUnboundStreamApps() {
 		StreamNode sn = parse("foo|| bar|| baz");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertThat(3).isEqualTo(appNodes.size());
@@ -601,7 +601,7 @@ public abstract class AbstractStreamDslTests {
 	}
 
 	@Test
-	public void testParseUnboundStreamAppsWithParams() {
+	public void parseUnboundStreamAppsWithParams() {
 		StreamNode sn = parse("foo --aaa=bbb || bar");
 		List<AppNode> appNodes = sn.getAppNodes();
 		assertThat(2).isEqualTo(appNodes.size());

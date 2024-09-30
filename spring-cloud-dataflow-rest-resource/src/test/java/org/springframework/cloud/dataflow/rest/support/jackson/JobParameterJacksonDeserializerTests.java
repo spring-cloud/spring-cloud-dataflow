@@ -28,10 +28,10 @@ import org.springframework.batch.core.JobParameter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
-public class JobParameterJacksonDeserializerTests {
+class JobParameterJacksonDeserializerTests {
 
 	@Test
-	public void validJobParameter() throws IOException {
+	void validJobParameter() throws IOException {
 		JobParameterJacksonDeserializer jobParameterJacksonDeserializer = new JobParameterJacksonDeserializer();
 		String json = "{\"value\":\"BAR\",\"type\":\"java.lang.String\",\"identifying\":true}";
 		JobParameter jobParameter = jobParameterJacksonDeserializer.deserialize(getJsonParser(json), null);
@@ -41,7 +41,7 @@ public class JobParameterJacksonDeserializerTests {
 	}
 
 	@Test
-	public void inValidJobParameter() throws IOException {
+	void inValidJobParameter() throws IOException {
 		JobParameterJacksonDeserializer jobParameterJacksonDeserializer = new JobParameterJacksonDeserializer();
 		String json = "{\"value\":\"BAR\",\"type\":\"java.lang.FOO\",\"identifying\":true}";
 		assertThatExceptionOfType(IllegalArgumentException.class)

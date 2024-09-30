@@ -64,7 +64,7 @@ class ArgumentSanitizerTest {
 	}
 
 	@Test
-	void testSanitizeJobParameters() {
+	void sanitizeJobParameters() {
 		String[] JOB_PARAM_KEYS = {"username", "password", "name", "C", "D", "E"};
 		Date testDate = new Date();
 		JobParameter[] PARAMETERS = {new JobParameter("foo", String.class, true),
@@ -120,7 +120,7 @@ class ArgumentSanitizerTest {
 	}
 
 	@Test
-	void testSanitizeArguments() {
+	void sanitizeArguments() {
 		final List<String> arguments = new ArrayList<>();
 
 		for (String key : keys) {

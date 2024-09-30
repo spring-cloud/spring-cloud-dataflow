@@ -64,14 +64,14 @@ import static org.mockito.Mockito.when;
 /**
  * @author David Turanski
  **/
-@SpringBootTest(classes = { TaskLauncherSinkTests.TestConfig.class },
+@SpringBootTest(classes = {TaskLauncherSinkTests.TestConfig.class},
 	properties = {
 		"spring.cloud.function.definition=launchRequestConsumer",
 		"retry.initial-delay=100",
-				"retry.max-period=3000", "retry.max-attempts=6"
-})
+		"retry.max-period=3000", "retry.max-attempts=6"
+	})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class TaskLauncherSinkTests {
+class TaskLauncherSinkTests {
 
 	private static final Logger logger = LoggerFactory.getLogger(TaskLauncherSinkTests.class);
 
@@ -96,8 +96,9 @@ public class TaskLauncherSinkTests {
 			return errorsReceived.get() > 0;
 		}
 	}
+
 	@Test
-	public void consumerPausesWhenMaxTaskExecutionsReached() {
+	void consumerPausesWhenMaxTaskExecutionsReached() {
 
 		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
 		ErrorHandler errorHandler = new ErrorHandler();
@@ -123,7 +124,7 @@ public class TaskLauncherSinkTests {
 	}
 
 	@Test
-	public void launchValidRequest() {
+	void launchValidRequest() {
 
 		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);
 		ErrorHandler errorHandler = new ErrorHandler();
@@ -146,7 +147,7 @@ public class TaskLauncherSinkTests {
 	}
 
 	@Test
-	public void launchRequestFailure() {
+	void launchRequestFailure() {
 
 
 		SubscribableChannel errorChannel = context.getBean("errorChannel", SubscribableChannel.class);

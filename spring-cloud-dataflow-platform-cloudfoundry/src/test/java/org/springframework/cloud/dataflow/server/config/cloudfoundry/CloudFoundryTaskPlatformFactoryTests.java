@@ -58,7 +58,7 @@ import reactor.core.publisher.Mono;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  **/
-public class CloudFoundryTaskPlatformFactoryTests {
+class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryPlatformTokenProvider platformTokenProvider;
 
@@ -81,7 +81,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	private CloudFoundryDeploymentProperties deploymentProperties;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		cloudFoundryClientProvider = mock(CloudFoundryPlatformClientProvider.class);
 		cloudFoundrySchedulerClientProvider = mock(CloudFoundrySchedulerClientProvider.class);
 		cloudFoundryClient = mock(CloudFoundryClient.class);
@@ -108,7 +108,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatformNoScheduler() {
+	void cloudFoundryTaskPlatformNoScheduler() {
 		setupSinglePlatform();
 		TaskPlatformFactory taskPlatformFactory = CloudFoundryTaskPlatformFactory
 				.builder()
@@ -129,7 +129,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatformWithScheduler() {
+	void cloudFoundryTaskPlatformWithScheduler() {
 		setupSinglePlatform();
 		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));
@@ -149,7 +149,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
+	void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
 		setupMultiPlatform();
 		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));

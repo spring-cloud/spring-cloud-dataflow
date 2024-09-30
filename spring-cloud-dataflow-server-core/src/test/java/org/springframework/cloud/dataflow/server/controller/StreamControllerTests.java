@@ -1415,7 +1415,7 @@ class StreamControllerTests {
 	}
 
 	@Test
-	void testAggregateState() {
+	void aggregateState() {
 		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.deployed, DeploymentState.failed)))
 			.isEqualTo(DeploymentState.partial);
 		assertThat(StreamDeployerUtil.aggregateState(EnumSet.of(DeploymentState.unknown, DeploymentState.failed)))

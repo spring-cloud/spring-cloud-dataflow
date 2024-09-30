@@ -16,13 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.runners.MethodSorters;
 
 import org.springframework.cloud.dataflow.core.ApplicationType;
 
@@ -47,20 +45,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SuppressWarnings("NewClassNamingConvention")
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class TaskDefinitionsDocumentation extends BaseDocumentation {
+class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
 	@Test
-	public void createDefinition() throws Exception {
+	void createDefinition() throws Exception {
 		this.mockMvc.perform(
 			post("/tasks/definitions")
 				.queryParam("name", "my-task")
@@ -88,7 +86,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listAllTaskDefinitions() throws Exception {
+	void listAllTaskDefinitions() throws Exception {
 		this.documentation.dontDocument(
 				() -> this.mockMvc
 					.perform(post("/tasks/definitions").queryParam("name", "my-task")
@@ -120,7 +118,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void displayDetail() throws Exception {
+	void displayDetail() throws Exception {
 		this.documentation.dontDocument(
 				() -> this.mockMvc
 					.perform(post("/tasks/definitions").queryParam("name", "my-task")
@@ -154,7 +152,7 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void taskDefinitionDelete() throws Exception {
+	void taskDefinitionDelete() throws Exception {
 		this.documentation.dontDocument(
 				() -> this.mockMvc
 					.perform(post("/tasks/definitions").queryParam("name", "my-task")

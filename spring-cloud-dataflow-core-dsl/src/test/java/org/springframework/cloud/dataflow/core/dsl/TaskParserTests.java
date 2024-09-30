@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -32,6 +31,7 @@ import org.springframework.cloud.dataflow.core.dsl.graph.Node;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * Test the parser and visitor infrastructure. Check it accepts expected data and
@@ -94,10 +94,11 @@ class TaskParserTests {
 		String module = "gemfire-cq --query='Select * from /Stocks where symbol=''VMW''' --regionName=foo --foo=bar";
 		TaskAppNode gemfireApp = parse(module).getTaskApp();
 		Map<String, String> parameters = gemfireApp.getArgumentsAsMap();
-		assertThat(parameters).hasSize(3);
-		assertThat(parameters).containsEntry("query", "Select * from /Stocks where symbol='VMW'");
-		assertThat(parameters).containsEntry("regionName", "foo");
-		assertThat(parameters).containsEntry("foo", "bar");
+		assertThat(parameters)
+				.hasSize(3)
+				.containsEntry("query", "Select * from /Stocks where symbol='VMW'")
+				.containsEntry("regionName", "foo")
+				.containsEntry("foo", "bar");
 
 		module = "test";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
@@ -105,20 +106,23 @@ class TaskParserTests {
 
 		module = "foo --x=1 --y=two ";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters).hasSize(2);
-		assertThat(parameters).containsEntry("x", "1");
-		assertThat(parameters).containsEntry("y", "two");
+		assertThat(parameters)
+				.hasSize(2)
+				.containsEntry("x", "1")
+				.containsEntry("y", "two");
 
 		module = "foo --x=1a2b --y=two ";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters).hasSize(2);
-		assertThat(parameters).containsEntry("x", "1a2b");
-		assertThat(parameters).containsEntry("y", "two");
+		assertThat(parameters)
+				.hasSize(2)
+				.containsEntry("x", "1a2b")
+				.containsEntry("y", "two");
 
 		module = "foo --x=2";
 		parameters = parse(module).getTaskApp().getArgumentsAsMap();
-		assertThat(parameters).hasSize(1);
-		assertThat(parameters).containsEntry("x", "2");
+		assertThat(parameters)
+				.hasSize(1)
+				.containsEntry("x", "2");
 
 		module = "--foo = bar";
 		try {
@@ -1073,7 +1077,7 @@ class TaskParserTests {
 		catch (CheckPointedParseException cppe) {
 			assertThat(cppe.message).isEqualTo(DSLMessage.TASK_ARGUMENTS_NOT_ALLOWED_UNLESS_IN_APP_MODE);
 		}
-		Assertions.assertDoesNotThrow(() -> {
+		assertDoesNotThrow(() -> {
 			new TaskParser("foo", "appA --p1=v1", true, true).parse();
 		});
 	}

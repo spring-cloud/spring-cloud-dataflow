@@ -28,10 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class RepositoryMvcTests extends AbstractMockMvcTests {
+class RepositoryMvcTests extends AbstractMockMvcTests {
 
 	@Test
-	public void shouldReturnRepositoryIndex() throws Exception {
+	void shouldReturnRepositoryIndex() throws Exception {
 		mockMvc.perform(get("/api")).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.repositories").exists());
 	}
