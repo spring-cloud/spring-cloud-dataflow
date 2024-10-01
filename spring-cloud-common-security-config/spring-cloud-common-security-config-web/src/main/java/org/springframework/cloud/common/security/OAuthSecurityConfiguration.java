@@ -105,7 +105,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Corneil du Plessis
  */
 @Configuration(proxyBeanMethods = false)
-// SCDF 3.0 Migration - Need to re add this later with a different class or bean.
+// TODO SCDF 3.0 Migration - Need to re add this later with a different class or bean.
 // @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
 // @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.ANY)
