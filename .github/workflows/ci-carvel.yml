@@ -3,7 +3,7 @@ name: CI Carvel
 on:
   push:
     branches:
-      - main-3
+      - main
     paths:
       - 'src/carvel/**'
   workflow_dispatch:

@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import static org.mockito.Mockito.mock;
-
+import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
 import org.cloudfoundry.operations.CloudFoundryOperations;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
 
-import io.pivotal.reactor.scheduler.ReactorSchedulerClient;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Christian Tzolov

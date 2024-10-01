@@ -127,7 +127,7 @@ public abstract class BaseDocumentation {
 	protected ApplicationContext context;
 
 	protected void prepareDocumentationTests(WebApplicationContext context,
-											 RestDocumentationContextProvider restDocumentationContextProvider) throws Exception {
+											 RestDocumentationContextProvider restDocumentationContextProvider) {
 		this.context = context;
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.documentation = new ToggleableResultHandler(documentationHandler);
