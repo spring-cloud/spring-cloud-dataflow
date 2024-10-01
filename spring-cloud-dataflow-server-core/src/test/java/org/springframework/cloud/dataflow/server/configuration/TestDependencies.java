@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -42,6 +43,7 @@ import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilde
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.autoconfigure.web.client.RestTemplateAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -774,12 +776,13 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 
 	@Bean
 	public AboutController aboutController(
-			VersionInfoProperties versionInfoProperties,
-			FeaturesProperties featuresProperties, StreamDeployer streamDeployer,
-			DataflowMetricsProperties monitoringDashboardInfoProperties,
-			ObjectProvider<GitInfoContributor> gitInfoContributor,
-			ObjectProvider<BuildInfoContributor> buildInfoContributor
-	) {
+                       VersionInfoProperties versionInfoProperties,
+										   FeaturesProperties featuresProperties, StreamDeployer streamDeployer,
+										   DataflowMetricsProperties monitoringDashboardInfoProperties,
+										   @Nullable OAuth2ClientProperties oAuth2ClientProperties,
+                       ObjectProvider<GitInfoContributor> gitInfoContributor,
+			                 ObjectProvider<BuildInfoContributor> buildInfoContributor 
+  ) {
 
 		Launcher launcher = mock(Launcher.class);
 		TaskLauncher taskLauncher = mock(TaskLauncher.class);
@@ -801,7 +804,7 @@ public class TestDependencies extends WebMvcConfigurationSupport {
 		return new AboutController(streamDeployer, launcherRepository,
 				featuresProperties, versionInfoProperties,
 				mock(SecurityStateBean.class), monitoringDashboardInfoProperties,
-				gitInfoContributor, buildInfoContributor);
+				oAuth2ClientProperties, gitInfoContributor, buildInfoContributor);
 	}
 
 

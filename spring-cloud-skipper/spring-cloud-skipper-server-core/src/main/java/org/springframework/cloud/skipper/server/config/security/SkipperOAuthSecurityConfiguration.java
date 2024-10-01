@@ -62,26 +62,46 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 			http.addFilter(basicAuthenticationFilter);
 		}
 
-		getAuthorizationProperties().getAuthenticatedPaths()
-				.add(dashboard(getAuthorizationProperties(), "/**"));
-		getAuthorizationProperties().getAuthenticatedPaths()
-				.add(dashboard(getAuthorizationProperties(), ""));
+		getAuthorizationProperties().getAnonymousPaths().add(authorizationProperties.getLoginUrl());
 
-		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
-				http.authorizeRequests()
-						.antMatchers(getAuthorizationProperties().getPermitAllPaths()
-								.toArray(new String[0]))
-						.permitAll()
-						.antMatchers(getAuthorizationProperties().getAuthenticatedPaths()
-								.toArray(new String[0]))
-						.authenticated();
+		// All paths should be available only for authenticated users
+		getAuthorizationProperties().getAuthenticatedPaths().add("/");
+		getAuthorizationProperties().getAuthenticatedPaths().add(this.authorizationProperties.getDashboardUrl());
+		getAuthorizationProperties().getAuthenticatedPaths().add(dashboard(authorizationProperties, "/**"));
+
+		// Permit for all users as the visibility is managed through roles
+		getAuthorizationProperties().getPermitAllPaths().add(this.authorizationProperties.getDashboardUrl());
+		getAuthorizationProperties().getPermitAllPaths().add(dashboard(authorizationProperties, "/**"));
+
+		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security;
+
+		if (AuthorizationProperties.FRONTEND_LOGIN_URL.equals(this.authorizationProperties.getLoginUrl())) {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+
+		} else {
+			security =
+					http.authorizeRequests()
+							.antMatchers(this.authorizationProperties.getPermitAllPaths().toArray(new String[0]))
+							.permitAll()
+							.antMatchers(this.authorizationProperties.getAuthenticatedPaths().toArray(new String[0]))
+							.authenticated()
+							.antMatchers(this.authorizationProperties.getAnonymousPaths().toArray(new String[0]))
+							.anonymous();
+		}
 
 		security = SecurityConfigUtils.configureSimpleSecurity(security, getAuthorizationProperties());
 		security.anyRequest().denyAll();
 
 		http.httpBasic().and()
 				.logout()
-				.logoutSuccessUrl(dashboard(getAuthorizationProperties(), "/logout-success-oauth.html"))
+				.logoutSuccessUrl(getAuthorizationProperties().getLogoutSuccessUrl())
 				.and().csrf().disable()
 				.exceptionHandling()
 				.defaultAuthenticationEntryPointFor(basicAuthenticationEntryPoint, new AntPathRequestMatcher("/api/**"))
