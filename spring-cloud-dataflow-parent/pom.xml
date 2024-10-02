@@ -17,14 +17,14 @@
 		<java.version>17</java.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-		<spring-boot.version>3.3.0</spring-boot.version>
+		<spring-boot.version>3.3.4</spring-boot.version>
 		<spring-cloud-dataflow-ui.version>3.4.3-SNAPSHOT</spring-cloud-dataflow-ui.version>
 		<spring-cloud-dataflow-common.version>${dataflow.version}</spring-cloud-dataflow-common.version>
 		<spring-cloud-skipper.version>${dataflow.version}</spring-cloud-skipper.version>
 		<spring-cloud-deployer.version>3.0.0-SNAPSHOT</spring-cloud-deployer.version>
-		<spring-cloud-task.version>3.1.0</spring-cloud-task.version>
+		<spring-cloud-task.version>3.1.2</spring-cloud-task.version>
 		<spring-cloud-common-security-config.version>${dataflow.version}</spring-cloud-common-security-config.version>
-		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
 		<semver.version>2.2.0</semver.version>
 		<apache-directory-server.version>1.5.5</apache-directory-server.version>
@@ -43,7 +43,7 @@
 		<wavefront-spring-boot-bom.version>3.2.0</wavefront-spring-boot-bom.version>
 		<spring-cloud-dataflow-apps-docs-plugin.version>1.0.14</spring-cloud-dataflow-apps-docs-plugin.version>
 		<spring-cloud-dataflow-apps-metadata-plugin.version>1.0.14</spring-cloud-dataflow-apps-metadata-plugin.version>
-		<springdoc-openapi.version>2.3.0</springdoc-openapi.version>
+		<springdoc-openapi.version>2.6.0</springdoc-openapi.version>
 		<guava.version>32.1.3-jre</guava.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit-jupiter.version>5.10.3</junit-jupiter.version>
@@ -304,7 +304,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
@@ -395,11 +395,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
+				<version>3.13.0</version>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
 					<parameters>true</parameters>
+					<release>${java.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -410,7 +409,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.1.2</version>
 				<configuration>
 					<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 					<threadCount>1</threadCount>
@@ -442,7 +440,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.5.0</version>
 			</plugin>
 		</plugins>
 

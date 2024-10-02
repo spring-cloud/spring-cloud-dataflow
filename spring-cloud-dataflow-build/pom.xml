@@ -22,6 +22,7 @@
 		<docs.main>${project.artifactId}</docs.main>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
 		<spring-boot.version>3.3.4</spring-boot.version>
+		<spring-framework.version>6.1.13</spring-framework.version>
 		<dataflow.version>3.0.0-SNAPSHOT</dataflow.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>

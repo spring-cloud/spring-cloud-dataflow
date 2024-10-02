@@ -16,6 +16,7 @@
 
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
+		<java.version>17</java.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>
