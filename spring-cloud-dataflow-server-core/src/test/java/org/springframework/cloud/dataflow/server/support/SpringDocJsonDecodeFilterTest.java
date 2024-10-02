@@ -19,9 +19,9 @@ package org.springframework.cloud.dataflow.server.support;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,8 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Tobias Soloschenko
  * @author Glenn Renfro
+ * @author Corneil du Plessis
  */
-public class SpringDocJsonDecodeFilterTest {
+class SpringDocJsonDecodeFilterTest {
 
     private static final String OPENAPI_JSON_ESCAPED_CONTENT = "\"{\\\"openapi:\\\"3.0.1\\\",\\\"info\\\":{\\\"title\\\":\\\"OpenAPI definition\\\",\\\"version\\\":\\\"v0\\\"}}\"";
 
@@ -49,12 +50,13 @@ public class SpringDocJsonDecodeFilterTest {
 	private MockHttpServletRequest mockHttpServletRequest;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		this.mockHttpServletResponse = new MockHttpServletResponse();
 		this.mockHttpServletRequest = new MockHttpServletRequest();
 	}
-    @Test
-    public void doFilterTestEscaped() throws ServletException, IOException {
+
+	@Test
+	void doFilterTestEscaped() throws ServletException, IOException {
 
         MockFilterChain mockFilterChain = new MockFilterChain() {
             @Override
@@ -66,8 +68,9 @@ public class SpringDocJsonDecodeFilterTest {
         new SpringDocJsonDecodeFilter().doFilter(this.mockHttpServletRequest, this.mockHttpServletResponse, mockFilterChain);
         assertThat(this.mockHttpServletResponse.getContentAsString()).isEqualTo(OPENAPI_JSON_UNESCAPED_CONTENT);
     }
+
 	@Test
-	public void doFilterTestUnEscaped() throws ServletException, IOException {
+	void doFilterTestUnEscaped() throws ServletException, IOException {
 		MockFilterChain mockFilterChain = new MockFilterChain() {
 			@Override
 			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {

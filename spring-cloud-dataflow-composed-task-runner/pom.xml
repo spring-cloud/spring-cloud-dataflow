@@ -6,10 +6,10 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.11.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
-	<version>2.11.6-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-composed-task-runner</artifactId>
 	<name>spring-cloud-dataflow-composed-task-runner</name>
@@ -17,7 +17,7 @@
 
 	<packaging>jar</packaging>
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 		<plexus.utils.version>3.3.0</plexus.utils.version>
 		<failIfNoTests>true</failIfNoTests>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
@@ -53,6 +53,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
+			<version>[2.2.222,)</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
@@ -79,16 +80,8 @@
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.hibernate</groupId>
+			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-entitymanager</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -109,7 +102,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
-			<artifactId>micrometer-registry-prometheus</artifactId>
+			<artifactId>micrometer-registry-prometheus-simpleclient</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer.prometheus</groupId>
@@ -134,6 +127,7 @@
 				</executions>
 				<configuration>
 					<image>
+						<pullPolicy>IF_NOT_PRESENT</pullPolicy>
 						<name>springcloud/${project.artifactId}:${project.version}</name>
 					</image>
 				</configuration>

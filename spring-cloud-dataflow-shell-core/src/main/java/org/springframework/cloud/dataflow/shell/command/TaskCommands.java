@@ -233,24 +233,23 @@ public class TaskCommands {
 			propertiesToUse.put("spring.cloud.dataflow.task.platformName", platformName);
 		}
 		LaunchResponseResource response = taskOperations().launch(name, propertiesToUse, argumentsToUse);
-		return String.format("Launched task '%s' with execution id %d, schemaTarget %s", name, response.getExecutionId(), response.getSchemaTarget());
+		return String.format("Launched task '%s' with execution id %d", name, response.getExecutionId());
 	}
 
 	@ShellMethod(key = STOP, value = "Stop executing tasks")
 	@ShellMethodAvailability("availableWithUnDeployRole")
 	public String stop(
 			@ShellOption(value = {"", "--ids"}, help = "the task execution id") String ids,
-			@ShellOption(value = "--platformName", help = "the name of the platform where the task is executing", defaultValue = ShellOption.NULL) String platform,
-			@ShellOption(value = "--schemaTarget", help = "the schema target of the task.", defaultValue = ShellOption.NULL) String schemaTarget) {
+			@ShellOption(value = "--platformName", help = "the name of the platform where the task is executing", defaultValue = ShellOption.NULL) String platform) {
 
 		String message = null;
 		if (StringUtils.hasText(platform)) {
-			taskOperations().stop(ids, schemaTarget, platform);
+			taskOperations().stop(ids, platform);
 			message = String.format(
 					"Request to stop the task execution with id(s): %s for platform %s has been submitted", ids,
 					platform);
 		} else {
-			taskOperations().stop(ids, schemaTarget);
+			taskOperations().stop(ids);
 			message = String.format("Request to stop the task execution with id(s): %s has been submitted", ids);
 		}
 		return message;
@@ -260,10 +259,9 @@ public class TaskCommands {
 	public String retrieveTaskExecutionLog(
 			@ShellOption(value = {"", "--id"}, help = "the task execution id", defaultValue = ShellOption.NULL) Long id,
 			@ShellOption(value = {"", "--externalExecutionId"}, help = "the task external execution id", defaultValue = ShellOption.NULL) String externalExecutionId,
-			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform,
-			@ShellOption(value = "--schemaTarget", help = "the schema target of the task", defaultValue = ShellOption.NULL) String schemaTarget) {
+			@ShellOption(help = "the platform of the task execution", defaultValue = ShellOption.NULL) String platform) {
 		if(externalExecutionId == null) {
-			TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id, schemaTarget);
+			TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 			externalExecutionId = taskExecutionResource.getExternalExecutionId();
 		}
 		String result;
@@ -312,17 +310,15 @@ public class TaskCommands {
 		headers.put("startTime", "Start Time");
 		headers.put("endTime", "End Time");
 		headers.put("exitCode", "Exit Code");
-		headers.put("schemaTarget", "Schema Target");
 		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
 		return DataFlowTables.applyStyle(builder).build();
 	}
 
 	@ShellMethod(key = TASK_EXECUTION_STATUS, value = "Display the details of a specific task execution")
 	@ShellMethodAvailability("availableWithViewRole")
-	public Table display(@ShellOption(value = {"", "--id"}, help = "the task execution id") long id,
-						 @ShellOption(value = "--schemaTarget", help = "the schema target of the task", defaultValue = ShellOption.NULL) String schemaTarget) {
+	public Table display(@ShellOption(value = {"", "--id"}, help = "the task execution id") long id) {
 
-		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id, schemaTarget);
+		TaskExecutionResource taskExecutionResource = taskOperations().taskExecutionStatus(id);
 
 		TableModelBuilder<Object> modelBuilder = new TableModelBuilder<>();
 
@@ -340,7 +336,6 @@ public class TaskCommands {
 		modelBuilder.addRow().addValue("Exit Code ").addValue(taskExecutionResource.getExitCode());
 		modelBuilder.addRow().addValue("Exit Message ").addValue(taskExecutionResource.getExitMessage());
 		modelBuilder.addRow().addValue("Error Message ").addValue(taskExecutionResource.getErrorMessage());
-		modelBuilder.addRow().addValue("Schema Target ").addValue(taskExecutionResource.getSchemaTarget());
 		modelBuilder.addRow().addValue("External Execution Id ")
 				.addValue(taskExecutionResource.getExternalExecutionId());
 
@@ -374,7 +369,6 @@ public class TaskCommands {
 			@ShellOption(help = "all task execution IDs", defaultValue = "false") boolean all,
 			@ShellOption(help = "include non-completed task executions", defaultValue = "false") boolean includeNonCompleted,
 			@ShellOption(value = "--task-name", help = "the name of the task to cleanup", defaultValue = ShellOption.NULL) String taskName,
-			@ShellOption(value = "--schemaTarget", help = "the schema target of the task", defaultValue = ShellOption.NULL) String schemaTarget,
 			@ShellOption(help = "bypass confirmation prompt", defaultValue = "false") boolean force) {
 		Assert.isTrue(!(id != null && all && StringUtils.hasText(taskName)),
 				"`taskName`, `id` and `all` options are mutually exclusive.");
@@ -411,7 +405,7 @@ public class TaskCommands {
 			Assert.notNull(id, "Task Execution ID should be set");
 			String warn = "About to delete 1 task execution. Are you sure (y/n)?";
 			if (force || "y".equalsIgnoreCase(userInput.promptWithOptions(warn, "n", "y", "n")))
-				taskOperations().cleanup(id, schemaTarget);
+				taskOperations().cleanup(id);
 			return String.format("Request to clean up resources for task execution %s has been submitted", id);
 		}
 		return "Cleanup process is canceled";

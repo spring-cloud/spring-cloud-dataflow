@@ -37,22 +37,22 @@ import org.springframework.core.io.FileSystemResource;
  * @author Glenn Renfro
  * @since 2.9.0
  */
-public class SingleStepJobTests {
+class SingleStepJobTests {
 
 	private File outputFile;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		outputFile = new File("result.txt");
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		Files.deleteIfExists(Paths.get(outputFile.getAbsolutePath()));
 	}
 
 	@Test
-	public void testFileReaderFileWriter() throws Exception {
+	void fileReaderFileWriter() throws Exception {
 		getSpringApplication().run(SingleStepBatchJobApplication.class,
 				"--spring.application.name=Single Step Batch Job",
 				"foo=testFileReaderJdbcWriter");

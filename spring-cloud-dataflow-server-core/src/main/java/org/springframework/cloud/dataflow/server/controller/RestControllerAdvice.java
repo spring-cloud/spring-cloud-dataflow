@@ -16,8 +16,8 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +153,6 @@ public class RestControllerAdvice {
 	 * {@link NoSuchStepExecutionException},
 	 * {@link NoSuchAppException},
 	 * {@link NoSuchAppInstanceException}, or
-	 *{@link NoSuchSchemaTargetException}
 	 * @return the error response in JSON format with media type
 	 * application/vnd.error+json
 	 */
@@ -162,9 +161,7 @@ public class RestControllerAdvice {
 			NoSuchTaskDefinitionException.class, NoSuchTaskExecutionException.class, NoSuchJobExecutionException.class,
 			NoSuchJobInstanceException.class, NoSuchJobException.class, NoSuchStepExecutionException.class,
 			NoSuchTaskBatchException.class, NoSuchAppException.class, NoSuchAppInstanceException.class,
-			NoSuchScheduleException.class,
-			NoSuchSchemaTargetException.class
-	})
+			NoSuchScheduleException.class})
 	@ResponseStatus(HttpStatus.NOT_FOUND)
 	@ResponseBody
 	public VndErrors onNotFoundException(Exception e) {

@@ -16,13 +16,18 @@
 
 package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
@@ -36,7 +41,6 @@ import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -46,18 +50,15 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.pivotal.scheduler.SchedulerClient;
+import reactor.core.publisher.Mono;
 
 /**
  * @author David Turanski
  * @author Glenn Renfro
  * @author Corneil du Plessis
  **/
-public class CloudFoundryTaskPlatformFactoryTests {
+class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryPlatformTokenProvider platformTokenProvider;
 
@@ -80,7 +81,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	private CloudFoundryDeploymentProperties deploymentProperties;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		cloudFoundryClientProvider = mock(CloudFoundryPlatformClientProvider.class);
 		cloudFoundrySchedulerClientProvider = mock(CloudFoundrySchedulerClientProvider.class);
 		cloudFoundryClient = mock(CloudFoundryClient.class);
@@ -107,7 +108,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatformNoScheduler() {
+	void cloudFoundryTaskPlatformNoScheduler() {
 		setupSinglePlatform();
 		TaskPlatformFactory taskPlatformFactory = CloudFoundryTaskPlatformFactory
 				.builder()
@@ -128,7 +129,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatformWithScheduler() {
+	void cloudFoundryTaskPlatformWithScheduler() {
 		setupSinglePlatform();
 		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));
@@ -148,7 +149,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
+	void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
 		setupMultiPlatform();
 		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));

@@ -26,10 +26,10 @@ import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerCompos
 import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeInfo;
 
 @DockerCompose(locations = {"classpath:org/springframework/cloud/dataflow/common/test/docker/junit5/docker-compose-cp1.yml"})
-public class DockerCompose3Tests {
+class DockerCompose3Tests {
 
 	@Test
-	public void testCompose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
+	void compose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
 		assertThat(dockerComposeInfo).isNotNull();
 		assertThat(dockerComposeInfo.id("").getRule()).isNotNull();
 		assertThat(dockerComposeInfo.id("").getRule().containers().container("testservice1")).isNotNull();

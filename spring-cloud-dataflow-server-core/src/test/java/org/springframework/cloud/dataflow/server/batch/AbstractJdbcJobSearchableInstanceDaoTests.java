@@ -21,7 +21,7 @@ import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.JobParameters;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class AbstractJdbcJobSearchableInstanceDaoTests extends AbstractDaoTests {
 

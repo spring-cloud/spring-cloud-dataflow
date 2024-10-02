@@ -27,12 +27,12 @@ import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CloudFoundryApplicationManifestReaderTests {
+class CloudFoundryApplicationManifestReaderTests {
 
 	private final CloudFoundryApplicationManifestReader applicationManifestReader = new CloudFoundryApplicationManifestReader();
 
 	@Test
-	public void readTests() throws IOException {
+	void readTests() throws IOException {
 		String manifestYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "manifest1.yml").getInputStream(),
 				Charset.defaultCharset());
@@ -57,15 +57,15 @@ public class CloudFoundryApplicationManifestReaderTests {
 		assertThat(m.getSpec().getManifest().getInstances()).isEqualTo(1);
 		assertThat(m.getSpec().getManifest().getMemory()).isEqualTo("1024");
 		assertThat(m.getSpec().getManifest().getTimeout()).isEqualTo(180);
-		assertThat(m.getSpec().getManifest().getNoHostname()).isEqualTo(false);
-		assertThat(m.getSpec().getManifest().getNoRoute()).isEqualTo(false);
-		assertThat(m.getSpec().getManifest().getRandomRoute()).isEqualTo(true);
+		assertThat(m.getSpec().getManifest().getNoHostname()).isFalse();
+		assertThat(m.getSpec().getManifest().getNoRoute()).isFalse();
+		assertThat(m.getSpec().getManifest().getRandomRoute()).isTrue();
 		assertThat(m.getSpec().getManifest().getStack()).isEqualTo("stack");
 		assertThat(m.getSpec().getManifest().getServices()).containsExactlyInAnyOrder("rabbit");
 	}
 
 	@Test
-	public void readListAlternativeFormat() throws IOException {
+	void readListAlternativeFormat() throws IOException {
 		String manifestYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "manifest2.yml").getInputStream(),
 				Charset.defaultCharset());

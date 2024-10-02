@@ -118,7 +118,12 @@ public abstract class AbstractShellIntegrationTest {
 					"--spring.jmx.default-domain=" + System.currentTimeMillis(), "--spring.jmx.enabled=false",
 					"--security.basic.enabled=false", "--spring.main.show_banner=false",
 					"--spring.cloud.config.enabled=false",
-					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration,org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration,org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration,org.springframework.boot.autoconfigure.session.SessionAutoConfiguration,org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
+					"--spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration," +
+						"org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration," +
+						"org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration," +
+						"org.springframework.boot.autoconfigure.session.SessionAutoConfiguration," +
+						"org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration," +
+						"org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration",
 					"--spring.datasource.url=" + dataSourceUrl,
 					"--spring.cloud.dataflow.features.schedules-enabled=true");
 			Shell shell = applicationContext.getBean(Shell.class);

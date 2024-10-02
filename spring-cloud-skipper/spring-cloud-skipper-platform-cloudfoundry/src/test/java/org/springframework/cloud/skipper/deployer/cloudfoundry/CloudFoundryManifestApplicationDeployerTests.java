@@ -23,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CloudFoundryManifestApplicationDeployerTests {
+class CloudFoundryManifestApplicationDeployerTests {
 
 	@Test
-	public void testGetResourceLocation() {
+	void getResourceLocation() {
 		SpringCloudDeployerApplicationSpec springBootAppSpec1 = mock(SpringCloudDeployerApplicationSpec.class);
 		String mavenSpecResource = "maven://org.springframework.cloud.stream.app:log-sink-rabbit";
 		String mavenSpecVersion = "1.2.0.RELEASE";

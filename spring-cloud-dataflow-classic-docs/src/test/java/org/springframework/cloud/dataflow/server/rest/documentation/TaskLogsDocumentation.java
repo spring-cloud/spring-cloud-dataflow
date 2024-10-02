@@ -19,21 +19,18 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import java.time.Duration;
 
 import org.awaitility.Awaitility;
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,12 +42,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@TestMethodOrder(MethodName.class)
-public class TaskLogsDocumentation extends BaseDocumentation {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class TaskLogsDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getLogsByTaskId() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+	void getLogsByTaskId() throws Exception {
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		String taskName = "taskA";
 		documentation.dontDocument( () -> this.mockMvc.perform(
 				post("/tasks/definitions")
@@ -64,18 +61,14 @@ public class TaskLogsDocumentation extends BaseDocumentation {
 		TaskDeploymentRepository taskDeploymentRepository =
 				springDataflowServer.getWebApplicationContext().getBean(TaskDeploymentRepository.class);
 		TaskExecutionService service = springDataflowServer.getWebApplicationContext().getBean(TaskExecutionService.class);
-		AggregateExecutionSupport aggregateExecutionSupport = springDataflowServer.getWebApplicationContext().getBean(AggregateExecutionSupport.class);
-		TaskDefinitionReader taskDefinitionReader = springDataflowServer.getWebApplicationContext().getBean(TaskDefinitionReader.class);
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
 		Awaitility.await().atMost(Duration.ofMillis(30000)).until(() -> service.getLog("default",
-				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName).getTaskDeploymentId(),
-				schemaVersionTarget.getName()).length() > 0);
+				taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName).getTaskDeploymentId()).length() > 0);
 		this.mockMvc.perform(
 				get("/tasks/logs/"+taskDeploymentRepository.findTopByTaskDefinitionNameOrderByCreatedOnAsc(taskName)
 						.getTaskDeploymentId()).param("platformName", "default"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("platformName").description("The name of the platform the task is launched."))
 				));
 	}

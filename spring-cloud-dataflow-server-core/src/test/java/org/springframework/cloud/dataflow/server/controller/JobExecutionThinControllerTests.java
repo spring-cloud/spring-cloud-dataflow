@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2023 the original author or authors.
+ * Copyright 2018-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -30,20 +34,19 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
+import org.springframework.cloud.task.batch.listener.TaskBatchDao;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -57,21 +60,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author  Corneil du Plessis
  */
-@SpringBootTest(classes = { JobDependencies.class,
-		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+
+@SpringBootTest(classes = {JobDependencies.class,
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class JobExecutionThinControllerTests {
+class JobExecutionThinControllerTests {
 
 	@Autowired
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
 	@Autowired
-	private JobRepositoryContainer jobRepositoryContainer;
+	private JobRepository jobRepository;
 
 	@Autowired
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -80,19 +84,16 @@ public class JobExecutionThinControllerTests {
 
 	@Autowired
 	RequestMappingHandlerAdapter adapter;
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
 
 	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
-				jobRepositoryContainer,
-				taskBatchDaoContainer,
-				daoContainer,
-				aggregateExecutionSupport,
+				jobRepository,
+				taskBatchDao,
+				taskExecutionDao,
 				taskDefinitionReader,
 				wac,
 				adapter
@@ -100,14 +101,12 @@ public class JobExecutionThinControllerTests {
 	}
 
 	@Test
-	public void testJobExecutionThinControllerConstructorMissingRepository() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			new JobExecutionThinController(null);
-		});
+	void jobExecutionThinControllerConstructorMissingRepository() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new JobExecutionThinController(null));
 	}
 
 	@Test
-	public void testGetAllExecutionsJobExecutionOnly() throws Exception {
+	void getAllExecutionsJobExecutionOnly() throws Exception {
 		mockMvc.perform(get("/jobs/thinexecutions").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 3, 2, 1)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
@@ -115,8 +114,8 @@ public class JobExecutionThinControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByName() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+	void getExecutionsByName() throws Exception {
+		mockMvc.perform(get("/jobs/thinexecutions").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
@@ -124,25 +123,26 @@ public class JobExecutionThinControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByDateRange() throws Exception {
-		final Date toDate = new Date();
+	void getExecutionsByDateRange() throws Exception {
+		Date toDate = new Date();
 		final Date fromDate = DateUtils.addMinutes(toDate, -10);
-		mockMvc.perform(get("/jobs/thinexecutions/")
+		toDate = DateUtils.addMinutes(toDate, 10);
+		mockMvc.perform(get("/jobs/thinexecutions")
 				.param("fromDate",
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(fromDate))
 				.param("toDate",
 						new SimpleDateFormat(TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN)
 								.format(toDate))
-				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(10)))
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[*].taskExecutionId", containsInAnyOrder(9, 8, 7, 6, 5, 4, 3, 3, 2, 1)))
-				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)))
-				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList", hasSize(10)));
+				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].stepExecutionCount", is(1)));
 	}
 
 	@Test
-	public void testGetExecutionsByJobInstanceId() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("jobInstanceId", "1")
+	void getExecutionsByJobInstanceId() throws Exception {
+		mockMvc.perform(get("/jobs/thinexecutions").param("jobInstanceId", "1")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].name", is(JobExecutionUtils.JOB_NAME_ORIG)))
@@ -151,8 +151,8 @@ public class JobExecutionThinControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByTaskExecutionId() throws Exception {
-		mockMvc.perform(get("/jobs/thinexecutions/").param("taskExecutionId", "4")
+	void getExecutionsByTaskExecutionId() throws Exception {
+		mockMvc.perform(get("/jobs/thinexecutions").param("taskExecutionId", "4")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionThinResourceList[0].taskExecutionId", is(4)))

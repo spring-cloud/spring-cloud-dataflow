@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2019 the original author or authors.
+ * Copyright 2018-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,72 +18,66 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 import java.io.IOException;
 
 import com.github.zafarkhaja.semver.Version;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import static org.apache.commons.io.IOUtils.toInputStream;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import org.apache.commons.io.IOUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class DockerTests {
+class DockerTests {
 
-    private final DockerExecutable executor = mock(DockerExecutable.class);
-    private final Docker docker = new Docker(executor);
+    private DockerExecutable executor = mock(DockerExecutable.class);
+    private Docker docker = new Docker(executor);
+    private Process executedProcess = mock(Process.class);
 
-    private final Process executedProcess = mock(Process.class);
-
-    @Before
-    public void before() throws IOException {
-        when(executor.execute(any())).thenReturn(executedProcess);
+    @BeforeEach
+    void prepareForTest() throws IOException {
+        when(executor.commandName()).thenReturn("docker-compose");
+        when(executor.execute(anyBoolean())).thenReturn(executedProcess);
+        when(executor.execute(anyBoolean(), any(String[].class))).thenReturn(executedProcess);
         when(executedProcess.exitValue()).thenReturn(0);
     }
-
+    
     @Test
-    public void call_docker_rm_with_force_flag_on_rm() throws IOException, InterruptedException {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(""));
-
+    void callDockerRmWithForceFlagOnRm() throws Exception {
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(""));
         docker.rm("testContainer");
-
-        verify(executor).execute("rm", "-f", "testContainer");
+        verify(executor).execute(false,"rm", "-f", "testContainer");
     }
 
     @Test
-    public void call_docker_network_ls() throws IOException, InterruptedException {
+    void callDockerNetworkLs() throws Exception {
         String lsOutput = "0.0.0.0:7000->7000/tcp";
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(lsOutput));
-
-        assertThat(docker.listNetworks(), is(lsOutput));
-
-        verify(executor).execute("network", "ls");
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(lsOutput));
+		assertThat(docker.listNetworks()).isEqualTo(lsOutput);
+        verify(executor).execute(false, "network", "ls");
     }
 
     @Test
-    public void call_docker_network_prune() throws IOException, InterruptedException {
+    void callDockerNetworkPrune() throws Exception {
         String lsOutput = "0.0.0.0:7000->7000/tcp";
-        when(executedProcess.getInputStream()).thenReturn(toInputStream(lsOutput));
-
-        assertThat(docker.pruneNetworks(), is(lsOutput));
-
-        verify(executor).execute("network", "prune", "--force");
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream(lsOutput));
+		assertThat(docker.pruneNetworks()).isEqualTo(lsOutput);
+        verify(executor).execute(false,"network", "prune", "--force");
     }
 
     @Test
-    public void understand_old_version_format() throws IOException, InterruptedException {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("Docker version 1.7.2"));
-
+    void understandOldVersionFormat() throws Exception {
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 1.7.2"));
         Version version = docker.configuredVersion();
-        assertThat(version, is(Version.valueOf("1.7.2")));
+		assertThat(version).isEqualTo(Version.valueOf("1.7.2"));
     }
 
     @Test
-    public void understand_new_version_format() throws IOException, InterruptedException {
-        when(executedProcess.getInputStream()).thenReturn(toInputStream("Docker version 17.03.1-ce"));
-
+    void understandNewVersionFormat() throws Exception {
+        when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 17.03.1-ce"));
         Version version = docker.configuredVersion();
-        assertThat(version, is(Version.valueOf("17.3.1")));
+		assertThat(version).isEqualTo(Version.valueOf("17.3.1"));
     }
 }

@@ -1,7 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServerAutoConfiguration, \
-  org.springframework.cloud.dataflow.autoconfigure.local.LocalSchedulerAutoConfiguration, \
-  org.springframework.cloud.dataflow.autoconfigure.StreamDefinitionServiceAutoConfiguration
 
 org.springframework.context.ApplicationListener=\
   org.springframework.cloud.dataflow.autoconfigure.local.ProfileApplicationListener

@@ -22,18 +22,16 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 
-
 import static org.junit.jupiter.api.Assertions.*;
-
 
 /**
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class DeploymentStateResourceTests {
+class DeploymentStateResourceTests {
 
 	@Test
-	public void testSerializationOfSingleStepExecution() throws JsonProcessingException {
+	void serializationOfSingleStepExecution() throws JsonProcessingException {
 
 		final ObjectMapper objectMapper = new ObjectMapper();
 

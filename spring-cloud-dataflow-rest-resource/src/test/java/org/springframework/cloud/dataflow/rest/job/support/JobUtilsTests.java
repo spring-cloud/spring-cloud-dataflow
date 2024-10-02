@@ -15,32 +15,29 @@
  */
 package org.springframework.cloud.dataflow.rest.job.support;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  * @since 1.0
  */
-public class JobUtilsTests {
+class JobUtilsTests {
 
 	/**
 	 * Test method for
 	 * {@link JobUtils#isJobExecutionRestartable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
-	public void testIsJobExecutionRestartable() {
+	void isJobExecutionRestartable() {
 		final JobExecution jobExecution = new JobExecution(1L);
-		assertFalse(JobUtils.isJobExecutionRestartable(jobExecution));
+		assertThat(JobUtils.isJobExecutionRestartable(jobExecution)).isFalse();
 	}
 
 	/**
@@ -48,9 +45,9 @@ public class JobUtilsTests {
 	 * {@link JobUtils#isJobExecutionAbandonable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
-	public void testIsJobExecutionAbandonable() {
+	void isJobExecutionAbandonable() {
 		final JobExecution jobExecution = new JobExecution(1L);
-		assertFalse(JobUtils.isJobExecutionAbandonable(jobExecution));
+		assertThat(JobUtils.isJobExecutionAbandonable(jobExecution)).isFalse();
 	}
 
 	/**
@@ -58,46 +55,46 @@ public class JobUtilsTests {
 	 * {@link JobUtils#isJobExecutionStoppable(org.springframework.batch.core.JobExecution)}.
 	 */
 	@Test
-	public void testIsJobExecutionStoppable() {
+	void isJobExecutionStoppable() {
 		final JobExecution jobExecution = new JobExecution(1L);
-		assertTrue(JobUtils.isJobExecutionStoppable(jobExecution));
+		assertThat(JobUtils.isJobExecutionStoppable(jobExecution)).isTrue();
 	}
 
 	@Test
-	public void testIsJobExecutionRestartableWithNullJobExecution() {
+	void isJobExecutionRestartableWithNullJobExecution() {
 		try {
 			JobUtils.isJobExecutionRestartable(null);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The provided jobExecution must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The provided jobExecution must not be null.");
 		}
 	}
 
 	@Test
-	public void testIsJobExecutionAbandonableWithNullJobExecution() {
+	void isJobExecutionAbandonableWithNullJobExecution() {
 		try {
 			JobUtils.isJobExecutionAbandonable(null);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The provided jobExecution must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The provided jobExecution must not be null.");
 		}
 	}
 
 	@Test
-	public void testIsJobExecutionStoppableWithNullJobExecution() {
+	void isJobExecutionStoppableWithNullJobExecution() {
 		try {
 			JobUtils.isJobExecutionStoppable(null);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The provided jobExecution must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The provided jobExecution must not be null.");
 		}
 	}
 
 	@Test
-	public void testIsJobExecutionRestartableWithNullBatchStatus() {
+	void isJobExecutionRestartableWithNullBatchStatus() {
 		try {
 			final JobExecution jobExecution = new JobExecution(1L);
 			jobExecution.setStatus(null);
@@ -105,12 +102,12 @@ public class JobUtilsTests {
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The BatchStatus of the provided jobExecution must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The BatchStatus of the provided jobExecution must not be null.");
 		}
 	}
 
 	@Test
-	public void testIsJobExecutionAbandonableWithNullBatchStatus() {
+	void isJobExecutionAbandonableWithNullBatchStatus() {
 		try {
 			final JobExecution jobExecution = new JobExecution(1L);
 			jobExecution.setStatus(null);
@@ -118,12 +115,12 @@ public class JobUtilsTests {
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The BatchStatus of the provided jobExecution must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The BatchStatus of the provided jobExecution must not be null.");
 		}
 	}
 
 	@Test
-	public void testIsJobExecutionStoppableWithNullBatchStatus() {
+	void isJobExecutionStoppableWithNullBatchStatus() {
 		try {
 			final JobExecution jobExecution = new JobExecution(1L);
 			jobExecution.setStatus(null);
@@ -131,50 +128,50 @@ public class JobUtilsTests {
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
-			assertEquals("The BatchStatus of the provided jobExecution must not be null.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("The BatchStatus of the provided jobExecution must not be null.");
 		}
 	}
 
 	@Test
-	public void testIsJobExecutionStoppableWithCompletedBatchStatus() {
+	void isJobExecutionStoppableWithCompletedBatchStatus() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setStatus(BatchStatus.COMPLETED);
-		assertFalse(JobUtils.isJobExecutionStoppable(jobExecution));
+		assertThat(JobUtils.isJobExecutionStoppable(jobExecution)).isFalse();
 	}
 
 	@Test
-	public void testIsJobExecutionRestartableWithCompletedBatchStatus() {
+	void isJobExecutionRestartableWithCompletedBatchStatus() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setStatus(BatchStatus.COMPLETED);
-		assertFalse(JobUtils.isJobExecutionRestartable(jobExecution));
+		assertThat(JobUtils.isJobExecutionRestartable(jobExecution)).isFalse();
 	}
 
 	@Test
-	public void testIsJobExecutionAbandonableWithCompletedBatchStatus() {
+	void isJobExecutionAbandonableWithCompletedBatchStatus() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setStatus(BatchStatus.COMPLETED);
-		assertFalse(JobUtils.isJobExecutionAbandonable(jobExecution));
+		assertThat(JobUtils.isJobExecutionAbandonable(jobExecution)).isFalse();
 	}
 
 	@Test
-	public void testIsJobExecutionStoppableWithFailedBatchStatus() {
+	void isJobExecutionStoppableWithFailedBatchStatus() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setStatus(BatchStatus.FAILED);
-		assertFalse(JobUtils.isJobExecutionStoppable(jobExecution));
+		assertThat(JobUtils.isJobExecutionStoppable(jobExecution)).isFalse();
 	}
 
 	@Test
-	public void testIsJobExecutionRestartableWithFailedBatchStatus() {
+	void isJobExecutionRestartableWithFailedBatchStatus() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setStatus(BatchStatus.FAILED);
-		assertTrue(JobUtils.isJobExecutionRestartable(jobExecution));
+		assertThat(JobUtils.isJobExecutionRestartable(jobExecution)).isTrue();
 	}
 
 	@Test
-	public void testIsJobExecutionAbandonableWithFailedBatchStatus() {
+	void isJobExecutionAbandonableWithFailedBatchStatus() {
 		final JobExecution jobExecution = new JobExecution(1L);
 		jobExecution.setStatus(BatchStatus.FAILED);
-		assertTrue(JobUtils.isJobExecutionAbandonable(jobExecution));
+		assertThat(JobUtils.isJobExecutionAbandonable(jobExecution)).isTrue();
 	}
 
 }

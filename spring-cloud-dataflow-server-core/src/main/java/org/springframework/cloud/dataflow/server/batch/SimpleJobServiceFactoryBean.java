@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2023 the original author or authors.
+ * Copyright 2009-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.batch.core.configuration.support.MapJobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.jsr.JsrJobParametersConverter;
-import org.springframework.batch.core.jsr.launch.JsrJobOperator;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.support.SimpleJobOperator;
 import org.springframework.batch.core.repository.ExecutionContextSerializer;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.AbstractJdbcBatchMetadataDao;
@@ -39,11 +39,6 @@ import org.springframework.batch.support.DatabaseType;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
-import org.springframework.cloud.dataflow.server.repository.AggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.repository.JdbcAggregateJobQueryDao;
-import org.springframework.cloud.dataflow.server.service.JobServiceContainer;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcOperations;
@@ -91,24 +86,12 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 
 	private PlatformTransactionManager transactionManager;
 
-	private JobServiceContainer jobServiceContainer;
-
-	private SchemaService schemaService;
-
-	private SchemaVersionTarget schemaVersionTarget;
+	private JobService jobService;
 
 	private Environment environment;
 
 	public void setTransactionManager(PlatformTransactionManager transactionManager) {
 		this.transactionManager = transactionManager;
-	}
-
-	/**
-	 * Set the schemaVersionTarget to be used by the created SimpleJobService.
-	 * @param schemaVersionTarget the schemaVersionTarget to be associated with this service.
-	 */
-	public void setAppBootSchemaVersionTarget(SchemaVersionTarget schemaVersionTarget) {
-		this.schemaVersionTarget = schemaVersionTarget;
 	}
 
 	/**
@@ -171,20 +154,13 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	/**
-	 * Sets the {@link JobServiceContainer} for the service.
-	 * @param jobServiceContainer the JobServiceContainer for this service.
+	 * Sets the {@link JobService} for the factory bean.
+	 * @param jobService the JobService for this Factory Bean.
 	 */
-	public void setJobServiceContainer(JobServiceContainer jobServiceContainer) {
-		this.jobServiceContainer = jobServiceContainer;
+	public void setJobService(JobService jobService) {
+		this.jobService = jobService;
 	}
 
-	/**
-	 * Sets the {@link SchemaService} for this factory bean.
-	 * @param schemaService the schemaService for this factory bean.
-	 */
-	public void setSchemaService(SchemaService schemaService) {
-		this.schemaService = schemaService;
-	}
 
 	/**
 	 * A factory for incrementers (used to build primary keys for meta data). Defaults to
@@ -269,8 +245,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	protected SearchableJobExecutionDao createJobExecutionDao() throws Exception {
-		BatchVersion batchVersion = BatchVersion.from(this.schemaVersionTarget);
-		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao(batchVersion);
+		JdbcSearchableJobExecutionDao dao = new JdbcSearchableJobExecutionDao();
 		dao.setDataSource(dataSource);
 		dao.setJobExecutionIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix
 				+ "JOB_EXECUTION_SEQ"));
@@ -318,10 +293,6 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 		}
 	}
 
-	protected AggregateJobQueryDao createAggregateJobQueryDao() throws Exception {
-		return new JdbcAggregateJobQueryDao(this.dataSource, this.schemaService, this.jobServiceContainer, this.environment);
-	}
-
 	/**
 	 * Create a {@link SimpleJobService} from the configuration provided.
 	 *
@@ -329,13 +300,14 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	 */
 	@Override
 	public JobService getObject() throws Exception {
-		JsrJobParametersConverter jobParametersConverter = new JsrJobParametersConverter(dataSource);
-		jobParametersConverter.afterPropertiesSet();
-		JsrJobOperator jsrJobOperator = new JsrJobOperator(jobExplorer, jobRepository, jobParametersConverter,
-				transactionManager);
-		jsrJobOperator.afterPropertiesSet();
+
+		SimpleJobOperator jobOperator = new SimpleJobOperator();
+		jobOperator.setJobExplorer(this.jobExplorer);
+		jobOperator.setJobLauncher(this.jobLauncher);
+		jobOperator.setJobRepository(this.jobRepository);
+		jobOperator.setJobRegistry(new MapJobRegistry());
 		return new SimpleJobService(createJobInstanceDao(), createJobExecutionDao(), createStepExecutionDao(),
-			jobRepository, createExecutionContextDao(), jsrJobOperator, createAggregateJobQueryDao(), schemaVersionTarget);
+			jobRepository, createExecutionContextDao(), jobOperator);
 	}
 
 	/**

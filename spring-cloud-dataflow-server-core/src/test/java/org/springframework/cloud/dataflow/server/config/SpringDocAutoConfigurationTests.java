@@ -19,11 +19,11 @@ package org.springframework.cloud.dataflow.server.config;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
-import org.springdoc.core.Constants;
-import org.springdoc.core.SpringDocConfigProperties;
-import org.springdoc.core.SpringDocConfiguration;
-import org.springdoc.core.SwaggerUiConfigProperties;
-import org.springdoc.core.SwaggerUiOAuthProperties;
+import org.springdoc.core.configuration.SpringDocConfiguration;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
+import org.springdoc.core.properties.SwaggerUiOAuthProperties;
+import org.springdoc.core.utils.Constants;
 import org.springdoc.webmvc.ui.SwaggerConfig;
 
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -34,6 +34,7 @@ import org.springframework.boot.test.context.assertj.AssertableWebApplicationCon
 import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.dataflow.server.support.SpringDocJsonDecodeFilter;
+import org.springframework.format.support.FormattingConversionService;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.util.AntPathMatcher;
@@ -46,8 +47,9 @@ import static org.mockito.Mockito.verify;
  * Lightweight integration tests for {@link SpringDocAutoConfiguration}.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-public class SpringDocAutoConfigurationTests {
+class SpringDocAutoConfigurationTests {
 
 	// The base web context runner does the following:
 	//   - loads default props via config data additional location
@@ -57,6 +59,7 @@ public class SpringDocAutoConfigurationTests {
 	private final WebApplicationContextRunner contextRunner = new WebApplicationContextRunner()
 			.withPropertyValues("spring.config.additional-location=classpath:/META-INF/dataflow-server-defaults.yml")
 			.withInitializer(new ConfigDataApplicationContextInitializer())
+			.withBean("mvcConversionService", FormattingConversionService.class, () -> mock(FormattingConversionService.class))
 			.withConfiguration(AutoConfigurations.of(
 					ConfigurationPropertiesAutoConfiguration.class,
 					SpringDocConfiguration.class,
@@ -125,8 +128,8 @@ public class SpringDocAutoConfigurationTests {
 		WebSecurityCustomizer customizer = context.getBean("springDocWebSecurityCustomizer", WebSecurityCustomizer.class);
 		WebSecurity webSecurity = mock(WebSecurity.class, Answers.RETURNS_DEEP_STUBS);
 		customizer.customize(webSecurity);
-		ArgumentCaptor<String> antMatchersCaptor = ArgumentCaptor.forClass(String.class);
-		verify(webSecurity.ignoring()).antMatchers(antMatchersCaptor.capture());
+		ArgumentCaptor<String[]> antMatchersCaptor = ArgumentCaptor.forClass(String[].class);
+		verify(webSecurity.ignoring()).requestMatchers(antMatchersCaptor.capture());
 		assertThat(antMatchersCaptor.getAllValues()).containsExactly(expected);
 	}
 

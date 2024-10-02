@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Load matrix
         id: matrix
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Install pack
         uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -81,7 +81,7 @@ jobs:
         shell: bash
         env:
           TAG: ${{ needs.prepare.outputs.version }}
-          DEFAULT_JDK: '11'
+          DEFAULT_JDK: '17'
           ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
           DELETE_TAGS: ${{ inputs.delete-tags }}

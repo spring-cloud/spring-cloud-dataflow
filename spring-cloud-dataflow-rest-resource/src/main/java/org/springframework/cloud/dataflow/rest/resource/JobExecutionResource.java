@@ -17,7 +17,12 @@
 package org.springframework.cloud.dataflow.rest.resource;
 
 import java.text.DateFormat;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -47,11 +52,9 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	private DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
+	private DateTimeFormatter dateFormat = DateTimeFormatter.ISO_LOCAL_DATE;
 
-	private DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
-
-	private DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
+	private DateTimeFormatter timeFormat = DateTimeFormatter.ISO_LOCAL_TIME;
 
 	private Long executionId;
 
@@ -87,8 +90,6 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	private TimeZone timeZone;
 
-	private String schemaTarget;
-
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
 
 	/**
@@ -106,13 +107,11 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
-		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
 		this.jobParameters = converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
 				this.argumentSanitizer.sanitizeJobParameters(jobExecution.getJobParameters()));
 		this.defined = taskJobExecution.isTaskDefined();
-		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		JobInstance jobInstance = jobExecution.getJobInstance();
 		if (jobInstance != null) {
 			this.name = jobInstance.getJobName();
@@ -123,16 +122,14 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 			this.name = "?";
 		}
 
-		// Duration is always in GMT
-		durationFormat.setTimeZone(TimeUtils.getDefaultTimeZone());
-		// The others can be localized
-		timeFormat.setTimeZone(timeZone);
-		dateFormat.setTimeZone(timeZone);
 		if (jobExecution.getStartTime() != null) {
-			this.startDate = dateFormat.format(jobExecution.getStartTime());
-			this.startTime = timeFormat.format(jobExecution.getStartTime());
-			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
-			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+			// We assume the startTime is date time from current timezone.
+			// if the timezone provided is different from the current we have to assume we need a representation in that timezone.
+			this.startDate = dateFormat.format(ZonedDateTime.of(jobExecution.getStartTime(), TimeZone.getDefault().toZoneId()).withZoneSameInstant(timeZone.toZoneId()));
+			this.startTime = timeFormat.format(ZonedDateTime.of(jobExecution.getStartTime(), TimeZone.getDefault().toZoneId()).withZoneSameInstant(timeZone.toZoneId()));
+			// We assume start time and end time are from current timezone.
+			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
+			this.duration = String.valueOf(Duration.between(jobExecution.getStartTime(), endTime));
 		}
 	}
 
@@ -198,10 +195,6 @@ public class JobExecutionResource extends RepresentationModel<JobExecutionResour
 
 	public boolean isDefined() {
 		return defined;
-	}
-
-	public String getSchemaTarget() {
-		return schemaTarget;
 	}
 
 	/**

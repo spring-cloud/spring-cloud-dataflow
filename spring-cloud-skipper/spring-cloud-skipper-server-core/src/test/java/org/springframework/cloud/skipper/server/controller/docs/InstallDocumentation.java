@@ -42,10 +42,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class InstallDocumentation extends BaseDocumentation {
+class InstallDocumentation extends BaseDocumentation {
 
 	@Test
-	public void installPackage() throws Exception {
+	void installPackage() throws Exception {
 
 		final String releaseName = "test";
 		final InstallRequest installRequest = new InstallRequest();
@@ -121,7 +121,7 @@ public class InstallDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void installPackageWithId() throws Exception {
+	void installPackageWithId() throws Exception {
 
 		final String releaseName = "myLogRelease2";
 		final InstallRequest installRequest = new InstallRequest();

@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Arrays;
 import java.util.Map;
 
@@ -34,18 +36,16 @@ import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * @author David Turanski
  * @author Corneil du Plessis
  **/
-public class LocalPlatformTests {
+class LocalPlatformTests {
 
 	private ConfigurableApplicationContext context;
 
 	@AfterEach
-	public void cleanup() {
+	void cleanup() {
 		if (this.context != null) {
 			this.context.close();
 		}
@@ -53,7 +53,7 @@ public class LocalPlatformTests {
 	}
 
 	@Test
-	public void defaultLocalPlatform() {
+	void defaultLocalPlatform() {
 		this.context = new SpringApplicationBuilder(TestConfig.class)
 				.web(WebApplicationType.SERVLET)
 				.bannerMode(Banner.Mode.OFF)
@@ -70,7 +70,7 @@ public class LocalPlatformTests {
 	}
 
 	@Test
-	public void multipleLocalPlatformAccounts() {
+	void multipleLocalPlatformAccounts() {
 		this.context = new SpringApplicationBuilder(TestConfig.class)
 				.web(WebApplicationType.SERVLET)
 				.bannerMode(Banner.Mode.OFF)

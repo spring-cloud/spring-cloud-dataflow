@@ -36,10 +36,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class LogsDocumentation extends BaseDocumentation {
+class LogsDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getLogsofRelease() throws Exception {
+	void getLogsofRelease() throws Exception {
 		Release release = createTestRelease();
 		when(this.releaseService.getLog(release.getName())).thenReturn(new LogInfo(Collections.emptyMap()));
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -54,7 +54,7 @@ public class LogsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getLogsofReleaseByAppName() throws Exception {
+	void getLogsofReleaseByAppName() throws Exception {
 		Release release = createTestRelease();
 		when(this.releaseService.getLog(release.getName(), "myapp")).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 

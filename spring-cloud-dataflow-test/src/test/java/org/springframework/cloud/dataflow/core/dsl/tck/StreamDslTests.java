@@ -20,10 +20,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.cloud.dataflow.core.dsl.StreamNode;
 import org.springframework.cloud.dataflow.core.dsl.StreamParser;
 
-public class StreamDslTests extends AbstractStreamDslTests {
+class StreamDslTests extends AbstractStreamDslTests {
 
 	@Test
-	public void test() {
+	void test() {
 	}
 
 	@Override

@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
 		<groupId>org.springframework.cloud</groupId>
-		<version>2.11.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-audit</artifactId>
@@ -18,6 +18,10 @@
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>jakarta.persistence</groupId>
+			<artifactId>jakarta.persistence-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-dataflow-core</artifactId>
@@ -41,8 +45,9 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.11.0</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>17</source>
+					<target>17</target>
+					<parameters>true</parameters>
 				</configuration>
 			</plugin>
 			<plugin>

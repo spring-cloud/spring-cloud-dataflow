@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
 
 /**
  * @author David Turanski
+ * @author Corneil du Plessis
  **/
 
 public class LaunchRequest {
@@ -36,6 +37,15 @@ public class LaunchRequest {
 	private Map<String, String> deploymentProperties = new HashMap<>();
 	@JsonProperty("name")
 	private String taskName;
+
+	public LaunchRequest() {
+	}
+
+	public LaunchRequest(String taskName, List<String> commandlineArguments, Map<String, String> deploymentProperties) {
+		this.commandlineArguments = commandlineArguments;
+		this.deploymentProperties = deploymentProperties;
+		this.taskName = taskName;
+	}
 
 	public List<String> getCommandlineArguments() {
 		return commandlineArguments;
@@ -62,5 +72,14 @@ public class LaunchRequest {
 	public void setTaskName(String taskName) {
 		Assert.hasText(taskName, "'taskName' cannot be blank.");
 		this.taskName = taskName;
+	}
+
+	@Override
+	public String toString() {
+		return "LaunchRequest{" +
+			"commandlineArguments=" + commandlineArguments +
+			", deploymentProperties=" + deploymentProperties +
+			", taskName='" + taskName + '\'' +
+			'}';
 	}
 }

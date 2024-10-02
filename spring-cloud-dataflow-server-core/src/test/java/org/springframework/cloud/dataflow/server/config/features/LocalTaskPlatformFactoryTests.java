@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author David Turanski
  * @author Corneil du Plessis
  **/
-public class LocalTaskPlatformFactoryTests {
+class LocalTaskPlatformFactoryTests {
 
 	@Test
-	public void createsDefaultPlatform() {
+	void createsDefaultPlatform() {
 		LocalPlatformProperties platformProperties = new LocalPlatformProperties();
 		LocalTaskPlatformFactory taskPlatformFactory = new LocalTaskPlatformFactory(platformProperties, null);
 		TaskPlatform taskPlatform = taskPlatformFactory.createTaskPlatform();
@@ -46,7 +46,7 @@ public class LocalTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void createsConfiguredPlatform() {
+	void createsConfiguredPlatform() {
 		LocalPlatformProperties platformProperties = new LocalPlatformProperties();
 		platformProperties.setAccounts(Collections.singletonMap("custom",new LocalDeployerProperties()));
 		LocalTaskPlatformFactory taskPlatformFactory = new LocalTaskPlatformFactory(platformProperties, null);

@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry.security.s
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * The specific access level granted to the Cloud Foundry user that's calling the

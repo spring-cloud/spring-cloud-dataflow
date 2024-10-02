@@ -36,7 +36,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 /**
  * Tests for {@link FlywayVendorReplacingApplicationContextInitializer}.
  */
-public class FlywayVendorReplacingApplicationContextInitializerTests {
+class FlywayVendorReplacingApplicationContextInitializerTests {
 
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("vendorReplacedProperlyProvider")

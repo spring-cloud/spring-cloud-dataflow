@@ -16,17 +16,21 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
+
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -34,23 +38,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -65,12 +66,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {JobDependencies.class,
-	PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+		PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class JobInstanceControllerTests {
+class JobInstanceControllerTests {
 
 	private final static String BASE_JOB_NAME = "myJob";
 
@@ -83,13 +85,13 @@ public class JobInstanceControllerTests {
 	private boolean initialized = false;
 
 	@Autowired
-	TaskExecutionDaoContainer daoContainer;
+	TaskExecutionDao taskExecutionDao;
 
 	@Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -97,13 +99,10 @@ public class JobInstanceControllerTests {
 	WebApplicationContext wac;
 
 	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 			.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		if (!initialized) {
@@ -114,21 +113,19 @@ public class JobInstanceControllerTests {
 		}
 	}
 
-	@Test
-	public void testJobInstanceControllerConstructorMissingRepository() {
-		assertThrows(IllegalArgumentException.class, () -> {
-			new JobInstanceController(null);
-		});
+	@Test()
+	void jobInstanceControllerConstructorMissingRepository() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() ->new JobInstanceController(null));
 	}
 
 	@Test
-	public void testGetInstanceNotFound() throws Exception {
+	void getInstanceNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/instances/1345345345345").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetInstance() throws Exception {
+	void getInstance() throws Exception {
 		mockMvc.perform(get("/jobs/instances/1").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.jobInstanceId", equalTo(1)))
@@ -137,16 +134,16 @@ public class JobInstanceControllerTests {
 	}
 
 	@Test
-	public void testGetInstancesByName() throws Exception {
-		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+	void getInstancesByName() throws Exception {
+		mockMvc.perform(get("/jobs/instances").param("name", JOB_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_ORIG)))
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList", hasSize(1)));
 	}
 
 	@Test
-	public void testGetExecutionsByNameMultipleResult() throws Exception {
-		mockMvc.perform(get("/jobs/instances/").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON))
+	void getExecutionsByNameMultipleResult() throws Exception {
+		mockMvc.perform(get("/jobs/instances").param("name", JOB_NAME_FOOBAR).accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobName", is(JOB_NAME_FOOBAR)))
 			.andExpect(jsonPath("$._embedded.jobInstanceResourceList[0].jobExecutions[0].executionId", is(4)))
@@ -155,23 +152,22 @@ public class JobInstanceControllerTests {
 	}
 
 	@Test
-	public void testGetInstanceByNameNotFound() throws Exception {
-		mockMvc.perform(get("/jobs/instances/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
+	void getInstanceByNameNotFound() throws Exception {
+		mockMvc.perform(get("/jobs/instances").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().is4xxClientError())
 			.andExpect(content().string(containsString("NoSuchJobException")));
 	}
 
-	private void createSampleJob(String jobName, int jobExecutionCount) {
-		String defaultSchemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		JobRepository jobRepository = jobRepositoryContainer.get(defaultSchemaTarget);
-		JobInstance instance = jobRepository.createJobInstance(jobName, new JobParameters());
+	private void createSampleJob(String jobName, int jobExecutionCount)
+		throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 
-		TaskExecutionDao dao = daoContainer.get(defaultSchemaTarget);
-		TaskExecution taskExecution = dao.createTaskExecution(jobName, new Date(), new ArrayList<String>(), null);
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(jobName, LocalDateTime.now(), new ArrayList<String>(), null);
 
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(defaultSchemaTarget);
 		for (int i = 0; i < jobExecutionCount; i++) {
-			JobExecution jobExecution = jobRepository.createJobExecution(instance, new JobParameters(), null);
+			JobParameters jobParameters = new JobParameters();
+			JobExecution jobExecution = jobRepository.createJobExecution(jobName, jobParameters);
+			jobExecution.setStatus(BatchStatus.COMPLETED);
+			jobRepository.update(jobExecution);
 			StepExecution stepExecution = new StepExecution("foo", jobExecution, 1L);
 			stepExecution.setId(null);
 			jobRepository.add(stepExecution);

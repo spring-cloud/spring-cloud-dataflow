@@ -111,12 +111,17 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public void executionRestart(long id, String schemaTarget) {
+	public void executionRestart(long id) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionLink.expand(id).getHref()).queryParam("restart", "true");
 
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
+		restTemplate.put(builder.toUriString(), null);
+	}
+
+	@Override
+	public void executionRestart(long id, Boolean useJsonJobParameters) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionLink.expand(id).getHref()).queryParam("restart", "true")
+			.queryParam("useJsonJobParameters", useJsonJobParameters);
+
 		restTemplate.put(builder.toUriString(), null);
 	}
 
@@ -142,40 +147,28 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public JobExecutionResource jobExecution(long id, String schemaTarget) {
+	public JobExecutionResource jobExecution(long id) {
 		String url = executionLink.expand(id).getHref();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 
 		return restTemplate.getForObject(builder.toUriString(), JobExecutionResource.class);
 	}
 
 	@Override
-	public JobInstanceResource jobInstance(long id, String schemaTarget) {
+	public JobInstanceResource jobInstance(long id) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(instanceLink.expand(id).getHref());
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 		return restTemplate.getForObject(builder.toUriString(), JobInstanceResource.class);
 	}
 
 	@Override
-	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget) {
+	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(stepExecutionsLink.expand(jobExecutionId).getHref());
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 		return restTemplate.getForObject(builder.toUriString(), StepExecutionResource.Page.class);
 	}
 
 	@Override
-	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget) {
+	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(stepExecutionProgressLink.expand(jobExecutionId, stepExecutionId).getHref());
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 		return restTemplate.getForObject(builder.toUriString(), StepExecutionProgressInfoResource.class);
 	}
 

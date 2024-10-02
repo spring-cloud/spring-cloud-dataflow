@@ -9,16 +9,19 @@ import org.springframework.cloud.dataflow.common.persistence.type.DatabaseTypeAw
 import org.springframework.core.env.ConfigurableEnvironment;
 
 import static org.assertj.core.api.Assertions.assertThat;
-public class DatabaseTypeAwareInitializerTest {
+
+class DatabaseTypeAwareInitializerTest {
 	private static final Logger logger = LoggerFactory.getLogger(DatabaseTypeAwareInitializerTest.class);
+
 	@Test
-	public void testInitPostgres() {
+	void initPostgres() {
 		initDriverType("org.postgresql.Driver");
 		assertThat(DatabaseTypeAwareInitializer.getPostgresDatabase()).isNotNull();
 		assertThat(DatabaseTypeAwareInitializer.getPostgresDatabase()).isTrue();
 	}
+
 	@Test
-	public void testInitMariaDB() {
+	void initMariaDB() {
 		initDriverType("org.mariadb.jdbc.Driver");
 		assertThat(DatabaseTypeAwareInitializer.getPostgresDatabase()).isNotNull();
 		assertThat(DatabaseTypeAwareInitializer.getPostgresDatabase()).isFalse();

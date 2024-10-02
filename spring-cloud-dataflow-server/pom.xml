@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-parent</artifactId>
-		<version>2.11.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-parent</relativePath>
 	</parent>
 	<artifactId>spring-cloud-dataflow-server</artifactId>
@@ -17,12 +17,12 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
 		<oracle-driver-ojdbc8.version>21.9.0.0</oracle-driver-ojdbc8.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.3.0</maven-source-plugin.version>
 		<checkstyle.config.location>../src/checkstyle/checkstyle.xml</checkstyle.config.location>
 		<failIfNoTests>true</failIfNoTests>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -64,14 +64,17 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.76</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk18on</artifactId>
+			<version>1.75</version>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcutil-jdk18on</artifactId>
+			<version>1.75</version>
 		</dependency>
 		<dependency>
 			<groupId>io.fabric8</groupId>
@@ -85,7 +88,6 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>2.2.222</version>
 		</dependency>
 
 		<dependency>
@@ -164,7 +166,7 @@
 		<dependency>
 			<groupId>com.ibm.db2</groupId>
 			<artifactId>jcc</artifactId>
-			<version>11.5.8.0</version>
+			<version>11.5.9.0</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -201,6 +203,22 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+					<threadCount>1</threadCount>
+					<forkCount>1</forkCount>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>${maven-javadoc-plugin.version}</version>
 				<executions>
@@ -228,44 +246,11 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>io.github.git-commit-id</groupId>
-				<artifactId>git-commit-id-maven-plugin</artifactId>
-				<version>4.9.9</version>
-				<executions>
-					<execution>
-						<id>get-the-git-infos</id>
-						<goals>
-							<goal>revision</goal>
-						</goals>
-						<phase>initialize</phase>
-					</execution>
-				</executions>
-				<configuration>
-					<generateGitPropertiesFile>true</generateGitPropertiesFile>
-					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-					<excludeProperties>
-						<excludeProperty>^git.build.user</excludeProperty>
-						<excludeProperty>^git.commit.id.describe</excludeProperty>
-						<excludeProperty>^git.commit.message.*</excludeProperty>
-						<excludeProperty>^git.commit.author.time</excludeProperty>
-						<excludeProperty>^git.commit.committer.time</excludeProperty>
-						<excludeProperty>^git.build.*</excludeProperty>
-						<excludeProperty>^git.closest.*</excludeProperty>
-						<excludeProperty>^git.commit.user.*</excludeProperty>
-						<excludeProperty>^git.dirty.*</excludeProperty>
-						<excludeProperty>^git.local.*</excludeProperty>
-						<excludeProperty>^git.remote.*</excludeProperty>
-						<excludeProperty>^git.tags</excludeProperty>
-						<excludeProperty>^git.total.*</excludeProperty>
-					</excludeProperties>
-					<commitIdGenerationMode>full</commitIdGenerationMode>
-				</configuration>
-			</plugin>
-			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
 					<image>
+						<pullPolicy>IF_NOT_PRESENT</pullPolicy>
 						<name>springcloud/${project.artifactId}:${project.version}</name>
 					</image>
 				</configuration>
@@ -302,6 +287,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>3.0.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -321,13 +307,14 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.1.2</version>
 						<configuration>
+							<skipTests>false</skipTests>
+							<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+							<threadCount>1</threadCount>
 							<forkCount>1</forkCount>
-							<failIfNoTests>true</failIfNoTests>
-							<reuseForks>false</reuseForks>
 							<includes>
-								<include>**/*IT.*</include>
-								<include>**/*$*IT.*</include>
+								<include>**/*IT.java</include>
 							</includes>
 							<groups>${groups}</groups>
 						</configuration>
@@ -415,7 +402,7 @@
 				<dependency>
 					<groupId>com.ibm.db2</groupId>
 					<artifactId>jcc</artifactId>
-					<version>11.5.8.0</version>
+					<version>11.5.9.0</version>
 				</dependency>
 			</dependencies>
 		</profile>

@@ -42,10 +42,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class RollbackDocumentation extends BaseDocumentation {
+class RollbackDocumentation extends BaseDocumentation {
 
 	@Test
-	public void rollbackRelease() throws Exception {
+	void rollbackRelease() throws Exception {
 		Release release = createTestRelease();
 		when(this.skipperStateMachineService.rollbackRelease(any(RollbackRequest.class))).thenReturn(release);
 		MvcResult result = this.mockMvc.perform(
@@ -109,7 +109,7 @@ public class RollbackDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void rollbackReleaseRequest() throws Exception {
+	void rollbackReleaseRequest() throws Exception {
 		Release release = createTestRelease();
 		when(this.skipperStateMachineService.rollbackRelease(any(RollbackRequest.class))).thenReturn(release);
 

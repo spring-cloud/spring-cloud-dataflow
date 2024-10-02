@@ -33,8 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.AuditServiceUtils;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -50,7 +49,6 @@ import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.controller.VisibleProperties;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
@@ -108,10 +106,6 @@ public class DefaultSchedulerService implements SchedulerService {
 
 	private final ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
-	private final AggregateExecutionSupport aggregateExecutionSupport;
-
-	private final TaskDefinitionReader taskDefinitionReader;
-
 	private final TaskExecutionInfoService taskExecutionInfoService;
 
 	private final PropertyResolver propertyResolver;
@@ -136,8 +130,6 @@ public class DefaultSchedulerService implements SchedulerService {
 	 * @param metaDataResolver                          the {@link ApplicationConfigurationMetadataResolver} for this service.
 	 * @param schedulerServiceProperties                the {@link SchedulerServiceProperties} for this service.
 	 * @param auditRecordService                        the {@link AuditRecordService} for this service.
-	 * @param aggregateExecutionSupport                 the {@link AggregateExecutionSupport} for this service
-	 * @param taskDefinitionReader                      the {@link TaskDefinitionReader} for this service
 	 * @param taskExecutionInfoService                  the {@link TaskExecutionInfoService} for this service
 	 * @param propertyResolver                          the {@link PropertyResolver} for this service
 	 * @param composedTaskRunnerConfigurationProperties the {@link ComposedTaskRunnerConfigurationProperties} for this service
@@ -154,8 +146,6 @@ public class DefaultSchedulerService implements SchedulerService {
 			ApplicationConfigurationMetadataResolver metaDataResolver,
 			SchedulerServiceProperties schedulerServiceProperties,
 			AuditRecordService auditRecordService,
-			AggregateExecutionSupport aggregateExecutionSupport,
-			TaskDefinitionReader taskDefinitionReader,
 			TaskExecutionInfoService taskExecutionInfoService,
 			PropertyResolver propertyResolver,
 			ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties
@@ -171,8 +161,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		Assert.notNull(schedulerServiceProperties, "schedulerServiceProperties must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
 		Assert.notNull(dataSourceProperties, "dataSourceProperties must not be null");
-		Assert.notNull(aggregateExecutionSupport, "aggregateExecutionSupport must not be null");
-		Assert.notNull(taskDefinitionReader, "taskDefinitionReader must not be null");
 		Assert.notNull(taskExecutionInfoService, "taskExecutionInfoService must not be null");
 		Assert.notNull(propertyResolver, "propertyResolver must not be null");
 		this.commonApplicationProperties = commonApplicationProperties;
@@ -186,8 +174,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		this.auditRecordService = auditRecordService;
 		this.auditServiceUtils = new AuditServiceUtils();
 		this.dataSourceProperties = dataSourceProperties;
-		this.aggregateExecutionSupport = aggregateExecutionSupport;
-		this.taskDefinitionReader = taskDefinitionReader;
 		this.taskExecutionInfoService = taskExecutionInfoService;
 		this.propertyResolver = propertyResolver;
 		this.composedTaskRunnerConfigurationProperties = composedTaskRunnerConfigurationProperties;
@@ -225,13 +211,6 @@ public class DefaultSchedulerService implements SchedulerService {
 		String taskAppName = taskDefinition.getRegisteredAppName();
 		String taskLabel = taskDefinition.getAppDefinition().getName();
 		String version = taskDeploymentProperties.get("version." + taskLabel);
-		if (version == null) {
-			version = taskDeploymentProperties.get("version." + taskAppName);
-		}
-
-
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskAppName, version, taskDefinition);
-		Assert.notNull(schemaVersionTarget, "schemaVersionTarget not found for " + taskAppName);
 		TaskParser taskParser = new TaskParser(taskDefinition.getName(), taskDefinition.getDslText(), true, true);
 		TaskNode taskNode = taskParser.parse();
 		AppRegistration appRegistration;
@@ -257,8 +236,8 @@ public class DefaultSchedulerService implements SchedulerService {
 			Set<String> appNames = taskExecutionInfoService.composedTaskChildNames(taskDefinition.getName());
 
 			logger.info("composedTask:dsl={}:appNames:{}", taskDefinition.getDslText(), appNames);
-			addPrefixProperties(schemaVersionTarget, "app.composed-task-runner.", taskDeploymentProperties);
-			addPrefixProperties(schemaVersionTarget, "app." + scheduleName + ".", taskDeploymentProperties);
+			addPrefixProperties("app.composed-task-runner.", taskDeploymentProperties);
+			addPrefixProperties("app." + scheduleName + ".", taskDeploymentProperties);
 			for (String appName : appNames) {
 				List<String> names = new ArrayList<>(Arrays.asList(StringUtils.delimitedListToStringArray(appName, ",")));
 				String registeredName = names.get(0);
@@ -273,24 +252,16 @@ public class DefaultSchedulerService implements SchedulerService {
 				if(!StringUtils.hasText(appVersion)) {
 					appVersion = taskDeploymentProperties.get("version." + appId);
 				}
-				SchemaVersionTarget appSchemaTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(registeredName, appVersion, taskDefinitionReader);
-				logger.debug("ctr:{}:registeredName={}, version={}, schemaTarget={}", names, registeredName, appVersion, appSchemaTarget.getName());
-				taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + scheduleName + "-" + appId + ".spring.cloud.task.tablePrefix",
-						appSchemaTarget.getTaskPrefix());
-				taskDeploymentProperties.put("app.composed-task-runner.composed-task-app-properties.app." + appId + ".spring.cloud.task.tablePrefix",
-						appSchemaTarget.getTaskPrefix());
-				taskDeploymentProperties.put("app." + scheduleName + "-" + appId + ".spring.batch.jdbc.table-prefix", appSchemaTarget.getBatchPrefix());
-				taskDeploymentProperties.put("app." + registeredName + ".spring.batch.jdbc.table-prefix", appSchemaTarget.getBatchPrefix());
+				logger.debug("ctr:{}:registeredName={}, version={}, schemaTarget={}", names, registeredName, appVersion);
 			}
 			logger.debug("ctr:added:{}:{}", scheduleName, taskDeploymentProperties);
 			commandLineArgs = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArgs);
 		} else {
 			appRegistration = this.registry.find(taskDefinition.getRegisteredAppName(),
 					ApplicationType.task);
-			addPrefixCommandLineArgs(schemaVersionTarget, "app." + taskDefinition.getRegisteredAppName() + ".", commandLineArgs);
-			addPrefixProperties(schemaVersionTarget, "app." + taskDefinition.getRegisteredAppName() + ".", taskDeploymentProperties);
+			addPrefixCommandLineArgs("app." + taskDefinition.getRegisteredAppName() + ".", commandLineArgs);
+			addPrefixProperties("app." + taskDefinition.getRegisteredAppName() + ".", taskDeploymentProperties);
 		}
-		addDefaultDeployerProperties(platformType, schemaVersionTarget, taskDeploymentProperties);
 		Assert.notNull(appRegistration, "Unknown task app: " + taskDefinition.getRegisteredAppName());
 		Resource metadataResource = this.registry.getAppMetadataResource(appRegistration);
 		Launcher launcher = getTaskLauncher(platformName);
@@ -332,36 +303,6 @@ public class DefaultSchedulerService implements SchedulerService {
 				launcher.getName());
 	}
 
-	private void addDefaultDeployerProperties(
-			String platformType,
-			SchemaVersionTarget schemaVersionTarget,
-			Map<String, String> deploymentProperties
-	) {
-		String bootVersion = schemaVersionTarget.getSchemaVersion().getBootVersion();
-		switch (platformType) {
-			case TaskPlatformFactory.LOCAL_PLATFORM_TYPE: {
-				String javaHome = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".local.javaHomePath");
-				if (StringUtils.hasText(javaHome)) {
-					String property = "spring.cloud.deployer.local.javaHomePath." + bootVersion;
-					addProperty(property, javaHome, deploymentProperties);
-				}
-				break;
-			}
-			case TaskPlatformFactory.CLOUDFOUNDRY_PLATFORM_TYPE: {
-				String buildpack = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpack");
-				if (StringUtils.hasText(buildpack)) {
-					String property = "spring.cloud.deployer.cloudfoundry.buildpack";
-					addProperty(property, buildpack, deploymentProperties);
-				}
-				String buildpacks = propertyResolver.getProperty("spring.cloud.dataflow.defaults.boot" + bootVersion + ".cloudfoundry.buildpacks");
-				if (StringUtils.hasText(buildpacks)) {
-					String property = "spring.cloud.deployer.cloudfoundry.buildpacks";
-					addProperty(property, buildpacks, deploymentProperties);
-				}
-				break;
-			}
-		}
-	}
 
 	private static void addProperty(String property, String value, Map<String, String> properties) {
 		if (properties.containsKey(property)) {
@@ -372,20 +313,12 @@ public class DefaultSchedulerService implements SchedulerService {
 		}
 	}
 
-	private static void addPrefixProperties(SchemaVersionTarget schemaVersionTarget, String prefix, Map<String, String> deploymentProperties) {
+	private static void addPrefixProperties(String prefix, Map<String, String> deploymentProperties) {
 		addProperty(prefix + "spring.cloud.task.initialize-enabled", "false", deploymentProperties);
-		addProperty(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), deploymentProperties);
-		addProperty(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), deploymentProperties);
-		addProperty(prefix + "spring.cloud.task.schemaTarget", schemaVersionTarget.getName(), deploymentProperties);
-		addProperty(prefix + "spring.cloud.deployer.bootVersion", schemaVersionTarget.getSchemaVersion().getBootVersion(), deploymentProperties);
 	}
 
-	private static void addPrefixCommandLineArgs(SchemaVersionTarget schemaVersionTarget, String prefix, List<String> commandLineArgs) {
+	private static void addPrefixCommandLineArgs(String prefix, List<String> commandLineArgs) {
 		addCommandLine(prefix + "spring.cloud.task.initialize-enabled", "false", commandLineArgs);
-		addCommandLine(prefix + "spring.batch.jdbc.table-prefix", schemaVersionTarget.getBatchPrefix(), commandLineArgs);
-		addCommandLine(prefix + "spring.cloud.task.tablePrefix", schemaVersionTarget.getTaskPrefix(), commandLineArgs);
-		addCommandLine(prefix + "spring.cloud.task.schemaTarget", schemaVersionTarget.getName(), commandLineArgs);
-		addCommandLine(prefix + "spring.cloud.deployer.bootVersion", schemaVersionTarget.getSchemaVersion().getBootVersion(), commandLineArgs);
 	}
 
 	private static void addCommandLine(String property, String value, List<String> commandLineArgs) {

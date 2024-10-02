@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
@@ -64,13 +65,13 @@ public class SkipperServerPlatformConfigurationTests {
 	@SpringBootTest(classes = TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 	@ActiveProfiles({"platform-configuration", "local"})
 	@Nested
-	public class AllPlatformsConfigurationTest {
+	class AllPlatformsConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;
 
 		@Test
-		public void allPlatformsConfiguredTest() {
+		void allPlatformsConfiguredTest() {
 			assertThat(platforms).extracting("name").containsExactlyInAnyOrder("Local", "Test");
 		}
 	}
@@ -78,13 +79,13 @@ public class SkipperServerPlatformConfigurationTests {
 	@Nested
 	@SpringBootTest(classes = TestConfig.class,
 			properties = {"spring.main.allow-bean-definition-overriding=true"})
-	public class SinglePlatformConfigurationTest {
+	class SinglePlatformConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;
 
 		@Test
-		public void singlePlatformsConfiguredTest() {
+		void singlePlatformsConfiguredTest() {
 			assertThat(platforms.get(0).getDeployers()).extracting("name").containsExactly("test");
 		}
 	}
@@ -93,13 +94,13 @@ public class SkipperServerPlatformConfigurationTests {
 			properties = {"spring.main.allow-bean-definition-overriding=true"})
 	@ActiveProfiles("platform-configuration")
 	@Nested
-	public class ExternalPlatformsOnlyConfigurationTest {
+	class ExternalPlatformsOnlyConfigurationTest {
 
 		@Autowired
 		private List<Platform> platforms;
 
 		@Test
-		public void localPlatformDisabledTest() {
+		void localPlatformDisabledTest() {
 			assertThat(platforms).extracting("name").containsExactly("Test");
 		}
 	}

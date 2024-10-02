@@ -46,10 +46,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class UploadDocumentation extends BaseDocumentation {
+class UploadDocumentation extends BaseDocumentation {
 
 	@Test
-	public void uploadRelease() throws Exception {
+	void uploadRelease() throws Exception {
 
 		final UploadRequest uploadProperties = new UploadRequest();
 		uploadProperties.setRepoName("local");

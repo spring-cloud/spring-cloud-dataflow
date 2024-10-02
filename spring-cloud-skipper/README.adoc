@@ -151,7 +151,7 @@ skipper:>release upgrade --release-name mylog --package-name log --package-versi
 mylog has been upgraded.  Now at version v2.
 ----
 
-You should see the java app named `log-sink-rabbit-1.2.0.RELEASE.jar` running in the output of the `jps` command.
+You should see the java app named `log-sink-rabbit-5.0.0.jar` running in the output of the `jps` command.
 
 The status command should shortly show it has been deployed successfully.  Note you can type `!status` to execute the last command that started with the word `status`
 
@@ -225,4 +225,3 @@ You should not see any `log-sink-rabbit` apps in the `jps` command.
 Then navigate to `Intellij IDEA > Preferences` and select the Eclipse Code Formatter.  Select the `eclipse-code-formatter.xml` file for the field `Eclipse Java Formatter config file` and the file `eclipse.importorder` for the field `Import order`.
 Enable the `Eclipse code formatter` by clicking `Use the Eclipse code formatter` then click the *OK* button.
 ** NOTE: If you configure the `Eclipse Code Formatter` from `File > Other Settings > Default Settings` it will set this policy across all of your Intellij projects.
-

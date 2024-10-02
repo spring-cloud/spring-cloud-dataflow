@@ -16,6 +16,11 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -40,20 +45,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+@SpringBootTest(classes = {JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TaskLogsControllerTests {
+class TaskLogsControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -70,7 +70,7 @@ public class TaskLogsControllerTests {
 	private TaskPlatform taskPlatform;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
@@ -80,7 +80,7 @@ public class TaskLogsControllerTests {
 	}
 
 	@Test
-	public void testGetCurrentExecutionLog() throws Exception {
+	void getCurrentExecutionLog() throws Exception {
 		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
 		mockMvc.perform(get("/tasks/logs/mytask1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

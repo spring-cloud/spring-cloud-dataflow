@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -44,8 +45,8 @@ import org.springframework.util.StringUtils;
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  */
-@Configuration
-@EnableConfigurationProperties({ ContainerRegistryProperties.class })
+@AutoConfiguration
+@EnableConfigurationProperties({ContainerRegistryProperties.class})
 public class ContainerRegistryAutoConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(ContainerRegistryAutoConfiguration.class);

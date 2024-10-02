@@ -40,19 +40,19 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 public class StepExecutionResourceBuilder {
 
-	static public StepExecutionResource toModel(StepExecution entity, String schemaTarget) {
-		StepExecutionResource resource = new StepExecutionResource(entity.getJobExecution().getId(), entity, generateStepType(entity), schemaTarget);
+	static public StepExecutionResource toModel(StepExecution entity) {
+		StepExecutionResource resource = new StepExecutionResource(entity.getJobExecution().getId(), entity, generateStepType(entity));
 		try {
 			resource.add(
 					linkTo(
 							methodOn(JobStepExecutionController.class)
-									.getStepExecution(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId(), schemaTarget)
+									.getStepExecution(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId())
 					).withSelfRel()
 			);
 			resource.add(
 					linkTo(
 							methodOn(JobStepExecutionProgressController.class)
-									.progress(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId(), schemaTarget)
+									.progress(resource.getStepExecution().getJobExecutionId(), resource.getStepExecution().getId())
 					).withRel("progress")
 			);
 		} catch (NoSuchStepExecutionException | NoSuchJobExecutionException e) {

@@ -21,13 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
+import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -91,17 +92,11 @@ public class AppRegistrationRepositoryImpl implements AppRegistrationRepositoryC
 				appRegistration.setVersions(versions);
 			});
 		}
-		return new PageImpl<>(resultList, pageable, getTotalCount(cb, predicates.toArray(new Predicate[0])));
+		return new PageImpl<>(resultList, pageable, getTotalCount(cq));
 	}
 
-	private Long getTotalCount(CriteriaBuilder criteriaBuilder, Predicate[] predicateArray) {
-		CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-		Root<AppRegistration> root = criteriaQuery.from(AppRegistration.class);
-
-		criteriaQuery.select(criteriaBuilder.count(root));
-		criteriaQuery.where(predicateArray);
-
-		return entityManager.createQuery(criteriaQuery).getSingleResult();
+	private Long getTotalCount(CriteriaQuery<AppRegistration> criteriaQuery) {
+		return (Long) entityManager.createQuery(((SqmSelectStatement)criteriaQuery).createCountQuery()).getSingleResult();
 	}
 
 }

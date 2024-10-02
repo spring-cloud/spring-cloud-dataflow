@@ -4,8 +4,8 @@ if [ "$TAG" == "" ]; then
     exit 1
 fi
 if [ "$DEFAULT_JDK" = "" ]; then
-    echo "DEFAULT_JDK not found using 11"
-    DEFAULT_JDK=11
+    echo "DEFAULT_JDK not found using 17"
+    DEFAULT_JDK=17
 else
     echo "DEFAULT_JDK=$DEFAULT_JDK"
 fi
@@ -20,7 +20,7 @@ function pack_image {
     fi
     echo "Creating: $REPO:$TAG-jdk$v"
     # --buildpack "paketo-buildpacks/java@10.0.0" --buildpack "paketo-buildpacks/bellsoft-liberica@10.3.2"
-    pack build --builder gcr.io/paketo-buildpacks/builder:base \
+    pack build --builder paketobuildpacks/builder-jammy-base:latest \
             --path "$JAR" \
             --trust-builder --verbose \
             --env BP_JVM_VERSION=$v "$REPO:$TAG-jdk$v"
@@ -37,7 +37,7 @@ for ((i = 0; i < LEN; i++)); do
     IMAGE="$(jq -r --argjson index $i '.include[$index] | .image' .github/workflows/images.json)"
     ARTIFACT_ID="$(jq -r --argjson index $i '.include[$index] | .name' .github/workflows/images.json)"
     # 8 11 17 21
-    for v in 8 11 17; do
+    for v in 17 21; do
         pack_image "$TARGET/$ARTIFACT_ID"  $IMAGE $v $ARTIFACT_ID
         RC=$?
         if [ $RC -ne 0 ]; then

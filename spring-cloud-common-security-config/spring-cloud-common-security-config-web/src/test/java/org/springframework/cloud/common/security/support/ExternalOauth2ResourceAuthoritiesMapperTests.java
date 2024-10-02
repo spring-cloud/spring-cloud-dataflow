@@ -21,11 +21,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import mockwebserver3.MockResponse;
-import mockwebserver3.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -43,12 +43,12 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 	public MockWebServer mockBackEnd;
 
 
-	@BeforeEach
+	@Before
 	public void setUp() throws IOException {
 		mockBackEnd = new MockWebServer();
 		mockBackEnd.start();
 	}
-	@AfterEach
+	@After
 	public void tearDown() throws IOException {
 		mockBackEnd.shutdown();
 	}
@@ -65,9 +65,9 @@ public class ExternalOauth2ResourceAuthoritiesMapperTests {
 
 	private void assertAuthorities2(URI uri, String... roles) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		mockBackEnd.enqueue(new MockResponse().newBuilder()
-				.body(objectMapper.writeValueAsString(roles))
-				.addHeader("Content-Type", "application/json").build());
+		mockBackEnd.enqueue(new MockResponse()
+				.setBody(objectMapper.writeValueAsString(roles))
+				.addHeader("Content-Type", "application/json"));
 
 		final ExternalOauth2ResourceAuthoritiesMapper authoritiesExtractor =
 				new ExternalOauth2ResourceAuthoritiesMapper(uri);

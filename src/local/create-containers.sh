@@ -16,7 +16,7 @@ fi
 if [ "$2" != "" ]; then
     v=$2
 else
-    v=11
+    v=17
 fi
 PROCESSOR=$(uname -p)
 # export ARCH=arm64v8 for ARM64 image

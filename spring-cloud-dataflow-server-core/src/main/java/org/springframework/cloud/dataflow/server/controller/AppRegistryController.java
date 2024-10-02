@@ -47,7 +47,6 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
 import org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -251,8 +250,7 @@ public class AppRegistryController {
 					type,
 					version,
 					new URI(uri),
-					metadataUri != null ? new URI(metadataUri) : null,
-					bootVersion != null ? AppBootSchemaVersion.fromBootVersion(bootVersion) : AppBootSchemaVersion.defaultVersion()
+					metadataUri != null ? new URI(metadataUri) : null
 			);
 			prefetchMetadata(Collections.singletonList(registration));
 		}

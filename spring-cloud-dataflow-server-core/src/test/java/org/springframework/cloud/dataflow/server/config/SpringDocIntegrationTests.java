@@ -28,11 +28,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * integration} with a running Spring Cloud Dataflow server.
  *
  * @author Chris Bono
+ * @author Corneil du Plessis
  */
-public class SpringDocIntegrationTests {
+class SpringDocIntegrationTests {
 
 	@Test
-	public void disabledByDefault() {
+	void disabledByDefault() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class,
 				"--server.port=0",
 				"--spring.main.allow-bean-definition-overriding=true",
@@ -44,7 +45,7 @@ public class SpringDocIntegrationTests {
 	}
 
 	@Test
-	public void disabledSpringDocAutoConfiguration() {
+	void disabledSpringDocAutoConfiguration() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class,
 				"--server.port=0",
 				"--springdoc.api-docs.enabled=true",
@@ -59,7 +60,7 @@ public class SpringDocIntegrationTests {
 	}
 
 	@Test
-	public void enabledWithDefaults() {
+	void enabledWithDefaults() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class,
 				"--server.port=0",
 				"--springdoc.api-docs.enabled=true",

@@ -16,6 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerServiceTestUtil.assertThatCommandLineArgsHaveNonDefaultArgs;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -39,8 +49,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.core.AppRegistration;
@@ -49,7 +57,6 @@ import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.DockerValidatorProperties;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.SimpleTestScheduler;
@@ -71,16 +78,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.cloud.dataflow.server.service.impl.DefaultSchedulerServiceTestUtil.assertThatCommandLineArgsHaveNonDefaultArgs;
 
 @SpringBootTest(classes = {TaskServiceDependencies.class,
 		DefaultSchedulerServiceMultiplatformTests.MultiplatformTaskConfiguration.class,
@@ -145,12 +142,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	private Scheduler scheduler;
 
 	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
-	private TaskDefinitionReader taskDefinitionReader;
-
-	@Autowired
 	private TaskExecutionInfoService taskExecutionInfoService;
 
 	@Autowired
@@ -163,15 +154,13 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	List<String> commandLineArgs;
 
 	@BeforeEach
-	public void setup() throws Exception {
-
+	void setup() throws Exception {
 		when(this.appRegistry.find(
 			eq("demo"), eq(ApplicationType.task), eq("1.0.0"))).thenReturn(new AppRegistration("demo",
 			ApplicationType.task, new URI("file:src/test/resources/apps/foo-task")));
 		when(this.appRegistry.find(
 			eq("demo2"), eq(ApplicationType.task), eq("1.0.0"))).thenReturn(new AppRegistration("demo2",
 			ApplicationType.task, new URI("file:src/test/resources/apps/foo-task")));
-
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME, "demo"));
 		taskDefinitionRepository.save(new TaskDefinition(CTR_DEFINITION_NAME, "demo && demo2"));
 		initializeSuccessfulRegistry();
@@ -187,38 +176,38 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		((SimpleTestScheduler) simpleTestScheduler).getSchedules().clear();
 	}
 
 	@Test
-	public void testSchedule() {
+	void schedule() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
 
 	@Test
-	public void testScheduleWithNoVersion() {
+	void scheduleWithNoVersion() {
 		this.testProperties.remove("version." + BASE_DEFINITION_NAME);
 		schedulerService.schedule(BASE_SCHEDULE_NAME, BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME));
 	}
 
 	@Test
-	public void testScheduleWithLongNameOnKuberenetesPlatform() {
-		assertThrows(IllegalArgumentException.class, () -> {
+	void scheduleWithLongNameOnKuberenetesPlatform() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			getMockedKubernetesSchedulerService().schedule(BASE_SCHEDULE_NAME +
-					"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
-					this.commandLineArgs, null);
+						"1234567789012345612345678901234567890123", BASE_DEFINITION_NAME, this.testProperties,
+				this.commandLineArgs, null);
 		});
 	}
 
 	@Test
-	public void testScheduleWithCapitalizeNameOnKuberenetesPlatform() {
+	void scheduleWithCapitalizeNameOnKuberenetesPlatform() {
 		SchedulerService testSchedulerService = getMockedKubernetesSchedulerService();
 		testSchedulerService.schedule(BASE_SCHEDULE_NAME + "AB", BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		List<ScheduleInfo> scheduleInfos = testSchedulerService.listForPlatform(KUBERNETES_PLATFORM);
-		assertThat(scheduleInfos.size()).isEqualTo(1);
+		assertThat(scheduleInfos).hasSize(1);
 		assertThat(scheduleInfos.get(0).getScheduleName()).isEqualTo("mytaskscheduleab");
 	}
 
@@ -240,8 +229,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				this.metaDataResolver,
 				this.schedulerServiceProperties,
 				this.auditRecordService,
-				this.aggregateExecutionSupport,
-				this.taskDefinitionReader,
 				this.taskExecutionInfoService,
 				this.propertyResolver,
 				this.composedTaskRunnerConfigurationProperties
@@ -255,14 +242,14 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testScheduleCTR() {
+	void scheduleCTR() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
 	}
 
 	@Test
-	public void testDuplicate() {
-		assertThrows(CreateScheduleException.class, () -> {
+	void duplicate() {
+		assertThatExceptionOfType(CreateScheduleException.class).isThrownBy(() -> {
 			schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
 					this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 			schedulerService.schedule(BASE_SCHEDULE_NAME + 1, BASE_DEFINITION_NAME,
@@ -271,7 +258,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testMultipleSchedules() {
+	void multipleSchedules() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -285,7 +272,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testGetSchedule() {
+	void getSchedule() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -302,7 +289,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testRemoveSchedulesForTaskDefinitionName() {
+	void removeSchedulesForTaskDefinitionName() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -319,7 +306,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testUnschedule() {
+	void unschedule() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -338,14 +325,14 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testEmptyUnschedule() {
+	void emptyUnschedule() {
 		validateSchedulesCount(0);
 		schedulerService.unschedule(BASE_SCHEDULE_NAME + 2, KUBERNETES_PLATFORM);
 		validateSchedulesCount(0);
 	}
 
 	@Test
-	public void testList() {
+	void list() {
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 2,
@@ -354,14 +341,14 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 
 		List<ScheduleInfo> schedules = schedulerService.listForPlatform(KUBERNETES_PLATFORM);
-		assertThat(schedules.size()).isEqualTo(3);
+		assertThat(schedules).hasSize(3);
 		verifyScheduleExistsInScheduler(schedules.get(0));
 		verifyScheduleExistsInScheduler(schedules.get(1));
 		verifyScheduleExistsInScheduler(schedules.get(2));
 	}
 
 	@Test
-	public void testListMaxEntry() {
+	void listMaxEntry() {
 		final int MAX_COUNT = 500;
 		schedulerServiceProperties.setMaxSchedulesReturned(MAX_COUNT);
 		for (int i = 0; i < MAX_COUNT + 1; i++) {
@@ -369,25 +356,25 @@ public class DefaultSchedulerServiceMultiplatformTests {
 					BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		}
 		List<ScheduleInfo> schedules = schedulerService.listForPlatform(KUBERNETES_PLATFORM);
-		assertThat(schedules.size()).isEqualTo(MAX_COUNT);
+		assertThat(schedules).hasSize(MAX_COUNT);
 	}
 
 	@Test
-	public void testListPaginated() {
-		assertThrows(UnsupportedOperationException.class, () -> {
+	void listPaginated() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 			schedulerService.list(PageRequest.of(0, 1), null);
 		});
 	}
 
 	@Test
-	public void testListWithParamsPaginated() {
-		assertThrows(UnsupportedOperationException.class, () -> {
+	void listWithParamsPaginated() {
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
 			schedulerService.list(PageRequest.of(0, 1), BASE_DEFINITION_NAME);
 		});
 	}
 
 	@Test
-	public void testListWithParams() {
+	void listWithParams() {
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME + 1, "demo"));
 		schedulerService.schedule(BASE_SCHEDULE_NAME + 1,
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
@@ -397,21 +384,21 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				BASE_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 
 		List<ScheduleInfo> schedules = schedulerService.list(BASE_DEFINITION_NAME + 1, KUBERNETES_PLATFORM);
-		assertThat(schedules.size()).isEqualTo(1);
+		assertThat(schedules).hasSize(1);
 		verifyScheduleExistsInScheduler(schedules.get(0));
 	}
 
 	@Test
-	public void testEmptyList() {
+	void emptyList() {
 		taskDefinitionRepository.save(new TaskDefinition(BASE_DEFINITION_NAME + 1, "demo"));
 		List<ScheduleInfo> schedules = schedulerService.list(BASE_DEFINITION_NAME + 1, "testTaskPlatform");
-		assertThat(schedules.size()).isEqualTo(0);
+		assertThat(schedules).isEmpty();
 		schedules = schedulerService.listForPlatform(KUBERNETES_PLATFORM);
-		assertThat(schedules.size()).isEqualTo(0);
+		assertThat(schedules).isEmpty();
 	}
 
 	@Test
-	public void testScheduleWithCommandLineArguments() throws Exception {
+	void scheduleWithCommandLineArguments() throws Exception {
 		List<String> args = new ArrayList<>();
 		args.add("--myArg1");
 		args.add("--myArg2");
@@ -420,7 +407,7 @@ public class DefaultSchedulerServiceMultiplatformTests {
 	}
 
 	@Test
-	public void testScheduleWithoutCommandLineArguments() throws URISyntaxException {
+	void scheduleWithoutCommandLineArguments() throws URISyntaxException {
 		List<String> args = getCommandLineArguments(new ArrayList<>());
 		assertThatCommandLineArgsHaveNonDefaultArgs(args, "--app.timestamp");
 	}
@@ -434,9 +421,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 			thenReturn(new AppRegistration("timestamp", ApplicationType.task,
 				new URI("file:src/test/resources/apps/timestamp-task")));
 
-		AggregateExecutionSupport mockAggExecSupport = mock(AggregateExecutionSupport.class);
-		when(mockAggExecSupport.findSchemaVersionTarget(anyString(), anyString(), any(TaskDefinition.class)))
-				.thenReturn(SchemaVersionTarget.defaultTarget());
 
 		Launcher launcher = new Launcher("default", "defaultType", null, mockScheduler);
 		List<Launcher> launchers = new ArrayList<>();
@@ -454,8 +438,6 @@ public class DefaultSchedulerServiceMultiplatformTests {
 				mock(ApplicationConfigurationMetadataResolver.class),
 				mock(SchedulerServiceProperties.class),
 				mock(AuditRecordService.class),
-				mockAggExecSupport,
-				mock(TaskDefinitionReader.class),
 				mock(TaskExecutionInfoService.class),
 				mock(PropertyResolver.class),
 				this.composedTaskRunnerConfigurationProperties);
@@ -481,20 +463,18 @@ public class DefaultSchedulerServiceMultiplatformTests {
 						equals(scheduleInfo.getScheduleName())).
 				collect(Collectors.toList());
 
-		assertThat(scheduleInfos.size()).isEqualTo(1);
+		assertThat(scheduleInfos).hasSize(1);
 		assertThat(scheduleInfos.get(0).getTaskDefinitionName()).isEqualTo(
 				scheduleInfo.getTaskDefinitionName());
 
 		for (String key : scheduleInfo.getScheduleProperties().keySet()) {
-			assertThat(scheduleInfos.get(0).getScheduleProperties().
-					get(key)).
-					isEqualTo(scheduleInfo.getScheduleProperties().get(key));
+			assertThat(scheduleInfos.get(0).getScheduleProperties()).containsEntry(key, scheduleInfo.getScheduleProperties().get(key));
 		}
 	}
 
 	private void validateSchedulesCount(int expectedScheduleCount) {
 		assertThat(((SimpleTestScheduler) simpleTestScheduler).
-				getSchedules().size()).isEqualTo(expectedScheduleCount);
+				getSchedules()).hasSize(expectedScheduleCount);
 	}
 
 	private ScheduleInfo createScheduleInfo(String scheduleName) {

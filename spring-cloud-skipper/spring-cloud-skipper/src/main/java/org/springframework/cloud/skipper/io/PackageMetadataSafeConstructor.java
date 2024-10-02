@@ -23,6 +23,7 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
+import org.yaml.snakeyaml.inspector.TagInspector;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -52,8 +53,9 @@ class PackageMetadataSafeConstructor extends SafeConstructor {
 	private static final String SHA256 = "sha256";
 	private static final String ICON_URL = "iconUrl";
 
-	PackageMetadataSafeConstructor(LoaderOptions loadingConfig) {
-		super(loadingConfig);
+	PackageMetadataSafeConstructor() {
+		super(new LoaderOptions());
+		this.loadingConfig.setTagInspector(tag -> tag.getClassName().equals(PackageMetadata.class.getName()));
 		this.yamlConstructors.put(new TypeDescription(PackageMetadata.class).getTag(), new ConstructYamlPackageMetadata());
 		rootTag = new Tag(new TypeDescription(PackageMetadata.class).getType());
 	}

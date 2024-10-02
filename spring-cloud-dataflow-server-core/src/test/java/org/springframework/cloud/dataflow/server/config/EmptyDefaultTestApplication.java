@@ -23,9 +23,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.impl.DefaultTaskRepositoryContainer;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
@@ -33,6 +31,8 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskExecuti
 import org.springframework.cloud.deployer.spi.app.AppDeployer;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskRepository;
+import org.springframework.cloud.task.repository.support.SimpleTaskRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -75,8 +75,8 @@ public class EmptyDefaultTestApplication {
 	}
 
 	@Bean
-	public TaskRepositoryContainer taskRepository() {
-		return mock(DefaultTaskRepositoryContainer.class);
+	public TaskRepository taskRepository() {
+		return mock(SimpleTaskRepository.class);
 	}
 
 	@Bean

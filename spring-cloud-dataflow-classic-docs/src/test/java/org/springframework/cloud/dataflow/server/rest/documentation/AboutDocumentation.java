@@ -34,10 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-public class AboutDocumentation extends BaseDocumentation {
+class AboutDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getMetaInformation() throws Exception {
+	void getMetaInformation() throws Exception {
 		this.mockMvc.perform(
 			get("/about")
 				.accept(MediaType.APPLICATION_JSON))

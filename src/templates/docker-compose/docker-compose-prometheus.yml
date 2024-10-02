@@ -6,23 +6,23 @@ services:
 
   dataflow-server:
     environment:
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED=true
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST=prometheus-rsocket-proxy
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT=7001
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED=true
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_HOST=prometheus-rsocket-proxy
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_PORT=7001
       #- SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
       - SPRING_CLOUD_DATAFLOW_METRICS_DASHBOARD_URL=http://localhost:3000
 
   skipper-server:
     environment:
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED=true
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED=true
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_HOST=prometheus-rsocket-proxy
-      - MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_PORT=7001
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED=true
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED=true
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_HOST=prometheus-rsocket-proxy
+      - MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_PORT=7001
       #- SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
 
   prometheus-rsocket-proxy:
-    image: micrometermetrics/prometheus-rsocket-proxy:1.5.2
+    image: micrometermetrics/prometheus-rsocket-proxy:2.0.0-M1
     container_name: prometheus-rsocket-proxy
     expose:
       - '9096'

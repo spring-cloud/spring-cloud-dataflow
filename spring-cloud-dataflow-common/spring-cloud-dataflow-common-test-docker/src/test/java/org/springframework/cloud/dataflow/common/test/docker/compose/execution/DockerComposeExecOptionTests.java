@@ -17,8 +17,7 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerComposeExecOption.noOptions;
 
 public class DockerComposeExecOptionTests {
@@ -26,6 +25,6 @@ public class DockerComposeExecOptionTests {
     @Test public void
     be_constructable_with_no_args() {
         DockerComposeExecOption option = noOptions();
-        assertThat(option.options(), empty());
+		assertThat(option.options()).isEmpty();
     }
 }

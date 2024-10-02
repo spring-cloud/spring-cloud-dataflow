@@ -17,19 +17,19 @@
 package org.springframework.cloud.dataflow.container.registry.authorization;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.ProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
-import org.apache.http.protocol.HttpContext;
+import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.core5.http.HttpException;
+import org.apache.hc.core5.http.HttpRequest;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import org.springframework.util.StringUtils;
 
@@ -86,40 +86,48 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 	}
 
 	@Override
-	public HttpUriRequest getRedirect(final HttpRequest request, final HttpResponse response,
-			final HttpContext context) throws ProtocolException {
+	public URI getLocationURI(final HttpRequest request, final HttpResponse response,
+			final HttpContext context) throws HttpException {
 
-		HttpUriRequest httpUriRequest = super.getRedirect(request, response, context);
-		String query = httpUriRequest.getURI().getQuery();
-		String method = request.getRequestLine().getMethod();
+		URI httpUriRequest = super.getLocationURI(request, response, context);
+		String query = httpUriRequest.getQuery();
+		String method = request.getMethod();
 
 		// Handle Amazon requests
 		if (StringUtils.hasText(query) && query.contains(AMZ_CREDENTIAL)) {
 			if (isHeadOrGetMethod(method)) {
-				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
-			}
+                try {
+                    return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest, method).getUri();
+                } catch (URISyntaxException e) {
+                    throw new HttpException("Unable to get location URI", e);
+                }
+            }
 		}
 
 		// Handle Azure requests
-		if (request.getRequestLine().getUri().contains(AZURECR_URI_SUFFIX)) {
+        try {
+            if (request.getUri().getRawPath().contains(AZURECR_URI_SUFFIX)) {
+                if (isHeadOrGetMethod(method)) {
+                    return (new DropAuthorizationHeaderHttpRequestBase(httpUriRequest, method) {
+                        // Drop headers only for the Basic Auth and leave unchanged for OAuth2
+                        @Override
+                        protected boolean isDropHeader(String name, Object value) {
+                            return name.equalsIgnoreCase(AUTHORIZATION_HEADER) && StringUtils.hasText((String) value) && ((String)value).contains(BASIC_AUTH);
+                        }
+                    }).getUri();
+                }
+            }
+
+
+        // Handle Custom requests
+		if (extra.containsKey(CUSTOM_REGISTRY) && request.getUri().getRawPath().contains(extra.get(CUSTOM_REGISTRY))) {
 			if (isHeadOrGetMethod(method)) {
-				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method) {
-					// Drop headers only for the Basic Auth and leave unchanged for OAuth2
-					@Override
-					protected boolean isDropHeader(String name, String value) {
-						return name.equalsIgnoreCase(AUTHORIZATION_HEADER) && StringUtils.hasText(value) && value.contains(BASIC_AUTH);
-					}
-				};
+				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest, method).getUri();
 			}
 		}
-
-		// Handle Custom requests
-		if (extra.containsKey(CUSTOM_REGISTRY) && request.getRequestLine().getUri().contains(extra.get(CUSTOM_REGISTRY))) {
-			if (isHeadOrGetMethod(method)) {
-				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest.getURI(), method);
-			}
+		} catch (URISyntaxException e) {
+			throw new HttpException("Unable to get Locaction URI", e);
 		}
-
 		return httpUriRequest;
 	}
 
@@ -131,13 +139,12 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 	/**
 	 * Overrides all header setter methods to filter out the Authorization headers.
 	 */
-	static class DropAuthorizationHeaderHttpRequestBase extends HttpRequestBase {
+	static class DropAuthorizationHeaderHttpRequestBase extends HttpUriRequestBase {
 
 		private final String method;
 
 		DropAuthorizationHeaderHttpRequestBase(URI uri, String method) {
-			super();
-			setURI(uri);
+			super(method, uri);
 			this.method = method;
 		}
 
@@ -154,7 +161,7 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 		}
 
 		@Override
-		public void addHeader(String name, String value) {
+		public void addHeader(String name, Object value) {
 			if (!isDropHeader(name, value)) {
 				super.addHeader(name, value);
 			}
@@ -168,7 +175,7 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 		}
 
 		@Override
-		public void setHeader(String name, String value) {
+		public void setHeader(String name, Object value) {
 			if (!isDropHeader(name, value)) {
 				super.setHeader(name, value);
 			}
@@ -186,7 +193,7 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 			return isDropHeader(header.getName(), header.getValue());
 		}
 
-		protected boolean isDropHeader(String name, String value) {
+		protected boolean isDropHeader(String name, Object value) {
 			return name.equalsIgnoreCase(AUTHORIZATION_HEADER);
 		}
 	}

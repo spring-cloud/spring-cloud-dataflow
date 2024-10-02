@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -32,7 +32,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -44,29 +44,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@TestMethodOrder(MethodName.class)
-public class TaskDefinitionsDocumentation extends BaseDocumentation {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class TaskDefinitionsDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+	void setup() throws Exception {
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
 	@Test
-	public void createDefinition() throws Exception {
+	void createDefinition() throws Exception {
 		this.mockMvc.perform(
 			post("/tasks/definitions")
-				.param("name", "my-task")
-				.param("definition", "timestamp --format='YYYY MM DD'")
-				.param("description", "Demo task definition for testing"))
+				.queryParam("name", "my-task")
+				.queryParam("definition", "timestamp --format='YYYY MM DD'")
+				.queryParam("description", "Demo task definition for testing"))
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("name").description("The name for the created task definition"),
 					parameterWithName("definition").description("The definition for the task, using Data Flow DSL"),
 					parameterWithName("description").description("The description of the task definition")
@@ -86,24 +86,24 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listAllTaskDefinitions() throws Exception {
-		documentation.dontDocument(()->this.mockMvc.perform(
-				post("/tasks/definitions")
-					.param("name", "my-task")
-					.param("definition", "timestamp --format='YYYY MM DD'")
-					.param("description", "Demo task definition for testing"))
-			.andExpect(status().isOk()));
+	void listAllTaskDefinitions() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "my-task")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'")
+						.queryParam("description", "Demo task definition for testing"))
+					.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			get("/tasks/definitions")
-				.param("page", "0")
-				.param("size", "10")
-				.param("sort", "taskName,ASC")
-				.param("search", "")
-				.param("manifest", "true")
+				.queryParam("page", "0")
+				.queryParam("size", "10")
+				.queryParam("sort", "taskName,ASC")
+				.queryParam("search", "")
+				.queryParam("manifest", "true")
 			)
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
-				requestParameters(
+				queryParameters(
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("size").description("The requested page size (optional)"),
 					parameterWithName("search").description("The search string performed on the name (optional)"),
@@ -118,22 +118,23 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void displayDetail() throws Exception {
-		documentation.dontDocument(()->this.mockMvc.perform(
-				post("/tasks/definitions")
-					.param("name", "my-task")
-					.param("definition", "timestamp --format='YYYY MM DD'")
-					.param("description", "Demo task definition for testing"))
-			.andExpect(status().isOk()));
+	void displayDetail() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "my-task")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'")
+						.queryParam("description", "Demo task definition for testing"))
+					.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			get("/tasks/definitions/{my-task}","my-task")
-			.param("manifest", "true"))
+			.queryParam("manifest", "true"))
+			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
 					parameterWithName("my-task").description("The name of an existing task definition (required)")
 				),
-				requestParameters(
+				queryParameters(
 					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
 				),
 				responseFields(
@@ -151,21 +152,22 @@ public class TaskDefinitionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void taskDefinitionDelete() throws Exception {
-		documentation.dontDocument(()->this.mockMvc.perform(
-				post("/tasks/definitions")
-					.param("name", "my-task")
-					.param("definition", "timestamp --format='YYYY MM DD'")
-					.param("description", "Demo task definition for testing"))
-			.andExpect(status().isOk()));
+	void taskDefinitionDelete() throws Exception {
+		this.documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "my-task")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'")
+						.queryParam("description", "Demo task definition for testing"))
+					.andExpect(status().isOk()));
 		this.mockMvc.perform(
 			delete("/tasks/definitions/{my-task}", "my-task")
-			.param("cleanup", "true"))
+			.queryParam("cleanup", "true"))
+			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
 					parameterWithName("my-task").description("The name of an existing task definition (required)")),
-				requestParameters(
+				queryParameters(
 						parameterWithName("cleanup").description("The flag to indicate if the associated task executions needed to be cleaned up")
 				)
 			));

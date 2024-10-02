@@ -23,10 +23,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CloudFoundryApplicationManifestUtilsTests {
+class CloudFoundryApplicationManifestUtilsTests {
 
 	@Test
-	public void testManifestMap() {
+	void manifestMap() {
 		ApplicationManifest manifest = ApplicationManifest.builder()
 				.name("name")
 				.buildpack("buildpack")

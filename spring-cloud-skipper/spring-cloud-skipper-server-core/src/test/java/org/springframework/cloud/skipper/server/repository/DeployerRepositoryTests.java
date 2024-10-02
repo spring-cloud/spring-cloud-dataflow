@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Corneil du Plessis
  */
 @ActiveProfiles("local")
-public class DeployerRepositoryTests extends AbstractIntegrationTest {
+class DeployerRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private DeployerRepository deployerRepository;
 
 	@Test
-	public void basicCrud() {
+	void basicCrud() {
 		LocalDeployerProperties properties = new LocalDeployerProperties();
 		LocalAppDeployer localAppDeployer = new LocalAppDeployer(properties);
 		ActuatorOperations actuatorOperations = new LocalActuatorTemplate(new RestTemplate(), localAppDeployer,

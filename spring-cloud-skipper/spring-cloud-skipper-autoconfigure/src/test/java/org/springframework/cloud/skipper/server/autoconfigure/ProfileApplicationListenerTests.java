@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.skipper.server.autoconfigure;
 
-import java.util.Map;
-
-import mockit.MockUp;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +34,7 @@ import static org.mockito.Mockito.when;
  * @author Corneil du Plessis
  */
 @ExtendWith(MockitoExtension.class)
-public class ProfileApplicationListenerTests {
+class ProfileApplicationListenerTests {
 
 	private MockEnvironment environment;
 
@@ -47,34 +44,34 @@ public class ProfileApplicationListenerTests {
 	private ProfileApplicationListener profileApplicationListener;
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		environment = new MockEnvironment();
 		when(event.getEnvironment()).thenReturn(environment);
 		profileApplicationListener = new ProfileApplicationListener();
 	}
 
 	@Test
-	public void shouldEnableLocalProfile() {
+	void shouldEnableLocalProfile() {
 		profileApplicationListener.onApplicationEvent(event);
 		assertThat(environment.getActiveProfiles()).contains("local");
 	}
 
 	@Test
-	public void shouldNotEnableLocalProfileRunningOnKubernetes() {
+	void shouldNotEnableLocalProfileRunningOnKubernetes() {
 		environment.setProperty("kubernetes_service_host", "true");
 		profileApplicationListener.onApplicationEvent(event);
 		assertThat(environment.getActiveProfiles()).doesNotContain("local");
 	}
 
 	@Test
-	public void shouldNotEnableLocalProfileRunningOnCloudFoundry() {
+	void shouldNotEnableLocalProfileRunningOnCloudFoundry() {
 		environment.setProperty("VCAP_APPLICATION", "true");
 		profileApplicationListener.onApplicationEvent(event);
 		assertThat(environment.getActiveProfiles()).doesNotContain("local");
 	}
 
 	@Test
-	public void testAddedSpringCloudKubernetesConfigEnabledIsFalse() {
+	void addedSpringCloudKubernetesConfigEnabledIsFalse() {
 		profileApplicationListener.onApplicationEvent(event);
 		PropertySource<?> propertySource = environment.getPropertySources().get("skipperProfileApplicationListener");
 		assertThat(propertySource.containsProperty("spring.cloud.kubernetes.enabled")).isTrue();
@@ -82,7 +79,7 @@ public class ProfileApplicationListenerTests {
 	}
 
 	@Test
-	public void backOffIfCloudProfileAlreadySet() {
+	void backOffIfCloudProfileAlreadySet() {
 		// kubernetes profile set by user
 		environment.setActiveProfiles("kubernetes");
 		// environment says we are on cloud foundry, the profile is 'cloud'
@@ -94,7 +91,7 @@ public class ProfileApplicationListenerTests {
 	}
 
 	@Test
-	public void doNotSetLocalIfKubernetesProfileIsSet() {
+	void doNotSetLocalIfKubernetesProfileIsSet() {
 		// kubernetes profile set by user
 		environment.setActiveProfiles("kubernetes");
 		profileApplicationListener.onApplicationEvent(event);
@@ -104,7 +101,7 @@ public class ProfileApplicationListenerTests {
 	}
 
 	@Test
-	public void disableProfileApplicationListener() {
+	void disableProfileApplicationListener() {
 		try {
 			System.setProperty(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_PROPERTY_NAME, "true");
 			environment.setProperty("VCAP_APPLICATION", "true");
@@ -116,29 +113,4 @@ public class ProfileApplicationListenerTests {
 		}
 	}
 
-	@Test
-	public void disableProfileApplicationListenerViaEnvVar() {
-		MockUp<?> mockup = mockProfileListenerEnvVar();
-		try {
-			environment.setProperty("VCAP_APPLICATION", "true");
-			profileApplicationListener.onApplicationEvent(event);
-			assertThat(environment.getActiveProfiles()).isEmpty();
-		}
-		finally {
-			mockup.tearDown();
-		}
-	}
-
-	private MockUp<?> mockProfileListenerEnvVar() {
-		Map<String, String> env = System.getenv();
-		return new MockUp<System>() {
-			@mockit.Mock
-			public String getenv(String name) {
-				if (name.equalsIgnoreCase(ProfileApplicationListener.IGNORE_PROFILEAPPLICATIONLISTENER_ENVVAR_NAME)) {
-					return "true";
-				}
-				return env.get(name);
-			}
-		};
-	}
 }

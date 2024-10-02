@@ -6,12 +6,6 @@
     "audit-records": {
       "href": "http://localhost/audit-records"
     },
-    "schema/versions": {
-      "href": "http://localhost/schema/versions"
-    },
-    "schema/targets": {
-      "href": "http://localhost/schema/targets"
-    },
     "streams/definitions": {
       "href": "http://localhost/streams/definitions"
     },
@@ -138,7 +132,7 @@
       "href": "http://localhost/tasks/executions/current"
     },
     "tasks/executions/execution": {
-      "href": "http://localhost/tasks/executions/{id}{?schemaTarget}",
+      "href": "http://localhost/tasks/executions/{id}",
       "templated": true
     },
     "tasks/validation": {
@@ -150,7 +144,7 @@
       "templated": true
     },
     "tasks/logs": {
-      "href": "http://localhost/tasks/logs/{taskExternalExecutionId}{?platformName,schemaTarget}",
+      "href": "http://localhost/tasks/logs/{taskExternalExecutionId}{?platformName}",
       "templated": true
     },
     "tasks/thinexecutions": {

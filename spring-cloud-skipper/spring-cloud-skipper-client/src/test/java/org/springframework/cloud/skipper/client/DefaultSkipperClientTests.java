@@ -36,13 +36,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
+
+
+// @checkstyle:off
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.queryParam;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+// @checkstyle:on
 
 /**
  * Tests for {@link DefaultSkipperClient}.
@@ -53,7 +58,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class DefaultSkipperClientTests {
+class DefaultSkipperClientTests {
 
 	private final String ERROR1 = "{\"timestamp\":1508161424577," +
 			"\"status\":404," +
@@ -75,14 +80,14 @@ public class DefaultSkipperClientTests {
 			"\"path\":\"/api/status/mylog\",\"releaseName\":\"mylog\"}";
 
 	@Test
-	public void genericTemplateTest() {
+	void genericTemplateTest() {
 		SkipperClient skipperClient = new DefaultSkipperClient("http://localhost:7577");
 		assertThat(skipperClient.getSpringCloudDeployerApplicationTemplate()).isNotNull();
 		assertThat(skipperClient.getSpringCloudDeployerApplicationTemplate().getData()).isNotEmpty();
 	}
 
 	@Test
-	public void testStatusReleaseNameFound() {
+	void statusReleaseNameFound() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
@@ -92,13 +97,14 @@ public class DefaultSkipperClientTests {
 		Info status = skipperClient.status("mylog");
 		mockServer.verify();
 
-		assertThat(status).isNotNull();
-		assertThat(status).isInstanceOf(Info.class);
+		assertThat(status)
+				.isNotNull()
+				.isInstanceOf(Info.class);
 	}
 
 	@Test
-	public void testStatusReleaseNameNotFound() {
-		assertThrows(ReleaseNotFoundException.class, () -> {
+	void statusReleaseNameNotFound() {
+		assertThatExceptionOfType(ReleaseNotFoundException.class).isThrownBy(() -> {
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
@@ -112,8 +118,8 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testSkipperException() {
-		assertThrows(SkipperException.class, () -> {
+	void skipperException() {
+		assertThatExceptionOfType(SkipperException.class).isThrownBy(() -> {
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
@@ -127,12 +133,12 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testDeleteReleaseWithoutPackageDeletion() {
+	void deleteReleaseWithoutPackageDeletion() {
 		testDeleteRelease(false);
 	}
 
 	@Test
-	public void testDeleteReleaseWithPackageDeletion() {
+	void deleteReleaseWithPackageDeletion() {
 		testDeleteRelease(true);
 	}
 
@@ -152,8 +158,8 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testDeletePackageHasDeployedRelease() {
-		assertThrows(PackageDeleteException.class, () -> {
+	void deletePackageHasDeployedRelease() {
+		assertThatExceptionOfType(PackageDeleteException.class).isThrownBy(() -> {
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.setErrorHandler(new SkipperClientResponseErrorHandler(new ObjectMapper()));
 			SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
@@ -166,7 +172,7 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testLogByReleaseName() {
+	void logByReleaseName() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
@@ -180,7 +186,7 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testLogByReleaseAndAppNames() {
+	void logByReleaseAndAppNames() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
@@ -194,7 +200,7 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testScaleByReleaseAndScaleRequest() {
+	void scaleByReleaseAndScaleRequest() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
@@ -212,7 +218,7 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testReleaseList() {
+	void releaseList() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
@@ -224,7 +230,7 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testActuatorGet() {
+	void actuatorGet() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 
@@ -241,7 +247,7 @@ public class DefaultSkipperClientTests {
 	}
 
 	@Test
-	public void testActuatorPost() {
+	void actuatorPost() {
 		RestTemplate restTemplate = new RestTemplate();
 		SkipperClient skipperClient = new DefaultSkipperClient("", restTemplate);
 		ActuatorPostRequest actuatorPostRequest = ActuatorPostRequest.of("/bindings/input",

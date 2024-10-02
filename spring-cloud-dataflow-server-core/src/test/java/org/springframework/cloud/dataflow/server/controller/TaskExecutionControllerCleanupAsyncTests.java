@@ -18,9 +18,9 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.awaitility.Awaitility;
@@ -35,13 +35,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
@@ -49,7 +47,6 @@ import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -75,16 +72,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(
 		properties = "spring.cloud.dataflow.async.enabled=true",
-		classes = { JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
+		classes = {JobDependencies.class, TaskExecutionAutoConfiguration.class, DataflowAsyncAutoConfiguration.class,
 				PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @EnableDataFlowServer
-public class TaskExecutionControllerCleanupAsyncTests {
+class TaskExecutionControllerCleanupAsyncTests {
 
 	@Autowired
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
 	@Autowired
 	private TaskDefinitionRepository taskDefinitionRepository;
@@ -93,9 +90,6 @@ public class TaskExecutionControllerCleanupAsyncTests {
 
 	@Autowired
 	private WebApplicationContext wac;
-
-	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
 
 	@Autowired
 	private TaskLauncher taskLauncher;
@@ -113,7 +107,7 @@ public class TaskExecutionControllerCleanupAsyncTests {
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
@@ -136,13 +130,11 @@ public class TaskExecutionControllerCleanupAsyncTests {
 
 	private void setupTaskExecutions(String taskName, String taskExecutionId) {
 		taskDefinitionRepository.save(new TaskDefinition(taskName, "taskDslGoesHere"));
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		TaskExecutionDao taskExecutionDao = daoContainer.get(schemaVersionTarget.getName());
 
 		List<String> taskArgs = new ArrayList<>();
 		taskArgs.add("foo=bar");
-		TaskExecution taskExecution1 = taskExecutionDao.createTaskExecution(taskName, new Date(), taskArgs, taskExecutionId);
-		taskExecutionDao.createTaskExecution(taskName, new Date(), taskArgs, taskExecutionId, taskExecution1.getExecutionId());
+		TaskExecution taskExecution1 = taskExecutionDao.createTaskExecution(taskName, LocalDateTime.now(), taskArgs, taskExecutionId);
+		taskExecutionDao.createTaskExecution(taskName, LocalDateTime.now(), taskArgs, taskExecutionId, taskExecution1.getExecutionId());
 
 		TaskDeployment taskDeployment = new TaskDeployment();
 		taskDeployment.setTaskDefinitionName(taskName);

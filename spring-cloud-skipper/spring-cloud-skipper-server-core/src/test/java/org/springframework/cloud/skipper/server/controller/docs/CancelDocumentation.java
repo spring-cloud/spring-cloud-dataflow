@@ -35,10 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Janne Valkealahti
  * @author Corneil du Plessis
  */
-public class CancelDocumentation extends BaseDocumentation {
+class CancelDocumentation extends BaseDocumentation {
 
 	@Test
-	public void cancelRelease() throws Exception {
+	void cancelRelease() throws Exception {
 		final String releaseName = "myLogRelease";
 
 		when(this.skipperStateMachineService.cancelRelease(releaseName)).thenReturn(Boolean.TRUE);

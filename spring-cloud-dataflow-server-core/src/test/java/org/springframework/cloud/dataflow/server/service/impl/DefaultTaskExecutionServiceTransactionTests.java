@@ -16,6 +16,12 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,11 +35,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.aggregate.task.TaskRepositoryContainer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -44,29 +45,25 @@ import org.springframework.cloud.dataflow.core.TaskPlatformFactory;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
+import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionCreationService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.core.RuntimeEnvironmentInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.deployer.spi.task.TaskStatus;
+import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro
@@ -77,14 +74,14 @@ import static org.mockito.Mockito.when;
 		"spring.main.allow-bean-definition-overriding=true"})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public class DefaultTaskExecutionServiceTransactionTests {
+class DefaultTaskExecutionServiceTransactionTests {
 
 	private final static String BASE_TASK_NAME = "myTask";
 
 	private final static String TASK_NAME_ORIG = BASE_TASK_NAME + "_ORIG";
 
 	@Autowired
-	TaskRepositoryContainer taskRepositoryContainer;
+	TaskRepository taskRepository;
 
 	@Autowired
 	TaskDefinitionRepository taskDefinitionRepository;
@@ -114,7 +111,7 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator;
 
 	@Autowired
-	AggregateTaskExplorer taskExplorer;
+	DataflowTaskExplorer taskExplorer;
 
 	@Autowired
 	TaskConfigurationProperties taskConfigurationProperties;
@@ -123,27 +120,21 @@ public class DefaultTaskExecutionServiceTransactionTests {
 	ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties;
 
 	@Autowired
-	DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
+	DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
 	@Autowired
-	DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 	@Autowired
 	DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao;
 
-	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
 	private TaskExecutionService transactionTaskService;
-
-	@Autowired
-	TaskDefinitionReader taskDefinitionReader;
 
 	@Autowired
 	ApplicationContext applicationContext;
 
 	@BeforeEach
-	public void setupMocks() {
+	void setupMocks() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		this.launcherRepository.save(new Launcher("default", TaskPlatformFactory.LOCAL_PLATFORM_TYPE, new TaskLauncherStub(dataSource)));
 		this.taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
@@ -152,32 +143,29 @@ public class DefaultTaskExecutionServiceTransactionTests {
 				applicationContext.getEnvironment(),
 				launcherRepository,
 				auditRecordService,
-				taskRepositoryContainer,
+				taskRepository,
 				taskExecutionInfoService,
 				mock(TaskDeploymentRepository.class),
 				taskDefinitionRepository,
-				taskDefinitionReader,
 				taskExecutionRepositoryService,
 				taskAppDeploymentRequestCreator,
 				taskExplorer,
-				dataflowTaskExecutionDaoContainer,
-				dataflowTaskExecutionMetadataDaoContainer,
+				dataflowTaskExecutionDao,
+				dataflowTaskExecutionMetadataDao,
 				dataflowTaskExecutionQueryDao,
 				mock(OAuth2TokenUtilsService.class),
 				taskSaveService,
 				taskConfigurationProperties,
-				aggregateExecutionSupport,
 				null
 		);
 	}
 
 	@Test
 	@DirtiesContext
-	public void executeSingleTaskTransactionTest() {
+	void executeSingleTaskTransactionTest() {
 		initializeSuccessfulRegistry(this.appRegistry);
 		LaunchResponse taskExecution = this.transactionTaskService.executeTask(TASK_NAME_ORIG, new HashMap<>(), new LinkedList<>());
-		assertEquals(1L, taskExecution.getExecutionId());
-		assertEquals("boot2", taskExecution.getSchemaTarget());
+		assertThat(taskExecution.getExecutionId()).isEqualTo(1L);
 	}
 
 	private static class TaskLauncherStub implements TaskLauncher {

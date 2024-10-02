@@ -15,8 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DaemonHostIpResolver.LOCALHOST;
 
 import org.junit.Test;
@@ -26,17 +25,17 @@ public class DaemonHostIpResolverTests {
 
     @Test
     public void return_local_host_with_null() {
-        assertThat(new DaemonHostIpResolver().resolveIp(null), is(LOCALHOST));
+		assertThat(new DaemonHostIpResolver().resolveIp(null)).isEqualTo(LOCALHOST);
     }
 
     @Test
     public void return_local_host_with_blank() {
-        assertThat(new DaemonHostIpResolver().resolveIp(""), is(LOCALHOST));
+		assertThat(new DaemonHostIpResolver().resolveIp("")).isEqualTo(LOCALHOST);
     }
 
     @Test
     public void return_local_host_with_arbitrary() {
-        assertThat(new DaemonHostIpResolver().resolveIp("arbitrary"), is(LOCALHOST));
+		assertThat(new DaemonHostIpResolver().resolveIp("arbitrary")).isEqualTo(LOCALHOST);
     }
 
 }

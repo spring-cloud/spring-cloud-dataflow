@@ -56,13 +56,13 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 @SpringBootTest(classes = ConfigValueUtilsTests.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-public class ConfigValueUtilsTests {
+class ConfigValueUtilsTests {
 
 	@Autowired
 	private PackageReader packageReader;
 
 	@Test
-	public void testYamlMerge() throws IOException {
+	void yamlMerge() throws IOException {
 		DumperOptions dumperOptions = new DumperOptions();
 		dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 		dumperOptions.setPrettyFlow(true);

@@ -34,10 +34,10 @@ import org.springframework.cloud.skipper.support.yaml.YamlConverter.Mode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class YamlConverterTests {
+class YamlConverterTests {
 
 	@Test
-	public void conversionWithListItems() throws Exception {
+	void conversionWithListItems() throws Exception {
 		doConversionTest(
 				"some.thing[0].a=first-a\n" +
 				"some.thing[0].b=first-b\n" +
@@ -54,7 +54,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void deepKeys1() throws Exception {
+	void deepKeys1() throws Exception {
 		doConversionTest(
 				"hi.this.is.same=xxx.yyy\n",
 				// ==>
@@ -78,7 +78,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void deepKeys2() throws Exception {
+	void deepKeys2() throws Exception {
 		doConversionTest(
 				"bye.this.is.same=xxx.yyy\n" +
 				"hi.this.is.same=xxx.yyy\n",
@@ -110,7 +110,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void hasComments() throws Exception {
+	void hasComments() throws Exception {
 		do_hasComments_test("#comment");
 		do_hasComments_test("!comment");
 		do_hasComments_test("    \t!comment");
@@ -128,7 +128,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void almostHasComments() throws Exception {
+	void almostHasComments() throws Exception {
 		doConversionTest(
 			"my.hello=Good morning!\n" +
 			"my.goodbye=See ya # later\n",
@@ -141,7 +141,7 @@ public class YamlConverterTests {
 
 
 	@Test
-	public void simpleConversion() throws Exception {
+	void simpleConversion() throws Exception {
 		doConversionTest(
 				"some.thing=vvvv\n" +
 				"some.other.thing=blah\n",
@@ -154,7 +154,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void emptyFileConversion() throws Exception {
+	void emptyFileConversion() throws Exception {
 		doConversionTest(
 				"",
 				// ==>
@@ -163,7 +163,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void unusualName() throws Exception {
+	void unusualName() throws Exception {
 		File input = createFile("no-extension",
 				"server.port: 6789"
 		);
@@ -174,7 +174,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void multipleAssignmentProblem() throws Exception {
+	void multipleAssignmentProblem() throws Exception {
 		do_conversionTest(
 				"some.property=something\n" +
 				"some.property=something-else",
@@ -188,7 +188,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void scalarAndMapConflict() throws Exception {
+	void scalarAndMapConflict() throws Exception {
 		do_conversionTest(
 				"some.property=a-scalar\n" +
 				"some.property.sub=sub-value",
@@ -204,7 +204,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void scalarAndMapConflictFlatten() throws Exception {
+	void scalarAndMapConflictFlatten() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
 				"some.property=a-scalar\n" +
@@ -220,7 +220,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void forceFlatten() throws Exception {
+	void forceFlatten() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
 			Collections.singletonList("some.property"),
@@ -236,7 +236,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void forceFlattenMulti() throws Exception {
+	void forceFlattenMulti() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
 			Collections.singletonList("some.property"),
@@ -254,7 +254,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void forceFlattenMultiUseRegex() throws Exception {
+	void forceFlattenMultiUseRegex() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
 			Collections.singletonList("[a-z]*2\\.property"),
@@ -280,7 +280,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void scalarAndMapConflictDeepFlatten() throws Exception {
+	void scalarAndMapConflictDeepFlatten() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
 				"log4j.appender.stdout=org.apache.log4j.ConsoleAppender\n" +
@@ -309,7 +309,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void scalarAndMapConflictDeepFlatten2() throws Exception {
+	void scalarAndMapConflictDeepFlatten2() throws Exception {
 		do_conversionTest(
 				Mode.FLATTEN,
 				"log4j.appender.stdout=org.apache.log4j.ConsoleAppender\n" +
@@ -342,7 +342,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void scalarAndSequenceConflict() throws Exception {
+	void scalarAndSequenceConflict() throws Exception {
 		do_conversionTest(
 				"some.property=a-scalar\n" +
 				"some.property[0]=zero\n" +
@@ -360,7 +360,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void mapAndSequenceConflict() throws Exception {
+	void mapAndSequenceConflict() throws Exception {
 		do_conversionTest(
 				"some.property.abc=val1\n" +
 				"some.property.def=val2\n" +
@@ -381,7 +381,7 @@ public class YamlConverterTests {
 	}
 
 	@Test
-	public void scalarAndMapAndSequenceConflict() throws Exception {
+	void scalarAndMapAndSequenceConflict() throws Exception {
 		do_conversionTest(
 				"some.property=a-scalar\n" +
 				"some.property.abc=val1\n" +
@@ -420,7 +420,7 @@ public class YamlConverterTests {
 
 	private void do_conversionTest(Mode mode, List<String> keyspaces, String input, String expectedOutput, Checker<YamlConversionStatus> statusChecker) throws Exception {
 		File propertiesFile = createFile("application.properties", input);
-		assertThat(propertiesFile.exists()).isTrue();
+		assertThat(propertiesFile).exists();
 		Builder builder = YamlConverter.builder().mode(mode).file(propertiesFile);
 		if (keyspaces != null) {
 			for (String keyspace : keyspaces) {

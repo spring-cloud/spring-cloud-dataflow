@@ -16,8 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
-import javax.servlet.RequestDispatcher;
-
+import jakarta.servlet.RequestDispatcher;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.rest.Version;
@@ -43,17 +42,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-public class ApiDocumentation extends BaseDocumentation {
+class ApiDocumentation extends BaseDocumentation {
 
 	@Test
-	public void headers() throws Exception {
+	void headers() throws Exception {
 		this.mockMvc.perform(get("/")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(responseHeaders(headerWithName("Content-Type")
 						.description("The Content-Type of the payload, e.g. " + "`application/hal+json`"))));
 	}
 
 	@Test
-	public void errors() throws Exception {
+	void errors() throws Exception {
 		this.mockMvc
 				.perform(get("/error").requestAttr(RequestDispatcher.ERROR_STATUS_CODE, 400)
 						.requestAttr(RequestDispatcher.ERROR_REQUEST_URI, "/apps").requestAttr(
@@ -73,7 +72,7 @@ public class ApiDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void index() throws Exception {
+	void index() throws Exception {
 		this.mockMvc.perform(get("/"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(links(
@@ -116,6 +115,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/executions/launch").description("Provides for launching a Task execution"),
 				linkWithRel("tasks/executions/external").description("Returns Task execution by external id"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
+				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
 				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
 				linkWithRel("tasks/schedules/instances").description("Provides schedule information of a specific task	"),
@@ -124,9 +124,6 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks.  The results can be filtered to show the platforms that support scheduling by adding a request parameter of 'schedulesEnabled=true"),
 				linkWithRel("tasks/logs").description("Retrieve the task application log"),
 				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
-
-				linkWithRel("schema/versions").description("List of Spring Boot related schemas"),
-				linkWithRel("schema/targets").description("List of schema targets"),
 
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
@@ -153,9 +150,6 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("['" + Version.REVISION_KEY + "']").description("Incremented each time a change is implemented in this REST API"),
 						fieldWithPath("_links.audit-records.href").description("Link to the audit records"),
 						fieldWithPath("_links.dashboard.href").description("Link to the dashboard"),
-
-						fieldWithPath("_links.schema/versions.href").description("Link to the schema/versions"),
-						fieldWithPath("_links.schema/targets.href").description("Link to the schema/targets"),
 
 						fieldWithPath("_links.streams/definitions.href").description("Link to the streams/definitions"),
 						fieldWithPath("_links.streams/definitions/definition.href").description("Link to the streams/definitions/definition"),
@@ -225,6 +219,8 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/executions/execution.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/execution is templated"),
 						fieldWithPath("_links.tasks/executions/external.href").description("Link to the tasks/executions/external"),
 						fieldWithPath("_links.tasks/executions/external.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/executions/external is templated"),
+
+						fieldWithPath("_links.tasks/thinexecutions.href").description("Link to the tasks/thinexecutions"),
 
 						fieldWithPath("_links.tasks/info/executions.href").description("Link to the tasks/info/executions"),
 						fieldWithPath("_links.tasks/info/executions.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/info is templated"),

@@ -16,15 +16,16 @@
 
 package org.springframework.cloud.dataflow.server.config;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springdoc.core.SpringDocConfigProperties;
-import org.springdoc.core.SpringDocConfiguration;
-import org.springdoc.core.SwaggerUiConfigProperties;
+import org.springdoc.core.configuration.SpringDocConfiguration;
+import org.springdoc.core.properties.SpringDocConfigProperties;
+import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springdoc.webmvc.ui.SwaggerConfig;
 
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -32,7 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cloud.dataflow.server.support.SpringDocJsonDecodeFilter;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 
 /**
@@ -42,7 +42,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
  *
  * @author Tobias Soloschenko
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnClass({ SpringDocConfigProperties.class, SwaggerUiConfigProperties.class })
 @ConditionalOnBean({ SpringDocConfigProperties.class, SwaggerUiConfigProperties.class })
 @AutoConfigureAfter({ SpringDocConfiguration.class, SwaggerConfig.class })
@@ -79,7 +79,7 @@ public class SpringDocAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	public WebSecurityCustomizer springDocWebSecurityCustomizer() {
-		return (webSecurity -> webSecurity.ignoring().antMatchers(
+		return (webSecurity -> webSecurity.ignoring().requestMatchers(
 				"/swagger-ui/**",
 				getApiDocsPathContext() + "/**",
 				swaggerUiConfigProperties.getPath(),

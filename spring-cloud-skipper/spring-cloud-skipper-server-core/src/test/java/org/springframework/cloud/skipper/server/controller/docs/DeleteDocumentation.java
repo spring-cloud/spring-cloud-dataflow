@@ -41,10 +41,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class DeleteDocumentation extends BaseDocumentation {
+class DeleteDocumentation extends BaseDocumentation {
 
 	@Test
-	public void deleteRelease() throws Exception {
+	void deleteRelease() throws Exception {
 		Release release = createTestRelease("test", StatusCode.DELETED);
 		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		this.mockMvc.perform(
@@ -108,7 +108,7 @@ public class DeleteDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void deleteReleaseDefault() throws Exception {
+	void deleteReleaseDefault() throws Exception {
 		Release release = createTestRelease("test", StatusCode.DELETED);
 		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),

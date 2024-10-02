@@ -128,7 +128,7 @@ For example, if you would like to register all the task applications that ship w
 ====
 [source,bash]
 ----
-dataflow:>app import --uri https://dataflow.spring.io/task-maven-latest
+dataflow:>app import --uri https://dataflow.spring.io/task-maven-3-0-x
 ----
 ====
 

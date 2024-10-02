@@ -15,6 +15,12 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,12 +41,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * Tests for TaskCtrController
  *
@@ -49,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = TestDependencies.class)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TaskCtrControllerTests {
+class TaskCtrControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -60,7 +60,7 @@ public class TaskCtrControllerTests {
 	private ApplicationConfigurationMetadataResolver metadataResolver;
 
 	@BeforeEach
-	public void setupMocks() {
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		ConfigurationMetadataProperty p = new ConfigurationMetadataProperty();
@@ -76,7 +76,7 @@ public class TaskCtrControllerTests {
 	}
 
 	@Test
-	public void testOptions() throws Exception {
+	void options() throws Exception {
 		mockMvc.perform(get("/tasks/ctr/options").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.[?(@.id == 'oauth2-client-credentials-scopes')].name", hasItems("oauth2-client-credentials-scopes")))

@@ -15,174 +15,43 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.matchers;
 
-import static org.hamcrest.Matchers.containsString;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.regex.Pattern;
+
 import org.apache.commons.io.FileUtils;
-import org.hamcrest.Description;
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.assertj.core.api.Condition;
 
 public final class IOMatchers {
 	private IOMatchers() {}
-
-	public static Matcher<File> hasFiles(int numberOfFiles) {
-		return new ValueCachingMatcher<File>() {
-			private String[] files = new String[0];
-
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("directory ")
-						   .appendValue(value())
-						   .appendText(" to have " + numberOfFiles + " files");
-			}
-
-			@Override
-			protected void describeMismatchSafely(File item, Description mismatchDescription) {
-				mismatchDescription.appendText("directory ")
-								   .appendValue(item)
-								   .appendText(" had " + files.length + " files ")
-								   .appendText(Arrays.toString(files))
-								   .appendText(" or is not a directory");
-			}
-
-			@Override
-			protected boolean matchesSafely() {
-				files = value().list() != null ? value().list() : new String[0];
-				return files.length == numberOfFiles;
-			}
-		};
+	public static Condition<File[]> containsInAnyOrder(Condition<File>... conditions) {
+		return new Condition<>(files ->
+			Arrays.stream(conditions).allMatch(condition -> Arrays.stream(files).anyMatch(condition::matches))
+		, "containsInAnyOrder");
+	}
+	public static Condition<File> hasFiles(int numberOfFiles) {
+		return new Condition<File>(dir -> dir.isDirectory() && dir.listFiles().length == numberOfFiles, "directory has " + numberOfFiles + " of files");
 	}
 
-	public static Matcher<File> fileWithName(String filename) {
-		return new ValueCachingMatcher<File>() {
-
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("file with name " + filename);
-			}
-
-			@Override
-			protected void describeMismatchSafely(File item, Description mismatchDescription) {
-				mismatchDescription.appendText("file ")
-								   .appendValue(item)
-								   .appendText(" did not have name " + filename);
-			}
-
-			@Override
-			protected boolean matchesSafely() {
-				return value().getName().equals(filename);
-			}
-		};
+	public static Condition<File> fileWithName(String filename) {
+		return new Condition<>(file -> file.getName().equals(filename), "filename is '" + filename + "'");
 	}
 
-	public static Matcher<File> fileContainingString(String contents) {
-		return fileWithConents(containsString(contents));
+	public static Condition<File> fileContainingString(String contents) {
+		return fileWithContents(new Condition<>(s -> s.contains(contents), "contains " + contents));
 	}
 
-	public static Matcher<String> matchingPattern(String patternStr) {
-		return new TypeSafeDiagnosingMatcher<String>() {
-			@Override
-			protected boolean matchesSafely(String text, Description mismatchDescription) {
-				Pattern pattern = Pattern.compile(patternStr, Pattern.DOTALL);
-				boolean matches = pattern.matcher(text).matches();
-				if (!matches) {
-					mismatchDescription.appendText(text);
-				}
-				return matches;
-			}
-
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("matching '" + patternStr + "'");
-			}
-		};
+	public static Condition<File> fileWithContents(Condition<String> contentsMatcher) {
+		return new Condition<>(file -> {
+            try {
+                return contentsMatcher.matches(FileUtils.readFileToString(file, StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }, "file contents");
 	}
 
-	public static Matcher<File> fileWithConents(Matcher<String> contentsMatcher) {
-		return new FeatureMatcher<File, String>(contentsMatcher, "file contents", "file contents") {
-
-			@Override
-			protected String featureValueOf(File file) {
-				try {
-					return FileUtils.readFileToString(file, StandardCharsets.UTF_8);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		};
-	}
-
-	public static Matcher<File> fileExists() {
-		return new ValueCachingMatcher<File>() {
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("file ")
-						   .appendValue(value())
-						   .appendText(" to exist");
-			}
-
-			@Override
-			protected void describeMismatchSafely(File item, Description mismatchDescription) {
-				mismatchDescription.appendText("file ")
-								   .appendValue(item.getAbsolutePath())
-								   .appendText(" did not exist");
-			}
-
-			@Override
-			protected boolean matchesSafely() {
-				return value().exists();
-			}
-		};
-	}
-
-	public static Matcher<File> isDirectory() {
-		return new ValueCachingMatcher<File>() {
-			@Override
-			public void describeTo(Description description) {
-				description.appendValue(value())
-						   .appendText(" is directory");
-			}
-
-			@Override
-			protected void describeMismatchSafely(File item, Description mismatchDescription) {
-				mismatchDescription.appendValue(item.getAbsolutePath())
-								   .appendText(" is not a directory");
-			}
-
-			@Override
-			protected boolean matchesSafely() {
-				return value().isDirectory();
-			}
-		};
-	}
-
-	public static Matcher<Path> pathFileExists() {
-		return new ValueCachingMatcher<Path>() {
-			@Override
-			public void describeTo(Description description) {
-				description.appendText("file ")
-						   .appendValue(value())
-						   .appendText(" to exist");
-			}
-
-			@Override
-			protected void describeMismatchSafely(Path item, Description mismatchDescription) {
-				mismatchDescription.appendText("file ")
-								   .appendValue(item)
-								   .appendText(" did not exist");
-			}
-
-			@Override
-			protected boolean matchesSafely() {
-				return value().toFile().exists();
-			}
-		};
-	}
 }

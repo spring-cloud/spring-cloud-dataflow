@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cloud.dataflow.rest.client.TaskOperations;
 import org.springframework.cloud.dataflow.rest.resource.CurrentTaskExecutionsResource;
 import org.springframework.cloud.dataflow.rest.resource.LaunchResponseResource;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
+import org.springframework.core.log.LogAccessor;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -42,14 +40,16 @@ import org.springframework.util.StringUtils;
  * task launch request, otherwise it will return and log a warning message.
  *
  * @author David Turanski
+ * @author Corneil du Plessis
  **/
-public class TaskLauncherFunction implements Function<LaunchRequest, Optional<LaunchResponse>>, InitializingBean {
-	private static final Log log = LogFactory.getLog(TaskLauncherFunction.class);
+public class TaskLauncherFunction implements Consumer<LaunchRequest>, InitializingBean {
 
-	static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
+	private static final LogAccessor log = new LogAccessor(TaskLauncherFunction.class);
+
+	// VisibleForTesting
+	public static final String TASK_PLATFORM_NAME = "spring.cloud.dataflow.task.platformName";
 
 	private final TaskOperations taskOperations;
-
 	private String platformName = "default";
 
 	public TaskLauncherFunction(TaskOperations taskOperations) {
@@ -57,20 +57,16 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<La
 		this.taskOperations = taskOperations;
 	}
 
-	/**
-	 *
-	 * @param launchRequest the task launch request for the Data Flow server.
-	 * @return an {@code Optional<Long>} containing the task Id if the request is accepted or
-	 * empty otherwise.
-	 */
 	@Override
-	public Optional<LaunchResponse> apply(LaunchRequest launchRequest) {
+	public void accept(LaunchRequest request) {
 		if (platformIsAcceptingNewTasks()) {
-			return Optional.of(launchTask(launchRequest));
+			log.debug(() -> "TaskLauncher - LaunchRequest = " + request);
+			LaunchResponse response = launchTask(request);
+			log.debug(() -> "TaskLauncher - LaunchResponse = " + response);
+		} else {
+			log.warn(() -> "Platform is at capacity. Did not submit task launch request for task " + request.getTaskName());
+			throw new SystemAtMaxCapacityException();
 		}
-		log.warn(String.format("Platform is at capacity. Did not submit task launch request for task %s.",
-				launchRequest.getTaskName()));
-		return Optional.empty();
 	}
 
 	public boolean platformIsAcceptingNewTasks() {
@@ -96,10 +92,11 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<La
 
 		availableForNewTasks = runningExecutionCount < maximumTaskExecutions;
 		if (!availableForNewTasks) {
-			log.warn(String.format(
+			int finalMaximumTaskExecutions = maximumTaskExecutions;
+			log.warn(() -> String.format(
 					"The data Flow task platform %s has reached its concurrent task execution limit: (%d)",
 					platformName,
-					maximumTaskExecutions));
+				finalMaximumTaskExecutions));
 		}
 
 		return availableForNewTasks;
@@ -118,18 +115,17 @@ public class TaskLauncherFunction implements Function<LaunchRequest, Optional<La
 							request.getDeploymentProperties().get(TASK_PLATFORM_NAME),
 							platformName));
 		}
-		log.info(String.format("Launching Task %s on platform %s", request.getTaskName(), platformName));
+		log.info(() -> String.format("Launching Task %s on platform %s", request.getTaskName(), platformName));
 		LaunchResponseResource response = taskOperations.launch(request.getTaskName(),
 				enrichDeploymentProperties(request.getDeploymentProperties()),
 				request.getCommandlineArguments());
-		log.info(String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getExecutionId()));
-		return new LaunchResponse(response.getExecutionId(), response.getSchemaTarget());
+		log.info(() -> String.format("Launched Task %s - task ID is %d", request.getTaskName(), response.getExecutionId()));
+		return new LaunchResponse(response.getExecutionId());
 	}
 
 	private Map<String, String> enrichDeploymentProperties(Map<String, String> deploymentProperties) {
 		if (!deploymentProperties.containsKey(TASK_PLATFORM_NAME)) {
-			Map<String, String> enrichedProperties = new HashMap<>();
-			enrichedProperties.putAll(deploymentProperties);
+			Map<String, String> enrichedProperties = new HashMap<>(deploymentProperties);
 			enrichedProperties.put(TASK_PLATFORM_NAME, platformName);
 			return enrichedProperties;
 		}

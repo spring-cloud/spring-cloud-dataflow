@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @TestPropertySource(properties = {
 		"maven.remote-repositories.repo1.url=https://repo.spring.io/snapshot"
 })
-public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
+class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 
 	private final Logger logger = LoggerFactory.getLogger(ReleaseAnalyzerTests.class);
 
@@ -54,7 +54,7 @@ public class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 	ReleaseAnalyzer releaseAnalyzer;
 
 	@Test
-	public void releaseAnalyzerAndAdditiveUpgradeTest() throws InterruptedException {
+	void releaseAnalyzerAndAdditiveUpgradeTest() throws InterruptedException {
 		// NOTE must be a release that exists in a maven repo....
 		String releaseName = "logreleaseAnalyzer";
 		String packageName = "ticktock";

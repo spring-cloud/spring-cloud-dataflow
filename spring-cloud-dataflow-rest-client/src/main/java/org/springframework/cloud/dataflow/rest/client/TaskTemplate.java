@@ -36,7 +36,6 @@ import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResourc
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionsInfoResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
@@ -67,11 +66,7 @@ public class TaskTemplate implements TaskOperations {
 	private static final String EXECUTIONS_CURRENT_RELATION_VERSION = "1.7.0";
 
 	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
-
 	private static final String VALIDATION_THIN_TASK_VERSION = "2.11.3";
-
-	private static final String VALIDATION_TASK_LAUNCH_VERSION = "2.11.0";
-
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
@@ -125,60 +120,56 @@ public class TaskTemplate implements TaskOperations {
 		Assert.notNull(resources, "URI CollectionModel must not be be null");
 		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		Assert.notNull(dataFlowServerVersion, "dataFlowVersion must not be null");
+		Assert.isTrue(resources.getLink("about").isPresent(), "Expected about relation");
 		Stream.of(
-				"about",
-				DEFINITIONS_RELATION,
-				DEFINITION_RELATION,
-				EXECUTIONS_RELATION,
-				EXECUTION_RELATION,
-				EXECUTION_RELATION_BY_NAME,
-				EXECUTIONS_INFO_RELATION,
-				PLATFORM_LIST_RELATION,
-				RETRIEVE_LOG
-			).forEach(relation -> {
-				Assert.isTrue(resources.getLink(relation).isPresent(), () -> relation + " relation is required");
-			});
-
-		this.restTemplate = restTemplate;
+			"about",
+			DEFINITIONS_RELATION,
+			DEFINITION_RELATION,
+			EXECUTIONS_RELATION,
+			EXECUTION_RELATION,
+			EXECUTION_RELATION_BY_NAME,
+			EXECUTIONS_INFO_RELATION,
+			PLATFORM_LIST_RELATION,
+			RETRIEVE_LOG,
+			VALIDATION_REL
+		).forEach(relation -> {
+			Assert.isTrue(resources.getLink(relation).isPresent(), () -> relation + " relation is required");
+		});
 		this.dataFlowServerVersion = dataFlowServerVersion;
+		this.restTemplate = restTemplate;
 
 		String version = VersionUtils.getThreePartVersion(dataFlowServerVersion);
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_RELATION_VERSION)) {
-			Assert.isTrue(resources.getLink(VALIDATION_REL).isPresent(), ()->VALIDATION_REL + " relation is required");
-			this.validationLink = resources.getLink(VALIDATION_REL).get();
-		} else {
-			this.validationLink = null;
+			Assert.notNull(resources.getLink(VALIDATION_REL), ()-> VALIDATION_REL + " relation is required");
 		}
-
-		// TODO early 2.11.3-SNAPSHOT version didn't have this. Remove && resources.getLink(THIN_EXECUTIONS_RELATION).isPresent() when releasing 2.11.3
-		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_THIN_TASK_VERSION) && resources.getLink(THIN_EXECUTIONS_RELATION).isPresent()) {
-			Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), () -> THIN_EXECUTIONS_RELATION + " relation is required");
-			this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
-		} else {
-			this.thinExecutionsLink = null;
-		}
-
-		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_TASK_LAUNCH_VERSION)) {
-			Assert.isTrue(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent(), () -> EXECUTION_LAUNCH_RELATION + " relation is required");
-			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
-		} else {
-			this.executionLaunchLink = null;
-		}
-
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, EXECUTIONS_CURRENT_RELATION_VERSION)) {
 			Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), ()-> EXECUTIONS_CURRENT_RELATION + " relation is required");
 			this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		} else {
 			this.executionsCurrentLink = null;
 		}
+
 		this.aboutLink = resources.getLink("about").get();
 
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
+		if(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent()) {
+			this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
+		} else {
+			this.thinExecutionsLink = null;
+		}
+		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
+			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
+		} else {
+			this.executionLaunchLink = null;
+		}
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
-		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
+		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
+			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
+		}
+		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
 	}
@@ -234,7 +225,6 @@ public class TaskTemplate implements TaskOperations {
 			if(id != null) {
 				LaunchResponseResource response = new LaunchResponseResource();
 				response.setExecutionId(id);
-				response.setSchemaTarget(SchemaVersionTarget.defaultTarget().getName());
 				return response;
 			} else {
 				throw new RuntimeException("Expected id");
@@ -243,21 +233,15 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void stop(String ids, String schemaTarget) {
+	public void stop(String ids) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
 	}
 
 	@Override
-	public void stop(String ids, String schemaTarget, String platform) {
+	public void stop(String ids, String platform) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("platform", platform);
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
 		restTemplate.postForLocation(executionLink.expand(ids).getHref(), values);
 	}
 
@@ -298,12 +282,9 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public TaskExecutionResource taskExecutionStatus(long id, String schemaTarget) {
+	public TaskExecutionResource taskExecutionStatus(long id) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 		values.add("id", id);
-		if (StringUtils.hasText(schemaTarget)) {
-			values.add("schemaTarget", schemaTarget);
-		}
 		String url = executionLink.expand(values).getHref();
 		return restTemplate.getForObject(url, TaskExecutionResource.class);
 	}
@@ -331,12 +312,12 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public void cleanup(long id, String schemaTarget) {
-		cleanup(id, schemaTarget, false);
+	public void cleanup(long id) {
+		cleanup(id, false);
 	}
 
 	@Override
-	public void cleanup(long id, String schemaTarget, boolean removeData) {
+	public void cleanup(long id,  boolean removeData) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
 
 		String uriTemplate = executionLink.expand(id).getHref();
@@ -345,10 +326,6 @@ public class TaskTemplate implements TaskOperations {
 			uriTemplate = uriTemplate + "?action=CLEANUP,REMOVE_DATA";
 		}
 
-		if (StringUtils.hasText(schemaTarget)) {
-			String schemaVal =  (removeData) ?  "&schemaTarget=" + schemaTarget : "?schemaTarget=" + schemaTarget;
-			uriTemplate = uriTemplate + schemaVal;
-		}
 		restTemplate.delete(uriTemplate);
 	}
 

@@ -24,15 +24,14 @@ import org.springframework.hateoas.mediatype.vnderrors.VndErrors.VndError;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
-
 /**
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class DataflowClientExceptionTests {
+class DataflowClientExceptionTests {
 
 	@Test
-	public void testCreationOfDataflowClientExceptionWithNullError() {
+	void creationOfDataflowClientExceptionWithNullError() {
 
 		try {
 			new DataFlowClientException(null);
@@ -46,14 +45,14 @@ public class DataflowClientExceptionTests {
 	}
 
 	@Test
-	public void testCreationOfDataflowClientExceptionWithSingleError() {
+	void creationOfDataflowClientExceptionWithSingleError() {
 		final VndErrors errors = new VndErrors("foo", "bar message", Link.of("somewhere"));
 		final DataFlowClientException dataFlowClientException = new DataFlowClientException(errors);
 		assertThat(dataFlowClientException.getMessage()).isEqualTo("bar message");
 	}
 
 	@Test
-	public void testCreationOfDataflowClientExceptionWithMultipleErrors() {
+	void creationOfDataflowClientExceptionWithMultipleErrors() {
 		final VndError vndError1 = new VndError("foo logref", "foo message", Link.of("foo link"));
 		final VndError vndError2 = new VndError("bar logref", "bar message", Link.of("bar link"));
 

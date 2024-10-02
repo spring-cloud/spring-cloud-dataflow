@@ -152,10 +152,15 @@ public class ManifestUtils {
 		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 		dumperOptions.setPrettyFlow(true);
 		dumperOptions.setSplitLines(false);
-		return new Yaml(new SafeConstructor(new LoaderOptions()), new ValueTypeRepresenter(), dumperOptions);
+		return new Yaml(new ValueTypeRepresenter(dumperOptions), dumperOptions);
 	}
 
 	private static class ValueTypeRepresenter extends Representer {
+
+		ValueTypeRepresenter(DumperOptions options) {
+			super(options);
+		}
+
 		@Override
 		protected Node representScalar(Tag tag, String value) {
 			if (tag.equals(Tag.INT) || tag.equals(Tag.FLOAT) || tag.equals(Tag.BOOL)

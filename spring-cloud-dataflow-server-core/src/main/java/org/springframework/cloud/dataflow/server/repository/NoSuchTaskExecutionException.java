@@ -36,8 +36,8 @@ public class NoSuchTaskExecutionException extends RuntimeException {
 	 *
 	 * @param id the id of the {@link TaskExecution} that could not be found
 	 */
-	public NoSuchTaskExecutionException(long id, String schemaTarget) {
-		super("Could not find TaskExecution with id " + id + " for schema target " + schemaTarget);
+	public NoSuchTaskExecutionException(long id) {
+		super("Could not find TaskExecution with id " + id);
 	}
 	public NoSuchTaskExecutionException(String externalExecutionId, String platform) {
 		super("Could not find TaskExecution with id " + externalExecutionId + " for platform " + platform);
@@ -48,7 +48,7 @@ public class NoSuchTaskExecutionException extends RuntimeException {
 	 *
 	 * @param ids the ids of the {@link TaskExecution} that could not be found
 	 */
-	public NoSuchTaskExecutionException(Set<Long> ids, String schemaTarget) {
-		super("Could not find TaskExecutions for schema target " + schemaTarget + " with the following ids: " + StringUtils.collectionToDelimitedString(ids, ", "));
+	public NoSuchTaskExecutionException(Set<Long> ids) {
+		super("Could not find TaskExecutions with the following ids: " + StringUtils.collectionToDelimitedString(ids, ", "));
 	}
 }

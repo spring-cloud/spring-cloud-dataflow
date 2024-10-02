@@ -31,7 +31,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWit
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,10 +41,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
-public class PackageMetadataDocumentation extends BaseDocumentation {
+class PackageMetadataDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllPackageMetadata() throws Exception {
+	void getAllPackageMetadata() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -101,7 +101,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataDetails() throws Exception {
+	void getPackageMetadataDetails() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -145,7 +145,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataSearchFindByName() throws Exception {
+	void getPackageMetadataSearchFindByName() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -157,7 +157,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 				get("/api/packageMetadata/search/findByName?name=log"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(parameterWithName("name").description("The name of the Package")),
+						queryParameters(parameterWithName("name").description("The name of the Package")),
 						responseFields(
 								fieldWithPath("_embedded.packageMetadata[].apiVersion")
 										.description("The Package Index spec version this file is based on"),
@@ -189,7 +189,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataSearchFindByNameContainingIgnoreCase() throws Exception {
+	void getPackageMetadataSearchFindByNameContainingIgnoreCase() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());
@@ -201,7 +201,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 				get("/api/packageMetadata/search/findByNameContainingIgnoreCase?name=LO"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(parameterWithName("name").description("The name of the Package")),
+						queryParameters(parameterWithName("name").description("The name of the Package")),
 						responseFields(
 								fieldWithPath("_embedded.packageMetadata[].apiVersion")
 										.description("The Package Index spec version this file is based on"),
@@ -241,7 +241,7 @@ public class PackageMetadataDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getPackageMetadataSummary() throws Exception {
+	void getPackageMetadataSummary() throws Exception {
 		Resource resource = new ClassPathResource("/repositories/sources/test/log/log-1.0.0");
 		PackageReader packageReader = new DefaultPackageReader();
 		Package pkg = packageReader.read(resource.getFile());

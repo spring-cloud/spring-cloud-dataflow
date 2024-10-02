@@ -36,7 +36,7 @@ public class DockerCompose2Tests {
 	@Test
 	@DockerCompose(id = DockerCompose2Tests.CLUSTER3, locations = {"src/test/resources/docker-compose-3.yml"})
 	@DockerCompose(id = DockerCompose2Tests.CLUSTER4, locations = {"src/test/resources/docker-compose-4.yml"}, start = false)
-	public void testCompose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
+	void compose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
 
 		dockerComposeInfo.id(CLUSTER2).start();
 		Thread.sleep(1000);

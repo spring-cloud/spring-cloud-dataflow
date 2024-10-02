@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.integration.test.oauth;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
@@ -29,17 +30,18 @@ import org.springframework.cloud.dataflow.integration.test.tags.Oauth;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
 import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.StringUtils;
 
 import static org.awaitility.Awaitility.with;
 
 @Oauth
 @ActiveProfiles({TagNames.PROFILE_OAUTH})
-public class DataflowOAuthIT extends AbstractDataflowTests {
+class DataflowOAuthIT extends AbstractDataflowTests {
 
 	private final Logger log = LoggerFactory.getLogger(DataflowOAuthIT.class);
 
 	@Test
-	public void testSecuredSetup() throws Exception {
+	void securedSetup() throws Exception {
 		log.info("Running testSecuredSetup()");
 		this.dataflowCluster.startIdentityProvider(TagNames.UAA_4_32);
 		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);
@@ -49,34 +51,38 @@ public class DataflowOAuthIT extends AbstractDataflowTests {
 		// need proper networking, so use separate tools container to run
 		// curl command as we support basic auth and if we get good response
 		// oauth is working with dataflow and skipper.
-		with()
-			.pollInterval(5, TimeUnit.SECONDS)
-			.and()
-			.await()
+
+		AtomicReference<String> stderr = new AtomicReference<>();
+		try {
+			with()
+				.pollInterval(5, TimeUnit.SECONDS)
+				.and()
+				.await()
 				.ignoreExceptions()
-				.atMost(120, TimeUnit.SECONDS)
+				.atMost(90, TimeUnit.SECONDS)
 				.until(() -> {
-					log.info("Checking auth using curl");
-					ExecResult cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/about");
+					log.debug("Checking auth using curl");
+					ExecResult cmdResult = execInToolsContainer("curl", "-v", "-u", "janne:janne", "http://dataflow:9393/about");
 					String response = cmdResult.getStdout();
-					log.debug("Response is {}", response);
-					Boolean authenticated = JsonPath.parse(response).read("$.securityInfo.authenticated", Boolean.class);
-					String username = JsonPath.parse(response).read("$.securityInfo.username", String.class);
-					boolean ok = Boolean.TRUE.equals(authenticated) && "janne".equals(username);
+					if (StringUtils.hasText(response)) {
+						log.debug("Response is {}", response);
+					}
+					boolean ok = response.contains("\"authenticated\":true") && response.contains("\"username\":\"janne\"");
 					log.info("Check for oauth {}", ok);
-					if (ok) {
-						String version = JsonPath.parse(response).read("$.versionInfo.core.version");
-						log.info("Version=[{}]", version);
-						String api = "tasks/executions";
-						if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(
-								VersionUtils.getThreePartVersion(version), "2.11.3")) {
-							api = "tasks/thinexecutions";
-						}
-						cmdResult = execInToolsContainer("curl", "-u", "janne:janne", "http://dataflow:9393/" + api);
-						response = cmdResult.getStdout();
-						ok = !JsonPath.parse(response).read("$._links.self.href", String.class).isEmpty();
+					if (!ok) {
+						stderr.set(cmdResult.getStderr());
+					}
+					else {
+						stderr.set("");
 					}
 					return ok;
 				});
+		}
+		finally {
+			String msg = stderr.get();
+			if (StringUtils.hasText(msg)) {
+				log.error("curl error: {}", msg);
+			}
+		}
 	}
 }

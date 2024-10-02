@@ -34,12 +34,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
  * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
-// Avoids calling 'run' on the ShellCommandLineRunner
 @ComponentScan(excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = CommandLineRunner.class))
-public class ShellApplicationTests {
+class ShellApplicationTests {
 
 	@Test
-	public void contextLoads() {
+	void contextLoads() {
 
 	}
 

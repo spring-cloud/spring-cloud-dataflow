@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,14 +36,11 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 /**
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class SchedulerTemplateTests {
+class SchedulerTemplateTests {
 	private static final String SCHEDULES_RELATION = org.springframework.cloud.dataflow.rest.client.SchedulerTemplate.SCHEDULES_RELATION;
 	private static final String SCHEDULES_RELATION_INSTANCE = SCHEDULES_RELATION + "/instances";
 	private static final String DEFAULT_SCHEDULE_NAME = "testSchedule";
@@ -51,7 +51,7 @@ public class SchedulerTemplateTests {
 	private SchedulerTemplate template;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		rootResource = mock(RootResource.class);
 		when(rootResource.getLink(SCHEDULES_RELATION)).thenReturn(Optional.of(Link.of(SCHEDULES_RELATION)));
 		when(rootResource.getLink(SCHEDULES_RELATION_INSTANCE)).thenReturn(Optional.of(Link.of(SCHEDULES_RELATION_INSTANCE)));
@@ -60,12 +60,12 @@ public class SchedulerTemplateTests {
 	}
 
 	@Test
-	public void scheduleTest() {
+	void scheduleTest() {
 		verifyControllerResult(null);
 	}
 
 	@Test
-	public void multiPlatformScheduleTest() {
+	void multiPlatformScheduleTest() {
 		verifyControllerResult("default");
 		verifyControllerResult("foo");
 	}
@@ -87,75 +87,75 @@ public class SchedulerTemplateTests {
 	}
 
 	@Test
-	public void unScheduleTest() {
+	void unScheduleTest() {
 		template.unschedule(DEFAULT_SCHEDULE_NAME);
 		Mockito.verify(restTemplate).delete(SCHEDULES_RELATION + "/testSchedule");
 	}
 
 	@Test
-	public void unSchedulePlatformTest() {
+	void unSchedulePlatformTest() {
 		template.unschedule(DEFAULT_SCHEDULE_NAME, "foo");
 		Mockito.verify(restTemplate).delete(SCHEDULES_RELATION + "/testSchedule?platform=foo");
 	}
 
 	@Test
-	public void unScheduleNullTest() {
+	void unScheduleNullTest() {
 		template.unschedule(DEFAULT_SCHEDULE_NAME, null);
 		Mockito.verify(restTemplate).delete(SCHEDULES_RELATION + "/testSchedule");
 	}
 
 	@Test
-	public void listTest() {
+	void listTest() {
 		template.list();
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION, ScheduleInfoResource.Page.class);
 	}
 
 	@Test
-	public void listByPlatformNullTest() {
+	void listByPlatformNullTest() {
 		template.listByPlatform(null);
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION, ScheduleInfoResource.Page.class);
 	}
 
 	@Test
-	public void listByPlatformTest() {
+	void listByPlatformTest() {
 		template.listByPlatform("foo");
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "?platform=foo", ScheduleInfoResource.Page.class);
 	}
 
 	@Test
-	public void listTaskDefNameTest() {
+	void listTaskDefNameTest() {
 		template.list(DEFAULT_DEFINITION_NAME);
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION_INSTANCE, ScheduleInfoResource.Page.class);
 	}
 
 	@Test
-	public void listTaskDefNameNullTest() {
+	void listTaskDefNameNullTest() {
 		template.list(DEFAULT_DEFINITION_NAME, null);
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION_INSTANCE, ScheduleInfoResource.Page.class);
 	}
 
 	@Test
-	public void listTaskDefNamePlatformTest() {
+	void listTaskDefNamePlatformTest() {
 		template.list(DEFAULT_DEFINITION_NAME, "foo");
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION_INSTANCE + "?platform=foo", ScheduleInfoResource.Page.class);
 	}
 
 	@Test
-	public void getScheduleTest() {
+	void getScheduleTest() {
 		template.getSchedule(DEFAULT_SCHEDULE_NAME);
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "/" + DEFAULT_SCHEDULE_NAME,
 				ScheduleInfoResource.class);
 	}
 
 	@Test
-	public void getScheduleNullTest() {
+	void getScheduleNullTest() {
 		template.getSchedule(DEFAULT_SCHEDULE_NAME, null);
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "/" + DEFAULT_SCHEDULE_NAME,
 				ScheduleInfoResource.class);
 	}
 
 	@Test
-	public void getSchedulePlatformTest() {
+	void getSchedulePlatformTest() {
 		template.getSchedule(DEFAULT_SCHEDULE_NAME, "foo");
 		Mockito.verify(restTemplate).getForObject(SCHEDULES_RELATION + "/" +
 						DEFAULT_SCHEDULE_NAME + "?platform=foo", ScheduleInfoResource.class);

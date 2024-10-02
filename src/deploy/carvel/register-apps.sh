@@ -27,7 +27,7 @@ if [ "$BROKER" = "" ]; then
 fi
 if [ "$1" = "" ]; then
     echo "Arguments: [stream-applications-version] [type]"
-    echo "  stream-applications-version: Optional. Use 2021.1.2 for latest release."
+    echo "  stream-applications-version: Optional. Use 2024.0.0 for latest release."
     echo "  type: docker or maven"
 fi
 if [ "$TYPE" = "" ]; then

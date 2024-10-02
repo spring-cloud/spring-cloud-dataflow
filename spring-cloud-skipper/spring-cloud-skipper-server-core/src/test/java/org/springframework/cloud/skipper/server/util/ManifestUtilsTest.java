@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-public class ManifestUtilsTest {
+class ManifestUtilsTest {
 
 	@Test
-	public void testCreateManifest() throws IOException {
+	void createManifest() throws IOException {
 		Resource resource = new ClassPathResource("/repositories/sources/test/ticktock/ticktock-1.0.1");
 		PackageReader packageReader = new DefaultPackageReader();
 

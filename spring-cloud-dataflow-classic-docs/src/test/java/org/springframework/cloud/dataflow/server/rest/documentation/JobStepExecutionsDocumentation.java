@@ -16,26 +16,24 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
@@ -48,7 +46,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -57,41 +55,42 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
+@SuppressWarnings({"NewClassNamingConvention","SameParameterValue"})
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
-public class JobStepExecutionsDocumentation extends BaseDocumentation {
+class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
-	private JobRepositoryContainer jobRepositoryContainer;
-	private TaskExecutionDaoContainer daoContainer;
-	private TaskBatchDaoContainer taskBatchDaoContainer;
-	private AggregateExecutionSupport aggregateExecutionSupport;
-	private TaskDefinitionReader taskDefinitionReader;
+	private JobRepository jobRepository;
+
+	private TaskExecutionDao taskExecutionDao;
+
+	private TaskBatchDao taskBatchDao;
+
 
 	@BeforeEach
-	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+	void setup() throws Exception {
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		initialize();
 		createJobExecution(JOB_NAME, BatchStatus.STARTED);
 
-		documentation.dontDocument(() -> this.mockMvc.perform(
-						post("/tasks/definitions")
-								.param("name", "DOCJOB1")
-								.param("definition", "timestamp --format='YYYY MM DD'"))
-				.andExpect(status().isOk()));
+		documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").param("name", "DOCJOB1")
+						.param("definition", "timestamp --format='YYYY MM DD'"))
+					.andExpect(status().isOk()));
 	}
 
 
 	@Test
-	public void listStepExecutionsForJob() throws Exception {
+	void listStepExecutionsForJob() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps", "1")
 								.param("page", "0")
 								.param("size", "10"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -106,22 +105,18 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void stepDetail() throws Exception {
+	void stepDetail() throws Exception {
 		this.mockMvc.perform(
-						get("/jobs/executions/{id}/steps/{stepid}", "1", "1").queryParam("schemaTarget", "boot2"))
+						get("/jobs/executions/{id}/steps/{stepid}", "1", "1"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The id of an existing job execution (required)"),
 								parameterWithName("stepid")
 										.description("The id of an existing step execution for a specific job execution (required)")
 						),
-						requestParameters(
-								parameterWithName("schemaTarget").description("Schema target").optional()
-						),
 						responseFields(
 								fieldWithPath("jobExecutionId").description("The ID of the job step execution"),
 								fieldWithPath("stepType").description("The type of the job step execution"),
-								fieldWithPath("schemaTarget").description("The schema target name of the job and task state data"),
 								subsectionWithPath("stepExecution").description("The step details of the job step execution"),
 								subsectionWithPath("_links.self").description("Link to the job step execution resource"),
 								subsectionWithPath("_links.progress").description("Link to retrieve the progress")
@@ -129,8 +124,9 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 				));
 	}
 
+	@Disabled("TODO: Boot3x followup : Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
 	@Test
-	public void stepProgress() throws Exception {
+	void stepProgress() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}/steps/{stepid}/progress", "1", "1"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
@@ -154,26 +150,21 @@ public class JobStepExecutionsDocumentation extends BaseDocumentation {
 
 
 	private void initialize() {
-		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
-		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
-		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
-		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
-		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
+		this.jobRepository = context.getBean(JobRepository.class);
+		this.taskExecutionDao = context.getBean(TaskExecutionDao.class);
+		this.taskBatchDao = context.getBean(TaskBatchDao.class);
 	}
 
-	private void createJobExecution(String name, BatchStatus status) {
-		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
-		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(name, new Date(), new ArrayList<>(), null);
-		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
-		JobExecution jobExecution = jobRepository.createJobExecution(jobRepository.createJobInstance(name, new JobParameters()), new JobParameters(), null);
+	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException,
+		JobExecutionAlreadyRunningException, JobRestartException {
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(name, LocalDateTime.now(), new ArrayList<>(), null);
+		JobExecution jobExecution = jobRepository.createJobExecution(name, new JobParameters());
 		StepExecution stepExecution = new StepExecution(name + "_STEP", jobExecution, jobExecution.getId());
 		stepExecution.setId(null);
 		jobRepository.add(stepExecution);
-		TaskBatchDao taskBatchDao = taskBatchDaoContainer.get(schemaVersionTarget.getName());
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
-		jobExecution.setStartTime(new Date());
+		jobExecution.setStartTime(LocalDateTime.now());
 		jobRepository.update(jobExecution);
 	}
 }

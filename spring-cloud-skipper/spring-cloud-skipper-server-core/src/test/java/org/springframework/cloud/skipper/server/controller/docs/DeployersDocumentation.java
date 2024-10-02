@@ -31,10 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @ActiveProfiles({"repository", "local"})
-public class DeployersDocumentation extends BaseDocumentation {
+class DeployersDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllDeployers() throws Exception {
+	void getAllDeployers() throws Exception {
 		this.mockMvc.perform(
 				get("/api/deployers")
 						.param("page", "0")

@@ -16,6 +16,10 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
+
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -23,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.configuration.metadata.BootApplicationConfigurationMetadataResolver;
 import org.springframework.cloud.dataflow.configuration.metadata.container.ContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.core.ApplicationType;
@@ -32,15 +35,9 @@ import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.deployer.spi.core.AppDefinition;
-import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan
@@ -48,22 +45,22 @@ import static org.mockito.Mockito.mock;
  * @author Corneil du Plessis
  */
 @ExtendWith(SpringExtension.class)
-public class AppDeploymentRequestCreatorTests {
+class AppDeploymentRequestCreatorTests {
+
+
 
 	private AppDeploymentRequestCreator appDeploymentRequestCreator;
-	@Autowired
-	protected PropertyResolver propertyResolver;
+
 	@BeforeEach
-	public void setupMock() {
+	void setupMock() {
 		this.appDeploymentRequestCreator = new AppDeploymentRequestCreator(mock(AppRegistryService.class),
 				mock(CommonApplicationProperties.class),
 				new BootApplicationConfigurationMetadataResolver(mock(ContainerImageMetadataResolver.class)),
-				new DefaultStreamDefinitionService(),
-				propertyResolver);
+				new DefaultStreamDefinitionService());
 	}
 
 	@Test
-	public void testRequalifyShortVisibleProperty() {
+	void requalifyShortVisibleProperty() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("timezone", "GMT+2").build("streamname");
@@ -77,7 +74,7 @@ public class AppDeploymentRequestCreatorTests {
 	}
 
 	@Test
-	public void testSameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
+	void sameNamePropertiesOKAsLongAsNotUsedAsShorthand() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("time.format", "hh")
@@ -92,21 +89,22 @@ public class AppDeploymentRequestCreatorTests {
 	}
 
 	@Test
-	public void testSameNamePropertiesKOWhenShorthand() {
-		Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-			StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
-					.setApplicationType(ApplicationType.app)
-					.setProperty("format", "hh").build("streamname");
+	void sameNamePropertiesKOWhenShorthand() {
+		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
+				.setApplicationType(ApplicationType.app)
+				.setProperty("format", "hh").build("streamname");
 
-			Resource app = new ClassPathResource("/apps/included-source");
+		Resource app = new ClassPathResource("/apps/included-source");
 
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			this.appDeploymentRequestCreator.mergeAndExpandAppProperties(appDefinition, app, new HashMap<>());
-		});
-		assertTrue(exception.getMessage().contains("time.format"));
+		}).withMessageContaining("Ambiguous short form property 'format'")
+				.withMessageContaining("date.format")
+				.withMessageContaining("time.format");
 	}
 
 	@Test
-	public void testShorthandsAcceptRelaxedVariations() {
+	void shorthandsAcceptRelaxedVariations() {
 		StreamAppDefinition appDefinition = new StreamAppDefinition.Builder().setRegisteredAppName("my-app")
 				.setApplicationType(ApplicationType.app)
 				.setProperty("someLongProperty", "yy") // Use camelCase here

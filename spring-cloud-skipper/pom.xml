@@ -3,7 +3,7 @@
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>spring-cloud-skipper-parent</artifactId>
-	<version>2.11.6-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<name>Spring Cloud Skipper</name>
 	<description>Spring Cloud Skipper</description>
 	<packaging>pom</packaging>
@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-build</artifactId>
-		<version>2.11.6-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../spring-cloud-dataflow-build</relativePath>
 	</parent>
 
@@ -22,28 +22,29 @@
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 
-		<spring-statemachine.version>2.5.1</spring-statemachine.version>
-		<spring-cloud-deployer.version>2.9.6-SNAPSHOT</spring-cloud-deployer.version>
+		<spring-statemachine.version>4.0.0</spring-statemachine.version>
+		<spring-cloud-deployer.version>3.0.0-SNAPSHOT</spring-cloud-deployer.version>
 
-		<zeroturnaround.version>1.15</zeroturnaround.version>
-		<spring-restdocs.version>2.0.7.RELEASE</spring-restdocs.version>
-		<java-semver.version>0.9.0</java-semver.version>
+		<zeroturnaround.version>1.17</zeroturnaround.version>
+		<spring-restdocs.version>3.0.1</spring-restdocs.version>
+		<java-semver.version>0.10.2</java-semver.version>
 
-		<equalverifier.version>3.14.1</equalverifier.version>
-		<hibernate.jpa.version>1.0.0.Final</hibernate.jpa.version>
+		<equalverifier.version>3.15.8</equalverifier.version>
 
-		<jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
-		<sonar-maven-plugin.version>3.0.2</sonar-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+		<sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
 		<jmockit.version>1.24</jmockit.version>
+
+		<commons-compress.version>1.26.1</commons-compress.version>
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
 		<jruby.version>9.2.11.1</jruby.version>
-		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
+		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
 		<ant-contrib.version>1.0b3</ant-contrib.version>
 		<ant-nodeps.version>1.8.1</ant-nodeps.version>
 		<antelopetasks.version>3.2.10</antelopetasks.version>
@@ -84,12 +85,12 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-common-security-config-web</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-starter-common-security-config-web</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.security.oauth.boot</groupId>
@@ -99,47 +100,47 @@
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-autoconfigure</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-client</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-server-core</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-server</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-shell</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-shell-commands</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-platform-cloudfoundry</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-skipper-platform-kubernetes</artifactId>
-				<version>${project.version}</version>
+				<version>${dataflow.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
@@ -192,11 +193,6 @@
 				<version>${spring-restdocs.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.hibernate.javax.persistence</groupId>
-				<artifactId>hibernate-jpa-2.1-api</artifactId>
-				<version>${hibernate.jpa.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>nl.jqno.equalsverifier</groupId>
 				<artifactId>equalsverifier</artifactId>
 				<version>${equalverifier.version}</version>
@@ -205,6 +201,11 @@
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
 				<version>${jmockit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-compress</artifactId>
+				<version>${commons-compress.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -215,6 +216,9 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<version>${spring-boot.version}</version>
+					<configuration>
+						<loaderImplementation>CLASSIC</loaderImplementation>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.sonarsource.scanner.maven</groupId>
@@ -250,6 +254,11 @@
 						</execution>
 					</executions>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>3.1.2</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -259,6 +268,7 @@
 				<configuration>
 					<source>${java.version}</source>
 					<target>${java.version}</target>
+					<parameters>true</parameters>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -35,11 +35,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Janne Valkealahti
  * @author Corneil du Plessis
  */
-public class StateMachinePersistConfigurationTests {
+class StateMachinePersistConfigurationTests {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testSkipFunction() {
+	void skipFunction() {
 		SkipUnwantedVariablesFunction f = new SkipUnwantedVariablesFunction();
 
 		DefaultExtendedState extendedState = new DefaultExtendedState();
@@ -56,7 +56,8 @@ public class StateMachinePersistConfigurationTests {
 
 		// test that others gets filtered out
 		Map<Object, Object> map = f.apply(stateMachine);
-		assertThat(map).isNotNull();
-		assertThat(map).containsOnlyKeys(SkipperVariables.UPGRADE_CUTOFF_TIME, SkipperVariables.UPGRADE_STATUS);
+		assertThat(map)
+				.isNotNull()
+				.containsOnlyKeys(SkipperVariables.UPGRADE_CUTOFF_TIME, SkipperVariables.UPGRADE_STATUS);
 	}
 }

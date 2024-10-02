@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.Is.is;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DaemonHostIpResolver.LOCALHOST;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerType.DAEMON;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerType.REMOTE;
@@ -174,7 +174,7 @@ public class LocalBuilderTests {
 	@Test
 	public void return_localhost_as_ip_daemon() {
 		DockerMachine localMachine = new LocalBuilder(DAEMON, new HashMap<>()).build();
-		assertThat(localMachine.getIp(), is(LOCALHOST));
+		assertThat(localMachine.getIp()).isEqualTo(LOCALHOST);
 	}
 
 	@Test
@@ -185,7 +185,7 @@ public class LocalBuilderTests {
 		dockerVariables.put(DOCKER_CERT_PATH, "/path/to/certs");
 
 		DockerMachine localMachine = new LocalBuilder(REMOTE, dockerVariables).build();
-		assertThat(localMachine.getIp(), is("192.168.99.100"));
+		assertThat(localMachine.getIp()).isEqualTo("192.168.99.100");
 	}
 
 	@Test

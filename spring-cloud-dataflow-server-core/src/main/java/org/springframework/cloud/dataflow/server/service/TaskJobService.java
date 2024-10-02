@@ -32,9 +32,9 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.cloud.dataflow.rest.job.JobInstanceExecutions;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
 import org.springframework.cloud.dataflow.server.batch.JobExecutionWithStepCount;
 import org.springframework.cloud.dataflow.server.job.support.JobNotRestartableException;
+import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,12 +75,11 @@ public interface TaskJobService {
 	 * Retrieves a JobExecution from the JobRepository and matches it with a task id.
 	 *
 	 * @param id           the id of the {@link JobExecution}
-	 * @param schemaTarget the schema target of the task job execution.
 	 * @return the {@link TaskJobExecution}s associated with the id.
 	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not
 	 *                                     exist.
 	 */
-	TaskJobExecution getJobExecution(long id, String schemaTarget) throws NoSuchJobExecutionException;
+	TaskJobExecution getJobExecution(long id) throws NoSuchJobExecutionException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobInstanceExecutions} from the JobRepository with a
@@ -98,23 +97,38 @@ public interface TaskJobService {
 	 * associated {@link JobExecution}s.
 	 *
 	 * @param id           the id of the {@link JobInstance}
-	 * @param schemaTarget the schema target of the job instance.
 	 * @return the {@link JobInstanceExecutions} associated with the id.
 	 * @throws NoSuchJobInstanceException if job instance id does not exist.
 	 * @throws NoSuchJobException         if the job for the job instance does not exist.
 	 */
-	JobInstanceExecutions getJobInstance(long id, String schemaTarget) throws NoSuchJobInstanceException, NoSuchJobException;
+	JobInstanceExecutions getJobInstance(long id) throws NoSuchJobInstanceException, NoSuchJobException;
 
 	/**
-	 * Restarts a {@link JobExecution} IF the respective {@link JobExecution} is actually
+	 * Restarts a {@link JobExecution} if the respective {@link JobExecution} is actually
 	 * deemed restartable. Otherwise a {@link JobNotRestartableException} is being thrown.
+	 * The system will use {@link TaskConfigurationProperties#isUseJsonJobParameters()} to
+	 * determine the {@link org.springframework.batch.core.JobParameter} serializer.
 	 *
 	 * @param jobExecutionId The id of the JobExecution to restart.
-	 * @param schemaTarget   the schema target of the job execution.
 	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
 	 *                                     exist.
 	 */
-	void restartJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException;
+	void restartJobExecution(long jobExecutionId) throws NoSuchJobExecutionException;
+
+	/**
+	 * Restarts a {@link JobExecution} if the respective {@link JobExecution} is actually
+	 * deemed restartable. Otherwise, a {@link JobNotRestartableException} is being thrown.
+	 *
+	 * @param jobExecutionId The id of the JobExecution to restart.
+	 * @param useJsonJobParameters if set to true, dataflow will serialize job parameters to the command line using the
+	 *                                format provided by {@code JsonJobParametersConverter}.
+	 *                                If set to false dataflow will use {@code DefaultParametersConverter}.
+	 *                                If null dataflow  will use {@link TaskConfigurationProperties#isUseJsonJobParameters()}
+	 *                                to determine the {@link org.springframework.batch.core.JobParameter} serializer.
+	 * @throws NoSuchJobExecutionException if the JobExecution for the provided id does not
+	 *                                     exist.
+	 */
+	void restartJobExecution(long jobExecutionId, Boolean useJsonJobParameters) throws NoSuchJobExecutionException;
 
 	/**
 	 * Requests a {@link JobExecution} to stop.
@@ -125,14 +139,13 @@ public interface TaskJobService {
 	 * Furthermore, this method does not interfere with the associated {@link TaskExecution}.
 	 *
 	 * @param jobExecutionId The id of the {@link JobExecution} to stop.
-	 * @param schemaTarget   the schema target of the job execution.
 	 * @throws NoSuchJobExecutionException     thrown if no job execution exists for the
 	 *                                         jobExecutionId.
 	 * @throws JobExecutionNotRunningException thrown if a stop is requested on a job that is
 	 *                                         not running.
 	 * @see org.springframework.cloud.dataflow.server.batch.JobService#stop(Long)
 	 */
-	void stopJobExecution(long jobExecutionId, String schemaTarget) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
+	void stopJobExecution(long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount}s from the JobRepository
@@ -180,15 +193,12 @@ public interface TaskJobService {
 	 *
 	 * @param pageable      enumerates the data to be returned.
 	 * @param jobInstanceId the job instance id associated with the execution.
-	 * @param schemaTarget  the schema target of the job instance.
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(
 		Pageable pageable,
-		int jobInstanceId,
-		String schemaTarget
-	) throws NoSuchJobException;
+		int jobInstanceId) throws NoSuchJobException;
 
 	/**
 	 * Retrieves Pageable list of {@link JobExecutionWithStepCount} from the JobRepository
@@ -196,18 +206,14 @@ public interface TaskJobService {
 	 *
 	 * @param pageable        enumerates the data to be returned.
 	 * @param taskExecutionId the task execution id associated with the execution.
-	 * @param schemaTarget    the schema target of the task execution.
 	 * @return List containing {@link JobExecutionWithStepCount}s.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
 	Page<TaskJobExecution> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(
 		Pageable pageable,
-		int taskExecutionId,
-		String schemaTarget
+		int taskExecutionId
 	) throws NoSuchJobException;
 
-	Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionIds, String schemaTarget);
-
-	void populateComposeTaskRunnerStatus(Collection<AggregateTaskExecution> taskExecutions);
+	Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionIds);
 
 }

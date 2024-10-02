@@ -19,14 +19,15 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.Test;
-
+//@checkstyle:off
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
-public class DurationUtilsTests {
+//@checkstyle:on
+class DurationUtilsTests {
 
 	@Test
-	public void convertWhenIso8601ShouldReturnDuration() {
+	void convertWhenIso8601ShouldReturnDuration() {
 		assertThat(convert("PT20.345S")).isEqualTo(Duration.parse("PT20.345S"));
 		assertThat(convert("PT15M")).isEqualTo(Duration.parse("PT15M"));
 		assertThat(convert("+PT15M")).isEqualTo(Duration.parse("PT15M"));
@@ -38,7 +39,7 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleNanosShouldReturnDuration() {
+	void convertWhenSimpleNanosShouldReturnDuration() {
 		assertThat(convert("10ns")).isEqualTo(Duration.ofNanos(10));
 		assertThat(convert("10NS")).isEqualTo(Duration.ofNanos(10));
 		assertThat(convert("+10ns")).isEqualTo(Duration.ofNanos(10));
@@ -46,7 +47,7 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleMillisShouldReturnDuration() {
+	void convertWhenSimpleMillisShouldReturnDuration() {
 		assertThat(convert("10ms")).isEqualTo(Duration.ofMillis(10));
 		assertThat(convert("10MS")).isEqualTo(Duration.ofMillis(10));
 		assertThat(convert("+10ms")).isEqualTo(Duration.ofMillis(10));
@@ -54,7 +55,7 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleSecondsShouldReturnDuration() {
+	void convertWhenSimpleSecondsShouldReturnDuration() {
 		assertThat(convert("10s")).isEqualTo(Duration.ofSeconds(10));
 		assertThat(convert("10S")).isEqualTo(Duration.ofSeconds(10));
 		assertThat(convert("+10s")).isEqualTo(Duration.ofSeconds(10));
@@ -62,7 +63,7 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleMinutesShouldReturnDuration() {
+	void convertWhenSimpleMinutesShouldReturnDuration() {
 		assertThat(convert("10m")).isEqualTo(Duration.ofMinutes(10));
 		assertThat(convert("10M")).isEqualTo(Duration.ofMinutes(10));
 		assertThat(convert("+10m")).isEqualTo(Duration.ofMinutes(10));
@@ -70,7 +71,7 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleHoursShouldReturnDuration() {
+	void convertWhenSimpleHoursShouldReturnDuration() {
 		assertThat(convert("10h")).isEqualTo(Duration.ofHours(10));
 		assertThat(convert("10H")).isEqualTo(Duration.ofHours(10));
 		assertThat(convert("+10h")).isEqualTo(Duration.ofHours(10));
@@ -78,7 +79,7 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleDaysShouldReturnDuration() {
+	void convertWhenSimpleDaysShouldReturnDuration() {
 		assertThat(convert("10d")).isEqualTo(Duration.ofDays(10));
 		assertThat(convert("10D")).isEqualTo(Duration.ofDays(10));
 		assertThat(convert("+10d")).isEqualTo(Duration.ofDays(10));
@@ -86,28 +87,28 @@ public class DurationUtilsTests {
 	}
 
 	@Test
-	public void convertWhenSimpleWithoutSuffixShouldReturnDuration() {
+	void convertWhenSimpleWithoutSuffixShouldReturnDuration() {
 		assertThat(convert("10")).isEqualTo(Duration.ofMillis(10));
 		assertThat(convert("+10")).isEqualTo(Duration.ofMillis(10));
 		assertThat(convert("-10")).isEqualTo(Duration.ofMillis(-10));
 	}
 
 	@Test
-	public void convertWhenSimpleWithoutSuffixButWithAnnotationShouldReturnDuration() {
+	void convertWhenSimpleWithoutSuffixButWithAnnotationShouldReturnDuration() {
 		assertThat(convert("10", ChronoUnit.SECONDS)).isEqualTo(Duration.ofSeconds(10));
 		assertThat(convert("+10", ChronoUnit.SECONDS)).isEqualTo(Duration.ofSeconds(10));
 		assertThat(convert("-10", ChronoUnit.SECONDS)).isEqualTo(Duration.ofSeconds(-10));
 	}
 
 	@Test
-	public void convertWhenBadFormatShouldThrowException() {
-		assertThrows(IllegalArgumentException.class, () -> {
+	void convertWhenBadFormatShouldThrowException() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			convert("10foo");
 		});
 	}
 
 	@Test
-	public void convertWhenEmptyShouldReturnNull() {
+	void convertWhenEmptyShouldReturnNull() {
 		assertThat(convert("")).isNull();
 	}
 

@@ -31,24 +31,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Janne Valkealahti
  * @author Corneil du Plessis
  */
-public class PropertiesDiffTests {
+class PropertiesDiffTests {
 
 	@Test
-	public void testEmptyMaps() {
+	void emptyMaps() {
 		Map<String, String> left = new HashMap<>();
 		Map<String, String> right = new HashMap<>();
 		PropertiesDiff diff = PropertiesDiff.builder().left(left).right(right).build();
 
 		assertThat(diff.areEqual()).isTrue();
-		assertThat(diff.getAdded()).hasSize(0);
-		assertThat(diff.getRemoved()).hasSize(0);
-		assertThat(diff.getChanged()).hasSize(0);
-		assertThat(diff.getCommon()).hasSize(0);
-		assertThat(diff.getDeleted()).hasSize(0);
+		assertThat(diff.getAdded()).isEmpty();
+		assertThat(diff.getRemoved()).isEmpty();
+		assertThat(diff.getChanged()).isEmpty();
+		assertThat(diff.getCommon()).isEmpty();
+		assertThat(diff.getDeleted()).isEmpty();
 	}
 
 	@Test
-	public void testAddedRemovedChanging() {
+	void addedRemovedChanging() {
 		Map<String, String> left = new HashMap<>();
 		left.put("key1", "value1");
 		left.put("key2", "value21");
@@ -64,11 +64,11 @@ public class PropertiesDiffTests {
 		assertThat(diff.getRemoved()).hasSize(1);
 		assertThat(diff.getChanged()).hasSize(1);
 		assertThat(diff.getCommon()).hasSize(1);
-		assertThat(diff.getDeleted()).hasSize(0);
+		assertThat(diff.getDeleted()).isEmpty();
 	}
 
 	@Test
-	public void testRemovedByEffectivelyNull() {
+	void removedByEffectivelyNull() {
 		Map<String, String> left = new HashMap<>();
 		left.put("key1", "value1");
 		left.put("key2", "value2");
@@ -80,15 +80,15 @@ public class PropertiesDiffTests {
 		PropertiesDiff diff = PropertiesDiff.builder().left(left).right(right).build();
 
 		assertThat(diff.areEqual()).isFalse();
-		assertThat(diff.getAdded()).hasSize(0);
-		assertThat(diff.getRemoved()).hasSize(0);
-		assertThat(diff.getChanged()).hasSize(0);
+		assertThat(diff.getAdded()).isEmpty();
+		assertThat(diff.getRemoved()).isEmpty();
+		assertThat(diff.getChanged()).isEmpty();
 		assertThat(diff.getCommon()).hasSize(1);
 		assertThat(diff.getDeleted()).hasSize(2);
 	}
 
 	@Test
-	public void testChangedValues() {
+	void changedValues() {
 		Map<String, String> left = new HashMap<>();
 		left.put("key1", "value1");
 		Map<String, String> right = new HashMap<>();

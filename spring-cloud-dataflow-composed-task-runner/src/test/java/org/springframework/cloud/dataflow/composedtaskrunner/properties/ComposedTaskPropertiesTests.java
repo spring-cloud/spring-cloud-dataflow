@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2021 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,13 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Glenn Renfro
  * @author Gunnar Hillert
+ * @author Corneil du Plessis
  */
-public class ComposedTaskPropertiesTests {
+class ComposedTaskPropertiesTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
 	@Test
-	public void testGettersAndSetters() throws URISyntaxException{
+	void gettersAndSetters() throws URISyntaxException{
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		properties.setComposedTaskProperties("aaa");
 		properties.setComposedTaskArguments("bbb");
@@ -59,7 +60,7 @@ public class ComposedTaskPropertiesTests {
 		assertThat(properties.getIntervalTimeBetweenChecks()).isEqualTo(12345);
 		assertThat(properties.getMaxWaitTime()).isEqualTo(6789);
 		assertThat(properties.getMaxStartWaitTime()).isEqualTo(101112);
-		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://test");
+		assertThat(properties.getDataflowServerUri()).hasToString("http://test");
 		assertThat(properties.getGraph()).isEqualTo("ddd");
 		assertThat(properties.getDataflowServerUsername()).isEqualTo("foo");
 		assertThat(properties.getDataflowServerPassword()).isEqualTo("bar");
@@ -74,25 +75,25 @@ public class ComposedTaskPropertiesTests {
 	}
 
 	@Test
-	public void testDataflowServerURIDefaults() {
+	void dataflowServerURIDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
-		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+		assertThat(properties.getDataflowServerUri()).hasToString("http://localhost:9393");
 	}
 
 	@Test
-	public void testSkipSslVerificationDefaults() {
+	void skipSslVerificationDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		assertThat(properties.isSkipTlsCertificateVerification()).isFalse();
 	}
 
 	@Test
-	public void testThreadDefaults() {
+	void threadDefaults() {
 		ComposedTaskProperties properties = new ComposedTaskProperties();
 		assertThat(properties.getSplitThreadCorePoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_CORE_POOL_SIZE_DEFAULT);
 		assertThat(properties.getSplitThreadKeepAliveSeconds()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_KEEP_ALIVE_SECONDS_DEFAULT);
 		assertThat(properties.getSplitThreadMaxPoolSize()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_MAX_POOL_SIZE_DEFAULT);
 		assertThat(properties.getSplitThreadQueueCapacity()).isEqualTo(ComposedTaskProperties.SPLIT_THREAD_QUEUE_CAPACITY_DEFAULT);
-		assertThat(properties.getDataflowServerUri().toString()).isEqualTo("http://localhost:9393");
+		assertThat(properties.getDataflowServerUri()).hasToString("http://localhost:9393");
 		assertThat(properties.isSplitThreadAllowCoreThreadTimeout()).isFalse();
 		assertThat(properties.isSplitThreadWaitForTasksToCompleteOnShutdown()).isFalse();
 		assertThat(properties.getDataflowServerUsername()).isNull();
@@ -100,7 +101,7 @@ public class ComposedTaskPropertiesTests {
 	}
 
 	@Test
-	public void testComposedTaskAppArguments() {
+	void composedTaskAppArguments() {
 		this.contextRunner
 				.withInitializer(context -> {
 					Map<String, Object> map = new HashMap<>();
@@ -125,14 +126,14 @@ public class ComposedTaskPropertiesTests {
 	}
 
 	@Test
-	public void testAssignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
+	void assignmentOfOauth2ClientCredentialsClientAuthenticationMethod(){
 		this.contextRunner
-				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=POST")
+				.withSystemProperties("OAUTH2_CLIENT_CREDENTIALS_CLIENT_AUTHENTICATION_METHOD=client_secret_post")
 				.withUserConfiguration(Config1.class).run((context) -> {
 					ComposedTaskProperties properties = context.getBean(ComposedTaskProperties.class);
 					assertThat(properties.getOauth2ClientCredentialsClientAuthenticationMethod())
 							.withFailMessage("The OAuth2 client credentials client authentication method couldn't be assigned correctly.")
-							.isEqualTo(ClientAuthenticationMethod.POST);
+							.isEqualTo(ClientAuthenticationMethod.CLIENT_SECRET_POST);
 				});
 	}
 

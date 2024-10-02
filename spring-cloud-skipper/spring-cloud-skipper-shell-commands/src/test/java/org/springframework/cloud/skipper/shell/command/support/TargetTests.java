@@ -23,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class TargetTests {
+class TargetTests {
 
 	@Test
-	public void constructorTests() {
+	void constructorTests() {
 		Target target = new Target("http://localhost:7577", "username", "password", true);
 		assertThat(target.getTargetUri()).hasPort(7577)
 				.hasPath("")
@@ -39,7 +39,7 @@ public class TargetTests {
 	}
 
 	@Test
-	public void testStatus() {
+	void status() {
 		Target target = new Target("http://localhost:7577", "username", "password", true);
 		assertThat(target.getStatus()).isNull();
 		target.setTargetException(new IllegalArgumentException("This is bad"));

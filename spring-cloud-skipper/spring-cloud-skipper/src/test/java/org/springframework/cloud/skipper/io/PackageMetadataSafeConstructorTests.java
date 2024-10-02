@@ -23,10 +23,11 @@ import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-public class PackageMetadataSafeConstructorTests {
+class PackageMetadataSafeConstructorTests {
 	private String testYaml = "!!org.springframework.cloud.skipper.domain.PackageMetadata\n" +
 		"apiVersion: skipper.spring.io/v1\n" +
 		"description: time --management.endpoints.web.exposure.include=health,info,bindings\n" +
@@ -62,12 +63,11 @@ public class PackageMetadataSafeConstructorTests {
 		"version: 1.0.0";
 
 	@Test
-	public void testSafeConstructor() {
+	void safeConstructor() {
 		DumperOptions options = new DumperOptions();
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(), representer);
 		PackageMetadata packageMetadata =  yaml.load(testYaml);
 		assertThat(packageMetadata.getApiVersion()).isEqualTo("skipper.spring.io/v1");
 		assertThat(packageMetadata.getOrigin()).isEqualTo("null");
@@ -87,12 +87,11 @@ public class PackageMetadataSafeConstructorTests {
 	}
 
 	@Test
-	public void testBadYaml() {
+	void badYaml() {
 		DumperOptions options = new DumperOptions();
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(), representer);
 		assertThatThrownBy( () -> yaml.load("!!org.springframework.cloud.skipper.domain.PackageMetadata\n" +
 			"apiVersion: !!javax.script.ScriptEngineManager [!!java.lang.String [\"helloworld\"]]"))
 			.isInstanceOf(YAMLException.class);

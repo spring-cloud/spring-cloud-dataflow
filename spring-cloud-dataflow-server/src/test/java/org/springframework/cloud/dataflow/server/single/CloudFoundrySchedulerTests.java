@@ -16,10 +16,15 @@
 
 package org.springframework.cloud.dataflow.server.single;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 
-import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
@@ -32,7 +37,6 @@ import org.cloudfoundry.client.v2.spaces.Spaces;
 import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,11 +50,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import io.pivotal.scheduler.SchedulerClient;
+import reactor.core.publisher.Mono;
 
 /**
  * @author David Turanski
@@ -69,7 +70,7 @@ import static org.mockito.Mockito.when;
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.schedulerurl=https://localhost"
 		})
-public class CloudFoundrySchedulerTests {
+class CloudFoundrySchedulerTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
@@ -78,7 +79,7 @@ public class CloudFoundrySchedulerTests {
 	SchedulerService schedulerService;
 
 	@Test
-	public void schedulerServiceCreated() {
+	void schedulerServiceCreated() {
 		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Cloud Foundry");

@@ -35,10 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
-public class HistoryDocumentation extends BaseDocumentation {
+class HistoryDocumentation extends BaseDocumentation {
 
 	@Test
-	public void showVersionHistoryForRelease() throws Exception {
+	void showVersionHistoryForRelease() throws Exception {
 		this.releaseRepository.save(createTestRelease());
 
 		this.mockMvc.perform(

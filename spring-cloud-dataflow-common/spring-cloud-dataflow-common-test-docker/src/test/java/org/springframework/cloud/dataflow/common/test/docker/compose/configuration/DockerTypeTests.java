@@ -15,8 +15,7 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
@@ -36,20 +35,20 @@ public class DockerTypeTests {
 		variables.put(DOCKER_HOST, "tcp://192.168.99.100:2376");
 		variables.put(DOCKER_TLS_VERIFY, "1");
 		variables.put(DOCKER_CERT_PATH, "/path/to/certs");
-		assertThat(DockerType.getFirstValidDockerTypeForEnvironment(variables), is(Optional.of(DockerType.REMOTE)));
+		assertThat(DockerType.getFirstValidDockerTypeForEnvironment(variables)).isEqualTo(Optional.of(DockerType.REMOTE));
 	}
 
 	@Test
 	public void return_daemon_as_first_valid_type_if_environment_is_illegal_for_remote() {
 		Map<String, String> variables = new HashMap<>();
-		assertThat(DockerType.getFirstValidDockerTypeForEnvironment(variables), is(Optional.of(DockerType.DAEMON)));
+		assertThat(DockerType.getFirstValidDockerTypeForEnvironment(variables)).isEqualTo(Optional.of(DockerType.DAEMON));
 	}
 
 	@Test
 	public void return_absent_as_first_valid_type_if_environment_is_illegal_for_all() {
 		Map<String, String> variables = new HashMap<>();
 		variables.put(DOCKER_TLS_VERIFY, "1");
-		assertThat(DockerType.getFirstValidDockerTypeForEnvironment(variables), is(Optional.empty()));
+		assertThat(DockerType.getFirstValidDockerTypeForEnvironment(variables)).isEqualTo(Optional.empty());
 	}
 
 }

@@ -25,7 +25,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,12 +36,14 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class ArgumentSanitizerTest {
+class ArgumentSanitizerTest {
 
 	private ArgumentSanitizer sanitizer;
 
@@ -50,78 +51,76 @@ public class ArgumentSanitizerTest {
 			"vcap_services", "url" };
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		sanitizer = new ArgumentSanitizer();
 	}
 
 	@Test
-	public void testSanitizeProperties() {
+	void sanitizeProperties() {
 		for (String key : keys) {
-			Assertions.assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
-			Assertions.assertEquals("******", sanitizer.sanitize(key, "bar"));
+			assertThat(sanitizer.sanitize("--" + key + "=foo")).isEqualTo("--" + key + "=******");
+			assertThat(sanitizer.sanitize(key, "bar")).isEqualTo("******");
 		}
 	}
 
 	@Test
-	public void testSanitizeJobParameters() {
+	void sanitizeJobParameters() {
 		String[] JOB_PARAM_KEYS = {"username", "password", "name", "C", "D", "E"};
 		Date testDate = new Date();
-		JobParameter[] PARAMETERS = {new JobParameter("foo", true),
-				new JobParameter("bar", true),
-				new JobParameter("baz", true),
-				new JobParameter(1L, true),
-				new JobParameter(1D, true),
-				new JobParameter(testDate, false)};
+		JobParameter[] PARAMETERS = {new JobParameter("foo", String.class, true),
+				new JobParameter("bar", String.class, true),
+				new JobParameter("baz", String.class, true),
+				new JobParameter(1L, Long.class, true),
+				new JobParameter(1D, Double.class, true),
+				new JobParameter(testDate, Date.class, false)};
 
-		Map<String, JobParameter> jobParamMap = new LinkedHashMap<>();
+		Map<String, JobParameter<?>> jobParamMap = new LinkedHashMap<>();
 		for (int paramCount = 0; paramCount < JOB_PARAM_KEYS.length; paramCount++) {
 			jobParamMap.put(JOB_PARAM_KEYS[paramCount], PARAMETERS[paramCount]);
 		}
 		JobParameters jobParameters = new JobParameters(jobParamMap);
 		JobParameters sanitizedJobParameters = this.sanitizer.sanitizeJobParameters(jobParameters);
-		for(Map.Entry<String, JobParameter> entry : sanitizedJobParameters.getParameters().entrySet()) {
+		for(Map.Entry<String, JobParameter<?>> entry : sanitizedJobParameters.getParameters().entrySet()) {
 			if (entry.getKey().equals("username") || entry.getKey().equals("password")) {
-				Assertions.assertEquals("******", entry.getValue().getValue());
+				assertThat(entry.getValue().getValue()).isEqualTo("******");
 			}
 			else if (entry.getKey().equals("name")) {
-				Assertions.assertEquals("baz", entry.getValue().getValue());
+				assertThat(entry.getValue().getValue()).isEqualTo("{value=baz, type=class java.lang.String, identifying=true}");
 			}
 			else if (entry.getKey().equals("C")) {
-				Assertions.assertEquals(1L, entry.getValue().getValue());
+				assertThat(entry.getValue().getValue()).isEqualTo(1L);
 			}
 			else if (entry.getKey().equals("D")) {
-				Assertions.assertEquals(1D, entry.getValue().getValue());
+				assertThat(entry.getValue().getValue()).isEqualTo(1D);
 			}
 			else if (entry.getKey().equals("E")) {
-				Assertions.assertEquals(testDate, entry.getValue().getValue());
+				assertThat(entry.getValue().getValue()).isEqualTo(testDate);
 			}
 		}
 	}
 
 	@Test
-	public void testSanitizeTaskDefinition() {
+	void sanitizeTaskDefinition() {
 		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar --another-secret=kenny");
-		Assertions.assertEquals("task1 --some.password='******' --another-secret='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
+		assertThat(this.sanitizer.sanitizeTaskDsl(taskDefinition)).isEqualTo("task1 --some.password='******' --another-secret='******'");
 	}
 
 
 	@Test
-	public void testSanitizeComposedTaskDefinition() {
+	void sanitizeComposedTaskDefinition() {
 		TaskDefinition taskDefinition = new TaskDefinition("mytask", "task1 --some.password=foobar && task2 --some.password=woof");
-		Assertions.assertEquals("task1 --some.password='******' && task2 --some.password='******'", this.sanitizer.sanitizeTaskDsl(taskDefinition));
+		assertThat(this.sanitizer.sanitizeTaskDsl(taskDefinition)).isEqualTo("task1 --some.password='******' && task2 --some.password='******'");
 	}
 
 	@Test
-	public void testSanitizeComposedTaskSplitDefinition() {
+	void sanitizeComposedTaskSplitDefinition() {
 		TaskDefinition taskDefinition = new TaskDefinition(
 				"mytask", "<task1 --some.password=foobar || task2 --some.password=woof> && task3  --some.password=foobar");
-		Assertions.assertEquals(
-				"<task1 --some.password='******' || task2 --some.password='******'> && task3 --some.password='******'",
-				this.sanitizer.sanitizeTaskDsl(taskDefinition));
+		assertThat(this.sanitizer.sanitizeTaskDsl(taskDefinition)).isEqualTo("<task1 --some.password='******' || task2 --some.password='******'> && task3 --some.password='******'");
 	}
 
 	@Test
-	public void testSanitizeArguments() {
+	void sanitizeArguments() {
 		final List<String> arguments = new ArrayList<>();
 
 		for (String key : keys) {
@@ -130,33 +129,33 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assertions.assertEquals(keys.length, sanitizedArguments.size());
+		assertThat(sanitizedArguments).hasSize(keys.length);
 
 		int order = 0;
 		for(String sanitizedString : sanitizedArguments) {
-			Assertions.assertEquals("--" + keys[order] + "=******", sanitizedString);
+			assertThat(sanitizedString).isEqualTo("--" + keys[order] + "=******");
 			order++;
 		}
 	}
 
 	@Test
-	public void testSanitizeNullArgument() {
+	void sanitizeNullArgument() {
 		final List<String> arguments = new ArrayList<>();
 
 		arguments.add(null);
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		Assertions.assertEquals(1, sanitizedArguments.size());
-		Assertions.assertEquals(sanitizedArguments.get(0), "");
+		assertThat(sanitizedArguments).hasSize(1);
+		assertThat(sanitizedArguments.get(0)).isEmpty();
 	}
 
 
 	@Test
-	public void testMultipartProperty() {
-		Assertions.assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
-		Assertions.assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
-		Assertions.assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
+	void multipartProperty() {
+		assertThat(sanitizer.sanitize("--password=boza")).isEqualTo("--password=******");
+		assertThat(sanitizer.sanitize("--one.two.password=boza")).isEqualTo("--one.two.password=******");
+		assertThat(sanitizer.sanitize("--one_two_password=boza")).isEqualTo("--one_two_password=******");
 	}
 	private String loadStringFromResource(String uri) throws IOException {
 		Resource resource = new DefaultResourceLoader().getResource(uri);
@@ -164,25 +163,26 @@ public class ArgumentSanitizerTest {
 			return FileCopyUtils.copyToString(reader);
 		}
 	}
+
 	@Test
-	public void testJsonData() throws IOException {
+	void jsonData() throws IOException {
 		String input = loadStringFromResource("classpath:sanitizer1.json");
 		String output = sanitizer.sanitizeJsonOrYamlString(input);
 		System.out.println("Read:" + input);
 		System.out.println("Sanitized:" + output);
-		Assertions.assertTrue(output.contains("*****"));
-		Assertions.assertFalse(output.contains("54321"));
+		assertThat(output).contains("*****");
+		assertThat(output).doesNotContain("54321");
 
 	}
 
 	@Test
-	public void testYamlData() throws IOException {
+	void yamlData() throws IOException {
 		String input = loadStringFromResource("classpath:sanitizer2.yaml");
 		String output = sanitizer.sanitizeJsonOrYamlString(input);
 		System.out.println("Read:" + input);
 		System.out.println("Sanitized:" + output);
-		Assertions.assertTrue(output.contains("*****"));
-		Assertions.assertFalse(output.contains("54321"));
+		assertThat(output).contains("*****");
+		assertThat(output).doesNotContain("54321");
 	}
 
 }

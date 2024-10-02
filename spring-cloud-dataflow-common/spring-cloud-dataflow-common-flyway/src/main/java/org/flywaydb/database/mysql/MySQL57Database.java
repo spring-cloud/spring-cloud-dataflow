@@ -17,15 +17,15 @@ package org.flywaydb.database.mysql;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.configuration.Configuration;
+import org.flywaydb.core.extensibility.Tier;
 import org.flywaydb.core.internal.database.base.Database;
 import org.flywaydb.core.internal.database.base.Table;
 import org.flywaydb.core.internal.jdbc.JdbcConnectionFactory;
 import org.flywaydb.core.internal.jdbc.StatementInterceptor;
-import org.flywaydb.database.mysql.MySQLConnection;
-import org.flywaydb.database.mysql.MySQLDatabase;
 import org.flywaydb.database.mysql.mariadb.MariaDBDatabaseType;
 
 public class MySQL57Database extends Database<MySQLConnection> {
@@ -57,13 +57,13 @@ public class MySQL57Database extends Database<MySQLConnection> {
     }
 
     @Override
-    public final void ensureSupported() {
+    public void ensureSupported(Configuration configuration) {
         ensureDatabaseIsRecentEnough("5.1");
         if (databaseType instanceof MariaDBDatabaseType) {
-            ensureDatabaseNotOlderThanOtherwiseRecommendUpgradeToFlywayEdition("10.4", org.flywaydb.core.internal.license.Edition.ENTERPRISE);
+            ensureDatabaseNotOlderThanOtherwiseRecommendUpgradeToFlywayEdition("10.4", List.of(Tier.ENTERPRISE), configuration);
             recommendFlywayUpgradeIfNecessary("10.6");
         } else {
-            ensureDatabaseNotOlderThanOtherwiseRecommendUpgradeToFlywayEdition("5.7", org.flywaydb.core.internal.license.Edition.ENTERPRISE);
+            ensureDatabaseNotOlderThanOtherwiseRecommendUpgradeToFlywayEdition("5.7", List.of(Tier.ENTERPRISE), configuration);
             recommendFlywayUpgradeIfNecessary("8.0");
         }
     }
@@ -85,11 +85,6 @@ public class MySQL57Database extends Database<MySQLConnection> {
     @Override
     public boolean supportsDdlTransactions() {
         return delegateDatabase.supportsDdlTransactions();
-    }
-
-    @Override
-    public boolean supportsChangingCurrentSchema() {
-        return delegateDatabase.supportsChangingCurrentSchema();
     }
 
     @Override

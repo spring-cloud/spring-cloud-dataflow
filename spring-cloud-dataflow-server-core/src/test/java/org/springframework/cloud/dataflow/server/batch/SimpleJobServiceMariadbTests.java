@@ -29,16 +29,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
-@JdbcTest(properties = {
-	"spring.jpa.hibernate.ddl-auto=none",
-	"spring.test.context.cache.maxSize=2",
-	"spring.datasource.hikari.maximum-pool-size=4",
-	"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"
-})
+import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+@JdbcTest(properties = {"spring.jpa.hibernate.ddl-auto=none",
+		"spring.test.context.cache.maxSize=2",
+		"spring.datasource.hikari.maximum-pool-size=4",
+		"spring.jpa.database-platform=org.hibernate.dialect.MariaDB106Dialect"})
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = SimpleJobServiceMariadbTests.SimpleJobTestMariaDBConfiguration.class)
 @Testcontainers
-public class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests {
+class SimpleJobServiceMariadbTests extends AbstractSimpleJobServiceTests {
 
 	@Container
 	private static final MariaDBContainer<?> mariaDBContainer = new MariaDBContainer<>("mariadb:10.6")

@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.spi.PersistenceUnitInfo;
 
 import org.hibernate.HibernateException;
 import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.tool.hbm2ddl.SchemaExport;
 import org.hibernate.tool.schema.TargetType;
@@ -37,10 +37,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
-import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+
+import jakarta.persistence.spi.PersistenceUnitInfo;
 
 /**
  * @author Gunnar Hillert
@@ -50,15 +51,15 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 		EmbeddedDataSourceConfiguration.class, HibernateJpaAutoConfiguration.class
 })
 @EntityScan({
-	"org.springframework.cloud.dataflow.core",
-	"org.springframework.cloud.dataflow.server.audit.domain"
+		"org.springframework.cloud.dataflow.core",
+		"org.springframework.cloud.dataflow.server.audit.domain"
 })
 @EnableJpaRepositories(basePackages = {
-	"org.springframework.cloud.dataflow.registry.repository",
-	"org.springframework.cloud.dataflow.server.audit.repository",
-	"org.springframework.cloud.dataflow.audit.repository"
+		"org.springframework.cloud.dataflow.registry.repository",
+		"org.springframework.cloud.dataflow.server.audit.repository",
+		"org.springframework.cloud.dataflow.audit.repository"
 })
-public class SchemaGenerationTests {
+class SchemaGenerationTests {
 
 	private static final Logger logger = LoggerFactory.getLogger(SchemaGenerationTests.class);
 
@@ -66,7 +67,7 @@ public class SchemaGenerationTests {
 	private LocalContainerEntityManagerFactoryBean fb;
 
 	@Test
-	public void generateSchemaDdlFiles() throws Exception {
+	void generateSchemaDdlFiles() throws Exception {
 
 		final PersistenceUnitInfo persistenceUnitInfo = fb.getPersistenceUnitInfo();
 		final File tempDir = Files.createTempDirectory("scdf-sql-").toFile();
@@ -74,10 +75,10 @@ public class SchemaGenerationTests {
 
 		supportedHibernateDialects.add("H2");
 		supportedHibernateDialects.add("HSQL");
-		supportedHibernateDialects.add("MySQL5");
+		supportedHibernateDialects.add("MySQL8");
 		supportedHibernateDialects.add("MariaDB106");
-		supportedHibernateDialects.add("Oracle10g");
-		supportedHibernateDialects.add("PostgreSQL94");
+		supportedHibernateDialects.add("Oracle");
+		supportedHibernateDialects.add("PostgreSQL");
 		supportedHibernateDialects.add("DB2");
 		supportedHibernateDialects.add("SQLServer2012");
 
@@ -86,6 +87,7 @@ public class SchemaGenerationTests {
 				+ supportedHibernateDialects.stream().map((db) -> db + "Dialect").collect(Collectors.joining("\n")) + "\n");
 
 		for (String supportedHibernateDialect : supportedHibernateDialects) {
+			System.out.println(supportedHibernateDialect);
 			generateDdlFiles(supportedHibernateDialect, tempDir, persistenceUnitInfo);
 		}
 
@@ -99,7 +101,7 @@ public class SchemaGenerationTests {
 		final MetadataSources metadata = new MetadataSources(
 				new StandardServiceRegistryBuilder()
 					.applySetting("hibernate.dialect", "org.hibernate.dialect." + dialect + "Dialect")
-					.applySetting("hibernate.physical_naming_strategy", SpringPhysicalNamingStrategy.class.getName())
+					.applySetting("hibernate.physical_naming_strategy", CamelCaseToUnderscoresNamingStrategy.class.getName())
 					.applySetting("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName())
 					.build());
 

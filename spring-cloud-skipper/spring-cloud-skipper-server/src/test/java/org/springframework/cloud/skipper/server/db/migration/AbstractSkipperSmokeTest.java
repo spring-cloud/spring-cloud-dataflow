@@ -16,8 +16,9 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import java.util.Collections;
-import javax.persistence.EntityManagerFactory;
 
+
+import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
@@ -80,7 +80,7 @@ public abstract class AbstractSkipperSmokeTest {
 
 
 	@Test
-	public void testStart() {
+	public void start() {
 		logger.info("started:{}", getClass().getSimpleName());
 		AppDeployerData deployerData = new AppDeployerData();
 		deployerData.setDeploymentDataUsingMap(Collections.singletonMap("a", "b"));
@@ -131,8 +131,7 @@ public abstract class AbstractSkipperSmokeTest {
 	@SpringBootApplication(exclude = {CloudFoundryDeployerAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
 		KubernetesAutoConfiguration.class,
-		SessionAutoConfiguration.class,
-		CommonSecurityAutoConfiguration.class
+		SessionAutoConfiguration.class
 	})
 	@EnableSkipperServer
 	public static class LocalTestSkipperServer {
