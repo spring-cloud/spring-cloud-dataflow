@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.db.support;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -27,7 +26,6 @@ import org.springframework.cloud.dataflow.server.db.MariaDB_11_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MySQL_5_7_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MySQL_8_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSupport;
-import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
 
@@ -63,11 +61,6 @@ class DatabaseTypeTests {
 	@EnabledIfEnvironmentVariable(named = "ENABLE_ORACLE", matches = "true", disabledReason = "Container is too big")
 	@Tag("ORACLE")
 	class OracleDatabaseTypeTests extends SingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
-	}
-
-	@Disabled("See https://github.com/spring-cloud/spring-cloud-dataflow/issues/5952")
-	@Nested
-	class SqlServer_2017_DatabaseTypeSingleDbDatabaseTypeTests extends SingleDbDatabaseTypeTests implements SqlServer_2017_ContainerSupport {
 	}
 
 	@Nested
