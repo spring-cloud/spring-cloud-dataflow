@@ -17,7 +17,6 @@ package org.springframework.cloud.skipper.client.util;
 
 import java.net.URI;
 
-
 import org.apache.hc.client5.http.auth.AuthCache;
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.impl.auth.BasicAuthCache;

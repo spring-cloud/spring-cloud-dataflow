@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.Arrays;
 import java.util.Map;
 
@@ -35,6 +33,8 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.local.LocalTaskLauncher;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author David Turanski

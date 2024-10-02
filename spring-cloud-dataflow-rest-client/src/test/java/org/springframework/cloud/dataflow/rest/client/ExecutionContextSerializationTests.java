@@ -21,9 +21,9 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.springframework.batch.item.ExecutionContext;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Gunnar Hillert

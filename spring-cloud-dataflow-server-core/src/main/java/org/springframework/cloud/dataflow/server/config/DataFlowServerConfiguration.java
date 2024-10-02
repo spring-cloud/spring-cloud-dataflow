@@ -22,7 +22,6 @@ import jakarta.servlet.Filter;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.completion.CompletionConfiguration;
 import org.springframework.cloud.dataflow.registry.repository.AppRegistrationRepositoryCustom;
@@ -32,6 +31,7 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesConfigu
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.db.migration.DataFlowFlywayConfigurationCustomizer;
 import org.springframework.cloud.dataflow.server.support.AuthenticationSuccessEventListener;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

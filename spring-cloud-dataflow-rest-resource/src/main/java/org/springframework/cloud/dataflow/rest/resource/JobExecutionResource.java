@@ -16,13 +16,10 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -34,7 +31,6 @@ import org.springframework.batch.core.converter.JobParametersConverter;
 import org.springframework.batch.support.PropertiesConverter;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.JobUtils;
-import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;

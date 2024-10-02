@@ -15,23 +15,24 @@
  */
 package org.springframework.cloud.dataflow.server.task.impl;
 
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.core.ThinTaskExecution;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.cloud.task.repository.support.SimpleTaskExplorer;

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import java.text.DateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

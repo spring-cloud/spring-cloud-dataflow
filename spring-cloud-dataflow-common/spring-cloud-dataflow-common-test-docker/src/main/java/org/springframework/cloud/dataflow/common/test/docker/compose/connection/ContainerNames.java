@@ -15,12 +15,12 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 public class ContainerNames {
 

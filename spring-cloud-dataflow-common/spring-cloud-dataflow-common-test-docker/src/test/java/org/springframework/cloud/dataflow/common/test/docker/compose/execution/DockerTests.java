@@ -18,10 +18,9 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 import java.io.IOException;
 
 import com.github.zafarkhaja.semver.Version;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import org.apache.commons.io.IOUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

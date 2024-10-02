@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.single;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +25,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.test.context.ActiveProfiles;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author David Turanski

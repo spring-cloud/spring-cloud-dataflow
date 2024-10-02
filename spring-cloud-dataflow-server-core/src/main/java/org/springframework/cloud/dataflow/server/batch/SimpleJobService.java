@@ -15,13 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.batch;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -49,8 +47,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.ExecutionContextDao;
 import org.springframework.batch.core.step.NoSuchStepException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;

@@ -15,14 +15,13 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerCache;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class ContainerCacheTests {
 

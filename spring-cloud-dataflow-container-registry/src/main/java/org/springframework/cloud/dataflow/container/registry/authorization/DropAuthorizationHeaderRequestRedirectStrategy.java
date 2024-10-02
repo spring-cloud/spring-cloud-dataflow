@@ -21,15 +21,15 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
+import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.apache.hc.core5.http.Header;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.classic.methods.HttpHead;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 
 import org.springframework.util.StringUtils;
 

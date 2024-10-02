@@ -15,19 +15,20 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility class that can be used in future to drop columns.

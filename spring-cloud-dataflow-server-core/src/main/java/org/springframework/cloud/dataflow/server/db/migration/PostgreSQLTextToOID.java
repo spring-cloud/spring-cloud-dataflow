@@ -20,7 +20,6 @@ import java.sql.Connection;
 import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLType;
 import java.sql.Types;
 
 import javax.sql.DataSource;

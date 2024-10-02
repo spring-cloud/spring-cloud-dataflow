@@ -15,11 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static java.util.stream.Collectors.joining;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -29,6 +24,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+
+import static java.util.stream.Collectors.joining;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
 
 public class RemoteEnvironmentValidator implements EnvironmentValidator {
 

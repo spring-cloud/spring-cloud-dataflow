@@ -17,7 +17,6 @@ package org.springframework.cloud.skipper.server.db.migration;
 
 import java.util.Collections;
 
-
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

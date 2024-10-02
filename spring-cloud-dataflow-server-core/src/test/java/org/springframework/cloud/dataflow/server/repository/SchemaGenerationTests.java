@@ -22,6 +22,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.HibernateException;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
@@ -40,8 +41,6 @@ import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-
-import jakarta.persistence.spi.PersistenceUnitInfo;
 
 /**
  * @author Gunnar Hillert

@@ -16,13 +16,14 @@
 
 package org.springframework.cloud.dataflow.server.configuration;
 
-import jakarta.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
@@ -41,14 +42,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
-import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
-import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
-import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
-import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepository;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.DefaultAuditRecordService;
@@ -73,10 +66,14 @@ import org.springframework.cloud.dataflow.server.controller.JobInstanceControlle
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionController;
 import org.springframework.cloud.dataflow.server.controller.JobStepExecutionProgressController;
 import org.springframework.cloud.dataflow.server.controller.RestControllerAdvice;
+import org.springframework.cloud.dataflow.server.controller.TaskDefinitionController;
 import org.springframework.cloud.dataflow.server.controller.TaskExecutionController;
+import org.springframework.cloud.dataflow.server.controller.TaskExecutionThinController;
 import org.springframework.cloud.dataflow.server.controller.TaskLogsController;
 import org.springframework.cloud.dataflow.server.controller.TaskPlatformController;
 import org.springframework.cloud.dataflow.server.controller.TasksInfoController;
+import org.springframework.cloud.dataflow.server.controller.assembler.DefaultTaskDefinitionAssemblerProvider;
+import org.springframework.cloud.dataflow.server.controller.assembler.TaskDefinitionAssemblerProvider;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
@@ -103,6 +100,10 @@ import org.springframework.cloud.dataflow.server.service.impl.DefaultTaskSaveSer
 import org.springframework.cloud.dataflow.server.service.impl.TaskAppDeploymentRequestCreator;
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.deployer.resource.maven.MavenProperties;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;

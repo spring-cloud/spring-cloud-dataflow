@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ import org.springframework.http.MediaType;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseBody;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**

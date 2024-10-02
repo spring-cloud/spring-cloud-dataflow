@@ -15,17 +15,15 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
+import org.junit.Test;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.failure;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.successful;
-
-import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthCheck;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthChecks;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure;
 
 public class PortsHealthCheckTests {
     private final HealthCheck<Container> healthCheck = HealthChecks.toHaveAllPortsOpen();

@@ -15,13 +15,12 @@
  */
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import jakarta.persistence.EntityManager;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.completion;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
@@ -60,6 +57,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.Assert;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan

@@ -15,14 +15,13 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
-import static org.hamcrest.Matchers.anything;
-import static org.hamcrest.Matchers.equalTo;
-
 import org.hamcrest.Description;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure;
+
+import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.equalTo;
 
 public class SuccessOrFailureMatchers {
 

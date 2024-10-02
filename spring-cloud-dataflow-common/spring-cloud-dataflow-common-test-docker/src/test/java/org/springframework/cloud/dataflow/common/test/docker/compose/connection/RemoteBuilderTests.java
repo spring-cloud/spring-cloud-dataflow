@@ -15,16 +15,16 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
-
 import java.util.HashMap;
 import java.util.Map;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 
 public class RemoteBuilderTests {
 

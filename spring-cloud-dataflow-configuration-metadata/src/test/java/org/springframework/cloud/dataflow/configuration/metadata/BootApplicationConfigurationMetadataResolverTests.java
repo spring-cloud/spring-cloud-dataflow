@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.configuration.metadata;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +34,9 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Conta
 import org.springframework.cloud.deployer.resource.docker.DockerResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link ApplicationConfigurationMetadataResolver}.

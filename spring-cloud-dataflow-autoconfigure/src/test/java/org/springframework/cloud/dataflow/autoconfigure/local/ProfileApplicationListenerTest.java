@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +27,9 @@ import org.springframework.cloud.dataflow.server.config.cloudfoundry.CloudFoundr
 import org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesCloudProfileProvider;
 import org.springframework.core.env.PropertySource;
 import org.springframework.mock.env.MockEnvironment;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link ProfileApplicationListener} test cases

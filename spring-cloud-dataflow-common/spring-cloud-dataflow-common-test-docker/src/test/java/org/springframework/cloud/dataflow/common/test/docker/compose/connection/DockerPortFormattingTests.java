@@ -15,10 +15,9 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DockerPortFormattingTests {
     private final DockerPort dockerPort = new DockerPort("hostname", 1234, 4321);

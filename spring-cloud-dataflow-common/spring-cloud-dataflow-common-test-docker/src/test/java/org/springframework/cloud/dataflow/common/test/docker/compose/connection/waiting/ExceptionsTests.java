@@ -15,10 +15,9 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.Exceptions;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ExceptionsTests {
     @Test

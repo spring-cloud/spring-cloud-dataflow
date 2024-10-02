@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
-import static java.util.stream.Collectors.joining;
-
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +24,8 @@ import java.util.function.Function;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Cluster;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.State;
+
+import static java.util.stream.Collectors.joining;
 
 @FunctionalInterface
 public interface ClusterHealthCheck {

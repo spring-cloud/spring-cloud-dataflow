@@ -21,8 +21,8 @@ import java.util.Map;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.ConfigValues;
@@ -45,7 +45,6 @@ import org.springframework.cloud.skipper.server.util.ManifestUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * @author Mark Pollack

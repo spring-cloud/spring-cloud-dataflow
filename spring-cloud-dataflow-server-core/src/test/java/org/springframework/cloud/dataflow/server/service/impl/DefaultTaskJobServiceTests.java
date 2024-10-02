@@ -64,8 +64,6 @@ import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.core.io.FileUrlResource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.jdbc.core.JdbcTemplate;
 

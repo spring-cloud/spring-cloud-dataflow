@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +30,8 @@ import org.springframework.cloud.dataflow.server.configuration.TaskServiceDepend
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.test.annotation.DirtiesContext;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Ilayaperumal Gopinathan

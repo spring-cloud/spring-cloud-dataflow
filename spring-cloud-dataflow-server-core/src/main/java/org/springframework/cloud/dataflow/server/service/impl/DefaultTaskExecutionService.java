@@ -37,8 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.cloud.common.security.core.support.OAuth2TokenUtilsService;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -67,6 +65,8 @@ import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalysisReport;
 import org.springframework.cloud.dataflow.server.service.impl.diff.TaskAnalyzer;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.deployer.spi.core.AppDeploymentRequest;
 import org.springframework.cloud.deployer.spi.task.LaunchState;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;

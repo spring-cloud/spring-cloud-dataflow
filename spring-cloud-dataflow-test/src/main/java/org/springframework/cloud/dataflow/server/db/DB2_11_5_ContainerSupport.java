@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.Db2Container;
-import org.testcontainers.utility.DockerImageName;
 
 import org.springframework.cloud.dataflow.server.db.arm64.Db2Arm64ContainerSupport;
 import org.springframework.test.context.DynamicPropertyRegistry;

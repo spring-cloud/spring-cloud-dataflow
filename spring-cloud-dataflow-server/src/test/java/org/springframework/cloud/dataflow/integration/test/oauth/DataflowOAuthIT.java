@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.integration.test.oauth;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,6 @@ import org.testcontainers.containers.Container.ExecResult;
 import org.springframework.cloud.dataflow.integration.test.db.AbstractDataflowTests;
 import org.springframework.cloud.dataflow.integration.test.tags.Oauth;
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
-import org.springframework.cloud.dataflow.rest.client.support.VersionUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StringUtils;
 

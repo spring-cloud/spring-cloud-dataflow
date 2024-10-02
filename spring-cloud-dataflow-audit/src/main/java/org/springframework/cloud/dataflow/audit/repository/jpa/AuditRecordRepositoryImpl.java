@@ -27,8 +27,8 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import org.hibernate.query.sqm.tree.select.SqmSelectStatement;
+
 import org.springframework.cloud.dataflow.audit.repository.AuditRecordRepositoryCustom;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;

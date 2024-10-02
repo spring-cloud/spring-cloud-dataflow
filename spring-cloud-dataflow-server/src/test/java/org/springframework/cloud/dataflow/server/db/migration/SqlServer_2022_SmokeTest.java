@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.junit.jupiter.api.Disabled;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
 
 

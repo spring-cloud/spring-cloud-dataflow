@@ -26,11 +26,11 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.ext.ScriptUtils;
 import org.testcontainers.jdbc.JdbcDatabaseDelegate;
 
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 

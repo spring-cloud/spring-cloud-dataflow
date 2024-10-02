@@ -16,10 +16,11 @@
 package org.springframework.cloud.dataflow.common.persistence.type;
 
 import org.hibernate.type.AbstractSingleColumnStandardBasicType;
-import org.hibernate.type.descriptor.jdbc.AdjustableJdbcType;
-import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
 import org.hibernate.type.descriptor.java.StringJavaType;
+import org.hibernate.type.descriptor.jdbc.AdjustableJdbcType;
 import org.hibernate.type.descriptor.jdbc.ClobJdbcType;
+import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
+
 import org.springframework.util.Assert;
 
 /**

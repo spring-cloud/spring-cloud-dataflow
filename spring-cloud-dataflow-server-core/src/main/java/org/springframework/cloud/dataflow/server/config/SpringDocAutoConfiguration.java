@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.config;
 
 import jakarta.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.configuration.SpringDocConfiguration;
