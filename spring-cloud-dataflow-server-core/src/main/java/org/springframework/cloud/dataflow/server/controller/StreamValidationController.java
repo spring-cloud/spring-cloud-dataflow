@@ -23,9 +23,9 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -61,10 +61,10 @@ public class StreamValidationController {
 	 * @param name name of the stream definition
 	 * @return The status for the apps in a stream definition.
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@GetMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public StreamAppStatusResource validate(
-			@PathVariable("name") String name) {
+			@PathVariable String name) {
 		ValidationStatus result = this.streamService.validateStream(name);
 		return new Assembler().toModel(result);
 	}

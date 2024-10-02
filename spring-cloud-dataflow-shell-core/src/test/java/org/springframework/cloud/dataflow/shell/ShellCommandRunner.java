@@ -71,8 +71,8 @@ public class ShellCommandRunner {
 					.isNotNull()
 					.isNotInstanceOf(Exception.class);
 		}
-		if (rawResult instanceof Exception) {
-			throw new RuntimeException((Exception) rawResult);
+		if (rawResult instanceof Exception exception) {
+			throw new RuntimeException(exception);
 		}
 		return rawResult;
 	}

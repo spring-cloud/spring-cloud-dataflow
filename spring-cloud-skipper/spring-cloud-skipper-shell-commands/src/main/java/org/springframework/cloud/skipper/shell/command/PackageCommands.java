@@ -31,7 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.PackageDeleteException;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.ConfigValues;
@@ -62,7 +61,6 @@ public class PackageCommands extends AbstractSkipperCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseCommands.class);
 
-	@Autowired
 	public PackageCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 	}

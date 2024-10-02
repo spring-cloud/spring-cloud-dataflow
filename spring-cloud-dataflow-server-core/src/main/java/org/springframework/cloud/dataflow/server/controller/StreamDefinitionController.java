@@ -47,10 +47,12 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -122,7 +124,7 @@ public class StreamDefinitionController {
 	 * @param search    optional findByTaskNameContains parameter
 	 * @return list of stream definitions
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends StreamDefinitionResource> list(
 			Pageable pageable,
@@ -151,13 +153,13 @@ public class StreamDefinitionController {
 	 * @throws InvalidStreamDefinitionException   if there are errors parsing the stream DSL,
 	 *                                            resolving the name, or type of applications in the stream
 	 */
-	@RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+	@PostMapping(value = "", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource save(
-			@RequestParam("name") String name,
+			@RequestParam String name,
 			@RequestParam("definition") String dsl,
-			@RequestParam(value = "description", defaultValue = "") String description,
-			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy
+			@RequestParam(defaultValue = "") String description,
+			@RequestParam(defaultValue = "false") boolean deploy
 	) {
 		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy, null);
 		return ((RepresentationModelAssembler<StreamDefinition, ? extends StreamDefinitionResource>)
@@ -182,13 +184,13 @@ public class StreamDefinitionController {
 	 * @throws InvalidStreamDefinitionException   if there are errors parsing the stream DSL,
 	 *                                            resolving the name, or type of applications in the stream
 	 */
-	@RequestMapping(value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.CREATED)
 	public StreamDefinitionResource saveWithDeployProps(
-			@RequestParam("name") String name,
+			@RequestParam String name,
 			@RequestParam("definition") String dsl,
-			@RequestParam(value = "description", defaultValue = "") String description,
-			@RequestParam(value = "deploy", defaultValue = "false") boolean deploy,
+			@RequestParam(defaultValue = "") String description,
+			@RequestParam(defaultValue = "false") boolean deploy,
 			@RequestBody(required = false) Map<String, String> deploymentProperties
 	) {
 		StreamDefinition streamDefinition = this.streamService.createStream(name, dsl, description, deploy, deploymentProperties);
@@ -201,9 +203,9 @@ public class StreamDefinitionController {
 	 *
 	 * @param name the name of an existing stream definition (required)
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public void delete(@PathVariable("name") String name) {
+	public void delete(@PathVariable String name) {
 		this.streamService.deleteStream(name);
 	}
 
@@ -217,12 +219,12 @@ public class StreamDefinitionController {
 	 * @param assembler resource assembler for stream definition
 	 * @return a list of related stream definitions
 	 */
-	@RequestMapping(value = "/{name}/related", method = RequestMethod.GET)
+	@GetMapping("/{name}/related")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends StreamDefinitionResource> listRelated(
 			Pageable pageable,
-			@PathVariable("name") String name,
-			@RequestParam(value = "nested", required = false, defaultValue = "false") boolean nested,
+			@PathVariable String name,
+			@RequestParam(required = false, defaultValue = "false") boolean nested,
 			PagedResourcesAssembler<StreamDefinition> assembler
 	) {
 		List<StreamDefinition> result = this.streamService.findRelatedStreams(name, nested);
@@ -238,17 +240,17 @@ public class StreamDefinitionController {
 	 * @param name the name of an existing stream definition (required)
 	 * @return the stream definition
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@GetMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public StreamDefinitionResource display(@PathVariable("name") String name) {
+	public StreamDefinitionResource display(@PathVariable String name) {
 		StreamDefinition streamDefinition = this.streamService.findOne(name);
 		return this.streamDefinitionAssemblerProvider.getStreamDefinitionAssembler(Collections.singletonList(streamDefinition)).toModel(streamDefinition);
 	}
 
 
-	@RequestMapping(value = "/{name}/applications", method = RequestMethod.GET)
+	@GetMapping("/{name}/applications")
 	@ResponseStatus(HttpStatus.OK)
-	public List<? extends AppRegistrationResource> listApplications(@PathVariable("name") String name) {
+	public List<? extends AppRegistrationResource> listApplications(@PathVariable String name) {
 		StreamDefinition definition = this.streamService.findOne(name);
 		LinkedList<StreamAppDefinition> streamAppDefinitions = this.streamDefinitionService.getAppDefinitions(definition);
 		List<AppRegistrationResource> appRegistrations = new ArrayList<>();
@@ -264,7 +266,7 @@ public class StreamDefinitionController {
 	/**
 	 * Request removal of all stream definitions.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.DELETE)
+	@DeleteMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteAll() {
 		this.streamService.deleteAll();

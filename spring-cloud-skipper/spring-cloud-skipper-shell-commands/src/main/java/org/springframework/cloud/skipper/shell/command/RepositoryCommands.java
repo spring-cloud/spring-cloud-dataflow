@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.shell.command;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.shell.command.support.TableUtils;
@@ -38,7 +37,6 @@ import org.springframework.shell.table.TableModel;
 @ShellComponent
 public class RepositoryCommands extends AbstractSkipperCommand {
 
-	@Autowired
 	public RepositoryCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 	}

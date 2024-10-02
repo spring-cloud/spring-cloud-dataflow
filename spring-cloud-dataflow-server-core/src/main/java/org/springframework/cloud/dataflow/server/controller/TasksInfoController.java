@@ -22,8 +22,8 @@ import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,12 +58,12 @@ public class TasksInfoController {
 		this.taskExecutionService = taskExecutionService;
 	}
 
-	@RequestMapping(value= "executions", method = RequestMethod.GET)
+	@GetMapping("executions")
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionsInfoResource getInfo(
-			@RequestParam(required = false, defaultValue = "false", name="completed") String completed,
+			@RequestParam(required = false, defaultValue = "false") String completed,
 			@RequestParam(required = false, defaultValue = "", name="name") String taskName,
-			@RequestParam(required = false, name="days") Integer days
+			@RequestParam(required = false) Integer days
 	) {
 		return this.taskExecutionsAssembler.toModel(this.taskExecutionService.getAllTaskExecutionsCount(Boolean.parseBoolean(completed), taskName, days));
 	}

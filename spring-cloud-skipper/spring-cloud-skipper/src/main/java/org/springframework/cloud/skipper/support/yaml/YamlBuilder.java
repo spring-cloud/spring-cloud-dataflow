@@ -153,8 +153,7 @@ class YamlBuilder {
 				String key = entry.getKey();
 				Object value = entry.getValue().build();
 
-				if (mode == Mode.FLATTEN && value instanceof Flatten) {
-					Flatten f = (Flatten) value;
+				if (mode == Mode.FLATTEN && value instanceof Flatten f) {
 					if (f.list != null && f.list.size() == 1) {
 						map.put(key, f.list.get(0));
 					}

@@ -16,18 +16,13 @@
 
 package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import io.pivotal.scheduler.SchedulerClient;
 import org.cloudfoundry.client.CloudFoundryClient;
 import org.cloudfoundry.client.v2.Metadata;
 import org.cloudfoundry.client.v2.info.GetInfoResponse;
@@ -41,6 +36,7 @@ import org.cloudfoundry.logcache.v1.LogCacheClient;
 import org.cloudfoundry.reactor.TokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
@@ -50,8 +46,11 @@ import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryConnectio
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeploymentProperties;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryTaskLauncher;
 
-import io.pivotal.scheduler.SchedulerClient;
-import reactor.core.publisher.Mono;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author David Turanski
@@ -101,7 +100,7 @@ class CloudFoundryTaskPlatformFactoryTests {
 		this.defaultConnectionProperties = new CloudFoundryConnectionProperties();
 		this.defaultConnectionProperties.setOrg("org");
 		this.defaultConnectionProperties.setSpace("space");
-		this.defaultConnectionProperties.setUrl(new URL("https://localhost:9999"));
+		this.defaultConnectionProperties.setUrl(URI.create("https://localhost:9999").toURL());
 
 		this.deploymentProperties = new CloudFoundryDeploymentProperties();
 		this.deploymentProperties.setApiTimeout(1L);
@@ -213,7 +212,7 @@ class CloudFoundryTaskPlatformFactoryTests {
 		this.anotherOrgSpaceConnectionProperties = new CloudFoundryConnectionProperties();
 		this.anotherOrgSpaceConnectionProperties.setOrg("another-org");
 		this.anotherOrgSpaceConnectionProperties.setSpace("another-space");
-		this.anotherOrgSpaceConnectionProperties.setUrl(new URL("https://localhost:9999"));
+		this.anotherOrgSpaceConnectionProperties.setUrl(URI.create("https://localhost:9999").toURL());
 
 
 		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();

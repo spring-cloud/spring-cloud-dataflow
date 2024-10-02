@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.job.StepExecutionHistory;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionProgressInfoResource;
 import org.springframework.cloud.dataflow.server.batch.JobService;
@@ -29,9 +28,9 @@ import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,7 +58,6 @@ public class JobStepExecutionProgressController {
 	 *                            progress execution information.
 	 * @param taskJobService      Queries both schemas.
 	 */
-	@Autowired
 	public JobStepExecutionProgressController(JobService jobService, TaskJobService taskJobService) {
 		this.taskJobService = taskJobService;
 		this.jobService = jobService;
@@ -77,7 +75,7 @@ public class JobStepExecutionProgressController {
 	 * @throws NoSuchStepExecutionException Thrown if the respective {@link StepExecution}
 	 *                                      does not exist
 	 */
-	@RequestMapping(value = "/{stepExecutionId}/progress", method = RequestMethod.GET)
+	@GetMapping("/{stepExecutionId}/progress")
 	@ResponseStatus(HttpStatus.OK)
 	public StepExecutionProgressInfoResource progress(
 			@PathVariable long jobExecutionId,

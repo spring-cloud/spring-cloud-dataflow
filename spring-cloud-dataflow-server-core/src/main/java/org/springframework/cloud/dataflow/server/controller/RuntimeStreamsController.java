@@ -42,9 +42,9 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -81,9 +81,9 @@ public class RuntimeStreamsController {
 	 *
 	 * @return a paged model for stream statuses
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public PagedModel<StreamStatusResource> status(
-			@RequestParam(value = "names", required = false) String[] names,
+			@RequestParam(required = false) String[] names,
 			Pageable pageable,
 			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler
 	) {
@@ -125,8 +125,8 @@ public class RuntimeStreamsController {
 	 * @param assembler The resource assembler for the results.
 	 * @return paged results.
 	 */
-	@RequestMapping(value = "/{streamNames}", method = RequestMethod.GET)
-	public PagedModel<StreamStatusResource> streamStatus(@PathVariable("streamNames") String[] streamNames, Pageable pageable,
+	@GetMapping("/{streamNames}")
+	public PagedModel<StreamStatusResource> streamStatus(@PathVariable String[] streamNames, Pageable pageable,
 			PagedResourcesAssembler<Pair<String, List<AppStatus>>> assembler) {
 		return assembler.toModel(new PageImpl<>(getStreamStatusList(getPagedStreamNames(pageable, Arrays.asList(streamNames))),
 				pageable, streamNames.length), statusAssembler);

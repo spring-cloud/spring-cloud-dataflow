@@ -41,23 +41,27 @@ class YmlUtilsTests {
 				+ "time.spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp1-helloworld.cfapps.io";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
 		assertThat(propertiesYml).isEqualTo(
-				"log:\n"
-						+ "  spec:\n"
-						+ "    deploymentProperties:\n"
-						+ "      spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io\n"
-						+ "time:\n"
-						+ "  spec:\n"
-						+ "    deploymentProperties:\n"
-						+ "      spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io\n");
+				"""
+				log:
+				  spec:
+				    deploymentProperties:
+				      spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io
+				time:
+				  spec:
+				    deploymentProperties:
+				      spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io
+				""");
 	}
 
 	@Test
 	void propertiesParsing() throws IOException {
 		String properties = "spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp3-helloworld.cfapps.io";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
-		assertThat(propertiesYml).isEqualTo("spec:\n"
-				+ "  deploymentProperties:\n"
-				+ "    spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io\n");
+		assertThat(propertiesYml).isEqualTo("""
+				spec:
+				  deploymentProperties:
+				    spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io
+				""");
 	}
 
 	@Test

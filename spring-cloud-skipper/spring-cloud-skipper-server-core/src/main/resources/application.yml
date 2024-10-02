@@ -6,7 +6,7 @@ info:
 management:
   security:
     roles: MANAGE
-  context-path: /actuator
+  server.base-path: /actuator
   endpoints:
     web:
       exposure:
@@ -200,7 +200,7 @@ spring:
     baselineOnMigrate: true
     locations:
       - classpath:org/springframework/cloud/skipper/server/db/migration/{vendor}
-    check-location: false
+    fail-on-missing-locations: false
   mvc:
     async:
       request-timeout: 120000

@@ -154,12 +154,13 @@ class PostgreSQLTextToOIDTest {
 
 	private void createTable(String tableName, String colType, final List<Pair<String, String>> data) {
 
-		final String createTable = "create table %s (\n" +
-				"  id int8 not null,\n" +
-				"  big_string %s,\n" +
-				"  short_string varchar(255)," +
-				"  primary key (id)\n" +
-				")";
+		final String createTable = """
+				create table %s (
+				  id int8 not null,
+				  big_string %s,
+				  short_string varchar(255),\
+				  primary key (id)
+				)""";
 		final String insertTable = "insert into %s(id, big_string, short_string) values(?,?,?)";
 		JdbcTemplate template = new JdbcTemplate(dataSource);
 		template.update(String.format(createTable, tableName, colType));

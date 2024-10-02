@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.listener.StepExecutionListenerSupport;
+import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.util.Assert;
@@ -35,7 +35,7 @@ import org.springframework.util.StringUtils;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class ComposedTaskStepExecutionListener extends StepExecutionListenerSupport {
+public class ComposedTaskStepExecutionListener implements StepExecutionListener {
 	private final static Logger logger = LoggerFactory.getLogger(ComposedTaskStepExecutionListener.class);
 
 	private final TaskExplorer taskExplorer;

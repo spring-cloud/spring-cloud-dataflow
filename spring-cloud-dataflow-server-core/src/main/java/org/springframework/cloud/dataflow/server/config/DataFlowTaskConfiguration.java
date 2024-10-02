@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.config;
 
+import java.sql.SQLException;
+
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.explore.JobExplorer;
@@ -23,8 +25,6 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
 import org.springframework.cloud.dataflow.server.batch.AllInOneExecutionContextSerializer;
 import org.springframework.cloud.dataflow.server.batch.JdbcSearchableJobExecutionDao;
@@ -40,6 +40,8 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
@@ -50,8 +52,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.sql.SQLException;
 
 /**
  * Configuration for DAO Containers use for multiple schema targets.
@@ -133,7 +133,8 @@ public class DataFlowTaskConfiguration {
 		jdbcSearchableJobExecutionDao.setDataSource(dataSource);
 		try {
 			jdbcSearchableJobExecutionDao.afterPropertiesSet();
-		} catch (Throwable x) {
+		}
+		catch (Throwable x) {
 			throw new RuntimeException("Exception creating JdbcSearchableJobExecutionDao", x);
 		}
 		return jdbcSearchableJobExecutionDao;

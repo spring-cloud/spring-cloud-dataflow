@@ -34,8 +34,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
@@ -64,7 +64,7 @@ public class AboutController {
 	 * @return Detailed information about the enabled features, versions of implementation
 	 * libraries, and security configuration
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public AboutResource getAboutResource() {
 		final AboutResource aboutResource = new AboutResource();

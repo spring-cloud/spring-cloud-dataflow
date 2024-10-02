@@ -22,7 +22,6 @@ import java.util.List;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.dataflow.rest.resource.StepExecutionResource;
 import org.springframework.cloud.dataflow.server.batch.JobService;
 import org.springframework.cloud.dataflow.server.batch.NoSuchStepExecutionException;
@@ -36,9 +35,9 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -58,7 +57,6 @@ public class JobStepExecutionController {
 	 *
 	 * @param jobService JobService used for this controller
 	 */
-	@Autowired
 	public JobStepExecutionController(JobService jobService) {
 		Assert.notNull(jobService, "jobService required");
         this.jobService = jobService;
@@ -74,7 +72,7 @@ public class JobStepExecutionController {
 	 * @throws NoSuchJobExecutionException if the job execution for the id specified does
 	 * not exist.
 	 */
-	@RequestMapping(value = { "" }, method = RequestMethod.GET)
+	@GetMapping({ "" })
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<StepExecutionResource> stepExecutions(
 			@PathVariable("jobExecutionId") long id,
@@ -98,7 +96,7 @@ public class JobStepExecutionController {
 	 * @throws NoSuchJobExecutionException if the job execution for the id specified does
 	 * not exist.
 	 */
-	@RequestMapping(value = { "/{stepExecutionId}" }, method = RequestMethod.GET)
+	@GetMapping({ "/{stepExecutionId}" })
 	@ResponseStatus(HttpStatus.OK)
 	public StepExecutionResource getStepExecution(
 			@PathVariable("jobExecutionId") Long id,

@@ -600,20 +600,20 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 			if (typedValue instanceof String) {
 				map.put(parameterName, new JobParameter(typedValue, String.class, identifying));
 			}
-			else if (typedValue instanceof Integer) {
-				map.put(parameterName, new JobParameter(((Integer) typedValue).longValue(), Integer.class, identifying));
+			else if (typedValue instanceof Integer integer) {
+				map.put(parameterName, new JobParameter(integer.longValue(), Integer.class, identifying));
 			}
 			else if (typedValue instanceof Long) {
 				map.put(parameterName, new JobParameter(typedValue, Long.class, identifying));
 			}
-			else if (typedValue instanceof Float) {
-				map.put(parameterName, new JobParameter(((Float) typedValue).doubleValue(), Float.class, identifying));
+			else if (typedValue instanceof Float float1) {
+				map.put(parameterName, new JobParameter(float1.doubleValue(), Float.class, identifying));
 			}
 			else if (typedValue instanceof Double) {
 				map.put(parameterName, new JobParameter(typedValue, Double.class, identifying));
 			}
-			else if (typedValue instanceof Timestamp) {
-				map.put(parameterName, new JobParameter(new Date(((Timestamp) typedValue).getTime()), Timestamp.class, identifying));
+			else if (typedValue instanceof Timestamp timestamp) {
+				map.put(parameterName, new JobParameter(new Date(timestamp.getTime()), Timestamp.class, identifying));
 			}
 			else if (typedValue instanceof Date) {
 				map.put(parameterName, new JobParameter(typedValue, Date.class, identifying));

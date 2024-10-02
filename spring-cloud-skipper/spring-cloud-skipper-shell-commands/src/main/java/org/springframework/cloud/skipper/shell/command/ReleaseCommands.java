@@ -28,7 +28,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
 import org.springframework.cloud.skipper.ReleaseNotFoundException;
 import org.springframework.cloud.skipper.SkipperException;
@@ -67,7 +66,6 @@ public class ReleaseCommands extends AbstractSkipperCommand {
 
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseCommands.class);
 
-	@Autowired
 	public ReleaseCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 	}

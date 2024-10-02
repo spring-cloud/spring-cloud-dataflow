@@ -19,20 +19,16 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.core.LaunchResponse;
 import org.springframework.cloud.dataflow.core.PlatformTaskExecutionInformation;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
@@ -56,6 +52,7 @@ import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionInfoService;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.TaskExplorer;
 import org.springframework.data.domain.Page;
@@ -69,9 +66,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -161,7 +160,7 @@ public class TaskExecutionController {
 	 * @param assembler for the {@link TaskExecution}s
 	 * @return a list of task executions
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionResource> list(Pageable pageable,
 												  PagedResourcesAssembler<TaskJobExecutionRel> assembler) {
@@ -179,7 +178,7 @@ public class TaskExecutionController {
 	 * @param assembler for the {@link TaskExecution}s
 	 * @return the paged list of task executions
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
+	@GetMapping(value = "", params = "name")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionResource> retrieveTasksByName(
 			@RequestParam("name") String taskName,
@@ -205,7 +204,7 @@ public class TaskExecutionController {
 	 * @param arguments  the runtime commandline arguments
 	 * @return the taskExecutionId for the executed task
 	 */
-	@RequestMapping(value = "", method = RequestMethod.POST, params = "name")
+	@PostMapping(value = "", params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
 	public long launch(
 			@RequestParam("name") String taskName,
@@ -216,7 +215,7 @@ public class TaskExecutionController {
 		LaunchResponse launchResponse = this.taskExecutionService.executeTask(taskName, propertiesToUse, argumentsToUse);
 		return launchResponse.getExecutionId();
 	}
-	@RequestMapping(value = "/launch", method = RequestMethod.POST, params = "name")
+	@PostMapping(value = "/launch", params = "name")
 	@ResponseStatus(HttpStatus.CREATED)
 	public LaunchResponseResource launchBoot3(
 			@RequestParam("name") String taskName,
@@ -236,10 +235,10 @@ public class TaskExecutionController {
 	 * @param id the id of the requested {@link TaskExecution}
 	 * @return the {@link TaskExecution}
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource view(
-			@PathVariable(name = "id") Long id) {
+			@PathVariable Long id) {
 		TaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecution(id));
 		if (taskExecution == null) {
 			throw new NoSuchTaskExecutionException(id);
@@ -254,11 +253,11 @@ public class TaskExecutionController {
 		);
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
-	@RequestMapping(value = "/external/{externalExecutionId}", method = RequestMethod.GET)
+	@GetMapping("/external/{externalExecutionId}")
 	@ResponseStatus(HttpStatus.OK)
 	public TaskExecutionResource viewByExternal(
-			@PathVariable(name = "externalExecutionId") String externalExecutionId,
-			@RequestParam(name = "platform", required = false) String platform
+			@PathVariable String externalExecutionId,
+			@RequestParam(required = false) String platform
 	) {
 		TaskExecution taskExecution = sanitizeTaskExecutionArguments(this.explorer.getTaskExecutionByExternalExecutionId(externalExecutionId, platform));
 		if (taskExecution == null) {
@@ -276,7 +275,7 @@ public class TaskExecutionController {
 		return this.taskAssembler.toModel(taskJobExecutionRel);
 	}
 
-	@RequestMapping(value = "/current", method = RequestMethod.GET)
+	@GetMapping("/current")
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<CurrentTaskExecutionsResource> getCurrentTaskExecutionsInfo() {
 		List<PlatformTaskExecutionInformation> executionInformation = taskExecutionInfoService
@@ -300,7 +299,7 @@ public class TaskExecutionController {
 	 * @param ids     The id of the {@link TaskExecution}s to clean up
 	 * @param actions Defaults to "CLEANUP" if not specified
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public void cleanup(
 			@PathVariable("id") Set<Long> ids,
@@ -323,14 +322,14 @@ public class TaskExecutionController {
 	 * @param taskName name of the task (default '')
 	 * @param days only include tasks that have ended at least this many days ago (default null)
 	 */
-	@RequestMapping(method = RequestMethod.DELETE)
+	@DeleteMapping
 	@ResponseStatus(HttpStatus.OK)
 	@Async(DataflowAsyncAutoConfiguration.DATAFLOW_ASYNC_EXECUTOR)
 	public void cleanupAll(
 			@RequestParam(defaultValue = "CLEANUP", name = "action") TaskExecutionControllerDeleteAction[] actions,
-			@RequestParam(defaultValue = "false", name = "completed") boolean completed,
+			@RequestParam(defaultValue = "false") boolean completed,
 			@RequestParam(defaultValue = "", name = "name") String taskName,
-			@RequestParam(name="days", required = false) Integer days
+			@RequestParam(required = false) Integer days
 	) {
 		this.taskDeleteService.cleanupExecutions(new HashSet<>(Arrays.asList(actions)), taskName, completed, days);
 	}
@@ -341,11 +340,11 @@ public class TaskExecutionController {
 	 * @param ids      the ids of the {@link TaskExecution}s to stop
 	 * @param platform the platform name
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.POST)
+	@PostMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public void stop(
 			@PathVariable("id") Set<Long> ids,
-			@RequestParam(defaultValue = "", name = "platform") String platform) {
+			@RequestParam(defaultValue = "") String platform) {
 		this.taskExecutionService.stopTaskExecution(ids, platform);
 	}
 

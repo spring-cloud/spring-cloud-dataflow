@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,8 +198,7 @@ public class RestControllerAdvice {
 		}
 
 		String message = null;
-		if (e instanceof MethodArgumentTypeMismatchException) {
-			final MethodArgumentTypeMismatchException methodArgumentTypeMismatchException = (MethodArgumentTypeMismatchException) e;
+		if (e instanceof MethodArgumentTypeMismatchException methodArgumentTypeMismatchException) {
 			final Class<?> requiredType = methodArgumentTypeMismatchException.getRequiredType();
 
 			final Class<?> enumType;

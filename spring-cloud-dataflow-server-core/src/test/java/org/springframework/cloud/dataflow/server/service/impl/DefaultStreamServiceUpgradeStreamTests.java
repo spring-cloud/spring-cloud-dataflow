@@ -71,14 +71,16 @@ class DefaultStreamServiceUpgradeStreamTests {
 			streamService.updateStream(streamDeployment2.getStreamName(), updateStreamRequest);
 			verify(this.skipperStreamDeployer, times(1))
 					.upgradeStream(this.streamDeployment2.getStreamName(),
-							null, "log:\n" +
-									"  spec:\n" +
-									"    applicationProperties:\n" +
-									"      spring.cloud.dataflow.stream.app.type: sink\n" +
-									"time:\n" +
-									"  spec:\n" +
-									"    applicationProperties:\n" +
-									"      spring.cloud.dataflow.stream.app.type: source\n", false, null);
+							null, """
+									log:
+									  spec:
+									    applicationProperties:
+									      spring.cloud.dataflow.stream.app.type: sink
+									time:
+									  spec:
+									    applicationProperties:
+									      spring.cloud.dataflow.stream.app.type: source
+									""", false, null);
 			verifyNoMoreInteractions(this.skipperStreamDeployer);
 		}
 	}

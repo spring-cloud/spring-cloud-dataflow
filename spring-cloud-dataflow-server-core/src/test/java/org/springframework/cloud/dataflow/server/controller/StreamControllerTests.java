@@ -38,7 +38,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +94,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -103,7 +103,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -575,9 +574,12 @@ class StreamControllerTests {
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("_embedded.errors[0].logref", is("InvalidStreamDefinitionException")))
 			.andExpect(jsonPath("_embedded.errors[0].message",
-				is("Application name 'foo' with type 'source' does not exist in the " + "app "
-					+ "registry.\nApplication name 'bar' with type 'sink' does not exist in the app "
-					+ "registry.")));
+				is("""
+					Application name 'foo' with type 'source' does not exist in the \
+					app \
+					registry.
+					Application name 'bar' with type 'sink' does not exist in the app \
+					registry.""")));
 	}
 
 	@Test

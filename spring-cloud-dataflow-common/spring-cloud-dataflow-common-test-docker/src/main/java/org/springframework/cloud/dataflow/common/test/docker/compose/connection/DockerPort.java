@@ -21,12 +21,16 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.net.URI;
 import java.net.URL;
 import java.util.Objects;
 import java.util.function.Function;
+
 import javax.net.ssl.SSLHandshakeException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure;
 
 public class DockerPort {
@@ -76,7 +80,7 @@ public class DockerPort {
         try {
             String urlString = urlFunction.apply(this);
             log.trace("Trying to connect to {}", urlString);
-            url = new URL(urlString);
+            url = URI.create(urlString).toURL();
         } catch (MalformedURLException e) {
             throw new RuntimeException("Could not create URL for connecting to localhost", e);
         }

@@ -39,8 +39,8 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,7 +73,6 @@ public class JobExecutionThinController {
 	 * @param taskJobService the service this controller will use for retrieving job
 	 *                       execution information. Must not be null.
 	 */
-	@Autowired
 	public JobExecutionThinController(TaskJobService taskJobService) {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
 		this.taskJobService = taskJobService;
@@ -89,7 +88,7 @@ public class JobExecutionThinController {
 	 * @throws NoSuchJobExecutionException in the event that a job execution id specified
 	 *                                     is not present when looking up stepExecutions for the result.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
+	@GetMapping(value = "", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> listJobsOnly(Pageable pageable,
 															 PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobExecutionException {
@@ -106,7 +105,7 @@ public class JobExecutionThinController {
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name", produces = "application/json")
+	@GetMapping(value = "", params = "name", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByName(
 			@RequestParam("name") String jobName,
@@ -126,12 +125,12 @@ public class JobExecutionThinController {
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = {"fromDate",
+	@GetMapping(value = "", params = {"fromDate",
 			"toDate"}, produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByDateRange(
-			@RequestParam("fromDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date fromDate,
-			@RequestParam("toDate") @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date toDate,
+			@RequestParam @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date fromDate,
+			@RequestParam @DateTimeFormat(pattern = TimeUtils.DEFAULT_DATAFLOW_DATE_TIME_PARAMETER_FORMAT_PATTERN) Date toDate,
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler
 	) throws NoSuchJobException {
@@ -148,10 +147,10 @@ public class JobExecutionThinController {
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "jobInstanceId", produces = "application/json")
+	@GetMapping(value = "", params = "jobInstanceId", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByJobInstanceId(
-			@RequestParam("jobInstanceId") int jobInstanceId,
+			@RequestParam int jobInstanceId,
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
 		Page<TaskJobExecution> jobExecutions = taskJobService
@@ -168,10 +167,10 @@ public class JobExecutionThinController {
 	 * @return list task/job executions with the specified jobName.
 	 * @throws NoSuchJobException if the job with the given name does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "taskExecutionId", produces = "application/json")
+	@GetMapping(value = "", params = "taskExecutionId", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionThinResource> retrieveJobsByTaskExecutionId(
-			@RequestParam("taskExecutionId") int taskExecutionId,
+			@RequestParam int taskExecutionId,
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException {
 		Page<TaskJobExecution> jobExecutions = taskJobService.listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(

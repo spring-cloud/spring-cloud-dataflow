@@ -104,11 +104,11 @@ public class DefaultContainerImageMetadataResolver implements ContainerImageMeta
 	}
 
 	private static int asInt(Object value) {
-		if (value instanceof Number) {
-			return ((Number) value).intValue();
+		if (value instanceof Number number) {
+			return number.intValue();
 		}
-		else if (value instanceof String) {
-			return Integer.parseInt((String) value);
+		else if (value instanceof String string) {
+			return Integer.parseInt(string);
 		}
 		else if (value != null) {
 			return Integer.parseInt(value.toString());

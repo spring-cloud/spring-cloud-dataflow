@@ -139,13 +139,16 @@ public class DockerComposeFactory {
 			return (BeforeAllCallback) context -> logger.debug("Docker Compose installation is disabled!");
 		}
 
-		logger.info("Docker Compose based Integration Tests. \nFollowing environment variables or properties can be used to configure the testing fixture: \n" +
-				" - TEST_DOCKER_COMPOSE_PATHS (test.docker.compose.paths) configures the list of docker-compose files. \n" +
-				" - TEST_DOCKER_COMPOSE_DATAFLOW_VERSION (test.docker.compose.dataflow.version) sets the Data Flow version used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_SKIPPER_VERSION (test.docker.compose.skipper.version) sets the Skipper version used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_STREAM_APPS_URI (test.docker.compose.stream.apps.uri) version of the Streaming apps used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_TASK_APPS_URI (test.docker.compose.taks.apps.uri)  sets the Tasks apps version used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_PULLONSTARTUP (test.docker.compose.pullOnStartup) enable/disable pulling latest docker images from the Docker Hub. \n");
+		logger.info("""
+				Docker Compose based Integration Tests.\s
+				Following environment variables or properties can be used to configure the testing fixture:\s
+				 - TEST_DOCKER_COMPOSE_PATHS (test.docker.compose.paths) configures the list of docker-compose files.\s
+				 - TEST_DOCKER_COMPOSE_DATAFLOW_VERSION (test.docker.compose.dataflow.version) sets the Data Flow version used for testing.\s
+				 - TEST_DOCKER_COMPOSE_SKIPPER_VERSION (test.docker.compose.skipper.version) sets the Skipper version used for testing.\s
+				 - TEST_DOCKER_COMPOSE_STREAM_APPS_URI (test.docker.compose.stream.apps.uri) version of the Streaming apps used for testing.\s
+				 - TEST_DOCKER_COMPOSE_TASK_APPS_URI (test.docker.compose.taks.apps.uri)  sets the Tasks apps version used for testing.\s
+				 - TEST_DOCKER_COMPOSE_PULLONSTARTUP (test.docker.compose.pullOnStartup) enable/disable pulling latest docker images from the Docker Hub.\s
+				""");
 
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN,
 				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, "default version set in ../src/docker-compose/docker-compose.yml"));
