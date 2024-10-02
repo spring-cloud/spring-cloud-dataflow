@@ -33,7 +33,7 @@
 
 		<equalverifier.version>3.15.8</equalverifier.version>
 
-		<jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 		<sonar-maven-plugin.version>3.11.0.3922</sonar-maven-plugin.version>
 		<javadoc.opts>-Xdoclint:none</javadoc.opts>
 
@@ -266,9 +266,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
 					<parameters>true</parameters>
+					<release>${java.version}</release>
 				</configuration>
 			</plugin>
 			<plugin>
