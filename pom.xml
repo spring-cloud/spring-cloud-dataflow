@@ -115,26 +115,10 @@
 				<version>2.1.1</version>
 				<dependencies>
 					<dependency>
-						<groupId>org.codehaus.groovy</groupId>
-						<artifactId>groovy-eclipse-compiler</artifactId>
-						<version>3.9.0</version>
-					</dependency>
-					<dependency>
-						<groupId>org.codehaus.groovy</groupId>
-						<artifactId>groovy-eclipse-batch</artifactId>
-						<version>4.0.22-03</version>
-					</dependency>
-					<dependency>
 						<groupId>org.apache.groovy</groupId>
 						<artifactId>groovy</artifactId>
 						<version>4.0.23</version>
 						<type>pom</type>
-						<exclusions>
-							<exclusion>
-								<groupId>junit</groupId>
-								<artifactId>junit</artifactId>
-							</exclusion>
-						</exclusions>
 					</dependency>
 				</dependencies>
 				<executions>
