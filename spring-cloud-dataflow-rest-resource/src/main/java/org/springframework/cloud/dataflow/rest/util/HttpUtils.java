@@ -15,13 +15,13 @@
  */
 package org.springframework.cloud.dataflow.rest.util;
 
-import org.apache.hc.core5.ssl.SSLContexts;
-
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
+
+import org.apache.hc.core5.ssl.SSLContexts;
 
 
 

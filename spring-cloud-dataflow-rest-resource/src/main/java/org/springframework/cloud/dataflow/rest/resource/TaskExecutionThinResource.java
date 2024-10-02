@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.util.StringUtils;
 
 
 /**

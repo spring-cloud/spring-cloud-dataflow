@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +24,9 @@ import org.springframework.boot.cloud.CloudPlatform;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesSchedulerProperties;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
 import org.springframework.test.context.TestPropertySource;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 /**
  * @author Christian Tzolov

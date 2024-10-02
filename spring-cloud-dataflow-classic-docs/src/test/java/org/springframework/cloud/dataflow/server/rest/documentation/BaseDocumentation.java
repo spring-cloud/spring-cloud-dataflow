@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

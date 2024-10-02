@@ -16,10 +16,10 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Provides meta-information about the Spring Cloud Data Flow server.

@@ -22,7 +22,6 @@ import org.springframework.cloud.dataflow.configuration.metadata.container.Conta
 import org.springframework.cloud.dataflow.configuration.metadata.container.DefaultContainerImageMetadataResolver;
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryService;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 /**
  * Automatically exposes an {@link ApplicationConfigurationMetadataResolver} if none is already registered.

@@ -15,12 +15,12 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import com.github.zafarkhaja.semver.Version;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+
+import com.github.zafarkhaja.semver.Version;
 
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerName;

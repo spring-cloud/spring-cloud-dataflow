@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.rest.support.jackson;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;

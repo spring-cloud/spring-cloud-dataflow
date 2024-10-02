@@ -15,10 +15,10 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration.db2;
 
+import java.util.Collections;
+
 import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
 import org.springframework.cloud.dataflow.server.db.migration.DropColumnSqlCommands;
-
-import java.util.Collections;
 
 /**
  * Removes extra JOB_CONFIGURATION_LOCATION columns.

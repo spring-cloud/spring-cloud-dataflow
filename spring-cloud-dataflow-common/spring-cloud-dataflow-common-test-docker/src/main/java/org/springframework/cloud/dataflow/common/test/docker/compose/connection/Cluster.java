@@ -15,11 +15,11 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 public class Cluster {
 

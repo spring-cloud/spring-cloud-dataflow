@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.util.Assert;

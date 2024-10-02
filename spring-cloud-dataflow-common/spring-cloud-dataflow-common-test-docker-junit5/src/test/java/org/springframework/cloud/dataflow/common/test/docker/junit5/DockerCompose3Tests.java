@@ -15,15 +15,14 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.junit5;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerExecutionException;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerCompose;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeInfo;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @DockerCompose(locations = {"classpath:org/springframework/cloud/dataflow/common/test/docker/junit5/docker-compose-cp1.yml"})
 class DockerCompose3Tests {

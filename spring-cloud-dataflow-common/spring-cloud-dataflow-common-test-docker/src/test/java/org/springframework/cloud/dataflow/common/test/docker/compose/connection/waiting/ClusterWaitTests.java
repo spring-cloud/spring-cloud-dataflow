@@ -15,21 +15,20 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
+import org.joda.time.Duration;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Cluster;
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerCache;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure.failure;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure.success;
-
-import org.joda.time.Duration;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Cluster;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerCache;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterHealthCheck;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterWait;
 
 public class ClusterWaitTests {
 

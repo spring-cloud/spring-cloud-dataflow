@@ -16,19 +16,18 @@
 
 package org.springframework.cloud.skipper.io;
 
-import org.springframework.cloud.skipper.domain.PackageMetadata;
-
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.error.YAMLException;
-import org.yaml.snakeyaml.inspector.TagInspector;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
+
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 
 /**
  * Extends {@link SafeConstructor} so that we can construct an instance of {@link org.springframework.cloud.skipper.domain.PackageMetadata}

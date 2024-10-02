@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import java.time.temporal.ValueRange;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
@@ -29,11 +25,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**

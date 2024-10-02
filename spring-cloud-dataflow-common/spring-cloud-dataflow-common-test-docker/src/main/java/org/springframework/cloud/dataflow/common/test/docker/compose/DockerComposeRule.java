@@ -15,16 +15,15 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose;
 
-import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterHealthCheck.serviceHealthCheck;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterHealthCheck.transformingHealthCheck;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.joda.time.Duration;
 import org.joda.time.ReadableDuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ProjectName;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ShutdownStrategy;
@@ -51,6 +50,9 @@ import org.springframework.cloud.dataflow.common.test.docker.compose.logging.DoN
 import org.springframework.cloud.dataflow.common.test.docker.compose.logging.FileLogCollector;
 import org.springframework.cloud.dataflow.common.test.docker.compose.logging.LogCollector;
 import org.springframework.cloud.dataflow.common.test.docker.compose.logging.LogDirectory;
+
+import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterHealthCheck.serviceHealthCheck;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterHealthCheck.transformingHealthCheck;
 
 public class DockerComposeRule {
 

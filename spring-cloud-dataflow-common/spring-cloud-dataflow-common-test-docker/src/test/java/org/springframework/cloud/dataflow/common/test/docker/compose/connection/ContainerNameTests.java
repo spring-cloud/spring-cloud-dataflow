@@ -15,13 +15,12 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
+import java.util.List;
+
+import org.junit.Test;
+
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerName;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerNames;
 
 public class ContainerNameTests {
 

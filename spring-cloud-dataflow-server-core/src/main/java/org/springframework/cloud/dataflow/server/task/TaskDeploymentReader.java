@@ -1,7 +1,5 @@
 package org.springframework.cloud.dataflow.server.task;
 
-import java.util.List;
-
 import org.springframework.cloud.dataflow.core.TaskDeployment;
 
 public interface TaskDeploymentReader {

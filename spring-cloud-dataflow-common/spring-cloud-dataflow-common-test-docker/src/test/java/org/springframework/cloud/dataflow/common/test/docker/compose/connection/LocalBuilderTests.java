@@ -15,6 +15,15 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine.LocalBuilder;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
@@ -25,14 +34,6 @@ import static org.springframework.cloud.dataflow.common.test.docker.compose.conf
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.DockerMachineEnvironmentMatcher.containsEnvironment;
-
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine.LocalBuilder;
 
 public class LocalBuilderTests {
 

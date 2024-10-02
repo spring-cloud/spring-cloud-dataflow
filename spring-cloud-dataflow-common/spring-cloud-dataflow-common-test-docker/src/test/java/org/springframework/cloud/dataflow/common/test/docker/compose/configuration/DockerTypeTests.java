@@ -15,16 +15,16 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerType;
 
 public class DockerTypeTests {
 

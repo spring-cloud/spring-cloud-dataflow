@@ -16,9 +16,6 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +32,9 @@ import org.springframework.hateoas.Link;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Glenn Renfro

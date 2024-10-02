@@ -15,11 +15,11 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
-import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
+import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 
 /**
  * Base implementation for removing Task v2 and Batch v4 schema.

@@ -19,13 +19,13 @@ import java.lang.reflect.Field;
 import java.net.URI;
 
 import org.apache.hc.client5.http.auth.AuthScope;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import org.apache.hc.client5.http.auth.CredentialsProvider;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.ReflectionUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author Gunnar Hillert

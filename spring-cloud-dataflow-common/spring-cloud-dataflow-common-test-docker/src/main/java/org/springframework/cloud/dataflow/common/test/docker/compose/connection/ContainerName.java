@@ -15,9 +15,9 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static java.util.stream.Collectors.joining;
-
 import java.util.Arrays;
+
+import static java.util.stream.Collectors.joining;
 
 public class ContainerName {
 

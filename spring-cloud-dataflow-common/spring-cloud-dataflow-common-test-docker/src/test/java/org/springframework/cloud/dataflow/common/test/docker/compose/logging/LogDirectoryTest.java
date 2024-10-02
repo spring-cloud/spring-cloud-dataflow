@@ -15,12 +15,9 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.logging;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Rule;
 import org.junit.Test;
-//import org.junit.contrib.java.lang.system.EnvironmentVariables;
-import org.springframework.cloud.dataflow.common.test.docker.compose.logging.LogDirectory;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LogDirectoryTest {
 

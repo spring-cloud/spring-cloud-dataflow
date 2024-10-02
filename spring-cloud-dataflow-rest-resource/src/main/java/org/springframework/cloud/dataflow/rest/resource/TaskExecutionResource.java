@@ -19,12 +19,10 @@ package org.springframework.cloud.dataflow.rest.resource;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.batch.core.JobExecution;
-
 import org.springframework.cloud.dataflow.core.TaskManifest;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.TaskJobExecutionRel;

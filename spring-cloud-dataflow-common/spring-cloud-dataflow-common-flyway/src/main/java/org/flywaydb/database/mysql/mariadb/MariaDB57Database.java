@@ -19,7 +19,6 @@ import org.flywaydb.core.api.configuration.Configuration;
 import org.flywaydb.core.internal.jdbc.JdbcConnectionFactory;
 import org.flywaydb.core.internal.jdbc.StatementInterceptor;
 import org.flywaydb.database.mysql.MySQL57Database;
-import org.flywaydb.database.mysql.mariadb.MariaDBDatabase;
 
 public class MariaDB57Database extends MySQL57Database {
 

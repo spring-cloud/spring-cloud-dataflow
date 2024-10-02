@@ -15,19 +15,21 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.AdditionalEnvironmentValidator;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerType;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.RemoteHostIpResolver;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerConfiguration;
+
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_CERT_PATH;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_HOST;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.DOCKER_TLS_VERIFY;
 
 public class DockerMachine implements DockerConfiguration {
 

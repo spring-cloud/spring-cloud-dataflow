@@ -17,8 +17,6 @@
 package org.springframework.cloud.dataflow.completion;
 
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.LinkedList;
 
 import org.junit.jupiter.api.Test;
@@ -27,6 +25,8 @@ import org.springframework.cloud.dataflow.core.DefaultStreamDefinitionService;
 import org.springframework.cloud.dataflow.core.StreamAppDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinition;
 import org.springframework.cloud.dataflow.core.StreamDefinitionService;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for CompletionUtils.

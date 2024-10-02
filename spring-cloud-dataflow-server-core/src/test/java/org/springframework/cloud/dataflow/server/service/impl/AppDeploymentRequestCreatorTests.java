@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.server.service.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.mockito.Mockito.mock;
-
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -38,6 +34,10 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Ilayaperumal Gopinathan

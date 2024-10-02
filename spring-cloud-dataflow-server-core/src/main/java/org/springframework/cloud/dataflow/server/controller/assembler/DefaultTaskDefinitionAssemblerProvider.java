@@ -16,9 +16,9 @@
 package org.springframework.cloud.dataflow.server.controller.assembler;
 
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskExecutionService;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.util.Assert;
 
 /**

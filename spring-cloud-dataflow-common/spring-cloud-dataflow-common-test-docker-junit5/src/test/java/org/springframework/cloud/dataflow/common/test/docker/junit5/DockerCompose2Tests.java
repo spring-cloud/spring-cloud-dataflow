@@ -19,9 +19,6 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerCompose;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeExtension;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeInfo;
 
 @DockerCompose(id = DockerCompose2Tests.CLUSTER1, locations = {"src/test/resources/docker-compose-1.yml"})
 @DockerCompose(id = DockerCompose2Tests.CLUSTER2, locations = {"src/test/resources/docker-compose-2.yml"}, start = false)

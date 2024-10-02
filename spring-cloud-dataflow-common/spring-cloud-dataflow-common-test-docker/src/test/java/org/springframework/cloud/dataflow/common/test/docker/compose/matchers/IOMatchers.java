@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.matchers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;

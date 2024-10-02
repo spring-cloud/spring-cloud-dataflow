@@ -35,7 +35,6 @@ import org.springframework.cloud.dataflow.container.registry.authorization.Docke
 import org.springframework.cloud.dataflow.container.registry.authorization.DockerOAuth2RegistryAuthorizer;
 import org.springframework.cloud.dataflow.container.registry.authorization.RegistryAuthorizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 

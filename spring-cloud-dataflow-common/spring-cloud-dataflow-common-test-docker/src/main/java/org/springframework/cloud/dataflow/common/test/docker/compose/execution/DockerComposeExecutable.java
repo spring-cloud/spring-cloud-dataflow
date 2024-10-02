@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;

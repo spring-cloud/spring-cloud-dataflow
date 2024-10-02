@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 import org.springframework.cloud.dataflow.core.TaskDeployment;
+import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
 
 /**
  * Provide a simple interface for reading Task deployments when required by Aggregate Task Explorer
