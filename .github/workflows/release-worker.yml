@@ -24,9 +24,7 @@ jobs:
         with:
           maven-version: 3.8.8
           maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-      - uses: jfrog/setup-jfrog-cli@v1
-        with:
-          version: 1.46.4
+      - uses: jfrog/setup-jfrog-cli@v3
         env:
           JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - uses: actions/cache@v3
