@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class DefaultEnvironmentPostProcessorTests {
 
-	private static final String MANAGEMENT_CONTEXT_PATH = "management.context-path";
+	private static final String MANAGEMENT_CONTEXT_PATH = "management.server.base-path";
 
 	@Test
 	void defaultsAreContributedByServerModule() {

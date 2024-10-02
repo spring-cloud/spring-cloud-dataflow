@@ -252,9 +252,8 @@ public class DataFlowTemplate implements DataFlowOperations {
 		boolean containsMappingJackson2HttpMessageConverter = false;
 
 		for (HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
-			if (converter instanceof MappingJackson2HttpMessageConverter) {
+			if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
-				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
 				DataFlowTemplate.prepareObjectMapper(jacksonConverter.getObjectMapper());
 			}
 		}

@@ -20,6 +20,7 @@ import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
@@ -41,9 +42,10 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,11 +96,11 @@ public class JobExecutionController {
 	 * @throws NoSuchJobException          if the job with the given name does not exist.
 	 * @throws NoSuchJobExecutionException if the job execution doesn't exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, produces = "application/json")
+	@GetMapping(value = "", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobExecutionResource> retrieveJobsByParameters(
 			@RequestParam(value = "name", required = false) String jobName,
-			@RequestParam(value = "status", required = false) BatchStatus status,
+			@RequestParam(required = false) BatchStatus status,
 			Pageable pageable, PagedResourcesAssembler<TaskJobExecution> assembler) throws NoSuchJobException, NoSuchJobExecutionException {
 		Page<TaskJobExecution> jobExecutions = jobName == null && status == null ? taskJobService.listJobExecutions(pageable)
 				: taskJobService.listJobExecutionsForJob(pageable, jobName, status);
@@ -113,9 +115,9 @@ public class JobExecutionController {
 	 * @throws NoSuchJobExecutionException if the specified job execution for the id does not
 	 *                                     exist.
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+	@GetMapping(value = "/{id}", produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public JobExecutionResource view(@PathVariable("id") long id) throws NoSuchJobExecutionException {
+	public JobExecutionResource view(@PathVariable long id) throws NoSuchJobExecutionException {
 		TaskJobExecution jobExecution = taskJobService.getJobExecution(id);
 		if (jobExecution == null) {
 			throw new NoSuchJobExecutionException(String.format("No Job Execution with id of %d exists", id));
@@ -132,7 +134,7 @@ public class JobExecutionController {
 	 *                                         running.
 	 * @throws NoSuchJobExecutionException     if the job execution id specified does not exist.
 	 */
-	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "stop=true")
+	@PutMapping(value = {"/{executionId}"}, params = "stop=true")
 
 	public ResponseEntity<Void> stopJobExecution(
 			@PathVariable("executionId") long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
@@ -148,11 +150,11 @@ public class JobExecutionController {
 	 * @throws NoSuchJobExecutionException if the job execution for the jobExecutionId
 	 *                                     specified does not exist.
 	 */
-	@RequestMapping(value = {"/{executionId}"}, method = RequestMethod.PUT, params = "restart=true")
+	@PutMapping(value = {"/{executionId}"}, params = "restart=true")
 	@ResponseStatus(HttpStatus.OK)
 	public ResponseEntity<Void> restartJobExecution(
 		@PathVariable("executionId") long jobExecutionId,
-		@RequestParam(value = "useJsonJobParameters", required = false) Boolean useJsonJobParameters)
+		@RequestParam(required = false) Boolean useJsonJobParameters)
 		throws NoSuchJobExecutionException {
 		try {
 			taskJobService.restartJobExecution(jobExecutionId, useJsonJobParameters);

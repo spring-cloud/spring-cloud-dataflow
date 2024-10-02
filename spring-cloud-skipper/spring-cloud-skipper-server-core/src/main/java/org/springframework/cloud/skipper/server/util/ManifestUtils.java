@@ -67,10 +67,10 @@ public class ManifestUtils {
 		Yaml yaml = new Yaml(new SafeConstructor(options));
 		Iterable<Object> object = yaml.loadAll(manifest);
 		for (Object o : object) {
-			if (o != null && o instanceof Map) {
-				Object kind = ((Map<?, ?>) o).get("kind");
-				if (kind instanceof String) {
-					return (String) kind;
+			if (o != null && o instanceof Map<?,?> map) {
+				Object kind = map.get("kind");
+				if (kind instanceof String string) {
+					return string;
 				}
 			}
 		}

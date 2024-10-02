@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.shell;
 import java.net.URI;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Encapsulates various data points related to the Data Flow Server Target, such as target
@@ -87,7 +87,7 @@ public class Target {
 		this.targetUri = URI.create(targetUriAsString);
 		this.skipSslValidation = skipSslValidation;
 
-		if (StringUtils.isEmpty(targetUsername)) {
+		if (ObjectUtils.isEmpty(targetUsername)) {
 			this.targetCredentials = null;
 		}
 		else {

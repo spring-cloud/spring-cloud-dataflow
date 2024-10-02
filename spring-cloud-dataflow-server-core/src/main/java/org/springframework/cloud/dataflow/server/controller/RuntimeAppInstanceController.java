@@ -46,11 +46,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -111,7 +112,7 @@ public class RuntimeAppInstanceController {
 		return new RuntimeAppInstanceController.InstanceAssembler(status).toModel(appInstanceStatus);
 	}
 
-	@RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.GET)
+	@GetMapping("/{instanceId}/actuator")
 	public ResponseEntity<String> getFromActuator(
 			@PathVariable String appId,
 			@PathVariable String instanceId,
@@ -119,7 +120,7 @@ public class RuntimeAppInstanceController {
 		return ResponseEntity.ok(streamDeployer.getFromActuator(appId, instanceId, endpoint));
 	}
 
-	@RequestMapping(value = "/{instanceId}/actuator", method = RequestMethod.POST)
+	@PostMapping("/{instanceId}/actuator")
 	public ResponseEntity<Void> postToActuator(
 			@PathVariable String appId,
 			@PathVariable String instanceId,
@@ -128,7 +129,7 @@ public class RuntimeAppInstanceController {
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
-	@RequestMapping(value = "/{instanceId}/post", method = RequestMethod.POST)
+	@PostMapping("/{instanceId}/post")
 	public ResponseEntity<String> postToUrl(
 			@PathVariable String appId,
 			@PathVariable String instanceId,

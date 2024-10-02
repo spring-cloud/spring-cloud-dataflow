@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.audit.service.AuditServiceUtils;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolver;
@@ -252,7 +251,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				if(!StringUtils.hasText(appVersion)) {
 					appVersion = taskDeploymentProperties.get("version." + appId);
 				}
-				logger.debug("ctr:{}:registeredName={}, version={}, schemaTarget={}", names, registeredName, appVersion);
+				logger.debug("ctr:{}:registeredName={}, version={}", names, registeredName, appVersion);
 			}
 			logger.debug("ctr:added:{}:{}", scheduleName, taskDeploymentProperties);
 			commandLineArgs = TaskServiceUtils.convertCommandLineArgsToCTRFormat(commandLineArgs);

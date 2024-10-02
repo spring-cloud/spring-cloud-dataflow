@@ -195,8 +195,8 @@ public class TaskCommandTemplate {
 	}
 
 	private String render(Object result) {
-		if(result instanceof Table) {
-			return ((Table) result).render(120);
+		if(result instanceof Table table) {
+			return table.render(120);
 		}
 		return result.toString();
 	}

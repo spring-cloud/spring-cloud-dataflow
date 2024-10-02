@@ -142,7 +142,7 @@ class SpringDocAutoConfigurationTests {
 					assertThat(springDocConfigProps.getApiDocs().getPath()).isEqualTo(Constants.DEFAULT_API_DOCS_URL);
 					assertThat(swaggerUiConfigProps.getPath()).isEqualTo(Constants.DEFAULT_SWAGGER_UI_PATH);
 					assertThat(swaggerUiConfigProps.getConfigUrl()).isEqualTo(
-							Constants.DEFAULT_API_DOCS_URL + AntPathMatcher.DEFAULT_PATH_SEPARATOR + Constants.SWAGGGER_CONFIG_FILE);
+							Constants.DEFAULT_API_DOCS_URL + AntPathMatcher.DEFAULT_PATH_SEPARATOR + Constants.SWAGGER_CONFIG_FILE);
 					assertThat(swaggerUiConfigProps.getValidatorUrl()).isEqualTo("https://validator.swagger.io/validator");
 					assertThat(swaggerUiConfigProps.getOauth2RedirectUrl()).isEqualTo(Constants.SWAGGER_UI_OAUTH_REDIRECT_URL);
 				});

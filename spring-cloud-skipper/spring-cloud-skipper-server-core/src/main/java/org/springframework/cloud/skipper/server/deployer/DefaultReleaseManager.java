@@ -416,8 +416,7 @@ public class DefaultReleaseManager implements ReleaseManager {
 			int unknownCount = 0;
 			Map<String, DeploymentState> deploymentStateMap = new HashMap<>();
 			logger.debug("Used appDeployer {}", appDeployer);
-			if (appDeployer instanceof MultiStateAppDeployer) {
-				MultiStateAppDeployer multiStateAppDeployer = (MultiStateAppDeployer) appDeployer;
+			if (appDeployer instanceof MultiStateAppDeployer multiStateAppDeployer) {
 				logger.debug("Calling multiStateAppDeployer states {}", deploymentIds);
 				deploymentStateMap = multiStateAppDeployer.states(StringUtils.toStringArray(deploymentIds));
 				logger.debug("Calling multiStateAppDeployer states end {}", deploymentIds);

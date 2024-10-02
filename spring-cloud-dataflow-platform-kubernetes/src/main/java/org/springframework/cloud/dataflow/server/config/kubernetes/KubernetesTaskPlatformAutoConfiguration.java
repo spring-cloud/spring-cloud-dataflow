@@ -16,12 +16,12 @@
 package org.springframework.cloud.dataflow.server.config.kubernetes;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.config.CloudProfileProvider;
 import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 /**
@@ -29,7 +29,7 @@ import org.springframework.core.env.Environment;
  * @author Mark Pollack
  * @author David Turanski
  */
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties({KubernetesPlatformProperties.class, KubernetesPlatformTaskLauncherProperties.class})
 @ConditionalOnTasksEnabled
 public class KubernetesTaskPlatformAutoConfiguration {

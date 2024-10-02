@@ -29,9 +29,9 @@ import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
 import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -61,7 +61,7 @@ public class ToolsController {
 	 * @param definition the map containing the task definition DSL and task name
 	 * @return a resource with the graph property set
 	 */
-	@RequestMapping(value = "/parseTaskTextToGraph", method = RequestMethod.POST)
+	@PostMapping("/parseTaskTextToGraph")
 	public TaskToolsResource parseTaskTextToGraph(@RequestBody Map<String, String> definition) {
 		Graph graph = null;
 		List<Map<String, Object>> errors = new ArrayList<>();
@@ -87,7 +87,7 @@ public class ToolsController {
 	 * @param graph the Flo Graph
 	 * @return a resource with the dsl property set
 	 */
-	@RequestMapping(value = "/convertTaskGraphToText", method = RequestMethod.POST)
+	@PostMapping("/convertTaskGraphToText")
 	public TaskToolsResource convertTaskGraphToText(@RequestBody Graph graph) {
 		String dsl = null;
 		List<Map<String, Object>> errors = new ArrayList<>();

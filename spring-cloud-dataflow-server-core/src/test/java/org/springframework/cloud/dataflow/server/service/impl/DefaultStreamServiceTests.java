@@ -146,8 +146,9 @@ public class DefaultStreamServiceTests {
 			when(this.appRegistryService.appExist("log", ApplicationType.sink)).thenReturn(false);
 			this.defaultStreamService.createStream("testStream", "time | log", "demo stream", false, null);
 		}).isInstanceOf(InvalidStreamDefinitionException.class)
-			.hasMessageContaining("Application name 'time' with type 'source' does not exist in the app registry.\n" +
-				"Application name 'log' with type 'sink' does not exist in the app registry.");
+			.hasMessageContaining("""
+				Application name 'time' with type 'source' does not exist in the app registry.
+				Application name 'log' with type 'sink' does not exist in the app registry.""");
 	}
 
 	@Test

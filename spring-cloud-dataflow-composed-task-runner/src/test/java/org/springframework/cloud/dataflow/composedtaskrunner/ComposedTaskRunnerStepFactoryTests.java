@@ -18,9 +18,6 @@ package org.springframework.cloud.dataflow.composedtaskrunner;
 
 import javax.sql.DataSource;
 
-
-import javax.sql.DataSource;
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.Step;
@@ -30,6 +27,7 @@ import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
+import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
@@ -43,9 +41,7 @@ import org.springframework.cloud.task.repository.TaskRepository;
 import org.springframework.cloud.task.repository.support.SimpleTaskNameResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -100,6 +96,7 @@ class ComposedTaskRunnerStepFactoryTests {
 		}
 
 		@Bean
+		@DependsOnDatabaseInitialization
 		public TaskConfigurer taskConfigurer() {
 			return new TaskConfigurer() {
 				@Override

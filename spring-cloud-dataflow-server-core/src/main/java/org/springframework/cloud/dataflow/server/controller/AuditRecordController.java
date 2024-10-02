@@ -41,9 +41,9 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -91,7 +91,7 @@ public class AuditRecordController {
 	 *     retrieve {@link AuditRecord}s
 	 * @return list of audit records
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<AuditRecordResource> list(Pageable pageable,
 			@RequestParam(required = false) AuditActionType[] actions,
@@ -120,9 +120,9 @@ public class AuditRecordController {
 	 * @param id the id of an existing audit record (required)
 	 * @return the audit record or null if the audit record does not exist
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public AuditRecordResource display(@PathVariable("id") Long id) {
+	public AuditRecordResource display(@PathVariable Long id) {
 		AuditRecord auditRecord = this.auditRecordService.findById(id)
 				.orElseThrow(() -> new NoSuchAuditRecordException(id));
 		return new Assembler(new PageImpl<>(Collections.singletonList(auditRecord))).toModel(auditRecord);
@@ -133,7 +133,7 @@ public class AuditRecordController {
 	 *
 	 * @return Array of AuditOperationTypes
 	 */
-	@RequestMapping(value = "/audit-operation-types", method = RequestMethod.GET)
+	@GetMapping("/audit-operation-types")
 	@ResponseStatus(HttpStatus.OK)
 	public AuditOperationType[] getAuditOperationTypes() {
 		return AuditOperationType.values();
@@ -144,7 +144,7 @@ public class AuditRecordController {
 	 *
 	 * @return Array of AuditActionTypes
 	 */
-	@RequestMapping(value = "/audit-action-types", method = RequestMethod.GET)
+	@GetMapping("/audit-action-types")
 	@ResponseStatus(HttpStatus.OK)
 	public AuditActionType[] getAuditActionTypes() {
 		return AuditActionType.values();

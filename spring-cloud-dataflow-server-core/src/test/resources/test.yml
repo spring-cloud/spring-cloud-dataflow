@@ -1,2 +1,2 @@
 management:
-  contextPath: /bar
+  server.base-path: /bar

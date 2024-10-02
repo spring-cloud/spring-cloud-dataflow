@@ -32,11 +32,13 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,7 +71,7 @@ public class PackageController {
 		this.skipperStateMachineService = skipperStateMachineService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public PackageControllerLinksResource resourceLinks() {
 		PackageControllerLinksResource resource = new PackageControllerLinksResource();
 		resource.add(
@@ -82,27 +84,27 @@ public class PackageController {
 		return resource;
 	}
 
-	@RequestMapping(path = "/upload", method = RequestMethod.POST)
+	@PostMapping("/upload")
 	@ResponseStatus(HttpStatus.CREATED)
 	public EntityModel<PackageMetadata> upload(@RequestBody UploadRequest uploadRequest) {
 		return this.packageMetadataResourceAssembler.toModel(this.packageService.upload(uploadRequest));
 	}
 
-	@RequestMapping(path = "/install", method = RequestMethod.POST)
+	@PostMapping("/install")
 	@ResponseStatus(HttpStatus.CREATED)
 	public EntityModel<Release> install(@RequestBody InstallRequest installRequest) {
 		return this.releaseResourceAssembler.toModel(this.skipperStateMachineService.installRelease(installRequest));
 	}
 
-	@RequestMapping(path = "/install/{id}", method = RequestMethod.POST)
+	@PostMapping("/install/{id}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public EntityModel<Release> install(@PathVariable("id") Long id, @RequestBody InstallProperties installProperties) {
+	public EntityModel<Release> install(@PathVariable Long id, @RequestBody InstallProperties installProperties) {
 		return this.releaseResourceAssembler.toModel(this.skipperStateMachineService.installRelease(id, installProperties));
 	}
 
-	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public void packageDelete(@PathVariable("name") String name) {
+	public void packageDelete(@PathVariable String name) {
 		this.packageMetadataService.deleteIfAllReleasesDeleted(name, PackageMetadataService.DEFAULT_RELEASE_ACTIVITY_CHECK);
 	}
 

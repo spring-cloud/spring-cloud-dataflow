@@ -25,8 +25,8 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,11 +56,11 @@ public class TaskPlatformController {
 	 * @param assembler the paged resource assembler for Launcher*
 	 * @return the paged resources of type {@link LauncherResource}
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<LauncherResource> list(
 			Pageable pageable,
-			@RequestParam(value = "schedulesEnabled", required = false) String schedulesEnabled,
+			@RequestParam(required = false) String schedulesEnabled,
 			PagedResourcesAssembler<Launcher> assembler
 	) {
 		PagedModel<LauncherResource> result;

@@ -34,7 +34,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -56,6 +55,7 @@ import org.springframework.cloud.dataflow.server.repository.TaskDefinitionReposi
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -378,11 +378,12 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			});
 		}
 
-		logger.info("Deleted the following Task Execution related data for {} Task Executions:\n" +
-						"Task Execution Param Rows:    {}\n" +
-						"Task Batch Relationship Rows: {}\n" +
-						"Task Manifest Rows:           {}\n" +
-						"Task Execution Rows:          {}.",
+		logger.info("""
+						Deleted the following Task Execution related data for {} Task Executions:
+						Task Execution Param Rows:    {}
+						Task Batch Relationship Rows: {}
+						Task Manifest Rows:           {}
+						Task Execution Rows:          {}.""",
 				taskExecutionIdsWithChildren.size(),
 				numberOfDeletedTaskExecutionParamRows,
 				numberOfDeletedTaskTaskBatchRelationshipRows,

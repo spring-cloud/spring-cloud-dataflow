@@ -190,8 +190,8 @@ public class ConfigValueUtils {
 				if (value1 instanceof Map && value2 instanceof Map) {
 					merge((Map<String, Object>) value1, (Map<String, Object>) value2);
 				}
-				else if (value1 instanceof List && value2 instanceof List) {
-					map1.put(key, mergeList((List) value1, (List) value2));
+				else if (value1 instanceof List<?> list && value2 instanceof List<?> list1) {
+					map1.put(key, mergeList(list, list1));
 				}
 				else {
 					map1.put(key, value2);

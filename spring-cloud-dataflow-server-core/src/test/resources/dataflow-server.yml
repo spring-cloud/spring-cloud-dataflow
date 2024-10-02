@@ -1,5 +1,5 @@
 management:
-  context-path: /foo
+  server.base-path: /foo
 
 spring:
   cloud:

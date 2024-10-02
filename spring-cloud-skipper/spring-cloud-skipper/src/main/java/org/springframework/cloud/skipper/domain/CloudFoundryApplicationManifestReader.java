@@ -110,8 +110,7 @@ public class CloudFoundryApplicationManifestReader implements SkipperManifestRea
 			throw new SkipperException("Can't parse manifest, it is not a map.  Manifest = " + object);
 		}
 		Object kindObject = manifestAsMap.get("kind");
-		if (kindObject instanceof String) {
-			String kind = (String) kindObject;
+		if (kindObject instanceof String kind) {
 			if (Arrays.asList(getSupportedKinds()).contains(kind)) {
 				logger.debug("Found supported kind " + kind);
 				return true;

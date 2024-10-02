@@ -66,16 +66,14 @@ public class AppResourceCommon {
 	 */
 	public String getResourceVersion(Resource resource) {
 		Assert.notNull(resource, "resource must not be null");
-		if (resource instanceof MavenResource) {
-			MavenResource mavenResource = (MavenResource) resource;
+		if (resource instanceof MavenResource mavenResource) {
 			return mavenResource.getVersion();
 		}
-		else if (resource instanceof DockerResource) {
-			DockerResource dockerResource = (DockerResource) resource;
+		else if (resource instanceof DockerResource dockerResource) {
 			return getDockerImageTag(dockerResource);
 		}
-		else if (resource instanceof UrlResource) {
-			return getUrlResourceVersion((UrlResource) resource);
+		else if (resource instanceof UrlResource urlResource) {
+			return getUrlResourceVersion(urlResource);
 		}
 		else {
 			throw new IllegalArgumentException("Do not support extracting resource from Resource of type "
@@ -191,8 +189,7 @@ public class AppResourceCommon {
 	 */
 	public String getResourceWithoutVersion(Resource resource) {
 		Assert.notNull(resource, "resource must not be null");
-		if (resource instanceof MavenResource) {
-			MavenResource mavenResource = (MavenResource) resource;
+		if (resource instanceof MavenResource mavenResource) {
 			StringBuilder mavenResourceStringBuilder = new StringBuilder();
 			mavenResourceStringBuilder.append(String.format("maven://%s:%s",
 					mavenResource.getGroupId(),
@@ -208,12 +205,11 @@ public class AppResourceCommon {
 			}
 			return mavenResourceStringBuilder.toString();
 		}
-		else if (resource instanceof DockerResource) {
-			DockerResource dockerResource = (DockerResource) resource;
+		else if (resource instanceof DockerResource dockerResource) {
 			return getDockerImageWithoutVersion(dockerResource);
 		}
-		else if (resource instanceof UrlResource) {
-			return getUrlResourceWithoutVersion((UrlResource) resource);
+		else if (resource instanceof UrlResource urlResource) {
+			return getUrlResourceWithoutVersion(urlResource);
 		}
 		else {
 			throw new IllegalArgumentException("Do not support extracting resource from Resource of type "

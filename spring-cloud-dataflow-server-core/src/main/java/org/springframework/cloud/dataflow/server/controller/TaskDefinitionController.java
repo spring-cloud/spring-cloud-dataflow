@@ -34,10 +34,10 @@ import org.springframework.cloud.dataflow.server.controller.support.TaskExecutio
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskQueryParamException;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
 import org.springframework.cloud.dataflow.server.service.TaskSaveService;
 import org.springframework.cloud.dataflow.server.service.impl.TaskServiceUtils;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
@@ -48,9 +48,11 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -118,11 +120,11 @@ public class TaskDefinitionController {
 	 * @param description description of the task definition
 	 * @return the task definition
 	 */
-	@RequestMapping(value = "", method = RequestMethod.POST)
+	@PostMapping("")
 	public TaskDefinitionResource save(
-			@RequestParam("name") String name,
+			@RequestParam String name,
 			@RequestParam("definition") String dsl,
-			@RequestParam(value = "description", defaultValue = "") String description
+			@RequestParam(defaultValue = "") String description
 	) {
 		TaskDefinition taskDefinition = new TaskDefinition(name, dsl, description);
 		taskSaveService.saveTaskDefinition(taskDefinition);
@@ -135,10 +137,10 @@ public class TaskDefinitionController {
 	 * @param name    name of the task to be deleted
 	 * @param cleanup optional cleanup indicator.
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyTask(
-			@PathVariable("name") String name,
+			@PathVariable String name,
 			@RequestParam(required = false) Boolean cleanup
 	) {
 		boolean taskExecutionCleanup = (cleanup != null && cleanup) ? cleanup : false;
@@ -148,7 +150,7 @@ public class TaskDefinitionController {
 	/**
 	 * Delete all task from the repository.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.DELETE)
+	@DeleteMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public void destroyAll() {
 		taskDeleteService.deleteAll();
@@ -166,7 +168,7 @@ public class TaskDefinitionController {
 	 * @param assembler   assembler for the {@link TaskDefinition}
 	 * @return a list of task definitions
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends TaskDefinitionResource> list(
 			Pageable pageable,
@@ -242,11 +244,11 @@ public class TaskDefinitionController {
 	 * @param manifest indicator to include manifest in response.
 	 * @return the task definition
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@GetMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public TaskDefinitionResource display(
-			@PathVariable("name") String name,
-			@RequestParam(required = false, name = "manifest") boolean manifest
+			@PathVariable String name,
+			@RequestParam(required = false) boolean manifest
 	) {
 		TaskDefinition definition = this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchTaskDefinitionException(name));

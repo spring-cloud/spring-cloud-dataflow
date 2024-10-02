@@ -53,6 +53,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +61,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -104,7 +104,7 @@ public class ReleaseController {
 		this.actuatorService = actuatorService;
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	public ReleaseControllerLinksResource resourceLinks() {
 		ReleaseControllerLinksResource resource = new ReleaseControllerLinksResource();
 		resource.add(WebMvcLinkBuilder.linkTo(methodOn(ReleaseController.class)
@@ -138,77 +138,77 @@ public class ReleaseController {
 
 	// Release commands
 
-	@RequestMapping(path = "/statuses", method = RequestMethod.GET)
+	@GetMapping("/statuses")
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<Map<String, Info>> statuses(@RequestParam("names") String[] names) {
+	public Mono<Map<String, Info>> statuses(@RequestParam String[] names) {
 		return this.releaseService.statusReactive(names);
 	}
 
-	@RequestMapping(path = "/states", method = RequestMethod.GET)
+	@GetMapping("/states")
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<Map<String, Map<String, DeploymentState>>> states(@RequestParam("names") String[] names) {
+	public Mono<Map<String, Map<String, DeploymentState>>> states(@RequestParam String[] names) {
 		return this.releaseService.states(names);
 	}
 
-	@RequestMapping(path = "/status/{name}", method = RequestMethod.GET)
+	@GetMapping("/status/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public EntityModel<Info> status(@PathVariable("name") String name) {
+	public EntityModel<Info> status(@PathVariable String name) {
 		return this.infoResourceAssembler.toModel(this.releaseService.status(name));
 	}
 
-	@RequestMapping(path = "/status/{name}/{version}", method = RequestMethod.GET)
+	@GetMapping("/status/{name}/{version}")
 	@ResponseStatus(HttpStatus.OK)
-	public EntityModel<Info> status(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+	public EntityModel<Info> status(@PathVariable String name, @PathVariable Integer version) {
 		return this.infoResourceAssembler.toModel(this.releaseService.status(name, version));
 	}
 
-	@RequestMapping(path = "/logs/{name}", method = RequestMethod.GET)
+	@GetMapping("/logs/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public EntityModel<LogInfo> log(@PathVariable("name") String name) {
+	public EntityModel<LogInfo> log(@PathVariable String name) {
 		return new SimpleResourceAssembler<LogInfo>().toModel(this.releaseService.getLog(name));
 	}
 
-	@RequestMapping(path = "/logs/{name}/{appName}", method = RequestMethod.GET)
+	@GetMapping("/logs/{name}/{appName}")
 	@ResponseStatus(HttpStatus.OK)
-	public EntityModel<LogInfo> log(@PathVariable("name") String name, @PathVariable("appName") String appName) {
+	public EntityModel<LogInfo> log(@PathVariable String name, @PathVariable String appName) {
 		return new SimpleResourceAssembler<LogInfo>().toModel(this.releaseService.getLog(name, appName));
 	}
 
-	@RequestMapping(path = "/manifest/{name}", method = RequestMethod.GET)
+	@GetMapping("/manifest/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public EntityModel<Manifest> manifest(@PathVariable("name") String name) {
+	public EntityModel<Manifest> manifest(@PathVariable String name) {
 		return this.manifestResourceAssembler.toModel(this.releaseService.manifest(name));
 	}
 
-	@RequestMapping(path = "/manifest/{name}/{version}", method = RequestMethod.GET)
+	@GetMapping("/manifest/{name}/{version}")
 	@ResponseStatus(HttpStatus.OK)
-	public EntityModel<Manifest> manifest(@PathVariable("name") String name,
-			@PathVariable("version") Integer version) {
+	public EntityModel<Manifest> manifest(@PathVariable String name,
+			@PathVariable Integer version) {
 		return this.manifestResourceAssembler.toModel(this.releaseService.manifest(name, version));
 	}
 
-	@RequestMapping(path = "/scale/{name}", method = RequestMethod.POST)
+	@PostMapping("/scale/{name}")
 	@ResponseStatus(HttpStatus.CREATED)
-	public EntityModel<Release> scale(@PathVariable("name") String name, @RequestBody ScaleRequest scaleRequest) {
+	public EntityModel<Release> scale(@PathVariable String name, @RequestBody ScaleRequest scaleRequest) {
 		Release release = this.skipperStateMachineService.scaleRelease(name, scaleRequest);
 		return this.releaseResourceAssembler.toModel(release);
 	}
 
-	@RequestMapping(path = "/upgrade", method = RequestMethod.POST)
+	@PostMapping("/upgrade")
 	@ResponseStatus(HttpStatus.CREATED)
 	public EntityModel<Release> upgrade(@RequestBody UpgradeRequest upgradeRequest) {
 		Release release = this.skipperStateMachineService.upgradeRelease(upgradeRequest);
 		return this.releaseResourceAssembler.toModel(release);
 	}
 
-	@RequestMapping(path = "/rollback", method = RequestMethod.POST)
+	@PostMapping("/rollback")
 	@ResponseStatus(HttpStatus.CREATED)
 	public EntityModel<Release> rollback(@RequestBody RollbackRequest rollbackRequest) {
 		Release release = this.skipperStateMachineService.rollbackRelease(rollbackRequest);
 		return this.releaseResourceAssembler.toModel(release);
 	}
 
-	@RequestMapping(path = "/rollback/{name}/{version}", method = RequestMethod.POST)
+	@PostMapping("/rollback/{name}/{version}")
 	@ResponseStatus(HttpStatus.CREATED)
 	@Deprecated
 	public EntityModel<Release> rollbackWithNamedVersion(@PathVariable("name") String releaseName,
@@ -218,13 +218,13 @@ public class ReleaseController {
 		return this.releaseResourceAssembler.toModel(release);
 	}
 
-	@RequestMapping(path = "/{name}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public EntityModel<Release> delete(@PathVariable("name") String releaseName) {
 		return deleteRelease(releaseName, false);
 	}
 
-	@RequestMapping(path = "/{name}/package", method = RequestMethod.DELETE)
+	@DeleteMapping("/{name}/package")
 	@ResponseStatus(HttpStatus.OK)
 	public EntityModel<Release> deleteWithPackage(@PathVariable("name") String releaseName) {
 		return deleteRelease(releaseName, true);
@@ -237,14 +237,14 @@ public class ReleaseController {
 		return this.releaseResourceAssembler.toModel(release);
 	}
 
-	@RequestMapping(path = "/cancel", method = RequestMethod.POST)
+	@PostMapping("/cancel")
 	@ResponseStatus(HttpStatus.OK)
 	public CancelResponse cancel(@RequestBody CancelRequest cancelRequest) {
 		boolean accepted = this.skipperStateMachineService.cancelRelease(cancelRequest.getReleaseName());
 		return new CancelResponse(accepted);
 	}
 
-	@RequestMapping(path = "/list", method = RequestMethod.GET)
+	@GetMapping("/list")
 	@ResponseStatus(HttpStatus.OK)
 	public CollectionModel<EntityModel<Release>> list() {
 		List<Release> releaseList = this.releaseService.list();
@@ -252,7 +252,7 @@ public class ReleaseController {
 		return resources;
 	}
 
-	@RequestMapping(path = "/list/{name}", method = RequestMethod.GET)
+	@GetMapping("/list/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public CollectionModel<EntityModel<Release>> list(@PathVariable("name") String releaseName) {
 		List<Release> releaseList = this.releaseService.list(releaseName);
@@ -265,7 +265,7 @@ public class ReleaseController {
 			@PathVariable("name") String releaseName,
 			@PathVariable("app") String appName,
 			@PathVariable("id") String appId,
-			@RequestParam("endpoint") String endpoint,
+			@RequestParam String endpoint,
 			@Nullable @RequestHeader(HttpHeaders.AUTHORIZATION) String auth) {
 		return new ResponseEntity<>(this.actuatorService.getFromActuator(
 				releaseName, appName, appId, endpoint,

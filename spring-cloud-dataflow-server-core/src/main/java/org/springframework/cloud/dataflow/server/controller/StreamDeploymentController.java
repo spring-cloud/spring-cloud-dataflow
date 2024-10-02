@@ -44,10 +44,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -114,11 +116,11 @@ public class StreamDeploymentController {
 	 * @param properties scale deployment specific properties (optional)
 	 * @return response without a body
 	 */
-	@RequestMapping(value = "/scale/{streamName}/{appName}/instances/{count}", method = RequestMethod.POST)
+	@PostMapping("/scale/{streamName}/{appName}/instances/{count}")
 	public ResponseEntity<Void> scaleApplicationInstances(
-			@PathVariable("streamName") String streamName,
-			@PathVariable("appName") String appName,
-			@PathVariable("count") Integer count,
+			@PathVariable String streamName,
+			@PathVariable String appName,
+			@PathVariable Integer count,
 			@RequestBody(required = false) Map<String, String> properties) {
 
 		logger.info("Scale stream: {}, apps: {} instances to {}", streamName, appName, count);
@@ -126,26 +128,26 @@ public class StreamDeploymentController {
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
-	@RequestMapping(value = "/update/{name}", method = RequestMethod.POST)
-	public ResponseEntity<Void> update(@PathVariable("name") String name,
+	@PostMapping("/update/{name}")
+	public ResponseEntity<Void> update(@PathVariable String name,
 									   @RequestBody UpdateStreamRequest updateStreamRequest) {
 		this.streamService.updateStream(name, updateStreamRequest);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
-	@RequestMapping(value = "/rollback/{name}/{version}", method = RequestMethod.POST)
-	public ResponseEntity<Void> rollback(@PathVariable("name") String name, @PathVariable("version") Integer version) {
+	@PostMapping("/rollback/{name}/{version}")
+	public ResponseEntity<Void> rollback(@PathVariable String name, @PathVariable Integer version) {
 		this.streamService.rollbackStream(name, version);
 		return new ResponseEntity<>(HttpStatus.CREATED);
 	}
 
-	@RequestMapping(value = "/manifest/{name}/{version}", method = RequestMethod.GET)
-	public ResponseEntity<String> manifest(@PathVariable("name") String name,
-										   @PathVariable("version") Integer version) {
+	@GetMapping("/manifest/{name}/{version}")
+	public ResponseEntity<String> manifest(@PathVariable String name,
+										   @PathVariable Integer version) {
 		return new ResponseEntity<>(this.streamService.manifest(name, version), HttpStatus.OK);
 	}
 
-	@RequestMapping(path = "/history/{name}", method = RequestMethod.GET)
+	@GetMapping("/history/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Release> history(@PathVariable("name") String releaseName) {
 		return this.streamService.history(releaseName)
@@ -161,7 +163,7 @@ public class StreamDeploymentController {
 		return release;
 	}
 
-	@RequestMapping(path = "/platform/list", method = RequestMethod.GET)
+	@GetMapping("/platform/list")
 	@ResponseStatus(HttpStatus.OK)
 	public Collection<Deployer> platformList() {
 		return this.streamService.platformList();
@@ -173,8 +175,8 @@ public class StreamDeploymentController {
 	 * @param name the name of an existing stream (required)
 	 * @return response without a body
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.DELETE)
-	public ResponseEntity<Void> undeploy(@PathVariable("name") String name) {
+	@DeleteMapping("/{name}")
+	public ResponseEntity<Void> undeploy(@PathVariable String name) {
 		this.repository.findById(name)
 				.orElseThrow(() -> new NoSuchStreamDefinitionException(name));
 		this.streamService.undeployStream(name);
@@ -186,7 +188,7 @@ public class StreamDeploymentController {
 	 *
 	 * @return instance of {@link ResponseEntity}
 	 */
-	@RequestMapping(value = "", method = RequestMethod.DELETE)
+	@DeleteMapping("")
 	public ResponseEntity<Void> undeployAll() {
 		for (StreamDefinition stream : this.repository.findAll()) {
 			this.streamService.undeployStream(stream.getName());
@@ -201,10 +203,10 @@ public class StreamDeploymentController {
 	 * @param reuseDeploymentProperties Indicator to re-use deployment properties.
 	 * @return The stream deployment
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@GetMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public StreamDeploymentResource info(
-			@PathVariable("name") String name,
+			@PathVariable String name,
 			@RequestParam(value = "reuse-deployment-properties", required = false) boolean reuseDeploymentProperties
 	) {
 		StreamDefinition streamDefinition = this.repository.findById(name)
@@ -230,8 +232,8 @@ public class StreamDeploymentController {
 	 *                   key=value pairs
 	 * @return response without a body
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.POST)
-	public ResponseEntity<Void> deploy(@PathVariable("name") String name,
+	@PostMapping("/{name}")
+	public ResponseEntity<Void> deploy(@PathVariable String name,
 									   @RequestBody(required = false) Map<String, String> properties) {
 		this.streamService.deployStream(name, properties);
 		return new ResponseEntity<>(HttpStatus.CREATED);
