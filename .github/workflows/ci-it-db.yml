@@ -33,8 +33,8 @@ jobs:
         ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
         ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       run: |
-        mvn clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  
-        mvn \
+        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  
+        ./mvnw \
           -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=${{ matrix.group }} \
@@ -92,8 +92,8 @@ jobs:
         env:
           ENABLE_DB2: 'true'
         run: |
-          mvn clean install -DskipTests -T 1C -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -am  
-          mvn \
+          ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -am  
+          ./mvnw \
             -s .settings.xml \
             -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server \
             -Dgroups=DB2 \

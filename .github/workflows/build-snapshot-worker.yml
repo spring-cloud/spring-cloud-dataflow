@@ -43,7 +43,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Configure JFrog Cli
       run: |
-        jfrog rt mvnc \
+        jfrog rt mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -64,8 +64,8 @@ jobs:
       run: |
         mvn clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn install -Pfull,docs -B
-        jfrog rt mvn install -pl spring-cloud-dataflow-package -B
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
         PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
@@ -134,7 +134,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Configure JFrog Cli
         run: |
-          jfrog rt mvnc \
+          jfrog rt mvnc --use-wrapper \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-milestone \

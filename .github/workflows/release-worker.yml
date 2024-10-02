@@ -39,7 +39,7 @@ jobs:
 #       target deploy repos
       - name: Configure JFrog Cli
         run: |
-          jfrog rt mvnc \
+          jfrog rt mvnc --use-wrapper \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
@@ -71,7 +71,7 @@ jobs:
             -Dartifactory.publish.artifacts=false \
             -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' \
             -B
-          BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"
           jfrog rt mvn versions:set-property \
@@ -108,7 +108,7 @@ jobs:
           jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,docs -B install -DskipTests
           echo "::notice ::build-publish"
           jfrog rt build-publish
-          PROJECT_VERSION=$(mvn -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
+          PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)
           spring_cloud_dataflow_version=$PROJECT_VERSION
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$spring_cloud_dataflow_version >> $GITHUB_ENV
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-release >> $GITHUB_ENV

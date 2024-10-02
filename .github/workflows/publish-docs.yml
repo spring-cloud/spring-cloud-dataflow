@@ -35,7 +35,7 @@ jobs:
 #       target deploy repos
       - name: Configure JFrog Cli
         run: |
-          jfrog rt mvnc \
+          jfrog rt mvnc --use-wrapper \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
@@ -74,7 +74,7 @@ jobs:
             -Dproperty=skipper.version \
             -DnewVersion=${{ inputs.version }} \
             -B
-          spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "spring_cloud_dataflow_version=$spring_cloud_dataflow_version" >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${spring_cloud_dataflow_version}"
           echo "::notice ::build-clean"
@@ -82,7 +82,7 @@ jobs:
           echo "::notice ::set-package-version"
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
-          mvn -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C
+          ./mvnw -gs .github/settings.xml -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C
           jfrog rt mvn -gs .github/settings.xml \
             -Pstagingrelease,full,deploymentfiles,docs \
             -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-docs \

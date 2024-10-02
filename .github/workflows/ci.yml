@@ -50,7 +50,7 @@ jobs:
 #       setup frog cli
     - name: Configure JFrog Cli
       run: |
-        jfrog rt mvnc \
+        jfrog rt mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -59,20 +59,20 @@ jobs:
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        echo spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
     - uses: ./.github/actions/install-xmlutils
 #       build and publish
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75
       run: |
-        mvn clean
+        ./mvnw clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn install -Pfull,docs -B
-        jfrog rt mvn install -pl spring-cloud-dataflow-package -B
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
-        PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
 #        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"
 #        SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-snapshot-local)
@@ -139,7 +139,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Configure JFrog Cli
       run: |
-        jfrog rt mvnc \
+        jfrog rt mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
