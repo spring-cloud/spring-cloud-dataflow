@@ -26,13 +26,13 @@ jobs:
       - name: Load matrix
         id: matrix
         shell: bash
-        run: |
-          echo "::notice::Input version: ${{ inputs.version }}"
+        run: |          
           if [ "${{ inputs.version }}" == "" ]; then            
             VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
-            echo "VERSION=$VERSION"
+            echo "::notice::VERSION=$VERSION"
             echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
+            echo "::notice::VERSION=${{ inputs.version }}"
             echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
           fi          
           MATRIX=$(cat .github/workflows/images.json | jq -c)
