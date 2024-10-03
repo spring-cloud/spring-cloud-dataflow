@@ -35,9 +35,9 @@ jobs:
         java-version: '17'
         distribution: 'liberica'
 #     jfrog cli
-    - uses: jfrog/setup-jfrog-cli@v3
+    - uses: jfrog/setup-jfrog-cli@v4
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        J_ENV: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:
@@ -121,9 +121,9 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - uses: jfrog/setup-jfrog-cli@v3
+    - uses: jfrog/setup-jfrog-cli@v4
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        J_ENV: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:

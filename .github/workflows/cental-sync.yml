@@ -19,9 +19,9 @@ jobs:
     - uses: actions/checkout@v4
 
     # Setup jfrog cli
-    - uses: jfrog/setup-jfrog-cli@v3
+    - uses: jfrog/setup-jfrog-cli@v4
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        J_ENV: ${{ secrets.JF_ARTIFACTORY_SPRING }}
 
     # Extract build id from input
     - name: Extract Build Id

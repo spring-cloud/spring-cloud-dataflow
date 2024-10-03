@@ -14,9 +14,9 @@ jobs:
     steps:
     # need repo to push release branch and a tag
     - uses: actions/checkout@v4
-    - uses: jfrog/setup-jfrog-cli@v3
+    - uses: jfrog/setup-jfrog-cli@v4
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        J_ENV: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     # zoo extract and ensure
     - name: Extract Zoo Context Properties
       uses: jvalkeal/build-zoo-handler@v0.0.4
