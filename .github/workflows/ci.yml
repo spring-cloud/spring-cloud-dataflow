@@ -32,10 +32,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
 #     jfrog cli
     - uses: jfrog/setup-jfrog-cli@v3
       env:
@@ -123,10 +119,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     - uses: jfrog/setup-jfrog-cli@v3
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
