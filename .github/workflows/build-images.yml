@@ -27,7 +27,8 @@ jobs:
         id: matrix
         shell: bash
         run: |          
-          if [ "${{ inputs.version }}" == "" ]; then            
+          if [ "${{ inputs.version }}" == "" ]; then
+            ./mvnw --version
             VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
             echo "::notice::VERSION=$VERSION"
             echo "VERSION=$VERSION" >> $GITHUB_ENV

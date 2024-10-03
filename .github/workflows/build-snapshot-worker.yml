@@ -21,10 +21,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     - uses: jfrog/setup-jfrog-cli@v3
       env:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
@@ -64,12 +60,12 @@ jobs:
         ./spring-cloud-dataflow-package/set-package-version.sh
         jfrog rt mvn -s .settings.xml install -Pfull,docs -B
         jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
-        jfrog rt build-publish
-        PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        jfrog rt build-publish        
+        PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(./mvnw help:evaluate -o -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
 #        echo "Determine project version"
 #        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"

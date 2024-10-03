@@ -57,6 +57,7 @@ jobs:
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+        ./mvnw --version
         echo spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout) >> $GITHUB_ENV
     - uses: ./.github/actions/install-xmlutils
 #       build and publish
@@ -64,6 +65,7 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |
+        ./mvnw --version
         ./mvnw clean
         ./spring-cloud-dataflow-package/set-package-version.sh
         jfrog rt mvn -s .settings.xml install -Pfull,docs -B

@@ -28,7 +28,9 @@ jobs:
       - name: Version from POM
         if: ${{ inputs.version == null || inputs.version == '' }}
         shell: bash
-        run: echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+        run: |
+          ./mvnw --version 
+          echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)" >> $GITHUB_ENV
       - name: Version from Input
         if: ${{ inputs.version != null && inputs.version != '' }}
         shell: bash
