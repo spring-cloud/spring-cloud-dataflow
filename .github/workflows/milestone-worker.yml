@@ -16,6 +16,7 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+    - uses: ./.github/actions/install-xmlutils
     - uses: actions/setup-java@v3
       with:
         java-version: '17'
@@ -56,8 +57,6 @@ jobs:
           BUILD_ZOO_HANDLER_milestone_version
           BUILD_ZOO_HANDLER_spring_cloud_deployer_version
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
-    - name: 'Install: xmllint'
-      uses: ./.github/actions/install-xmlutils
     - name: Build and Publish
       run: |
         jfrog rt mvn build-helper:parse-version versions:set \

@@ -17,6 +17,8 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+    - name: 'Install: xmllint'
+      uses: ./.github/actions/install-xmlutils
     - uses: actions/setup-java@v3
       with:
         java-version: '17'
@@ -50,8 +52,6 @@ jobs:
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
         dispatch-handler-extract-context-properties: true
-    - name: 'Install: xmllint'
-      uses: ./.github/actions/install-xmlutils
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75

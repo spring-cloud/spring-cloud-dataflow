@@ -20,6 +20,7 @@ jobs:
       cancel-in-progress: true
     steps:
     - uses: actions/checkout@v4
+    - uses: ./.github/actions/install-xmlutils
 #     cache maven repo
     - uses: actions/cache@v3
       with:
@@ -55,7 +56,6 @@ jobs:
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
         ./mvnw --version
         echo spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout) >> $GITHUB_ENV
-    - uses: ./.github/actions/install-xmlutils
 #       build and publish
     - name: Build and Publish
       shell: bash
@@ -109,6 +109,7 @@ jobs:
         db: [ 'ORACLE', 'DB2' ]
     steps:
     - uses: actions/checkout@v4
+    - uses: ./.github/actions/install-xmlutils
     - uses: actions/cache@v3
       with:
         path: ~/.m2/repository
@@ -136,7 +137,6 @@ jobs:
           --repo-resolve-snapshots=libs-snapshot \
           --repo-deploy-releases=libs-release-local \
           --repo-deploy-snapshots=libs-snapshot-local
-    - uses: ./.github/actions/install-xmlutils
     - name: Test
       shell: bash
       timeout-minutes: 75

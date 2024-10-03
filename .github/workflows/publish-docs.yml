@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-xmlutils
       - uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -43,8 +44,6 @@ jobs:
           echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-release >> $GITHUB_ENV
           echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
-      - name: 'Install: xmllint'
-        uses: ./.github/actions/install-xmlutils
 #       build and publish to configured target
       - name: Build and Publish
         run: |
