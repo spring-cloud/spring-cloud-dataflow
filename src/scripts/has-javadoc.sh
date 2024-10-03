@@ -34,7 +34,8 @@ function check_jars() {
         fi
     fi
 }
-VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+./mvnw help:evaluate -Dexpression=project.version > /dev/null
+VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
 FILES=$(find . -name "pom.xml" -type f)
 MVNV=$(realpath ./mvnw)
 for file in $FILES; do
@@ -42,7 +43,7 @@ for file in $FILES; do
         COUNT_FOUND=$((1 + COUNT_FOUND))
         DIR=$(dirname "$file")
         pushd "$DIR" > /dev/null || exit 1
-            PACKAGING=$($MVNV help:evaluate -Dexpression=project.packaging -q -DforceStdout)
+            PACKAGING=$($MVNV help:evaluate -Dexpression=project.packaging -o -q -DforceStdout)
         popd > /dev/null || exit 1
         if [ "$PACKAGING" == "jar" ]; then
             FILE=$(find $DIR/target -name "*-${VERSION}.jar" 2> /dev/null)

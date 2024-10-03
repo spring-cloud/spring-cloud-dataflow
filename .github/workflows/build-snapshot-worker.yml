@@ -56,7 +56,7 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |
-        mvn clean
+        ./mvnw --help
         ./spring-cloud-dataflow-package/set-package-version.sh
         jfrog rt mvn -s .settings.xml install -Pfull,docs -B
         jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B

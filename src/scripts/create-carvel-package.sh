@@ -11,8 +11,11 @@ fi
 if [ "$TARGET_DIR" != "" ]; then
     pushd $TARGET_DIR
 fi
+if [ "$VERSION" = "" ] || [ "$SKIPPER_VERSION" = "" ]; then
+    ./mvnw -s .settings.xml help:evaluate -Dexpression=project.version > /dev/null
+fi
 if [ "$VERSION" = "" ]; then
-    export VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+    export VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
     export DATAFLOW_VERSION=$VERSION
@@ -21,7 +24,7 @@ if [ "$PACKAGE_VERSION" = "" ]; then
     export PACKAGE_VERSION=$DATAFLOW_VERSION
 fi
 if [ "$SKIPPER_VERSION" = "" ]; then
-    export SKIPPER_VERSION=$(./mvnw help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout)
+    export SKIPPER_VERSION=$(./mvnw help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -o -q -DforceStdout)
 fi
 if [ "$TARGET_DIR" != "" ]; then
     popd
