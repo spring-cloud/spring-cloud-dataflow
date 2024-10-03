@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -28,7 +29,7 @@ jobs:
         shell: bash
         run: |          
           if [ "${{ inputs.version }}" == "" ]; then
-            ./mvnw help:evaluate -Dexpression=project.version -s .settings.xml
+            ./mvnw help:evaluate -Dexpression=project.version -s .settings.xml > /dev/null
             VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
             echo "::notice::VERSION=$VERSION"
             echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -53,6 +54,7 @@ jobs:
       group: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -87,6 +89,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - name: Login to docker.io
         uses: docker/login-action@v3
         with:

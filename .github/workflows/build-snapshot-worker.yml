@@ -17,6 +17,7 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
     - name: 'Install: xmllint'
       uses: ./.github/actions/install-xmlutils
     - uses: actions/setup-java@v3

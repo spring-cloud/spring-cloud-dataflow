@@ -21,6 +21,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: ./.github/actions/install-xmlutils
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
 #     cache maven repo
     - uses: actions/cache@v3
       with:
@@ -108,6 +109,7 @@ jobs:
         db: [ 'ORACLE', 'DB2' ]
     steps:
     - uses: actions/checkout@v4
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
     - uses: ./.github/actions/install-xmlutils
     - uses: actions/cache@v3
       with:

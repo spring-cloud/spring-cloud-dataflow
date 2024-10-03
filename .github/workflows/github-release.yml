@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - uses: jvalkeal/setup-maven@v1
         with:
           maven-version: 3.8.8
