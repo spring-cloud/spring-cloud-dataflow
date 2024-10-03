@@ -8,7 +8,7 @@ ROOT=$(realpath $SCDIR/..)
 if [ "$PACKAGE_VERSION" = "" ]; then
     pushd $ROOT > /dev/null
     ./mvnw help:evaluate -s .settings.xml -Dexpression=project.version > /dev/null
-    PACKAGE_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
+    PACKAGE_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
     popd > /dev/null
 fi
 echo "PACKAGE_VERSION=$PACKAGE_VERSION"

@@ -8,7 +8,7 @@ PROJECT_DIR=$(realpath $SCDIR/../../..)
 pushd $PROJECT_DIR || exit
     if [ "$DATAFLOW_VERSION" = "" ]; then
         ./mvnw help:evaluatev -s .settings.xml -Dexpression=project.version > /dev/null
-        SCDF_VER=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
+        SCDF_VER=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
     else
         SCDF_VER=$DATAFLOW_VERSION
     fi

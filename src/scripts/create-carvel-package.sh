@@ -15,7 +15,7 @@ if [ "$VERSION" = "" ] || [ "$SKIPPER_VERSION" = "" ]; then
     ./mvnw -s .settings.xml help:evaluate -Dexpression=project.version > /dev/null
 fi
 if [ "$VERSION" = "" ]; then
-    export VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
+    export VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
 fi
 if [ "$DATAFLOW_VERSION" = "" ]; then
     export DATAFLOW_VERSION=$VERSION

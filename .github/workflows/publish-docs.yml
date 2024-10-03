@@ -71,7 +71,7 @@ jobs:
             -Dproperty=skipper.version \
             -DnewVersion=${{ inputs.version }} \
             -B
-          spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
+          spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "spring_cloud_dataflow_version=$spring_cloud_dataflow_version" >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${spring_cloud_dataflow_version}"
           echo "::notice ::build-clean"

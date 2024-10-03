@@ -9,8 +9,8 @@ SCDIR=$(realpath $(dirname "$(readlink -f "${BASH_SOURCE[0]}")"))
 set -euxo pipefail
 pushd $SCDIR > /dev/null
 ./mvnw help:evaluate -Dexpression=project.version > /dev/null
-export DATAFLOW_VERSION=$(./mvnw help:evaluate -o -Dexpression=project.version -q -DforceStdout)
-export SKIPPER_VERSION=$(./mvnw help:evaluate -o -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout)
+export DATAFLOW_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+export SKIPPER_VERSION=$(./mvnw help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout)
 
 if [ "$PACKAGE_VERSION" = "" ]; then
   export PACKAGE_VERSION=$DATAFLOW_VERSION

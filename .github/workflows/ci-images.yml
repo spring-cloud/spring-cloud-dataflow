@@ -31,7 +31,7 @@ jobs:
         run: |
           ./mvnw --version 
           ./mvnw help:evaluate -s .settings.xml -Dexpression=project.version > /dev/null
-          echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)" >> $GITHUB_ENV
+          echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
       - name: Version from Input
         if: ${{ inputs.version != null && inputs.version != '' }}
         shell: bash
