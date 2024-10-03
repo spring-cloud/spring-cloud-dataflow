@@ -64,8 +64,8 @@ jobs:
       timeout-minutes: 75
       run: |
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn -s .settings.xml install -Pfull,docs -B
-        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
+        jfrog mvn -s .settings.xml install -Pfull,docs -B
+        jfrog mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
         PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
@@ -142,9 +142,9 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |                        
-        jfrog rt mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
+        jfrog mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
         export ENABLE_${{ matrix.db }}=true
-        jfrog rt mvn test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
+        jfrog mvn test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}

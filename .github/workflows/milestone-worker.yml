@@ -60,7 +60,7 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
     - name: Build and Publish
       run: |
-        jfrog rt mvn build-helper:parse-version versions:set \
+        jfrog mvn build-helper:parse-version versions:set \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DprocessAllModules=true \
@@ -71,21 +71,21 @@ jobs:
         BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
         echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
-        jfrog rt mvn versions:set-property \
+        jfrog mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=dataflow.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
           -B        
-        jfrog rt mvn versions:set-property \
+        jfrog mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
           -B
-        jfrog rt mvn versions:set-property \
+        jfrog mvn versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
@@ -94,7 +94,7 @@ jobs:
           -B
         jfrog rt build-clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,docs -B install -DskipTests 
+        jfrog mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,docs -B install -DskipTests 
         jfrog rt build-publish
         PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -o -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
