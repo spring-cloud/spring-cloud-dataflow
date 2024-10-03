@@ -178,7 +178,7 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     with:
       version: ${{ needs.build.outputs.version }}
-    secrets: inherits
+    secrets: inherit
   scan:
     runs-on: ubuntu-latest
     steps:
