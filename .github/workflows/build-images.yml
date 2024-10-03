@@ -12,13 +12,6 @@ on:
         default: false
         description: 'Delete the image tags'
 
-    secrets:
-      DOCKERHUB_USERNAME:
-      DOCKERHUB_TOKEN:
-      GCR_JSON_KEY:
-      ARTIFACTORY_USERNAME:
-      ARTIFACTORY_PASSWORD:
-
 jobs:
   # test templating before publishing a package
   prepare:
@@ -34,10 +27,11 @@ jobs:
         id: matrix
         shell: bash
         run: |
-          echo "Input version: ${{ inputs.version }}"
-          if [ "${{ inputs.version }}" == "" ]; then
-            ./mvnw help:evaluate -Dexpression=project.version -q
-            echo "VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+          echo "::notice::Input version: ${{ inputs.version }}"
+          if [ "${{ inputs.version }}" == "" ]; then            
+            VERSION=$(./mvnw help:evaluate -Dexpression=project.version -o -q -DforceStdout)
+            echo "VERSION=$VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
             echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
           fi          

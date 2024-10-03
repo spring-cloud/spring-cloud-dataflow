@@ -52,6 +52,4 @@ for ((i = 0; i < LEN; i++)); do
         fi
     done
 done
-echo "Pruning Docker"
-docker system prune -f
-docker system prune --volumes -f
+

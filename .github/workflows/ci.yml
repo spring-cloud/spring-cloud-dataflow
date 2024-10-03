@@ -178,10 +178,7 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     with:
       version: ${{ needs.build.outputs.version }}
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
+    secrets: inherits
   scan:
     runs-on: ubuntu-latest
     steps:
