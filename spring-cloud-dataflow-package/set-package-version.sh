@@ -5,8 +5,9 @@ if [ -z "$BASH_VERSION" ]; then
 fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 MVNW=$SCDIR/../mvnw
+MVND=$(dirname $MVNW)
 if [ "$PACKAGE_VERSION" = "" ]; then
-    $MVNW help:evaluate -s $MVNW/.settings.xml -Dexpression=project.version > /dev/null
+    $MVNW help:evaluate -s $MVND/.settings.xml -Dexpression=project.version > /dev/null
     PACKAGE_VERSION=$($MVNW help:evaluate -Dexpression=project.version -o -q -DforceStdout)
 fi
 echo "PACKAGE_VERSION=$PACKAGE_VERSION"
