@@ -40,10 +40,6 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     - uses: jfrog/setup-jfrog-cli@v4
       env:
         JF_URL: 'https://repo.spring.io'
@@ -51,7 +47,7 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog mvnc \
+        jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -60,7 +56,7 @@ jobs:
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo "::notice::$(mvn --version)"
+        echo "::notice::$(./mvnw --version)"
 #       build and publish
     - name: Build and Publish
       shell: bash

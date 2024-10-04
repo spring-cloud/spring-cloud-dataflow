@@ -32,18 +32,14 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.54.0
+    - uses: jfrog/setup-jfrog-cli@v4
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_URL: 'https://repo.spring.io'
+        JFROG_CLI_SERVER_ID: 'repo.spring.io'
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog rt mvnc \
+        jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -64,7 +60,7 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version
     - name: Build and Publish
       run: |
-        mvn build-helper:parse-version versions:set \
+        ./mvnw build-helper:parse-version versions:set \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DprocessAllModules=true \
@@ -75,21 +71,21 @@ jobs:
         BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
         echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
-        mvn versions:set-property \
+        ./mvnw versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=dataflow.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
           -B --no-transfer-progress
-        mvn versions:set-property \
+        ./mvnw versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
           -B --no-transfer-progress
-        mvn versions:set-property \
+        ./mvnw versions:set-property \
           -gs .github/settings.xml \
           -Pstagingmilestone \
           -DgenerateBackupPoms=false \
@@ -99,7 +95,7 @@ jobs:
         jfrog rt build-clean
         ./spring-cloud-dataflow-package/set-package-version.sh
         ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
-        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,docs -B install -DskipTests --no-transfer-progress 
+        jfrog mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,docs -B install -DskipTests --no-transfer-progress 
         jfrog rt build-publish
         PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
