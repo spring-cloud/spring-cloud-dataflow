@@ -71,6 +71,7 @@ jobs:
         echo spring_cloud_dataflow_version="$spring_cloud_dataflow_version" >> $GITHUB_ENV
         export spring_cloud_dataflow_version
         ./spring-cloud-dataflow-package/set-package-version.sh
+        ./mvnw -s .settings.xml package -DskipTests -T 1C
         jfrog rt mvn -s .settings.xml install -Pfull,docs -B
         jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish

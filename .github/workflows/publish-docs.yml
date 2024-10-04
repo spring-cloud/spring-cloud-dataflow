@@ -54,7 +54,7 @@ jobs:
 #       build and publish to configured target
       - name: Build and Publish
         run: |
-          jfrog rt mvn build-helper:parse-version versions:set \
+          mvn build-helper:parse-version versions:set \
             -gs .github/settings.xml \
             -DskipResolution=true \
             -DprocessAllModules=true \
@@ -62,7 +62,7 @@ jobs:
             -Dartifactory.publish.artifacts=false \
             -DnewVersion=${{ inputs.version }} \
             -B          
-          jfrog rt mvn versions:set-property \
+          mvn versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
@@ -70,7 +70,7 @@ jobs:
             -Dproperty=dataflow.version \
             -DnewVersion=${{ inputs.version }} \
             -B
-          jfrog rt mvn versions:set-property \
+          mvn versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
