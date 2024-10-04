@@ -44,7 +44,7 @@ jobs:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog mvnc \
+        jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=milestone \
@@ -63,7 +63,7 @@ jobs:
     # build and publish to configured target
     - name: Build and Publish
       run: |
-        jfrog mvn build-helper:parse-version versions:set \
+        jfrog rt mvn build-helper:parse-version versions:set \
           -DprocessAllModules=true \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
@@ -72,17 +72,17 @@ jobs:
         BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
         echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
-        jfrog mvn versions:set-property \
+        jfrog rt mvn versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=dataflow.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
           -B        
-        jfrog mvn versions:set-property \
+        jfrog rt mvn versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
           -B
-        jfrog mvn versions:set-property \
+        jfrog rt mvn versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-dataflow-ui.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
@@ -90,7 +90,7 @@ jobs:
         jfrog rt build-clean
         ./mvnw clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog mvn -s .settings.xml install -DskipTests -B         
+        jfrog rt mvn -s .settings.xml install -DskipTests -B         
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV

@@ -44,7 +44,7 @@ jobs:
           JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Configure JFrog Cli
         run: |
-          jfrog mvnc \
+          jfrog rt mvnc \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
@@ -65,7 +65,7 @@ jobs:
 #       build and publish to configured target
       - name: Build and Publish
         run: |
-          jfrog mvn build-helper:parse-version versions:set \
+          jfrog rt mvn build-helper:parse-version versions:set \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
@@ -77,7 +77,7 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"
-          jfrog mvn versions:set-property \
+          jfrog rt mvn versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
@@ -86,7 +86,7 @@ jobs:
             -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
             -B             
           echo "::notice ::set spring-cloud-deployer.version=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version}"
-          jfrog mvn versions:set-property \
+          jfrog rt mvn versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
@@ -95,7 +95,7 @@ jobs:
             -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
             -B
           echo "::notice ::set spring-cloud-dataflow-ui.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version}"
-          jfrog mvn versions:set-property \
+          jfrog rt mvn versions:set-property \
             -gs .github/settings.xml \
             -DskipResolution=true \
             -Pstagingrelease \
@@ -108,7 +108,7 @@ jobs:
           echo "::notice ::set-package-version"
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
-          jfrog mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,docs -B install -DskipTests
+          jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,docs -B install -DskipTests
           echo "::notice ::build-publish"
           jfrog rt build-publish
           PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)

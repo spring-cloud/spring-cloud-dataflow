@@ -51,7 +51,7 @@ jobs:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog mvnc \
+        jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=milestone \
@@ -71,8 +71,8 @@ jobs:
         echo spring_cloud_dataflow_version="$spring_cloud_dataflow_version" >> $GITHUB_ENV
         export spring_cloud_dataflow_version
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog mvn -s .settings.xml install -Pfull,docs -B
-        jfrog mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
         PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)

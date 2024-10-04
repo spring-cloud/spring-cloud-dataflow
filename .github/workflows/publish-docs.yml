@@ -41,7 +41,7 @@ jobs:
           JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Configure JFrog Cli
         run: |
-          jfrog mvnc \
+          jfrog rt mvnc \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
@@ -54,7 +54,7 @@ jobs:
 #       build and publish to configured target
       - name: Build and Publish
         run: |
-          jfrog mvn build-helper:parse-version versions:set \
+          jfrog rt mvn build-helper:parse-version versions:set \
             -gs .github/settings.xml \
             -DskipResolution=true \
             -DprocessAllModules=true \
@@ -62,7 +62,7 @@ jobs:
             -Dartifactory.publish.artifacts=false \
             -DnewVersion=${{ inputs.version }} \
             -B          
-          jfrog mvn versions:set-property \
+          jfrog rt mvn versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
@@ -70,7 +70,7 @@ jobs:
             -Dproperty=dataflow.version \
             -DnewVersion=${{ inputs.version }} \
             -B
-          jfrog mvn versions:set-property \
+          jfrog rt mvn versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
@@ -87,7 +87,7 @@ jobs:
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
           ./mvnw -gs .github/settings.xml -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C
-          jfrog mvn -gs .github/settings.xml \
+          jfrog rt mvn -gs .github/settings.xml \
             -Pstagingrelease,full,deploymentfiles,docs \
             -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-docs \
             -B install -DskipTests

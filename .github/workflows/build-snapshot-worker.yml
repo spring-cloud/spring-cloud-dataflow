@@ -47,7 +47,7 @@ jobs:
         JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog mvnc \
+        jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=milestone \
@@ -63,19 +63,17 @@ jobs:
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75
-      env:
-        MVN: 'jfrog mvn'
       run: |
         ./mvnw --help
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog mvn -s .settings.xml install -Pfull,docs -B
-        jfrog mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish        
-        PROJECT_VERSION=$($MVN help:evaluate -Dexpression=project.version -q -DforceStdout)
+        PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$($MVN help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(./mvnw help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
 #        echo "Determine project version"
 #        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"
