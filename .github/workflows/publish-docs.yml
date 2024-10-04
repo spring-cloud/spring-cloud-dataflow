@@ -20,24 +20,24 @@ jobs:
         with:
           java-version: '17'
           distribution: 'liberica'
-      - uses: jvalkeal/setup-maven@v1
-        with:
-          maven-version: 3.8.8
-          maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
       - uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-m2-
-      - uses: jfrog/setup-jfrog-cli@v4
+      - uses: jvalkeal/setup-maven@v1
+        with:
+          maven-version: 3.8.8
+          maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+      - uses: jfrog/setup-jfrog-cli@v1
+        with:
+          version: 1.54.0
         env:
-          JF_URL: 'https://repo.spring.io'
-          JFROG_CLI_SERVER_ID: 'repo.spring.io'
-          JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+          JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Configure JFrog Cli
         run: |
-          jfrog mvnc --use-wrapper \
+          jfrog rt mvnc \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
@@ -83,7 +83,7 @@ jobs:
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
           ./mvnw -gs .github/settings.xml -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C  -B --no-transfer-progress
-          jfrog mvn -gs .github/settings.xml \
+          jfrog rt mvn -gs .github/settings.xml \
             -Pstagingrelease,full,deploymentfiles,docs \
             -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-docs \
             -B install -DskipTests --no-transfer-progress

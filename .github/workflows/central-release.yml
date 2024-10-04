@@ -16,11 +16,11 @@ jobs:
     # to get spec file in .github
     - uses: actions/checkout@v4
 
-    # Setup jfrog cli
-    - uses: jfrog/setup-jfrog-cli@v4
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.54.0
       env:
-        JF_URL: 'https://repo.spring.io'
-
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
 
     # zoo extract and ensure
     - name: Extract Zoo Context Properties

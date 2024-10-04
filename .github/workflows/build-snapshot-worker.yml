@@ -40,14 +40,14 @@ jobs:
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - uses: jfrog/setup-jfrog-cli@v4
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.54.0
       env:
-        JF_URL: 'https://repo.spring.io'
-        JFROG_CLI_SERVER_ID: 'repo.spring.io'
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog mvnc --use-wrapper \
+        jfrog rt mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -67,8 +67,8 @@ jobs:
         ./mvnw --help
         ./spring-cloud-dataflow-package/set-package-version.sh
         ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
-        jfrog mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
-        jfrog mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
         jfrog rt build-publish        
         PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
