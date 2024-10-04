@@ -42,8 +42,8 @@ jobs:
         jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
-          --repo-resolve-releases=libs-milestone \
-          --repo-resolve-snapshots=libs-snapshot \
+          --repo-resolve-releases=milestone \
+          --repo-resolve-snapshots=snapshot \
           --repo-deploy-releases=libs-milestone-local \
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-milestone >> $GITHUB_ENV

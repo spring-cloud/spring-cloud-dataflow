@@ -38,7 +38,7 @@ jobs:
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
-            --repo-resolve-snapshots=libs-snapshot \
+            --repo-resolve-snapshots=snapshot \
             --repo-deploy-releases=libs-staging-local \
             --repo-deploy-snapshots=libs-snapshot-local
           echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-release >> $GITHUB_ENV
