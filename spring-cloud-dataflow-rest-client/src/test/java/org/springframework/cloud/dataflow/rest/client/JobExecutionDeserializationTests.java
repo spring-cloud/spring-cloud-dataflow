@@ -21,7 +21,7 @@ import java.io.InputStream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.StepExecution;
@@ -38,14 +38,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-// TODO revisit
-@Disabled("Structure changes on Job 5.x")
 class JobExecutionDeserializationTests {
 
 	@Test
 	void deserializationOfMultipleJobExecutions() throws IOException {
 
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
+		objectMapper.registerModule(new JavaTimeModule());
 
 		final InputStream inputStream = JobExecutionDeserializationTests.class
 				.getResourceAsStream("/JobExecutionJson.txt");
@@ -66,6 +65,8 @@ class JobExecutionDeserializationTests {
 	void deserializationOfSingleJobExecution() throws IOException {
 
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
+		objectMapper.registerModule(new JavaTimeModule());
+
 
 		final InputStream inputStream = JobExecutionDeserializationTests.class
 				.getResourceAsStream("/SingleJobExecutionJson.txt");
