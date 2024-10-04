@@ -1,4 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesTaskPlatformAutoConfiguration,\
-  org.springframework.cloud.dataflow.server.config.kubernetes.KubernetesSchedulerAutoConfiguration
-
