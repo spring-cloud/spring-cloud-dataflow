@@ -41,7 +41,6 @@ import org.springframework.cloud.dataflow.server.db.MySQL_5_7_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MySQL_8_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.PostgreSQL_14_ContainerSupport;
-import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
 import org.springframework.cloud.dataflow.server.single.DataFlowServerApplication;
@@ -211,10 +210,6 @@ public class TaskExecutionQueryContainer {
 	@Tag("DB2")
 	static class DB2_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
 			implements DB2_11_5_ContainerSupport {
-	}
-
-	static class SqlServer_2017_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
-			implements SqlServer_2017_ContainerSupport {
 	}
 
 	static class SqlServer_2019_TaskExecutionQueryIT extends AbstractLargeTaskExecutionDatabaseIT
