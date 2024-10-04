@@ -37,8 +37,9 @@ jobs:
 #     jfrog cli
     - uses: jfrog/setup-jfrog-cli@v4
       env:
-        JF_URL: 'https://repo.spring.io'
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+#        JF_URL: 'https://repo.spring.io'
+#        JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_ENV_1: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:
