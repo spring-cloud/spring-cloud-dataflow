@@ -24,9 +24,6 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-    - uses: jfrog/setup-jfrog-cli@v4
-      env:
-        J_ENV: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - uses: actions/cache@v3
       with:
         path: ~/.m2/repository
@@ -38,8 +35,14 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - uses: jfrog/setup-jfrog-cli@v4
+      env:
+        JF_URL: 'https://repo.spring.io'
+        JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
+        JF_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
     - name: Configure JFrog Cli
       run: |
+        jfrog config add repo.spring.io --url="https://repo.spring.io" --user="$ARTIFACTORY_USERNAME" --password="$ARTIFACTORY_PASSWORD"  --interactive=false --overwrite=true
         jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
@@ -119,31 +122,19 @@ jobs:
         with:
           maven-version: 3.8.8
           maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-      - uses: jfrog/setup-jfrog-cli@v4
-        env:
-          J_ENV: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Login dockerhub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Configure JFrog Cli
-        run: |
-          jfrog mvnc --use-wrapper \
-            --server-id-resolve=repo.spring.io \
-            --server-id-deploy=repo.spring.io \
-            --repo-resolve-releases=milestone \
-            --repo-resolve-snapshots=snapshot \
-            --repo-deploy-releases=libs-release-local \
-            --repo-deploy-snapshots=libs-snapshot-local
       - uses: ./.github/actions/install-xmlutils
       - name: Test
         shell: bash
         timeout-minutes: 75
         run: |
-          jfrog mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
+          ./mvnw clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
           export ENABLE_${{ matrix.db }}=true
-          jfrog mvn test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
+          ./mvnw test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}

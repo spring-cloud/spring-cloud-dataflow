@@ -12,7 +12,8 @@ on:
         default: false
         description: 'Delete the image tags'
 env:
-  MVN: 'jfrog mvn'
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   # test templating before publishing a package
@@ -26,26 +27,13 @@ jobs:
         with:
           java-version: '17'
           distribution: 'liberica'
-      - uses: jfrog/setup-jfrog-cli@v4
-        env:
-          JF_ENV_1: ${{ secrets.JF_ARTIFACTORY_SPRING }}
-      - name: Configure JFrog Cli
-        run: |
-          jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true 
-          jfrog mvnc --use-wrapper \
-            --server-id-resolve=repo.spring.io \
-            --server-id-deploy=repo.spring.io \
-            --repo-resolve-releases=milestone \
-            --repo-resolve-snapshots=snapshot \
-            --repo-deploy-releases=libs-release-local \
-            --repo-deploy-snapshots=libs-snapshot-local
       - name: Load matrix
         id: matrix
         shell: bash
         run: |          
           if [ "${{ inputs.version }}" == "" ]; then
-            $MVN help:evaluate -Dexpression=project.version -s .settings.xml > /dev/null
-            VERSION=$($MVN help:evaluate -Dexpression=project.version -q -DforceStdout)
+            ./mvnw help:evaluate -Dexpression=project.version -s .settings.xml > /dev/null
+            VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
             echo "::notice::VERSION=$VERSION"
             echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
@@ -94,8 +82,6 @@ jobs:
         env:
           TAG: ${{ needs.prepare.outputs.version }}
           DEFAULT_JDK: '17'
-          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
           DELETE_TAGS: ${{ inputs.delete-tags }}
         run: |
           .github/workflows/build-image.sh ${{ matrix.path }} ${{ matrix.image }} ${{ matrix.name }}
