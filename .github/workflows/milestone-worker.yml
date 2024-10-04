@@ -32,14 +32,18 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
-    - uses: jfrog/setup-jfrog-cli@v4
+    - uses: jvalkeal/setup-maven@v1
+      with:
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.54.0
       env:
-        JF_URL: 'https://repo.spring.io'
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true
-        jfrog mvnc --use-wrapper \
+        jfrog mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=milestone \
