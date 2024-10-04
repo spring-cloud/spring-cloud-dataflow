@@ -164,10 +164,7 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     with:
       version: ${{ needs.build.outputs.version }}
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
+    secrets: inherit
 
   wrap:
     needs: [ build, images, database-tests ]
