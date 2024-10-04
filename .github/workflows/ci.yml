@@ -9,7 +9,7 @@ on:
       - '.github/**'
 
 env:
-  MAVEN_THREADS: '-T 1'
+  MVN: 'jfrog mvn'
 
 jobs:
   build:
@@ -34,20 +34,18 @@ jobs:
       with:
         java-version: '17'
         distribution: 'liberica'
-#     jfrog cli
-    - uses: jfrog/setup-jfrog-cli@v4
-      env:
-        JF_ENV_1: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Login dockerhub
       uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-#       setup frog cli
+    - uses: jfrog/setup-jfrog-cli@v4
+      env:
+        JF_ENV_1: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
         jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true 
-        jfrog rt mvnc --use-wrapper \
+        jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -56,20 +54,20 @@ jobs:
           --repo-deploy-snapshots=libs-snapshot-local
         echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo "::notice::$(./mvnw --version)"
-        ./mvnw help:evaluate -s .settings.xml -Dexpression=project.version
-        echo spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
+        echo "::notice::$($MVN --version)"
+        $MVN help:evaluate -s .settings.xml -Dexpression=project.version
+        echo spring_cloud_dataflow_version=$($MVN help:evaluate -Dexpression=project.version -q -DforceStdout) >> $GITHUB_ENV
 #       build and publish
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75
-      run: |
+      run: |        
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog mvn -s .settings.xml install -Pfull,docs -B
-        jfrog mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
+        $MVN -s .settings.xml install -Pfull,docs -B
+        $MVN -s .settings.xml install -pl spring-cloud-dataflow-package -B
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
-        PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+        PROJECT_VERSION=$($MVN help:evaluate -Dexpression=project.version -q -DforceStdout)
 #        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"
 #        SKIPPER_DOCS_PATTERN=$(.github/workflows/skipper-docs-name.sh $PROJECT_VERSION libs-snapshot-local)
@@ -133,7 +131,7 @@ jobs:
     - name: Configure JFrog Cli
       run: |
         jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true
-        jfrog rt mvnc --use-wrapper \
+        jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -144,9 +142,9 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |                        
-        jfrog mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
+        $MVN clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
         export ENABLE_${{ matrix.db }}=true
-        jfrog mvn test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
+        $MVN test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: ${{ success() || failure() }}

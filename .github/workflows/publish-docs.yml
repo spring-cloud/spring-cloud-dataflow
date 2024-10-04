@@ -34,7 +34,7 @@ jobs:
 #       target deploy repos
       - name: Configure JFrog Cli
         run: |
-          jfrog rt mvnc --use-wrapper \
+          jfrog mvnc --use-wrapper \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \
             --repo-resolve-releases=libs-release-staging \
