@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.server.job.support;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
 import org.springframework.batch.core.StepExecution;
@@ -64,7 +63,7 @@ public class StepExecutionProgressInfo {
 		if (startTime == null) {
 			startTime = LocalDateTime.now();
 		}
-		duration = Duration.between(startTime, endTime).get(ChronoUnit.MILLIS);
+		duration = Duration.between(startTime, endTime).toMillis();
 		percentageComplete = calculatePercentageComplete();
 	}
 

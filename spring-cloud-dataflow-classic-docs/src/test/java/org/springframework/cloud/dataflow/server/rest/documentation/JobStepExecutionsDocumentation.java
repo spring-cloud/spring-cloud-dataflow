@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
@@ -124,7 +123,6 @@ class JobStepExecutionsDocumentation extends BaseDocumentation {
 				));
 	}
 
-	@Disabled("TODO: Boot3x followup : Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
 	@Test
 	void stepProgress() throws Exception {
 		this.mockMvc.perform(
