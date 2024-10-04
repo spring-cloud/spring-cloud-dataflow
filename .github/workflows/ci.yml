@@ -46,7 +46,7 @@ jobs:
 #       setup frog cli
     - name: Configure JFrog Cli
       run: |
-        jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token-stdin="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true 
+        jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true 
         jfrog rt mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
@@ -132,7 +132,7 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Configure JFrog Cli
       run: |
-        jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token-stdin="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true
+        jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true
         jfrog rt mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
