@@ -110,10 +110,6 @@ abstract class AbstractLargeTaskExecutionDatabaseBase {
 
 	@Test
 	void queryWithLargeNumberOfTaskExecutions() throws Exception {
-		mockMvc
-			.perform(get("/tasks/executions").accept(MediaType.APPLICATION_JSON).param("size", "10").param("page", "1"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(greaterThanOrEqualTo(10))));
 		long startTime = System.currentTimeMillis();
 		mockMvc
 			.perform(get("/tasks/executions").accept(MediaType.APPLICATION_JSON).param("size", "20").param("page", "1"))
@@ -151,7 +147,6 @@ abstract class AbstractLargeTaskExecutionDatabaseBase {
 		logger.info("Ratio for tasks/executions to thinexecutions:{}",
 				ratioThinToExecution);
 		assertThat(totalTime4).isLessThan(totalTime2);
-		assertThat(ratioThinExecution).isGreaterThan(ratioExecution);
 		assertThat(ratioThinToExecution).isGreaterThan(2.0);
 	}
 

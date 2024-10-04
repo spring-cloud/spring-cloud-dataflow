@@ -71,8 +71,11 @@ jobs:
         path: './**/target/failsafe-reports/**/*.*'
         retention-days: 7
         if-no-files-found: ignore
-  db2-tests:
-    name: DB2 Tests
+  large-container-tests:
+    strategy:
+      matrix:
+        database: ['DB2', 'ORACLE']
+    name: ${{ matrix.database }} Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,41 +93,40 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: 'Action: Run DB2 Tests'
-        env:
-          ENABLE_DB2: 'true'
+      - name: 'Action: Run ${{ matrix.database }} Tests'
         run: |
+          export ENABLE_${{ matrix.database }}=true
           ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -am  -B --no-transfer-progress  
           ./mvnw \
             -s .settings.xml \
             -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server \
-            -Dgroups=DB2 \
+            -Dgroups=${{ matrix.database }} \
             --batch-mode --no-transfer-progress \
             test
-      - name: Test Report for DB2
+      - name: Test Report for ${{ matrix.database }}
         id: test_report
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}
         with:
-          name: Tests - DB2
+          name: Tests - ${{ matrix.database }}
           path: '**/surefire-reports/*.xml'
           reporter: java-junit
           list-tests: failed
-      - name: Publish Test Url for DB2
+      - name: Publish Test Url for ${{ matrix.database }}
         shell: bash
         run: |
-          echo "::info ::Test report for DB2 published at ${{ steps.test_report.outputs.url_html }}"
+          echo "::info ::Test report for ${{ matrix.database }} published at ${{ steps.test_report.outputs.url_html }}"
       - name: 'Action: Upload Unit Test Results'
         if: ${{ success() || failure() }}
         uses: actions/upload-artifact@v3
         with:
-          name: DB2-test-results-surefire
+          name: ${{ matrix.database }}-test-results-surefire
           path: './**/target/surefire-reports/**/*.*'
           retention-days: 7
           if-no-files-found: ignore
   completed:
     runs-on: ubuntu-latest
-    needs: [ db2-tests, integration-test ]
+    needs: [ large-container-tests, integration-test ]
     steps:
       - name: 'Done'
         shell: bash
