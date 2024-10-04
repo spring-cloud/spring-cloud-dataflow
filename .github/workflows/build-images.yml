@@ -11,6 +11,7 @@ on:
         type: boolean
         default: false
         description: 'Delete the image tags'
+
 env:
   ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
   ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}

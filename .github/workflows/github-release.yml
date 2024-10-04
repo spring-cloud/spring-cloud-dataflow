@@ -7,6 +7,10 @@ on:
         description: 'Build Zoo Handler Payload'
         required: true
 
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 jobs:
   ghrelease:
     runs-on: ubuntu-latest

@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '0 6 * * 1-5'
 
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 jobs:
   integration-test:
     name: DB IT on ${{ matrix.group }}
@@ -29,9 +33,6 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: 'Action: Run Db IT'
-      env:
-        ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-        ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
       run: |
         ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  
         ./mvnw \

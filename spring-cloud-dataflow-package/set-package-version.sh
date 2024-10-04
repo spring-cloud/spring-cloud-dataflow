@@ -3,14 +3,11 @@ if [ -z "$BASH_VERSION" ]; then
     echo "This script requires Bash. Use: bash $0 $*"
     exit 0
 fi
-if [ "$MVN" = "" ]; then
-    MVN=./mvnw
-fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 ROOT=$(realpath $SCDIR/..)
 if [ "$PACKAGE_VERSION" = "" ]; then
     pushd $ROOT > /dev/null
-    $MVN help:evaluate -s .settings.xml -Dexpression=project.version > /dev/null
+    ./mvnw help:evaluate -s .settings.xml -Dexpression=project.version > /dev/null
     PACKAGE_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
     popd > /dev/null
 fi

@@ -46,6 +46,7 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
+        jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true
         jfrog mvnc --use-wrapper \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \

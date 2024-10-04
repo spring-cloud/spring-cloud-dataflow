@@ -6,6 +6,9 @@ on:
       version:
         description: 'Version to publish'
         required: true
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   build:
@@ -30,12 +33,11 @@ jobs:
       - uses: jfrog/setup-jfrog-cli@v4
         env:
           JF_URL: 'https://repo.spring.io'
-          JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
-          JF_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
 #       target deploy repos
       - name: Configure JFrog Cli
         run: |
-          jfrog config add repo.spring.io --url="https://repo.spring.io" --user="$ARTIFACTORY_USERNAME" --password="$ARTIFACTORY_PASSWORD"  --interactive=false --overwrite=true
+          jfrog config add repo.spring.io --url="https://repo.spring.io" --access-token="${{ secrets.JF_ARTIFACTORY_SPRING }}"  --interactive=false --overwrite=true
           jfrog mvnc --use-wrapper \
             --server-id-resolve=repo.spring.io \
             --server-id-deploy=repo.spring.io \

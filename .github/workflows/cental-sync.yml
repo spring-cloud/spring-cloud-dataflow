@@ -22,8 +22,7 @@ jobs:
     - uses: jfrog/setup-jfrog-cli@v4
       env:
         JF_URL: 'https://repo.spring.io'
-        JF_USER: ${{ secrets.ARTIFACTORY_USERNAME }}
-        JF_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 
     # Extract build id from input
     - name: Extract Build Id
