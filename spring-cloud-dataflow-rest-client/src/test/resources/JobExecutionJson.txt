@@ -48,7 +48,6 @@
           "failureExceptions": [
 
           ],
-          "jobConfigurationName": null,
           "running": false,
           "jobId": 6,
           "stopping": false,
@@ -117,7 +116,6 @@
           "failureExceptions": [
 
           ],
-          "jobConfigurationName": null,
           "running": false,
           "jobId": 5,
           "stopping": false,
@@ -186,7 +184,6 @@
           "failureExceptions": [
 
           ],
-          "jobConfigurationName": null,
           "running": false,
           "jobId": 4,
           "stopping": false,
@@ -225,42 +222,42 @@
               "-spring.datasource.driverClassName": {
                 "identifying": false,
                 "value": "com.mysql.jdbc.Driver",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.datasource.password": {
                 "identifying": false,
                 "value": "password",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.cloud.task.name": {
                 "identifying": false,
                 "value": "foo",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.jmx.default-domain": {
                 "identifying": false,
                 "value": "foo.taskbatch",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-dataflow.group-deployment-id": {
                 "identifying": false,
                 "value": "foo-1458075239963",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.datasource.username": {
                 "identifying": false,
                 "value": "root",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-server.port": {
                 "identifying": false,
                 "value": "25553",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.datasource.url": {
                 "identifying": false,
                 "value": "jdbc:mysql:\/\/localhost:3306\/practice",
-                "type": "STRING"
+                "type": "java.lang.String"
               }
             },
             "empty": false
@@ -294,7 +291,6 @@
           "failureExceptions": [
 
           ],
-          "jobConfigurationName": null,
           "running": false,
           "jobId": 3,
           "stopping": false,
@@ -370,7 +366,6 @@
           "failureExceptions": [
 
           ],
-          "jobConfigurationName": null,
           "running": false,
           "jobId": 2,
           "stopping": false,
@@ -409,42 +404,42 @@
               "-spring.datasource.driverClassName": {
                 "identifying": false,
                 "value": "com.mysql.jdbc.Driver",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.datasource.password": {
                 "identifying": false,
                 "value": "password",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.cloud.task.name": {
                 "identifying": false,
                 "value": "foo",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.jmx.default-domain": {
                 "identifying": false,
                 "value": "foo.taskbatch",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-dataflow.group-deployment-id": {
                 "identifying": false,
                 "value": "foo-1458074090919",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.datasource.username": {
                 "identifying": false,
                 "value": "root",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-server.port": {
                 "identifying": false,
                 "value": "26244",
-                "type": "STRING"
+                "type": "java.lang.String"
               },
               "-spring.datasource.url": {
                 "identifying": false,
                 "value": "jdbc:mysql:\/\/localhost:3306\/practice",
-                "type": "STRING"
+                "type": "java.lang.String"
               }
             },
             "empty": false
@@ -478,7 +473,6 @@
           "failureExceptions": [
 
           ],
-          "jobConfigurationName": null,
           "running": false,
           "jobId": 1,
           "stopping": false,
