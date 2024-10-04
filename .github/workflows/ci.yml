@@ -45,13 +45,13 @@ jobs:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
     - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.54.0
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_URL: 'https://repo.spring.io'
+        JFROG_CLI_SERVER_ID: 'repo.spring.io'
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
-        jfrog rt mvnc \
+        jfrog mvnc \
           --server-id-resolve=repo.spring.io \
           --server-id-deploy=repo.spring.io \
           --repo-resolve-releases=libs-milestone \
@@ -72,9 +72,9 @@ jobs:
         export spring_cloud_dataflow_version
         ./spring-cloud-dataflow-package/set-package-version.sh
         ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress 
-        jfrog rt mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
-        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
-        jfrog rt build-publish
+        jfrog mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
+        jfrog mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
+        jfrog build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"
         PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
 #        set +e
@@ -84,7 +84,7 @@ jobs:
 #          echo "::error ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
 #        else
 #          echo "::info ::Skipper Docs URL=$SKIPPER_DOCS_PATTERN"
-#          jfrog rt sp --build "$SKIPPER_DOCS_PATTERN" "buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
+#          jfrog sp --build "$SKIPPER_DOCS_PATTERN" "buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
 #          echo "::info ::Skipper Docs Set Properties buildName=$JFROG_CLI_BUILD_NAME;buildNumber=$JFROG_CLI_BUILD_NUMBER"
 #        fi
     - name: Test Report
