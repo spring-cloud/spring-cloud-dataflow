@@ -35,7 +35,6 @@ import org.springframework.cloud.dataflow.server.db.MariaDB_11_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MySQL_5_7_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.MySQL_8_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.Oracle_XE_18_ContainerSupport;
-import org.springframework.cloud.dataflow.server.db.SqlServer_2017_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2019_ContainerSupport;
 import org.springframework.cloud.dataflow.server.db.SqlServer_2022_ContainerSupport;
 import org.springframework.jdbc.support.MetaDataAccessException;
@@ -95,10 +94,6 @@ class DatabaseTypeTests {
 	@EnabledIfEnvironmentVariable(named = "ENABLE_ORACLE", matches = "true", disabledReason = "Container is too big")
 	@Tag("ORACLE")
 	class OracleDatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements Oracle_XE_18_ContainerSupport {
-	}
-
-	@Nested
-	class SqlServer_2017_DatabaseTypeSingleDbDatabaseTypeTests extends AbstractSingleDbDatabaseTypeTests implements SqlServer_2017_ContainerSupport {
 	}
 
 	@Nested
