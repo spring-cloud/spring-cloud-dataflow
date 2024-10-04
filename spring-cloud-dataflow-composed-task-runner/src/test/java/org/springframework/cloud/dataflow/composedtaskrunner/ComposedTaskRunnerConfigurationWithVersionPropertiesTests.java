@@ -72,7 +72,6 @@ class ComposedTaskRunnerConfigurationWithVersionPropertiesTests {
 
 	@Test
 	@DirtiesContext
-	@Disabled("waiting for Glenn")
 	void composedConfiguration() throws Exception {
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
