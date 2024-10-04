@@ -66,9 +66,9 @@ jobs:
       run: |
         ./mvnw --help
         ./spring-cloud-dataflow-package/set-package-version.sh
-        ./mvnw -s .settings.xml package -DskipTests -T 1C
-        jfrog rt mvn -s .settings.xml install -Pfull,docs -B
-        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B
+        ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
         jfrog rt build-publish        
         PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
@@ -135,9 +135,9 @@ jobs:
         shell: bash
         timeout-minutes: 75
         run: |
-          ./mvnw clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
+          ./mvnw clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -B --no-transfer-progress
           export ENABLE_${{ matrix.db }}=true
-          ./mvnw test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
+          ./mvnw test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }} -B --no-transfer-progress
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}

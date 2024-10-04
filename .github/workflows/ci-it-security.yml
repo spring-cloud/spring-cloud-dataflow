@@ -33,12 +33,12 @@ jobs:
     - name: Run Security IT
       shell: bash
       run: |
-        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am
+        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  -B --no-transfer-progress
         ./mvnw -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=oauth \
           -Pfailsafe \
-          --batch-mode \
+          --batch-mode --no-transfer-progress \
           test
     - name: Test Report
       uses: dorny/test-reporter@v1

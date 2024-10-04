@@ -32,12 +32,12 @@ jobs:
 
     - name: Run Performance IT
       run: |
-        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am
+        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  -B --no-transfer-progress
         ./mvnw -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=performance \
           -Pfailsafe \
-          --batch-mode \
+          --batch-mode --no-transfer-progress \
           verify
     - name: Test Report
       uses: dorny/test-reporter@v1

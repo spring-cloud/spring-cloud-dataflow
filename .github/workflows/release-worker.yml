@@ -73,7 +73,7 @@ jobs:
             -DgenerateBackupPoms=false \
             -Dartifactory.publish.artifacts=false \
             -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' \
-            -B
+            -B --no-transfer-progress
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"
@@ -84,7 +84,7 @@ jobs:
             -DgenerateBackupPoms=false \
             -Dproperty=dataflow.version \
             -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
-            -B             
+            -B --no-transfer-progress
           echo "::notice ::set spring-cloud-deployer.version=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version}"
           mvn versions:set-property \
             -gs .github/settings.xml \
@@ -93,7 +93,7 @@ jobs:
             -DgenerateBackupPoms=false \
             -Dproperty=spring-cloud-deployer.version \
             -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
-            -B
+            -B --no-transfer-progress
           echo "::notice ::set spring-cloud-dataflow-ui.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version}"
           mvn versions:set-property \
             -gs .github/settings.xml \
@@ -102,14 +102,14 @@ jobs:
             -DgenerateBackupPoms=false \
             -Dproperty=spring-cloud-dataflow-ui.version \
             -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
-            -B
+            -B --no-transfer-progress
           echo "::notice ::build-clean"
           jfrog rt build-clean
           echo "::notice ::set-package-version"
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
-          ./mvnw -s .settings.xml package -Pstagingrelease -DskipTests -T 1C
-          jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,docs -B install -DskipTests
+          ./mvnw -s .settings.xml package -Pstagingrelease -DskipTests -T 1C --no-transfer-progress
+          jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,docs -B install -DskipTests --no-transfer-progress
           echo "::notice ::build-publish"
           jfrog rt build-publish
           PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)

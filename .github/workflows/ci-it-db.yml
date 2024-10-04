@@ -34,13 +34,13 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: 'Action: Run Db IT'
       run: |
-        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  
+        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am -B --no-transfer-progress
         ./mvnw \
           -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=${{ matrix.group }} \
           -Pfailsafe \
-          --batch-mode \
+          --batch-mode --no-transfer-progress \
           verify
     - name: Integration Test Report for ${{ matrix.group }}
       id: test_report
@@ -94,12 +94,12 @@ jobs:
         env:
           ENABLE_DB2: 'true'
         run: |
-          ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -am  
+          ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -am  -B --no-transfer-progress  
           ./mvnw \
             -s .settings.xml \
             -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server \
             -Dgroups=DB2 \
-            --batch-mode \
+            --batch-mode --no-transfer-progress \
             test
       - name: Test Report for DB2
         id: test_report

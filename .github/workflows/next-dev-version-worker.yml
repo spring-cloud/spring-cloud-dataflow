@@ -68,7 +68,7 @@ jobs:
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT' \
-          -B
+          -B --no-transfer-progress
         BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
         echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
@@ -76,21 +76,21 @@ jobs:
           -DgenerateBackupPoms=false \
           -Dproperty=dataflow.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
-          -B        
+          -B --no-transfer-progress
         mvn versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
-          -B
+          -B --no-transfer-progress
         mvn versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-dataflow-ui.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
-          -B
+          -B --no-transfer-progress
         jfrog rt build-clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        ./mvnw -s .settings.xml package -DskipTests -T 1C
-        jfrog rt mvn -s .settings.xml install -DskipTests -B -T 1C         
+        ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -DskipTests -B -T 1C --no-transfer-progress         
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV

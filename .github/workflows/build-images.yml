@@ -33,7 +33,7 @@ jobs:
         shell: bash
         run: |          
           if [ "${{ inputs.version }}" == "" ]; then
-            ./mvnw help:evaluate -Dexpression=project.version -s .settings.xml > /dev/null
+            ./mvnw help:evaluate -Dexpression=project.version -s .settings.xml -B --no-transfer-progress > /dev/null
             VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
             echo "::notice::VERSION=$VERSION"
             echo "VERSION=$VERSION" >> $GITHUB_ENV
