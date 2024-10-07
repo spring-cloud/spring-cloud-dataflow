@@ -133,7 +133,6 @@ class JobExecutionTestUtils
 	 * Test utility that generates hundreds of job executions which can be useful when debugging paging issues.
 	 * <p>To run, adjust the datasource properties accordingly and then execute the test manually in your editor.
 	 */
-	// @Disabled
 	@Nested class JobExecutionTestDataGenerator {
 
 		@Test
