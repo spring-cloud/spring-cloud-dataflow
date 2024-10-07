@@ -56,7 +56,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-@Disabled("taskRepository not found")
 class JobCommandTests extends AbstractShellIntegrationTest {
 
 	private final static String BASE_JOB_NAME = "myJob";
@@ -129,17 +128,17 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 	void jobExecutionList() {
 		logger.info("Retrieve Job Execution List Test");
 		Table table = getTable(job().jobExecutionList());
-		verifyColumnNumber(table, 7);
+		verifyColumnNumber(table, 6);
 		checkCell(table, 0, 0, "ID ");
 		checkCell(table, 0, 1, "Task ID");
 		checkCell(table, 0, 2, "Job Name ");
 		checkCell(table, 0, 3, "Start Time ");
 		checkCell(table, 0, 4, "Step Execution Count ");
 		checkCell(table, 0, 5, "Definition Status ");
-		checkCell(table, 0, 6, "Schema Target");
-
  	 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x SCDF /jobs/thinexecutions endpoint fails to respond.")
 	@Test
 	void jobExecutionListByName() {
 		logger.info("Retrieve Job Execution List By Name Test");
@@ -176,7 +175,6 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, rowNumber++, 0, "Exit Status ");
 		checkCell(table, rowNumber++, 0, "Exit Message ");
 		checkCell(table, rowNumber++, 0, "Definition Status ");
-		checkCell(table, rowNumber++, 0, "Schema Target ");
 		checkCell(table, rowNumber++, 0, "Job Parameters ");
 		int paramRowOne = rowNumber;
 
@@ -204,7 +202,7 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Job Instance Detail by Id");
 
 		Table table = getTable(job().instanceDisplay(jobInstances.get(0).getInstanceId()));
-		verifyColumnNumber(table, 6);
+		verifyColumnNumber(table, 5);
 		checkCell(table, 0, 0, "Name ");
 		checkCell(table, 0, 1, "Execution ID ");
 		checkCell(table, 0, 2, "Step Execution Count ");
@@ -233,6 +231,8 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 5, "Status ");
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x https://github.com/spring-cloud/spring-cloud-dataflow/pull/5964 should resolve this.  Validate with this test")
 	@Test
 	void jobStepExecutionProgress() {
 		logger.info("Retrieve Job Step Execution Progress Test");
@@ -249,6 +249,8 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x https://github.com/spring-cloud/spring-cloud-dataflow/pull/5964 should resolve this.  Validate with this test")
 	@Test
 	void stepExecutionView() {
 		logger.info("Retrieve Job Execution Detail by Id");
