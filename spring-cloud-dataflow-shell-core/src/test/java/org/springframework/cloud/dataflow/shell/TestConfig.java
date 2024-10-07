@@ -21,8 +21,10 @@ import java.util.List;
 
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
+import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
@@ -30,6 +32,7 @@ import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.cloud.skipper.domain.AboutResource;
 import org.springframework.cloud.skipper.domain.Dependency;
 import org.springframework.cloud.skipper.domain.VersionInfo;
+import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -45,7 +48,7 @@ import static org.mockito.Mockito.when;
  * @author Mark Pollack
  * @author Chris Bono
  */
-@SpringBootApplication(exclude = {DataFlowClientAutoConfiguration.class})
+@SpringBootApplication(exclude = {DataFlowClientAutoConfiguration.class, SimpleTaskAutoConfiguration.class})
 @EnableDataFlowServer
 @Configuration
 public class TestConfig {
@@ -122,6 +125,12 @@ public class TestConfig {
 		when(skipperClient.info()).thenReturn(about);
 		when(skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 		return skipperClient;
+	}
+
+	@Bean
+	@ConditionalOnMissingBean({ActuatorOperations.class})
+	ActuatorOperations actuatorOperations() {
+		return mock(ActuatorOperations.class);
 	}
 
 }

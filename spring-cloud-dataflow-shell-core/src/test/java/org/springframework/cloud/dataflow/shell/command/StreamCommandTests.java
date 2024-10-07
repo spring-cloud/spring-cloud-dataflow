@@ -51,7 +51,6 @@ import static org.mockito.Mockito.when;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-@Disabled("taskRepository not found")
 class StreamCommandTests extends AbstractShellIntegrationTest {
 
 	private static final String APPS_URI = "META-INF/test-stream-apps.properties";
@@ -91,6 +90,8 @@ class StreamCommandTests extends AbstractShellIntegrationTest {
 		stream().update(streamName, "version.log=5.0.0","Update request has been sent for the stream");
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x Failing stating that long:sing:3.2.1 isn't registered.")
 	@Test
 	void streamUpdatePropFileForTickTock() throws InterruptedException {
 		String streamName = generateUniqueStreamOrTaskName();

@@ -18,7 +18,6 @@ package org.springframework.cloud.dataflow.shell.command;
 import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.cloud.dataflow.shell.AbstractShellIntegrationTest;
@@ -30,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-@Disabled("taskRepository not found")
 class TaskScheduleCommandsTest extends AbstractShellIntegrationTest {
 
 	@BeforeAll

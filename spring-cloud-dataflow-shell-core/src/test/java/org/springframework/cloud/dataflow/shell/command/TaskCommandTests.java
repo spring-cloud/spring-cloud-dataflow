@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-@Disabled("taskRepository not found")
+
 class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static final String APPS_URI = "META-INF/test-task-apps.properties";
@@ -65,9 +65,9 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static final long TASK_EXECUTION_ID = 10000;
 
-	private static final Date startTime = new Date();
+	private static final LocalDateTime startTime = LocalDateTime.now();
 
-	private static final Date endTime = new Date(startTime.getTime() + 5000);
+	private static final LocalDateTime endTime = LocalDateTime.now().plusSeconds(5);
 
 	private static final String EXTERNAL_EXECUTION_ID = "WOW22";
 
@@ -251,7 +251,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 		logger.info("Retrieve Task Execution List Test");
 		Object result = task().taskExecutionList();
 		Table table = (Table) result;
-		assertThat(table.getModel().getColumnCount()).isEqualTo(6);
+		assertThat(table.getModel().getColumnCount()).isEqualTo(5);
 		verifyTableValue(table, 0, 0, "Task Name");
 		verifyTableValue(table, 0, 1, "ID");
 		verifyTableValue(table, 0, 2, "Start Time");
@@ -281,7 +281,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().create("mytask", "timestamp");
 		Object result = task().taskExecutionListByName("mytask");
 		Table table = (Table) result;
-		assertThat(table.getModel().getColumnCount()).isEqualTo(6);
+		assertThat(table.getModel().getColumnCount()).isEqualTo(5);
 
 		verifyTableValue(table,0, 0, "Task Name");
 		verifyTableValue(table,0, 1, "ID");
@@ -314,8 +314,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 10, 0, "Exit Code ");
 		verifyTableValue(table, 11, 0, "Exit Message ");
 		verifyTableValue(table, 12, 0, "Error Message ");
-		verifyTableValue(table, 13, 0, "Schema Target ");
-		verifyTableValue(table, 14, 0, "External Execution Id ");
+		verifyTableValue(table, 13, 0, "External Execution Id ");
 
 		verifyTableValue(table, 1, 1, TASK_EXECUTION_ID);
 		verifyTableValue(table, 3, 1, TASK_NAME);
@@ -324,8 +323,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 10, 1, EXIT_CODE);
 		verifyTableValue(table, 11, 1, EXIT_MESSAGE);
 		verifyTableValue(table, 12, 1, ERROR_MESSAGE);
-		verifyTableValue(table, 13, 1, BOOT3_SCHEMA);
-		verifyTableValue(table, 14, 1, EXTERNAL_EXECUTION_ID);
+		verifyTableValue(table, 13, 1, EXTERNAL_EXECUTION_ID);
 	}
 
 	@Test
