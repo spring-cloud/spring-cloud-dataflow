@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.JobExecution;
@@ -173,8 +172,6 @@ class JobStepExecutionControllerTests {
 				.andExpect(jsonPath("$._embedded.stepExecutionResourceList[2].stepExecution.id", is(6)));
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x followup Need to create DataflowSqlPagingQueryProvider so that dataflow can call generateJumpToItemQuery")
 	@Test
 	void singleGetStepExecutionProgress() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1/steps/1/progress").accept(MediaType.APPLICATION_JSON))
