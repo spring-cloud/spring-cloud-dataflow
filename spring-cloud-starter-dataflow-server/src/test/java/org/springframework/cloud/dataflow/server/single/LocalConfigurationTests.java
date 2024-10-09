@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.server.single;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -104,8 +103,6 @@ class LocalConfigurationTests {
 		}
 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x DataflowServerConfiguration requires DataflowTaskExecutionQueryDao bean.  Doesn't seem like it is needed.")
 	@Test
 	void configWithTasksDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
