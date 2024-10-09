@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
@@ -42,7 +43,8 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfigurati
 		UserDetailsServiceAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
 		CloudFoundryDeployerAutoConfiguration.class,
-		KubernetesAutoConfiguration.class
+		KubernetesAutoConfiguration.class,
+		DataFlowClientAutoConfiguration.class
 })
 @AutoConfigureTestDatabase
 public class LocalTestNoDataFlowServer {

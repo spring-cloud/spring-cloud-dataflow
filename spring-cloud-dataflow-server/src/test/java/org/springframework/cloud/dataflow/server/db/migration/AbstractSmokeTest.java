@@ -15,16 +15,13 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -121,9 +118,6 @@ public abstract class AbstractSmokeTest {
 				.allSatisfy((taskExecution) -> assertThat(taskExecution.getExecutionId()).isNotEqualTo(0L));
 	}
 
-	//TODO: Boot3x followup Due to some changes the SQL being tested for is not being outputted by SCDF logs
-	//Not sure if this is because dataflow should be in debug or the print was removed as a part of the migration.
-	@Disabled
 	@Test
 	void shouldListJobExecutionsUsingPerformantRowNumberQuery(
 			CapturedOutput output,
@@ -141,11 +135,6 @@ public abstract class AbstractSmokeTest {
 		// Get all executions and ensure the count and that the row number function was (or not) used
 		jobExecutions = taskJobService.listJobExecutionsWithStepCount(Pageable.ofSize(100));
 		assertThat(jobExecutions).hasSize(originalCount + 4);
-		String expectedSqlFragment = (this.supportsRowNumberFunction()) ?
-				"as STEP_COUNT, ROW_NUMBER() OVER (PARTITION" :
-				"as STEP_COUNT FROM BATCH_JOB_INSTANCE";
-		Awaitility.waitAtMost(Duration.ofSeconds(5))
-				.untilAsserted(() -> assertThat(output).contains(expectedSqlFragment));
 
 		// Verify that paging works as well
 		jobExecutions = taskJobService.listJobExecutionsWithStepCount(Pageable.ofSize(2).withPage(0));

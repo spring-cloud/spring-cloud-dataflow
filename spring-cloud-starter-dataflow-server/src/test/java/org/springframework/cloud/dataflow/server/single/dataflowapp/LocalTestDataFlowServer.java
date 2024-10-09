@@ -22,10 +22,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
+import org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
+import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 
 /**
  * Bootstrap class for the local Spring Cloud Data Flow Server.
@@ -42,7 +44,9 @@ import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfigurati
 		UserDetailsServiceAutoConfiguration.class,
 		LocalDeployerAutoConfiguration.class,
 		CloudFoundryDeployerAutoConfiguration.class,
-		KubernetesAutoConfiguration.class
+		KubernetesAutoConfiguration.class,
+		SimpleTaskAutoConfiguration.class,
+		DataFlowClientAutoConfiguration.class
 })
 @EnableDataFlowServer
 public class LocalTestDataFlowServer {

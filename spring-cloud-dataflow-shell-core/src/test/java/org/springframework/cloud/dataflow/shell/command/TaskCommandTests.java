@@ -125,7 +125,7 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	@Disabled
+	@Disabled("Shell is merging 2 properties into a single property.")
 	void taskLaunchCTRUsingAltCtrName() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
@@ -134,7 +134,6 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().launchWithAlternateCTR(taskName, "timestamp");
 	}
 
-	@Disabled("Find why log is inaccessible")
 	@Test
 	void getLog() throws Exception{
 		logger.info("Retrieving task execution log");
@@ -152,7 +151,6 @@ class TaskCommandTests extends AbstractShellIntegrationTest {
 				.isEqualTo("Log could not be retrieved.  Verify that deployments are still available.");
 	}
 
-	@Disabled("Find why it won't start")
 	@Test
 	void getLogInvalidId() {
 		assertThatThrownBy(() -> taskWithErrors().getTaskExecutionLogInvalidId())

@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-@Disabled
+
 class LocalConfigurationTests {
 
 	private ConfigurableApplicationContext context;
@@ -104,6 +104,8 @@ class LocalConfigurationTests {
 		}
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x DataflowServerConfiguration requires DataflowTaskExecutionQueryDao bean.  Doesn't seem like it is needed.")
 	@Test
 	void configWithTasksDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);

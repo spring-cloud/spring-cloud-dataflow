@@ -194,7 +194,8 @@ class MetricsReplicationEnvironmentPostProcessorTests {
 		}
 	}
 
-	@Disabled("Waiting on https://github.com/spring-cloud/spring-cloud-dataflow/issues/5675#issuecomment-1953867317")
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x Waiting on https://github.com/spring-cloud/spring-cloud-dataflow/issues/5675#issuecomment-1953867317")
 	@Test
 	void prometheusPropertiesReplication() {
 		try (ConfigurableApplicationContext ctx = applicationContext(

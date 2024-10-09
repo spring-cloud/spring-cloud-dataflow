@@ -64,7 +64,8 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	@Disabled("TODO: Enable once Java 21 images are supported")
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x  Enable once Java 21 images are supported")
 	public void latestSharedDbJdk21() {
 		log.info("Running testLatestSharedDb()");
 		// start defined database

@@ -34,7 +34,8 @@ import org.springframework.cloud.dataflow.server.db.DB2_11_5_ContainerSupport;
 //at com.ibm.db2.jcc.am.ResultSet.getObject(ResultSet.java:2045)
 //at com.zaxxer.hikari.pool.HikariProxyResultSet.getObject(HikariProxyResultSet.java)
 //at org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao$TaskExecutionRowMapper.mapRow(JdbcTaskExecutionDao.java:621)
-@Disabled("TODO: DB2 Driver and LocalDateTime has a bug when the row has is null in the column")
+//TODO: Boot3x followup
+@Disabled("TODO: Boot3x DB2 Driver and LocalDateTime has a bug when the row has is null in the column")
 @EnabledIfEnvironmentVariable(named = "ENABLE_DB2", matches = "true", disabledReason = "Container is too big")
 @Tag("DB2")
 public class DB2_11_5_SmokeTest extends AbstractSmokeTest implements DB2_11_5_ContainerSupport {
