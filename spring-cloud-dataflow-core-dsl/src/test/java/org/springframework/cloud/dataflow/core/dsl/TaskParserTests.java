@@ -696,7 +696,7 @@ class TaskParserTests {
 				+ "[0-1][1-2][2-3][3-4][fail:1-9][fail2:2-9][9-10][10-4]", spec);
 	}
 
-	@Disabled
+	@Disabled ("Transition out of flow is incorrect. Verify test or parser.")
 	@Test
 	void transitionToSplit() {
 		String spec = "aa 'foo'->:split && bb && split: <cc || dd> && ee";

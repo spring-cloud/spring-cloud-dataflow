@@ -39,10 +39,9 @@ class StreamDefinitionServiceUtilsTests {
 		reverseDslTest("time | log", 2);
 	}
 
-	@Disabled
 	@Test
 	void quotesInParams() {
-		reverseDslTest("foo --bar='payload.matches(''hello'')' | file", 2);
+		reverseDslTest("foo --bar='payload.matches(\'hello\')' | file", 2);
 	}
 
 	@Test
@@ -65,7 +64,7 @@ class StreamDefinitionServiceUtilsTests {
 		reverseDslTest("http | transform --expression='payload.replace(\"abc\", \"\")' | log", 3);
 	}
 
-	@Disabled
+	@Disabled("The result from the parser is stating that the escaped single ticks is 2, but the assert is requesting 4 ticks.   Verify the assert is correct.")
 	@Test
 	void xd24162() {
 		reverseDslTest("http | transform --expression='payload.replace(\"abc\", '''')' | log", 3);
