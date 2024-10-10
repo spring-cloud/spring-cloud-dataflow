@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.task;
 
 import javax.sql.DataSource;
 
+import org.springframework.cloud.dataflow.server.config.features.ConditionalOnTasksEnabled;
 import org.springframework.cloud.dataflow.server.task.impl.DefaultDataflowTaskExplorer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,11 +28,12 @@ import org.springframework.util.Assert;
  *
  * @author Corneil du Plessis
  */
+@ConditionalOnTasksEnabled
 @Configuration
-public class DataflowTaskConfiguration {
+public class DataflowTaskExplorerConfiguration {
 
 	@Bean
-	public DataflowTaskExplorer aggregateTaskExplorer(
+	public DataflowTaskExplorer dataflowTaskExplorer(
 			DataSource dataSource,
 			DataflowTaskExecutionQueryDao taskExecutionQueryDao,
 			TaskDefinitionReader taskDefinitionReader,

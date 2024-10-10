@@ -146,7 +146,7 @@ import org.springframework.cloud.dataflow.server.service.impl.validation.Default
 import org.springframework.cloud.dataflow.server.service.impl.validation.DefaultTaskValidationService;
 import org.springframework.cloud.dataflow.server.stream.SkipperStreamDeployer;
 import org.springframework.cloud.dataflow.server.stream.StreamDeployer;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorerConfiguration;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
@@ -204,7 +204,7 @@ import static org.mockito.Mockito.when;
 @EnableSpringDataWebSupport
 @Import({
 		CompletionConfiguration.class,
-		DataflowTaskConfiguration.class,
+		DataflowTaskExplorerConfiguration.class,
 		DataFlowTaskConfiguration.class,
 		ContainerRegistryAutoConfiguration.class,
 		TaskConfiguration.TaskJobServiceConfig.class
