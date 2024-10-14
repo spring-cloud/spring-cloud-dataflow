@@ -18,11 +18,12 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -89,13 +90,14 @@ class CommandTests {
 		assertThat(consumedLogLines).containsExactly("line 1", "line 2");
     }
 
-    @Disabled("flaky test: https://circleci.com/gh/palantir/docker-compose-rule/378, 370, 367, 366")
     @Test
     void notCreateLongLivedThreadsAfterExecution() throws Exception {
-        int preThreadCount = Thread.getAllStackTraces().entrySet().size();
+		Set<Thread> preEntries = Thread.getAllStackTraces().keySet().stream().filter(Thread::isAlive).collect(Collectors.toSet());
+		int preThreadCount = preEntries.size();
         dockerComposeCommand.execute(errorHandler, true, "rm", "-f");
-        int postThreadCount = Thread.getAllStackTraces().entrySet().size();
-		assertThat(preThreadCount == postThreadCount).as("command thread pool has exited").isTrue();
+		Set<Thread> postEntries = Thread.getAllStackTraces().keySet().stream().filter(Thread::isAlive).collect(Collectors.toSet());
+		int postThreadCount = postEntries.size();
+		assertThat(postThreadCount).as(()-> "command thread pool has exited with extra threads:" + postEntries.removeAll(preEntries)).isEqualTo(preThreadCount);
     }
 
     private void givenTheUnderlyingProcessHasOutput(String output) {
