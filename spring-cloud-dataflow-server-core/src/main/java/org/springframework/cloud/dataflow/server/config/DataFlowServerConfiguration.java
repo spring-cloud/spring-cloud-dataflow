@@ -34,7 +34,6 @@ import org.springframework.cloud.dataflow.server.support.AuthenticationSuccessEv
 import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -69,7 +68,6 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		DataFlowTaskConfiguration.class
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
-@ComponentScan(basePackages = {"org.springframework.cloud.dataflow.schema.service", "org.springframework.cloud.dataflow.aggregate.task"})
 public class DataFlowServerConfiguration {
 
 	@Bean
