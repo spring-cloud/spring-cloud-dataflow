@@ -26,7 +26,6 @@ import javax.sql.DataSource;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,20 +136,17 @@ class JobCommandTests extends AbstractShellIntegrationTest {
 		checkCell(table, 0, 5, "Definition Status ");
  	 	}
 
-	//TODO: Boot3x followup
-	@Disabled("TODO: Boot3x SCDF /jobs/thinexecutions endpoint fails to respond.")
 	@Test
 	void jobExecutionListByName() {
 		logger.info("Retrieve Job Execution List By Name Test");
 		Table table = getTable(job().jobExecutionListByName(JOB_NAME_FOOBAR));
-		verifyColumnNumber(table, 7);
+		verifyColumnNumber(table, 6);
 		checkCell(table, 0, 0, "ID ");
 		checkCell(table, 0, 1, "Task ID");
 		checkCell(table, 0, 2, "Job Name ");
 		checkCell(table, 0, 3, "Start Time ");
 		checkCell(table, 0, 4, "Step Execution Count ");
 		checkCell(table, 0, 5, "Definition Status ");
-		checkCell(table, 0, 6, "Schema Target");
 	}
 
 	@Test
