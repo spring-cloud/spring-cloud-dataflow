@@ -40,8 +40,10 @@ import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExec
 import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExecutionQueryDao;
 import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.server.task.TaskDeploymentReader;
+import org.springframework.cloud.dataflow.server.task.impl.DefaultDataFlowTaskExecutionQueryDao;
 import org.springframework.cloud.task.batch.listener.support.JdbcTaskBatchDao;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.cloud.task.repository.dao.JdbcTaskExecutionDao;
@@ -155,5 +157,11 @@ public class DataFlowTaskConfiguration {
 	@Bean
 	public JdbcTaskBatchDao taskBatchDao(DataSource dataSource) {
 		return new JdbcTaskBatchDao(dataSource);
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	public DataflowTaskExecutionQueryDao taskExecutionQueryDao(DataSource dataSource) {
+		return new DefaultDataFlowTaskExecutionQueryDao(dataSource);
 	}
 }
