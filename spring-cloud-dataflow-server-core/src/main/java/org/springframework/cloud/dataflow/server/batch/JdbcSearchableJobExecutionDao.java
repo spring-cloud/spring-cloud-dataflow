@@ -30,6 +30,8 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
@@ -38,6 +40,7 @@ import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
+import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
@@ -49,6 +52,7 @@ import org.springframework.jdbc.core.JdbcOperations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.jdbc.support.incrementer.AbstractDataFieldMaxValueIncrementer;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -112,6 +116,9 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	private static final String GET_JOB_EXECUTIONS_BY_TASK_IDS = "SELECT JOB_EXECUTION_ID, TASK_EXECUTION_ID from %TASK_PREFIX%TASK_BATCH WHERE TASK_EXECUTION_ID in (?)";
 
+	private static final Logger logger = LoggerFactory.getLogger(JdbcSearchableJobExecutionDao.class);
+
+
 	private DataflowSqlPagingQueryProvider allExecutionsPagingQueryProvider;
 
 	private DataflowSqlPagingQueryProvider byJobNamePagingQueryProvider;
@@ -136,6 +143,8 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 	private DataSource dataSource;
 
 	private String taskTablePrefix;
+
+	private DatabaseType databaseType;
 
 	public JdbcSearchableJobExecutionDao() {
 		conversionService = new DefaultConversionService();
@@ -178,7 +187,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		byJobInstanceIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT, null, JOB_INSTANCE_ID_FILTER);
 		byTaskExecutionIdWithStepCountPagingQueryProvider = getPagingQueryProvider(FIELDS_WITH_STEP_COUNT,
 				getTaskQuery(FROM_CLAUSE_TASK_TASK_BATCH), TASK_EXECUTION_ID_FILTER);
-
+		databaseType = getDatabaseType();
 		super.afterPropertiesSet();
 	}
 
@@ -639,14 +648,42 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 		jobExecution = new JobExecution(jobInstance, jobParameters);
 		jobExecution.setId(id);
 
-		jobExecution.setStartTime(rs.getObject(2, LocalDateTime.class));
-		jobExecution.setEndTime(rs.getObject(3, LocalDateTime.class));
+		jobExecution.setStartTime(getLocalDateTime(2, rs));
+		jobExecution.setEndTime(getLocalDateTime(3, rs));
 		jobExecution.setStatus(BatchStatus.valueOf(rs.getString(4)));
 		jobExecution.setExitStatus(new ExitStatus(rs.getString(5), rs.getString(6)));
-		jobExecution.setCreateTime(rs.getObject(7, LocalDateTime.class));
-		jobExecution.setLastUpdated(rs.getObject(8, LocalDateTime.class));
+		jobExecution.setCreateTime(getLocalDateTime(7, rs));
+		jobExecution.setLastUpdated(getLocalDateTime(8, rs));
 		jobExecution.setVersion(rs.getInt(9));
 		return jobExecution;
+	}
+
+	private  LocalDateTime getLocalDateTime(int columnIndex, ResultSet rs) throws SQLException {
+		LocalDateTime result = null;
+		// TODO: When the DB2 driver can support LocalDateTime, remove this if block.
+		if (databaseType == DatabaseType.DB2) {
+			try {
+				result = rs.getObject(columnIndex, LocalDateTime.class);
+			} catch (NullPointerException npe) {
+				if (!npe.getMessage().contains("java.sql.Timestamp.toLocalDateTime()\" because \"<local4>\" is null")) {
+					throw npe;
+				}
+				logger.debug("DB2 threw a NPE because it fails to handle an empty column for a java LocalDateTime .  SCDF returns a null for this column.");
+			}
+		} else {
+			result = rs.getObject(columnIndex, LocalDateTime.class);
+		}
+		return result;
+	}
+
+	private DatabaseType getDatabaseType() throws SQLException {
+		DatabaseType databaseType;
+		try {
+			databaseType = DatabaseType.fromMetaData(dataSource);
+		} catch (MetaDataAccessException e) {
+			throw new IllegalStateException(e);
+		}
+		return databaseType;
 	}
 
 	private final class JobExecutionRowMapper implements RowMapper<JobExecution> {
