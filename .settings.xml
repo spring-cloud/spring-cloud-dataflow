@@ -53,6 +53,10 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</repository>
+				<repository>
+					<id>groovy-plugins-release</id>
+					<url>https://groovy.jfrog.io/artifactory/plugins-release</url>
+				</repository>
 			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
@@ -79,8 +83,11 @@
 						<enabled>false</enabled>
 					</snapshots>
 				</pluginRepository>
+				<pluginRepository>
+					<id>groovy-plugins-release</id>
+					<url>https://groovy.jfrog.io/artifactory/plugins-release</url>
+				</pluginRepository>
 			</pluginRepositories>
 		</profile>
 	</profiles>
-
 </settings>

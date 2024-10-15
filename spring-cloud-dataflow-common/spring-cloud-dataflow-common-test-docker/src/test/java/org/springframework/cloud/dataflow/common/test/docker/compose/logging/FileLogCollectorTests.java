@@ -32,16 +32,13 @@ import org.junit.rules.TemporaryFolder;
 
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.IOMatchers.containsInAnyOrder;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.IOMatchers.fileContainingString;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.IOMatchers.fileWithName;
 
@@ -79,7 +76,7 @@ public class FileLogCollectorTests {
                 .resolve("doesNotExist")
                 .toFile();
         new FileLogCollector(doesNotExistYetDirectory);
-        assertThat(doesNotExistYetDirectory.exists(), is(true));
+		assertThat(doesNotExistYetDirectory.exists()).isEqualTo(true);
     }
 
     @Test
@@ -98,7 +95,7 @@ public class FileLogCollectorTests {
         when(compose.services()).thenReturn(Collections.emptyList());
         logCollector.startCollecting(compose);
         logCollector.stopCollecting();
-        assertThat(logDirectory.list(), is(emptyArray()));
+		assertThat(logDirectory).isEmptyDirectory();
     }
 
     @Test
@@ -112,8 +109,8 @@ public class FileLogCollectorTests {
         });
         logCollector.startCollecting(compose);
         logCollector.stopCollecting();
-        assertThat(logDirectory.listFiles(), arrayContaining(fileWithName("db.log")));
-        assertThat(new File(logDirectory, "db.log"), is(fileContainingString("log")));
+		assertThat(logDirectory.listFiles()).have(fileWithName("db.log"));
+        assertThat(new File(logDirectory, "db.log")).has(fileContainingString("log"));
     }
 
     @Test
@@ -132,8 +129,8 @@ public class FileLogCollectorTests {
         logCollector.startCollecting(compose);
         latch.countDown();
         logCollector.stopCollecting();
-        assertThat(logDirectory.listFiles(), arrayContaining(fileWithName("db.log")));
-        assertThat(new File(logDirectory, "db.log"), is(fileContainingString("log")));
+		assertThat(logDirectory.listFiles()).have(fileWithName("db.log"));
+        assertThat(new File(logDirectory, "db.log")).is(fileContainingString("log"));
     }
 
     @Test
@@ -156,8 +153,8 @@ public class FileLogCollectorTests {
         });
         logCollector.startCollecting(compose);
         logCollector.stopCollecting();
-        assertThat(logDirectory.listFiles(), arrayContaining(fileWithName("db.log")));
-        assertThat(new File(logDirectory, "db.log"), is(fileContainingString("log")));
+		assertThat(logDirectory.listFiles()).have(fileWithName("db.log"));
+        assertThat(new File(logDirectory, "db.log")).is(fileContainingString("log"));
         latch.countDown();
     }
 
@@ -180,12 +177,12 @@ public class FileLogCollectorTests {
         });
 
         logCollector.startCollecting(compose);
-        assertThat(dbLatch.await(1, TimeUnit.SECONDS), is(true));
-        assertThat(db2Latch.await(1, TimeUnit.SECONDS), is(true));
+		assertThat(dbLatch.await(1, TimeUnit.SECONDS)).isEqualTo(true);
+		assertThat(db2Latch.await(1, TimeUnit.SECONDS)).isEqualTo(true);
 
-        assertThat(logDirectory.listFiles(), arrayContainingInAnyOrder(fileWithName("db.log"), fileWithName("db2.log")));
-        assertThat(new File(logDirectory, "db.log"), is(fileContainingString("log")));
-        assertThat(new File(logDirectory, "db2.log"), is(fileContainingString("other")));
+		assertThat(logDirectory.listFiles()).has(containsInAnyOrder(fileWithName("db.log"), fileWithName("db2.log")));
+        assertThat(new File(logDirectory, "db.log")).is(fileContainingString("log"));
+        assertThat(new File(logDirectory, "db2.log")).is(fileContainingString("other"));
 
         logCollector.stopCollecting();
     }

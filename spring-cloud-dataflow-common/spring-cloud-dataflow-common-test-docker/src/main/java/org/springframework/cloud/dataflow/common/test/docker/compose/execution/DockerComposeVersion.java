@@ -17,6 +17,8 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
 import com.github.zafarkhaja.semver.Version;
 
+import org.springframework.util.StringUtils;
+
 public final class DockerComposeVersion {
 
 	private DockerComposeVersion() {
@@ -28,12 +30,21 @@ public final class DockerComposeVersion {
 		String[] splitOnSeparator = versionOutput.split(" ");
 		String version = null;
 		for (String value : splitOnSeparator) {
+			if(value.length() == 0) {
+				continue;
+			}
 			if (Character.isDigit(value.charAt(0))) {
 				version = value;
 				break;
 			} else if (value.charAt(0) == 'v' && value.length() > 1 && Character.isDigit(value.charAt(1))) {
 				version = value.substring(1);
 			}
+			if(StringUtils.hasLength(version)) {
+				break;
+			}
+		}
+		if(!StringUtils.hasText(version)) {
+			throw new RuntimeException("Unknown version:" + versionOutput);
 		}
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < version.length(); i++) {

@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
@@ -33,7 +32,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -41,10 +39,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class DeleteDocumentation extends BaseDocumentation {
+class DeleteDocumentation extends BaseDocumentation {
 
 	@Test
-	public void deleteRelease() throws Exception {
+	void deleteRelease() throws Exception {
 		Release release = createTestRelease("test", StatusCode.DELETED);
 		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		this.mockMvc.perform(
@@ -108,7 +106,7 @@ public class DeleteDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void deleteReleaseDefault() throws Exception {
+	void deleteReleaseDefault() throws Exception {
 		Release release = createTestRelease("test", StatusCode.DELETED);
 		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),

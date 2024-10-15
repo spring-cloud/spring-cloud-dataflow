@@ -67,10 +67,10 @@ public class ManifestUtils {
 		Yaml yaml = new Yaml(new SafeConstructor(options));
 		Iterable<Object> object = yaml.loadAll(manifest);
 		for (Object o : object) {
-			if (o != null && o instanceof Map) {
-				Object kind = ((Map<?, ?>) o).get("kind");
-				if (kind instanceof String) {
-					return (String) kind;
+			if (o != null && o instanceof Map<?,?> map) {
+				Object kind = map.get("kind");
+				if (kind instanceof String string) {
+					return string;
 				}
 			}
 		}
@@ -152,10 +152,15 @@ public class ManifestUtils {
 		dumperOptions.setDefaultScalarStyle(DumperOptions.ScalarStyle.DOUBLE_QUOTED);
 		dumperOptions.setPrettyFlow(true);
 		dumperOptions.setSplitLines(false);
-		return new Yaml(new SafeConstructor(new LoaderOptions()), new ValueTypeRepresenter(), dumperOptions);
+		return new Yaml(new ValueTypeRepresenter(dumperOptions), dumperOptions);
 	}
 
 	private static class ValueTypeRepresenter extends Representer {
+
+		ValueTypeRepresenter(DumperOptions options) {
+			super(options);
+		}
+
 		@Override
 		protected Node representScalar(Tag tag, String value) {
 			if (tag.equals(Tag.INT) || tag.equals(Tag.FLOAT) || tag.equals(Tag.BOOL)

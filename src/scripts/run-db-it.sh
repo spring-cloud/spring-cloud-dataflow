@@ -16,4 +16,4 @@ case $DB in
         ;;
 esac
 
-./mvnw -s .settings.xml -pl spring-cloud-dataflow-server -Dgroups=$DB -Pfailsafe -B integration-test verify
+./mvnw -s .settings.xml -pl spring-cloud-dataflow-server -Dgroups=$DB -Pfailsafe -B integration-test verify --no-transfer-progress

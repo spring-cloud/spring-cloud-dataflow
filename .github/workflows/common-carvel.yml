@@ -54,9 +54,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Ensure scripts are executable
-      shell: bash
-      run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
     - uses: carvel-dev/setup-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}

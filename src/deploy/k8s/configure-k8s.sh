@@ -52,10 +52,12 @@ case "$K8S_DRIVER" in
     ;;
 "microk8s")
     echo "Configure Microk8s"
+    microk8s start
     microk8s enable registry
     microk8s enable hostpath-storage
     microk8s enable metallb:172.18.0.1-172.18.0.254
     microk8s kubectl get all --all-namespaces
+    microk8s config > $HOME/.kube/config
     ;;
 *)
     echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_VERSION"

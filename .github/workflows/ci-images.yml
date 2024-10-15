@@ -13,6 +13,10 @@ on:
         default: false
         description: 'Delete the image tags'
 
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 jobs:
   prepare:
     name: Prepare Build
@@ -23,12 +27,15 @@ jobs:
       - uses: actions/setup-java@v3
         if: ${{ inputs.version == null || inputs.version == '' }}
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Version from POM
         if: ${{ inputs.version == null || inputs.version == '' }}
         shell: bash
-        run: echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+        run: |
+          ./mvnw --version 
+          ./mvnw help:evaluate -s .settings.xml -Dexpression=project.version --no-transfer-progress > /dev/null
+          echo "VERSIONS=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
       - name: Version from Input
         if: ${{ inputs.version != null && inputs.version != '' }}
         shell: bash
@@ -42,9 +49,4 @@ jobs:
     with:
       version: ${{ needs.prepare.outputs.version }}
       delete-tags: ${{ inputs.delete-tags == 'true' }}
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
-      ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-      ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+    secrets: inherit

@@ -9,7 +9,8 @@ on:
         required: true
 
 env:
-  MAVEN_THREADS: '-T 1'
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   build:
@@ -17,19 +18,13 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
+    - name: 'Install: xmllint'
+      uses: ./.github/actions/install-xmlutils
     - uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.46.4
-      env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - uses: actions/cache@v3
       with:
         path: ~/.m2/repository
@@ -41,6 +36,15 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - uses: jvalkeal/setup-maven@v1
+      with:
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.54.0
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
         jfrog rt mvnc \
@@ -56,22 +60,21 @@ jobs:
       uses: jvalkeal/build-zoo-handler@v0.0.4
       with:
         dispatch-handler-extract-context-properties: true
-    - name: 'Install: xmllint'
-      uses: ./.github/actions/install-xmlutils
     - name: Build and Publish
       shell: bash
       timeout-minutes: 75
       run: |
-        mvn clean
+        ./mvnw --help
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn install -Pfull,docs -B
-        jfrog rt mvn install -pl spring-cloud-dataflow-package -B
-        jfrog rt build-publish
-        PROJECT_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
+        jfrog rt build-publish        
+        PROJECT_VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
-        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(mvn help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
+        echo BUILD_ZOO_HANDLER_spring_cloud_skipper_version=$(./mvnw help:evaluate -Dexpression=spring-cloud-skipper.version -pl spring-cloud-dataflow-parent -q -DforceStdout) >> $GITHUB_ENV
 #        echo "Determine project version"
 #        set +e
 #        echo "::info ::Project version=$PROJECT_VERSION"
@@ -116,39 +119,25 @@ jobs:
             ${{ runner.os }}-m2-${{ matrix.db }}
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - uses: jvalkeal/setup-maven@v1
         with:
           maven-version: 3.8.8
           maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-      - uses: jfrog/setup-jfrog-cli@v1
-        with:
-          version: 1.46.4
-        env:
-          JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Login dockerhub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Configure JFrog Cli
-        run: |
-          jfrog rt mvnc \
-            --server-id-resolve=repo.spring.io \
-            --server-id-deploy=repo.spring.io \
-            --repo-resolve-releases=libs-milestone \
-            --repo-resolve-snapshots=libs-snapshot \
-            --repo-deploy-releases=libs-release-local \
-            --repo-deploy-snapshots=libs-snapshot-local
       - uses: ./.github/actions/install-xmlutils
       - name: Test
         shell: bash
         timeout-minutes: 75
         run: |
-          jfrog rt mvn clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server
+          ./mvnw clean install -s .settings.xml -DskipTests -am -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -B --no-transfer-progress
           export ENABLE_${{ matrix.db }}=true
-          jfrog rt mvn test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }}
+          ./mvnw test -s .settings.xml -pl :spring-cloud-dataflow-server,:spring-cloud-skipper-server -Dgroups=${{ matrix.db }} -B --no-transfer-progress
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: ${{ success() || failure() }}
@@ -175,10 +164,7 @@ jobs:
     uses: ./.github/workflows/build-images.yml
     with:
       version: ${{ needs.build.outputs.version }}
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
+    secrets: inherit
 
   wrap:
     needs: [ build, images, database-tests ]

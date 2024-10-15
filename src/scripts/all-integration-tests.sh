@@ -2,5 +2,5 @@
 GROUPS="mariadb postgres oauth performance"
 set -e
 for GROUP in $GROUPS; do
-    ./mvnw test -Pfailsafe -Dgroups=$GROUP -pl spring-cloud-dataflow-server
+    ./mvnw test -Pfailsafe -Dgroups=$GROUP -pl spring-cloud-dataflow-server  -B --no-transfer-progress
 done

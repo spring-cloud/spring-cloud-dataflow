@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import java.util.List;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.cloud.dataflow.completion.CompletionProposal;
 import org.springframework.cloud.dataflow.completion.StreamCompletionProvider;
@@ -73,8 +73,8 @@ public class CompletionController {
 	 * @return the list of completion proposals
 	 */
 	@RequestMapping("/stream")
-	public CompletionProposalsResource completions(@RequestParam("start") String start,
-			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
+	public CompletionProposalsResource completions(@RequestParam String start,
+			@RequestParam(defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toModel(completionProvider.complete(start, detailLevel));
 	}
 
@@ -88,8 +88,8 @@ public class CompletionController {
 	 * @return the list of completion proposals
 	 */
 	@RequestMapping("/task")
-	public CompletionProposalsResource taskCompletions(@RequestParam("start") String start,
-			@RequestParam(value = "detailLevel", defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
+	public CompletionProposalsResource taskCompletions(@RequestParam String start,
+			@RequestParam(defaultValue = "1") @Min(value = 1, message = "The provided detail level must be greater than zero.") int detailLevel) {
 		return assembler.toModel(taskCompletionProvider.complete(start, detailLevel));
 	}
 

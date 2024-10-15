@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,23 +29,20 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskManifest;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
 import org.springframework.cloud.task.batch.listener.TaskBatchDao;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +54,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,55 +68,52 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SuppressWarnings("NewClassNamingConvention")
 @SpringBootTest(classes = {EmbeddedDataSourceConfiguration.class})
 @DirtiesContext
-public class JobExecutionsDocumentation extends BaseDocumentation {
+class JobExecutionsDocumentation extends BaseDocumentation {
 
 	private final static String JOB_NAME = "DOCJOB";
 
-	private JobRepositoryContainer jobRepositoryContainer;
+	private JobRepository jobRepository;
 
-	private TaskExecutionDaoContainer daoContainer;
+	private TaskExecutionDao taskExecutionDao;
 
-	private TaskBatchDaoContainer taskBatchDaoContainer;
+	private TaskBatchDao taskBatchDao;
 
 	private JdbcTemplate jdbcTemplate;
 
-	private DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
-
-	private AggregateExecutionSupport aggregateExecutionSupport;
-
-	private TaskDefinitionReader taskDefinitionReader;
+	private DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 
 	@BeforeEach
-	public void setup() throws Exception {
-			registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
-			initialize();
-			createJobExecution(JOB_NAME, BatchStatus.STARTED);
-			createJobExecution(JOB_NAME + "1", BatchStatus.STOPPED);
+	void setup() throws Exception {
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
+		initialize();
+		createJobExecution(JOB_NAME, BatchStatus.STARTED);
+		createJobExecution(JOB_NAME + "1", BatchStatus.STOPPED);
 
 
-			jdbcTemplate = new JdbcTemplate(this.dataSource);
-			jdbcTemplate.afterPropertiesSet();
-			jdbcTemplate.update(
-					"INSERT into task_deployment(id, object_version, task_deployment_id, task_definition_name, platform_name, created_on) " +
-							"values (?,?,?,?,?,?)",
-					1, 1, "2", JOB_NAME + "_1", "default", new Date());
+		jdbcTemplate = new JdbcTemplate(this.dataSource);
+		jdbcTemplate.afterPropertiesSet();
+		jdbcTemplate.update(
+				"INSERT into task_deployment(id, object_version, task_deployment_id, task_definition_name, platform_name, created_on) "
+						+ "values (?,?,?,?,?,?)",
+				1, 1, "2", JOB_NAME + "_1", "default", new Date());
 
-			documentation.dontDocument(() -> this.mockMvc.perform(
-							post("/tasks/definitions")
-									.param("name", "DOCJOB1")
-									.param("definition", "timestamp --format='YYYY MM DD'"))
+		documentation.dontDocument(
+				() -> this.mockMvc
+					.perform(post("/tasks/definitions").queryParam("name", "DOCJOB1")
+						.queryParam("definition", "timestamp --format='YYYY MM DD'"))
 					.andExpect(status().isOk()));
 	}
 
 	@Test
-	public void listJobExecutions() throws Exception {
+	void listJobExecutions() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions")
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -132,13 +127,14 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutions() throws Exception {
+	void listThinJobExecutions() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -152,14 +148,15 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByJobInstanceId() throws Exception {
+	void listThinJobExecutionsByJobInstanceId() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10")
-								.param("jobInstanceId", "1"))
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("jobInstanceId", "1"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -175,14 +172,15 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByTaskExecutionId() throws Exception {
+	void listThinJobExecutionsByTaskExecutionId() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10")
-								.param("taskExecutionId", "1"))
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("taskExecutionId", "1"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -198,15 +196,16 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByDate() throws Exception {
+	void listThinJobExecutionsByDate() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("page", "0")
-								.param("size", "10")
-								.param("fromDate", "2000-09-24T17:00:45,000")
-								.param("toDate", "2050-09-24T18:00:45,000"))
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("fromDate", "2000-09-24T17:00:45,000")
+								.queryParam("toDate", "2050-09-24T18:00:45,000"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -224,14 +223,15 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listJobExecutionsByName() throws Exception {
+	void listJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions")
-								.param("name", JOB_NAME)
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("name", JOB_NAME)
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -247,14 +247,15 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listThinJobExecutionsByName() throws Exception {
+	void listThinJobExecutionsByName() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/thinexecutions")
-								.param("name", JOB_NAME)
-								.param("page", "0")
-								.param("size", "10"))
+								.queryParam("name", JOB_NAME)
+								.queryParam("page", "0")
+								.queryParam("size", "10"))
+				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -270,18 +271,14 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void jobDisplayDetail() throws Exception {
+	void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 						get("/jobs/executions/{id}", "2")
-								.queryParam("schemaTarget", "boot2")
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
 								parameterWithName("id").description("The id of an existing job execution (required)")
-						),
-						requestParameters(
-								parameterWithName("schemaTarget").description("Schema Target to the Job.").optional()
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The execution ID of the job execution"),
@@ -299,44 +296,43 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 								fieldWithPath("stoppable").description("The status stoppable of the job execution"),
 								fieldWithPath("defined").description("The status defined of the job execution"),
 								fieldWithPath("timeZone").description("The time zone of the job execution"),
-								fieldWithPath("schemaTarget").description("The schema target of the job execution"),
 								subsectionWithPath("jobExecution").description("The details of the job execution"),
 								subsectionWithPath("jobParameters").description("The job parameters associated with the job execution"),
 								subsectionWithPath("_links.self").description("Link to the stream definition resource"),
-								subsectionWithPath("_links.stop").description("Link to stopping the job"),
-								subsectionWithPath("_links.restart").description("Link to restarting the job")
+								subsectionWithPath("_links.stop").type(JsonFieldType.OBJECT).description("Link to stopping the job").optional(),
+								subsectionWithPath("_links.restart").type(JsonFieldType.OBJECT).description("Link to restarting the job").optional()
 						)
 				));
 	}
 
 	@Test
-	public void jobStop() throws Exception {
+	void jobStop() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "1")
-						.param("stop", "true")
-						.queryParam("schemaTarget", "boot2")
+						.queryParam("stop", "true")
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("id")
 								.description("The id of an existing job execution (required)"))
-						, requestParameters(
-								parameterWithName("schemaTarget").description("The schema target of the job execution").optional(),
+						, queryParameters(
 								parameterWithName("stop")
 										.description("Sends signal to stop the job if set to true"))));
 	}
 
 	@Test
-	public void jobRestart() throws Exception {
+	void jobRestart() throws Exception {
 		this.mockMvc.perform(put("/jobs/executions/{id}", "2")
-						.param("restart", "true")
-						.queryParam("schemaTarget", "boot2")
+						.queryParam("restart", "true")
+						.queryParam("useJsonJobParameters", "true")
 				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 								pathParameters(parameterWithName("id")
 										.description("The id of an existing job execution (required)"))
-								, requestParameters(
-										parameterWithName("schemaTarget").description("The schema target of the job execution").optional(),
+								, queryParameters(
+										parameterWithName("useJsonJobParameters").description("If true dataflow will " +
+											"serialize job parameters as JSON.  Default is null, and the default " +
+											"configuration will be used to determine serialization method.").optional(),
 										parameterWithName("restart")
 												.description("Sends signal to restart the job if set to true")
 								)
@@ -345,35 +341,26 @@ public class JobExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	private void initialize() {
-		this.daoContainer = context.getBean(TaskExecutionDaoContainer.class);
-		this.taskBatchDaoContainer = context.getBean(TaskBatchDaoContainer.class);
-		this.jobRepositoryContainer = context.getBean(JobRepositoryContainer.class);
-		this.dataflowTaskExecutionMetadataDaoContainer = context.getBean(DataflowTaskExecutionMetadataDaoContainer.class);
-		this.aggregateExecutionSupport = context.getBean(AggregateExecutionSupport.class);
-		this.taskDefinitionReader = context.getBean(TaskDefinitionReader.class);
-
+		this.taskExecutionDao = context.getBean(TaskExecutionDao.class);
+		this.taskBatchDao = context.getBean(TaskBatchDao.class);
+		this.jobRepository = context.getBean(JobRepository.class);
+		this.dataflowTaskExecutionMetadataDao = context.getBean(DataflowTaskExecutionMetadataDao.class);
 	}
 
-	private void createJobExecution(String name, BatchStatus status) {
-		SchemaVersionTarget schemaVersionTarget = this.aggregateExecutionSupport.findSchemaVersionTarget(name, taskDefinitionReader);
-		TaskExecutionDao dao = this.daoContainer.get(schemaVersionTarget.getName());
-		TaskExecution taskExecution = dao.createTaskExecution(name, new Date(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
-		Map<String, JobParameter> jobParameterMap = new HashMap<>();
+	private void createJobExecution(String name, BatchStatus status) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
+		TaskExecution taskExecution = taskExecutionDao.createTaskExecution(name, LocalDateTime.now(), Collections.singletonList("--spring.cloud.data.flow.platformname=default"), null);
+		Map<String, JobParameter<?>> jobParameterMap = new HashMap<>();
 		JobParameters jobParameters = new JobParameters(jobParameterMap);
-		JobRepository jobRepository = this.jobRepositoryContainer.get(schemaVersionTarget.getName());
-		JobExecution jobExecution = jobRepository.createJobExecution(jobRepository.createJobInstance(name, new JobParameters()), jobParameters, null);
-		TaskBatchDao taskBatchDao = this.taskBatchDaoContainer.get(schemaVersionTarget.getName());
+		JobExecution jobExecution = this.jobRepository.createJobExecution(name, jobParameters);
 		taskBatchDao.saveRelationship(taskExecution, jobExecution);
 		jobExecution.setStatus(status);
-		jobExecution.setStartTime(new Date());
-		jobRepository.update(jobExecution);
+		jobExecution.setStartTime(LocalDateTime.now());
+		this.jobRepository.update(jobExecution);
 		final TaskManifest manifest = new TaskManifest();
 		manifest.setPlatformName("default");
-		DataflowTaskExecutionMetadataDao metadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaVersionTarget.getName());
-		assertThat(metadataDao).isNotNull();
+		assertThat(dataflowTaskExecutionMetadataDao).isNotNull();
 		TaskManifest taskManifest = new TaskManifest();
 		taskManifest.setPlatformName("default");
-		metadataDao.save(taskExecution, taskManifest);
+		dataflowTaskExecutionMetadataDao.save(taskExecution, taskManifest);
 	}
-
 }

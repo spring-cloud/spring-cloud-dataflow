@@ -15,10 +15,11 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.TCP_PROTOCOL;
-
 import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
+
+import static org.springframework.cloud.dataflow.common.test.docker.compose.configuration.EnvironmentVariables.TCP_PROTOCOL;
 
 public class RemoteHostIpResolver implements HostIpResolver {
 

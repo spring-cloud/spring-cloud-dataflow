@@ -39,10 +39,6 @@ final class DefaultSchedulerServiceTestUtil {
 	static List<String> defaultCommandLineArgs(String prefix) {
 		List<String> args = new ArrayList<>();
 		args.add(prefix + ".spring.cloud.task.initialize-enabled=false");
-		args.add(prefix + ".spring.batch.jdbc.table-prefix=BATCH_");
-		args.add(prefix + ".spring.cloud.task.tablePrefix=TASK_");
-		args.add(prefix + ".spring.cloud.task.schemaTarget=boot2");
-		args.add(prefix + ".spring.cloud.deployer.bootVersion=2");
 		return args;
 	}
 }

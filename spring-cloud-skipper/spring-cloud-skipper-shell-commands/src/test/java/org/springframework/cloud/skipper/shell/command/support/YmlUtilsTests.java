@@ -26,42 +26,46 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class YmlUtilsTests {
+class YmlUtilsTests {
 
 	@Test
-	public void testSimpleConversion() {
+	void simpleConversion() {
 		String stringToConvert = "hello=oi,world=mundo";
 		String yml = YmlUtils.getYamlConfigValues(null, stringToConvert);
 		assertThat(yml).isEqualTo("hello: oi\nworld: mundo\n");
 	}
 
 	@Test
-	public void testPropertiesParsingWithPackageDeps() throws IOException {
+	void propertiesParsingWithPackageDeps() throws IOException {
 		String properties = "log.spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp3-helloworld.cfapps.io,"
 				+ "time.spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp1-helloworld.cfapps.io";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
 		assertThat(propertiesYml).isEqualTo(
-				"log:\n"
-						+ "  spec:\n"
-						+ "    deploymentProperties:\n"
-						+ "      spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io\n"
-						+ "time:\n"
-						+ "  spec:\n"
-						+ "    deploymentProperties:\n"
-						+ "      spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io\n");
+				"""
+				log:
+				  spec:
+				    deploymentProperties:
+				      spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io
+				time:
+				  spec:
+				    deploymentProperties:
+				      spring.cloud.deployer.cloudfoundry.route: mlp1-helloworld.cfapps.io
+				""");
 	}
 
 	@Test
-	public void testPropertiesParsing() throws IOException {
+	void propertiesParsing() throws IOException {
 		String properties = "spec.deploymentProperties.spring.cloud.deployer.cloudfoundry.route=mlp3-helloworld.cfapps.io";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
-		assertThat(propertiesYml).isEqualTo("spec:\n"
-				+ "  deploymentProperties:\n"
-				+ "    spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io\n");
+		assertThat(propertiesYml).isEqualTo("""
+				spec:
+				  deploymentProperties:
+				    spring.cloud.deployer.cloudfoundry.route: mlp3-helloworld.cfapps.io
+				""");
 	}
 
 	@Test
-	public void testLogVersion() throws IOException {
+	void logVersion() throws IOException {
 		String properties = "log.version=1.1.1.RELEASE";
 		String propertiesYml = YmlUtils.getYamlConfigValues(null, properties);
 		assertThat(propertiesYml).isEqualTo("log:\n  version: 1.1.1.RELEASE\n");

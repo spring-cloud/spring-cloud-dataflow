@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,9 +58,12 @@ public class DockerExecutable implements Executable {
 	}
 
 	@Override
-	public Process execute(String... commands) throws IOException {
+	public Process execute(boolean composeCommand, String... commands) throws IOException {
 		List<String> args = new ArrayList<>();
 		args.add(dockerPath());
+		if(composeCommand) {
+			args.add("compose");
+		}
 		args.addAll(Arrays.asList(commands));
 
 		return dockerConfiguration().configuredDockerComposeProcess()

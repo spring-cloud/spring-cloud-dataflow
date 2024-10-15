@@ -34,6 +34,7 @@ function check_jars() {
         fi
     fi
 }
+./mvnw help:evaluate -Dexpression=project.version > /dev/null
 VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
 FILES=$(find . -name "pom.xml" -type f)
 MVNV=$(realpath ./mvnw)

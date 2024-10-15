@@ -278,7 +278,7 @@ public class RuntimeApplicationHelper {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 		headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-		String message = obj instanceof String ? (String) obj : new ObjectMapper().writeValueAsString(obj);
+		String message = obj instanceof String s ? s : new ObjectMapper().writeValueAsString(obj);
 		httpPost(streamName, appName, message.getBytes(StandardCharsets.UTF_8), headers);
 	}
 

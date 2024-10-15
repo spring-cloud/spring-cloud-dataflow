@@ -35,7 +35,6 @@ import org.springframework.cloud.dataflow.rest.resource.StreamDeploymentResource
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
-import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskToolsResource;
 import org.springframework.cloud.dataflow.rest.resource.about.AboutResource;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -94,9 +93,6 @@ public class RootController {
 		root.add(linkTo(UiController.class).withRel("dashboard"));
 		root.add(linkTo(AuditRecordController.class).withRel("audit-records"));
 
-		root.add(linkTo(methodOn(SchemaController.class).getVersions()).withRel("schema/versions"));
-		root.add(linkTo(methodOn(SchemaController.class).getTargets()).withRel("schema/targets"));
-
 		if (featuresProperties.isStreamsEnabled()) {
 			root.add(entityLinks.linkToCollectionResource(StreamDefinitionResource.class)
 					.withRel("streams/definitions"));
@@ -153,12 +149,13 @@ public class RootController {
 			root.add(Link.of(taskTemplated).withRel("tasks/executions/name"));
 			root.add(linkTo(methodOn(TaskExecutionController.class)
 					.getCurrentTaskExecutionsInfo()).withRel("tasks/executions/current"));
-			root.add(unescapeTemplateVariables(linkTo(methodOn(TaskExecutionController.class).view(null,null)).withRel("tasks/executions/execution")));
+			root.add(unescapeTemplateVariables(linkTo(methodOn(TaskExecutionController.class).view(null)).withRel("tasks/executions/execution")));
 			root.add(unescapeTemplateVariables(entityLinks.linkToItemResource(TaskAppStatusResource.class, "{name}")
 					.withRel("tasks/validation")));
 			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null, null)).withRel("tasks/info/executions"));
-			root.add(linkTo(methodOn(TaskLogsController.class).getLog(null, null, null)).withRel("tasks/logs"));
+			root.add(linkTo(methodOn(TaskLogsController.class).getLog(null, null)).withRel("tasks/logs"));
 			root.add(linkTo(methodOn(TaskExecutionThinController.class).listTasks(null, null)).withRel("tasks/thinexecutions"));
+
 			if (featuresProperties.isSchedulesEnabled()) {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
 				String scheduleTemplated = entityLinks.linkToCollectionResource(ScheduleInfoResource.class).getHref()

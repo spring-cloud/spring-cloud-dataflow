@@ -32,8 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@link H2ServerConfiguration}.
  *
  * @author Michael Wirth
+ * @author Corneil du Plessis
  */
-public class H2ServerConfigurationTests {
+class H2ServerConfigurationTests {
 
 	private final ApplicationContextRunner runner = new ApplicationContextRunner()
 			.withConfiguration(

@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class DefaultStreamServiceUpgradeStreamTests {
+class DefaultStreamServiceUpgradeStreamTests {
 
 	@MockBean
 	private StreamDefinitionRepository streamDefinitionRepository;
@@ -63,7 +63,7 @@ public class DefaultStreamServiceUpgradeStreamTests {
 	private final StreamDeployment streamDeployment2 = new StreamDeployment(streamDefinition2.getName(), "");
 
 	@Test
-	public void verifyUpgradeStream() {
+	void verifyUpgradeStream() {
 		if (!PlatformUtils.isWindows()) {
 			when(streamDefinitionRepository.findById("test2")).thenReturn(Optional.of(streamDefinition2));
 
@@ -71,18 +71,16 @@ public class DefaultStreamServiceUpgradeStreamTests {
 			streamService.updateStream(streamDeployment2.getStreamName(), updateStreamRequest);
 			verify(this.skipperStreamDeployer, times(1))
 					.upgradeStream(this.streamDeployment2.getStreamName(),
-							null, "log:\n" +
-									"  spec:\n" +
-									"    applicationProperties:\n" +
-									"      spring.cloud.dataflow.stream.app.type: sink\n" +
-									"    deploymentProperties:\n" +
-									"      spring.cloud.deployer.bootVersion: '2'\n" +
-									"time:\n" +
-									"  spec:\n" +
-									"    applicationProperties:\n" +
-									"      spring.cloud.dataflow.stream.app.type: source\n" +
-									"    deploymentProperties:\n" +
-									"      spring.cloud.deployer.bootVersion: '2'\n", false, null);
+							null, """
+									log:
+									  spec:
+									    applicationProperties:
+									      spring.cloud.dataflow.stream.app.type: sink
+									time:
+									  spec:
+									    applicationProperties:
+									      spring.cloud.dataflow.stream.app.type: source
+									""", false, null);
 			verifyNoMoreInteractions(this.skipperStreamDeployer);
 		}
 	}

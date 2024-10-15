@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
@@ -53,7 +54,7 @@ public class ConfigValueUtils {
 	 */
 	public static Map<String, Object> mergeConfigValues(Package pkg, ConfigValues overrideValues) {
 		// parse ConfigValues to a map.
-		Yaml yaml = new Yaml(new SafeConstructor());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 		Map<String, Object> mergedValues;
 		// merge top level override values on top level package values
 		if (StringUtils.hasText(overrideValues.getRaw())) {
@@ -89,7 +90,7 @@ public class ConfigValueUtils {
 			return overrideMap;
 		}
 		// load the package values
-		Yaml yaml = new Yaml(new SafeConstructor());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 		Object object = yaml.load(pkg.getConfigValues().getRaw());
 		if (object == null) {
 			// Config Values could have been file with comments only, no data.
@@ -163,7 +164,7 @@ public class ConfigValueUtils {
 	}
 
 	private static Map<String, Object> convertConfigValuesToMap(Package pkg) {
-		Yaml yaml = new Yaml(new SafeConstructor());
+		Yaml yaml = new Yaml(new SafeConstructor(new LoaderOptions()));
 		Map<String, Object> currentPackageValueMap = new TreeMap<>();
 		if (pkg.getConfigValues() != null && StringUtils.hasText(pkg.getConfigValues().getRaw())) {
 			currentPackageValueMap = (Map<String, Object>) yaml.load(pkg.getConfigValues().getRaw());
@@ -189,8 +190,8 @@ public class ConfigValueUtils {
 				if (value1 instanceof Map && value2 instanceof Map) {
 					merge((Map<String, Object>) value1, (Map<String, Object>) value2);
 				}
-				else if (value1 instanceof List && value2 instanceof List) {
-					map1.put(key, mergeList((List) value1, (List) value2));
+				else if (value1 instanceof List<?> list && value2 instanceof List<?> list1) {
+					map1.put(key, mergeList(list, list1));
 				}
 				else {
 					map1.put(key, value2);

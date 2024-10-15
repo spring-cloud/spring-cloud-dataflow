@@ -13,8 +13,8 @@ if [ "$TAG" == "" ]; then
     exit 1
 fi
 if [ "$DEFAULT_JDK" = "" ]; then
-    echo "DEFAULT_JDK not found using 11"
-    DEFAULT_JDK=11
+    echo "DEFAULT_JDK not found using 17"
+    DEFAULT_JDK=17
 else
     echo "DEFAULT_JDK=$DEFAULT_JDK"
 fi
@@ -55,7 +55,8 @@ if [ ! -f "$JAR" ]; then
         exit $RC
     fi
 fi
-for v in 8 11 17; do
+# TODO add Java 21 when packeto supports it
+for v in 17; do
     echo "Creating: $REPO:$TAG-jdk$v"
     pack build --builder gcr.io/paketo-buildpacks/builder:base \
         --path "$JAR" \
@@ -93,9 +94,5 @@ for v in 8 11 17; do
         fi
     fi
 done
-#if [ "$PUSH" == "true" ]; then
-#    echo "Pruning Docker"
-#    docker system prune -f
-#    docker system prune --volumes -f
-#fi
+
 

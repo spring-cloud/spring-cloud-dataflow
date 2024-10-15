@@ -26,7 +26,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -35,10 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @ActiveProfiles("repository")
-public class HistoryDocumentation extends BaseDocumentation {
+class HistoryDocumentation extends BaseDocumentation {
 
 	@Test
-	public void showVersionHistoryForRelease() throws Exception {
+	void showVersionHistoryForRelease() throws Exception {
 		this.releaseRepository.save(createTestRelease());
 
 		this.mockMvc.perform(

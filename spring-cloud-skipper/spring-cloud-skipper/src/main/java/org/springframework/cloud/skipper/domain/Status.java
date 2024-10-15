@@ -19,13 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.Version;
@@ -35,8 +28,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.Type;
 
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 import org.springframework.cloud.deployer.spi.app.AppInstanceStatus;
 import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.app.DeploymentState;
@@ -57,7 +56,7 @@ public class Status extends NonVersionedAbstractEntity {
 
 	// Status from the underlying platform
 	@Lob
-	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
+	@Type(DatabaseAwareLobUserType.class)
 	private String platformStatus;
 
 	public Status() {

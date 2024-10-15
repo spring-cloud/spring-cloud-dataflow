@@ -17,7 +17,7 @@ jobs:
           path: src/docker/uaa/uaa
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Build UAA Test Image
         shell: bash

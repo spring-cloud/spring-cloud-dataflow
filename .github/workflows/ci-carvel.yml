@@ -25,6 +25,7 @@ jobs:
       with:
         ref: ${{ inputs.branch && inputs.branch || github.ref }}
         path: 'target'
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
     - uses: actions/setup-node@v2
       with:
         node-version: 16

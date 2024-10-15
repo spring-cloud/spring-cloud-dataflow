@@ -61,12 +61,12 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class DataflowTemplateTests {
+class DataflowTemplateTests {
 
 	private ObjectMapper mapper;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		mapper = new ObjectMapper();
 		mapper.registerModule(new Jdk8Module());
 		mapper.registerModule(new Jackson2HalModule());
@@ -76,12 +76,12 @@ public class DataflowTemplateTests {
 	}
 
 	@AfterEach
-	public void shutdown() {
+	void shutdown() {
 		System.clearProperty("sun.net.client.defaultConnectTimeout");
 	}
 
 	@Test
-	public void testDataFlowTemplateContructorWithNullUri() throws URISyntaxException {
+	void dataFlowTemplateContructorWithNullUri() throws URISyntaxException {
 
 		try {
 			new DataFlowTemplate(null, mapper);
@@ -95,32 +95,33 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testDataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
+	void dataFlowTemplateContructorWithNonExistingUri() throws URISyntaxException {
 		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() -> {
 			new DataFlowTemplate(new URI("https://doesnotexist:1234"), mapper);
 		});
 	}
 
 	@Test
-	public void testThatObjectMapperGetsPrepared() {
+	void thatObjectMapperGetsPrepared() {
 		final ObjectMapper objectMapper = new ObjectMapper();
 		DataFlowTemplate.prepareObjectMapper(objectMapper);
 		assertCorrectMixins(objectMapper);
 	}
 
 	@Test
-	public void testPrepareObjectMapperWithNullObjectMapper() {
+	void prepareObjectMapperWithNullObjectMapper() {
 		try {
 			DataFlowTemplate.prepareObjectMapper(null);
 			fail("Expected an IllegalArgumentException to be thrown.");
 		}
 		catch (IllegalArgumentException e) {
 			assertThat(e.getMessage()).isEqualTo("The objectMapper must not be null.");
+			return;
 		}
 	}
 
 	@Test
-	public void testThatDefaultDataflowRestTemplateContainsMixins() {
+	void thatDefaultDataflowRestTemplateContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.getDefaultDataflowRestTemplate();
 
 		assertThat(restTemplate).isNotNull();
@@ -134,10 +135,8 @@ public class DataflowTemplateTests {
 		boolean containsMappingJackson2HttpMessageConverter = false;
 
 		for (HttpMessageConverter<?> converter : restTemplate.getMessageConverters()) {
-			if (converter instanceof MappingJackson2HttpMessageConverter) {
+			if (converter instanceof MappingJackson2HttpMessageConverter jacksonConverter) {
 				containsMappingJackson2HttpMessageConverter = true;
-
-				final MappingJackson2HttpMessageConverter jacksonConverter = (MappingJackson2HttpMessageConverter) converter;
 				assertCorrectMixins(jacksonConverter.getObjectMapper());
 			}
 		}
@@ -161,7 +160,7 @@ public class DataflowTemplateTests {
 
 
 	@Test
-	public void testThatPrepareRestTemplateWithNullContructorValueContainsMixins() {
+	void thatPrepareRestTemplateWithNullContructorValueContainsMixins() {
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(null);
 
 		assertThat(restTemplate).isNotNull();
@@ -172,19 +171,19 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testThatPrepareRestTemplateWithProvidedRestTemplateContainsMixins() {
+	void thatPrepareRestTemplateWithProvidedRestTemplateContainsMixins() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final RestTemplate restTemplate = DataFlowTemplate.prepareRestTemplate(providedRestTemplate);
 
 		assertThat(restTemplate).isNotNull();
-		assertThat(restTemplate).isSameAs(providedRestTemplate);
+		assertThat(providedRestTemplate == restTemplate).isTrue();
 		assertThat(restTemplate.getErrorHandler() instanceof VndErrorResponseErrorHandler).isTrue();
 
 		assertCorrectMixins(restTemplate);
 	}
 
 	@Test
-	public void testPrepareRestTemplateWithRestTemplateThatHasNoMessageConverters() {
+	void prepareRestTemplateWithRestTemplateThatHasNoMessageConverters() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		providedRestTemplate.getMessageConverters().clear();
 
@@ -200,7 +199,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testPrepareRestTemplateWithRestTemplateThatMissesJacksonConverter() {
+	void prepareRestTemplateWithRestTemplateThatMissesJacksonConverter() {
 		final RestTemplate providedRestTemplate = new RestTemplate();
 		final Iterator<HttpMessageConverter<?>> iterator = providedRestTemplate.getMessageConverters().iterator();
 
@@ -222,7 +221,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testAllActive() throws Exception{
+	void allActive() throws Exception{
 		DataFlowTemplate template = getMockedDataFlowTemplate(true);
 
 		assertThat(template.taskOperations()).isNotNull();
@@ -235,7 +234,7 @@ public class DataflowTemplateTests {
 	}
 
 	@Test
-	public void testAllDeActive() throws Exception{
+	void allDeActive() throws Exception{
 		DataFlowTemplate template = getMockedDataFlowTemplate(false);
 
 		assertThat(template.taskOperations()).isNull();

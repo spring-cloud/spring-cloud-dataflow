@@ -6,7 +6,7 @@ info:
 management:
   security:
     roles: MANAGE
-  context-path: /actuator
+  server.base-path: /actuator
   endpoints:
     web:
       exposure:
@@ -25,14 +25,19 @@ management:
           autotime:
             enabled: true # true is default to Boot 2.3.2 at least.
             percentiles-histogram: true
-    export:
-      influx:
+  influx:
+    metrics:
+      export:
         enabled: false
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: false
         rsocket:
           enabled: false
-      wavefront:
+  wavefront:
+    metrics:
+      export:
         enabled: false
 server:
   port: 7577
@@ -41,6 +46,8 @@ server:
 spring:
   main:
     banner-mode: "off"
+  config:
+    use-legacy-processing: true
   data:
     rest:
       base-path: /api
@@ -48,9 +55,10 @@ spring:
     generate-ddl: false
     properties:
       hibernate:
+        # continue using a single hibernate_sequence table
+        id.db_structure_naming_strategy: single
+        # use the sequence style identifier generator
         id.new_generator_mappings: true
-        # Statistics generation is required for publishing JPA micrometer metrics.
-        # generate_statistics: true
   cloud:
     skipper:
       server:
@@ -192,7 +200,7 @@ spring:
     baselineOnMigrate: true
     locations:
       - classpath:org/springframework/cloud/skipper/server/db/migration/{vendor}
-    check-location: false
+    fail-on-missing-locations: false
   mvc:
     async:
       request-timeout: 120000

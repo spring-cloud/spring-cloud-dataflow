@@ -22,10 +22,10 @@ import org.junit.jupiter.api.Test;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class PackageMetadataTests {
+class PackageMetadataTests {
 
 	@Test
-	public void equalsContract() {
+	void equalsContract() {
 		EqualsVerifier.forClass(PackageMetadata.class)
 				.withOnlyTheseFields("repositoryId", "name", "version")
 				.verify();

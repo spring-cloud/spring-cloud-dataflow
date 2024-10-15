@@ -59,14 +59,14 @@ public class ArgumentSanitizer {
 	private static final String[] KEYS_TO_SANITIZE = {"username", "password", "secret", "key", "token", ".*credentials.*",
 			"vcap_services", "url"};
 
-	private final static TypeReference<Map<String, Object>> mapTypeReference = new TypeReference<Map<String, Object>>() {
+	private final static TypeReference<Map<String, Object>> mapTypeReference = new TypeReference<>() {
 	};
 
 	private final ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
 	private final ObjectMapper jsonMapper = new ObjectMapper();
 
-	private Pattern[] keysToSanitize;
+	private final Pattern[] keysToSanitize;
 
 	public ArgumentSanitizer() {
 		this.keysToSanitize = new Pattern[KEYS_TO_SANITIZE.length];
@@ -140,11 +140,11 @@ public class ArgumentSanitizer {
 	 * @return the sanitized job parameters
 	 */
 	public JobParameters sanitizeJobParameters(JobParameters jobParameters) {
-		Map<String, JobParameter> newJobParameters = new HashMap<>();
+		Map<String, JobParameter<?>> newJobParameters = new HashMap<>();
 		jobParameters.getParameters().forEach((key, jobParameter) -> {
 			String updatedKey = !jobParameter.isIdentifying() ? "-" + key : key;
-			if (jobParameter.getType().equals(JobParameter.ParameterType.STRING)) {
-				newJobParameters.put(updatedKey, new JobParameter(this.sanitize(key, jobParameter.toString())));
+			if (jobParameter.getType().isAssignableFrom(String.class)) {
+				newJobParameters.put(updatedKey, new JobParameter<>(this.sanitize(key, jobParameter.toString()), String.class));
 			} else {
 				newJobParameters.put(updatedKey, jobParameter);
 			}
@@ -159,17 +159,15 @@ public class ArgumentSanitizer {
 	 * @return Task definition text that has sensitive data redacted.
 	 */
 	public String sanitizeTaskDsl(TaskDefinition taskDefinition) {
-		if (StringUtils.isEmpty(taskDefinition.getDslText())) {
+		if (!StringUtils.hasText(taskDefinition.getDslText())) {
 			return taskDefinition.getDslText();
 		}
 		TaskParser taskParser = new TaskParser(taskDefinition.getTaskName(), taskDefinition.getDslText(), true, true);
 		Graph graph = taskParser.parse().toGraph();
-		graph.getNodes().stream().forEach(node -> {
+		graph.getNodes().forEach(node -> {
 			if (node.properties != null) {
-				node.properties.keySet().stream().forEach(key -> {
-					node.properties.put(key,
-							DefinitionUtils.autoQuotes(sanitize(key, node.properties.get(key))));
-				});
+				node.properties.keySet().forEach(key -> node.properties.put(key,
+						DefinitionUtils.autoQuotes(sanitize(key, node.properties.get(key)))));
 			}
 		});
 		return graph.toDSLText();
@@ -228,6 +226,7 @@ public class ArgumentSanitizer {
 	 * @param input to be sanitized
 	 * @return the sanitized map.
 	 */
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> sanitizeMap(Map<String, Object> input) {
 		Map<String, Object> result = new HashMap<>();
 		for (Map.Entry<String, Object> entry : input.entrySet()) {
@@ -279,6 +278,7 @@ public class ArgumentSanitizer {
 	 * @param input to be sanitized
 	 * @return the sanitized string
 	 */
+	@SuppressWarnings("StringConcatenationArgumentToLogCall")
 	public String sanitizeJsonOrYamlString(String input) {
 		if (input == null) {
 			return null;
@@ -294,9 +294,11 @@ public class ArgumentSanitizer {
 			logger.trace("Cannot parse as YAML:" + x);
 		}
 		if (input.contains("\n")) {
+			//noinspection DataFlowIssue
 			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "\n"))), "\n");
 		}
 		if (input.contains("--")) {
+			//noinspection DataFlowIssue
 			return StringUtils.collectionToDelimitedString(sanitizeArguments(Arrays.asList(StringUtils.split(input, "--"))), "--");
 		}
 		return sanitize(input);

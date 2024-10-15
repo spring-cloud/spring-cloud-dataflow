@@ -14,11 +14,6 @@ jobs:
     steps:
     # need repo to push release branch and a tag
     - uses: actions/checkout@v4
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.46.4
-      env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     # zoo extract and ensure
     - name: Extract Zoo Context Properties
       uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -31,7 +26,11 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber
-    # promoting build from staging repo into milestone
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.54.0
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Promote Build
       run: |
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber libs-milestone-local

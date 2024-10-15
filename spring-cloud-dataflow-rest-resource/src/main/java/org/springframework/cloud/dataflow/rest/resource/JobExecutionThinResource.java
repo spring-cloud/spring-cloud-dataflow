@@ -16,12 +16,12 @@
 
 package org.springframework.cloud.dataflow.rest.resource;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 import java.util.TimeZone;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
@@ -50,12 +50,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
-	private static final DateFormat dateFormat = TimeUtils.getDefaultDateFormat();
-
-	private static final DateFormat timeFormat = TimeUtils.getDefaultTimeFormat();
-
-	private static final DateFormat durationFormat = TimeUtils.getDefaultDurationFormat();
-
 	private Long executionId;
 
 	private int stepExecutionCount;
@@ -72,7 +66,7 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private String startTime = "";
 
-	private Date startDateTime = null;
+	private LocalDateTime startDateTime = null;
 
 	private String duration = "";
 
@@ -96,8 +90,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 
 	private BatchStatus status;
 
-	private String schemaTarget;
-
 	/**
 	 * Default constructor to be used by Jackson.
 	 */
@@ -113,7 +105,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		this.timeZone = timeZone;
 		this.executionId = jobExecution.getId();
 		this.jobId = jobExecution.getJobId();
-		this.schemaTarget = taskJobExecution.getSchemaTarget();
 		this.stepExecutionCount = taskJobExecution.getStepExecutionCount();
 		this.jobParameters =converter.getProperties(jobExecution.getJobParameters());
 		this.jobParametersString = fromJobParameters(
@@ -132,16 +123,20 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 			this.name = "?";
 		}
 
+		//TODO: Boot3x followup 2.x used timzezone but we need to switch to local for date conversions
+		//2.x used timzezone but we need to switch to local for date conversions.Currently set to default location.
+		//Duration needs to be set to the correct format for gmt
+
 		// Duration is always in GMT
-		durationFormat.setTimeZone(TimeUtils.getDefaultTimeZone());
+		DateTimeFormatter durationFormat = DateTimeFormatter.ofPattern(TimeUtils.DEFAULT_DATAFLOW_DURATION_FORMAT_PATTERN);
 		// The others can be localized
-		timeFormat.setTimeZone(timeZone);
-		dateFormat.setTimeZone(timeZone);
+		DateTimeFormatter timeFormat =  DateTimeFormatter.ofPattern(TimeUtils.DEFAULT_DATAFLOW_TIME_FORMAT_PATTERN);
+		DateTimeFormatter dateFormat =  DateTimeFormatter.ofPattern(TimeUtils.DEFAULT_DATAFLOW_DATE_FORMAT_PATTERN);
 		if (jobExecution.getStartTime() != null) {
 			this.startDate = dateFormat.format(jobExecution.getStartTime());
 			this.startTime = timeFormat.format(jobExecution.getStartTime());
-			Date endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : new Date();
-			this.duration = durationFormat.format(new Date(endTime.getTime() - jobExecution.getStartTime().getTime()));
+			LocalDateTime endTime = jobExecution.getEndTime() != null ? jobExecution.getEndTime() : LocalDateTime.now();
+			this.duration = String.valueOf(Duration.between(jobExecution.getStartTime(), endTime).get(ChronoUnit.NANOS));
 			this.startDateTime = jobExecution.getStartTime();
 		}
 
@@ -207,7 +202,7 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		return status;
 	}
 
-	public Date getStartDateTime() {
+	public LocalDateTime getStartDateTime() {
 		return startDateTime;
 	}
 
@@ -219,9 +214,6 @@ public class JobExecutionThinResource extends RepresentationModel<JobExecutionTh
 		return defined;
 	}
 
-	public String getSchemaTarget() {
-		return schemaTarget;
-	}
 
 	/**
 	 * @param oldParameters the latest job parameters

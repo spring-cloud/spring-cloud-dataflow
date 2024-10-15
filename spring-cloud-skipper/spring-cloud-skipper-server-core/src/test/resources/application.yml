@@ -5,7 +5,6 @@ spring:
     rest:
       base-path: /api
   datasource:
-    initialize: true
     url: 'jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE'
     driverClassName: org.h2.Driver
     username: sa
@@ -27,6 +26,7 @@ spring:
             spring-cloud-skipper-shell:
               name: Spring Cloud Skipper Shell
               version: fake-shell-version
+  sql.init.mode: true
 
 logging:
   level:
@@ -43,3 +43,4 @@ logging:
     # The following INFO is to log the generated password when using basic security
     org.springframework.boot.autoconfigure.security: 'INFO'
     org.springframework.cloud.deployer: 'DEBUG'
+    org.springframework.statemachine: 'DEBUG'

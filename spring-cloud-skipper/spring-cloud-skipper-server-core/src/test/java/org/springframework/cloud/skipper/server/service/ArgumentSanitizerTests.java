@@ -30,10 +30,10 @@ import org.springframework.util.StreamUtils;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class ArgumentSanitizerTests {
+class ArgumentSanitizerTests {
 
 	@Test
-	public void testNoChange() throws Exception {
+	void noChange() throws Exception {
 		String initialYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "nopassword.yaml").getInputStream(),
 				Charset.defaultCharset());
@@ -42,7 +42,7 @@ public class ArgumentSanitizerTests {
 	}
 
 	@Test
-	public void testPasswordApps() throws Exception {
+	void passwordApps() throws Exception {
 		String initialYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "password.yaml").getInputStream(),
 				Charset.defaultCharset());
@@ -54,7 +54,7 @@ public class ArgumentSanitizerTests {
 	}
 
 	@Test
-	public void testPasswordDefaultConfig() throws Exception {
+	void passwordDefaultConfig() throws Exception {
 		String initialYaml = StreamUtils.copyToString(
 				TestResourceUtils.qualifiedResource(getClass(), "configpassword.yaml").getInputStream(),
 				Charset.defaultCharset());

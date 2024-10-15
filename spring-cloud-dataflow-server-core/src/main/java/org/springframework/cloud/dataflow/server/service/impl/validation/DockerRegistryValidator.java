@@ -21,9 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,19 +116,25 @@ public class DockerRegistryValidator {
 
 	private RestTemplate configureRestTemplate() {
 		CloseableHttpClient httpClient
-				= HttpClients.custom()
-				.setSSLHostnameVerifier(new NoopHostnameVerifier())
+				= httpClientBuilder()
 				.build();
 		HttpComponentsClientHttpRequestFactory requestFactory
 				= new HttpComponentsClientHttpRequestFactory();
 		requestFactory.setHttpClient(httpClient);
 		requestFactory.setConnectTimeout(dockerValidatiorProperties.getConnectTimeoutInMillis());
-		requestFactory.setReadTimeout(dockerValidatiorProperties.getReadTimeoutInMillis());
-
 		RestTemplate restTemplate = new RestTemplate(requestFactory);
 		return restTemplate;
 	}
 
+
+	private HttpClientBuilder httpClientBuilder() {
+		// Register http/s connection factories
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		return HttpClients.custom()
+			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
+	}
 	private DockerAuth getDockerAuth() {
 		DockerAuth result = null;
 		String userName = dockerValidatiorProperties.getUserName();

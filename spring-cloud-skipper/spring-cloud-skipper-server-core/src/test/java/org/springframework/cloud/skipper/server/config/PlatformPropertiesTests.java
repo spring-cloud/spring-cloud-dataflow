@@ -44,13 +44,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = PlatformPropertiesTests.TestConfig.class,
 		properties = "spring.main.allow-bean-definition-overriding=true")
 @ActiveProfiles({"platform-properties", "local"})
-public class PlatformPropertiesTests {
+class PlatformPropertiesTests {
 
 	@Autowired
 	private LocalPlatformProperties localPlatformProperties;
 
 	@Test
-	public void deserializationTest() {
+	void deserializationTest() {
 		Map<String, LocalDeployerProperties> localAccounts = this.localPlatformProperties.getAccounts();
 		assertThat(localAccounts).containsOnlyKeys("localDev", "localDevDebug");
 		assertThat(localAccounts.get("localDev").getShutdownTimeout()).isEqualTo(60);

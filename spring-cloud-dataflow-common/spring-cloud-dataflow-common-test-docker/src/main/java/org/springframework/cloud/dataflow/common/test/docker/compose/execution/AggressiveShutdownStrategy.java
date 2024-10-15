@@ -15,14 +15,16 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.IOException;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ShutdownStrategy;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.ContainerName;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Shuts down containers as fast as possible, without giving them time to finish

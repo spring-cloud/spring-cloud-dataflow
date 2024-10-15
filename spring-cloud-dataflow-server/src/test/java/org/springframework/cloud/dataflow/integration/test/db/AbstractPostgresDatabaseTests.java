@@ -45,7 +45,7 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 	@Test
 	@DataflowMain
 	@DatabaseFailure
-	public void testMigrationError() {
+	public void migrationError() {
 		log.info("Running testMigrationError()");
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
@@ -79,7 +79,7 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 	@SuppressWarnings("deprecation")
 	@Test
 	@DataflowMain
-	public void testMigration_210_211() throws URISyntaxException {
+	public void migration210211() throws URISyntaxException {
 		log.info("Running testMigrationError()");
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
@@ -93,8 +93,8 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.registerModule(new Jackson2DataflowModule());
 		final DataFlowTemplate dataFlowTemplate = new DataFlowTemplate(new URI(dataflowCluster.getDataflowUrl()), objectMapper);
-		dataFlowTemplate.appRegistryOperations().register("time", ApplicationType.source, "docker:springcloudstream/time-source-rabbit:3.2.1", null, false);
-		dataFlowTemplate.appRegistryOperations().register("log", ApplicationType.sink, "docker:springcloudstream/log-sink-rabbit:3.2.1", null, false);
+		dataFlowTemplate.appRegistryOperations().register("time", ApplicationType.source, "docker:springcloudstream/time-source-rabbit:5.0.0", null, false);
+		dataFlowTemplate.appRegistryOperations().register("log", ApplicationType.sink, "docker:springcloudstream/log-sink-rabbit:5.0.0", null, false);
 		dataFlowTemplate.streamOperations().createStream("timelogger", "time | log", "timelogger", false);
 
 		StreamDefinitionResource timelogger = dataFlowTemplate.streamOperations().getStreamDefinition("timelogger");

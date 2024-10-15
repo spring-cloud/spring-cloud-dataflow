@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 jobs:
   build:
 
@@ -18,15 +22,11 @@ jobs:
 
     - uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'liberica'
-    - uses: jvalkeal/setup-maven@v1
-      with:
-        maven-version: 3.8.8
-        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
 
     - name: Build with Maven
-      run: mvn process-resources -P deploymentfiles
+      run: ./mvnw process-resources -P deploymentfiles  -B --no-transfer-progress
 
     - name: Check Deployment Files
       uses: peter-evans/create-pull-request@v3

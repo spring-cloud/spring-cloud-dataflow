@@ -3,6 +3,13 @@ version: '3'
 # Extends the default docker-compose.yml with Zipkin Server distributed tracing configuration.
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-zipkin.yml up
 
+# NOTE: In Boot 3.0 - 3.3 only global tracing property 'management.tracing.enabled' is available.
+# This means in order to disable the other tracer reporters we have to exclude their tracing
+# auto-configuration. In Boot 3.4 there is a specific enabled property
+# 'management.<product>.tracing.export.enabled' that simplifies this by not requiring the
+# auto-configuration exclusion. However, to support all versions of Boot 3.0 - 3.4 we add
+# both sets of properties in env vars below.
+
 services:
 
   zipkin-server:
@@ -15,5 +22,8 @@ services:
 
   dataflow-server:
     environment:
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_ZIPKIN_ENABLED=true
-      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_ZIPKIN_BASEURL=http://zipkin-server:9411
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_TRACING_ENABLED=true
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_TRACING_SAMPLING_PROBABILITY=1.0
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_ZIPKIN_TRACING_EXPORT_ENABLED=true
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin-server:9411/api/v2/spans
+      - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_STREAM_SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.actuate.autoconfigure.tracing.wavefront.WavefrontTracingAutoConfiguration

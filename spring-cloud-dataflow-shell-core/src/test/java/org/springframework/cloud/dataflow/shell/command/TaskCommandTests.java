@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.shell.command;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -48,7 +48,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-public class TaskCommandTests extends AbstractShellIntegrationTest {
+
+class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static final String APPS_URI = "META-INF/test-task-apps.properties";
 
@@ -64,9 +65,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 
 	private static final long TASK_EXECUTION_ID = 10000;
 
-	private static final Date startTime = new Date();
+	private static final LocalDateTime startTime = LocalDateTime.now();
 
-	private static final Date endTime = new Date(startTime.getTime() + 5000);
+	private static final LocalDateTime endTime = LocalDateTime.now().plusSeconds(5);
 
 	private static final String EXTERNAL_EXECUTION_ID = "WOW22";
 
@@ -75,7 +76,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	private static JdbcTemplate template;
 
 	@BeforeAll
-	public static void setUp() throws InterruptedException{
+	static void setUp() throws InterruptedException{
 		Thread.sleep(2000);
 		template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
@@ -101,7 +102,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@AfterAll
-	public static void tearDown() {
+	static void tearDown() {
 		JdbcTemplate template = new JdbcTemplate(applicationContext.getBean(DataSource.class));
 		template.afterPropertiesSet();
 		final String TASK_EXECUTION_FORMAT = "DELETE FROM TASK_EXECUTION WHERE TASK_EXECUTION_ID = %d";
@@ -110,13 +111,13 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@BeforeEach
-	public void registerApps() {
+	void registerApps() {
 		AppRegistryService registry = applicationContext.getBean(AppRegistryService.class);
 		registry.importAll(true, new ClassPathResource(APPS_URI));
 	}
 
 	@Test
-	public void testTaskLaunch() {
+	void taskLaunch() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -124,8 +125,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	@Disabled
-	public void testTaskLaunchCTRUsingAltCtrName() {
+	@Disabled("Shell is merging 2 properties into a single property.")
+	void taskLaunchCTRUsingAltCtrName() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "1: timestamp && 2: timestamp");
@@ -133,9 +134,8 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		task().launchWithAlternateCTR(taskName, "timestamp");
 	}
 
-	@Disabled("Find why log is inaccessible")
 	@Test
-	public void testGetLog() throws Exception{
+	void getLog() throws Exception{
 		logger.info("Retrieving task execution log");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -143,7 +143,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testGetLogInvalidPlatform() throws Exception{
+	void getLogInvalidPlatform() throws Exception{
 		logger.info("Retrieving task execution log");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -151,10 +151,9 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 				.isEqualTo("Log could not be retrieved.  Verify that deployments are still available.");
 	}
 
-	@Disabled("Find why it won't start")
 	@Test
-	public void testGetLogInvalidId() {
-		assertThatThrownBy(() -> task().getTaskExecutionLogInvalidId())
+	void getLogInvalidId() {
+		assertThatThrownBy(() -> taskWithErrors().getTaskExecutionLogInvalidId())
 				.isInstanceOf(RuntimeException.class)
 				.hasCauseInstanceOf(DataFlowClientException.class)
 				.hasMessageContaining("Could not find TaskExecution with id 88");
@@ -171,7 +170,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testExecutionStop() {
+	void executionStop() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -182,7 +181,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testExecutionStopWithPlatform() {
+	void executionStopWithPlatform() {
 		logger.info("Launching instance of task");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -193,7 +192,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testExecutionStopInvalid() {
+	void executionStopInvalid() {
 		assertThatThrownBy(() -> taskWithErrors().stop(9001))
 				.isInstanceOf(RuntimeException.class)
 				.hasCauseInstanceOf(DataFlowClientException.class)
@@ -201,14 +200,14 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testCreateTask() {
+	void createTask() {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 	}
 
 	@Test
-	public void destroySpecificTask() {
+	void destroySpecificTask() {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -217,7 +216,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void destroySpecificTaskWithCleanup() {
+	void destroySpecificTaskWithCleanup() {
 		logger.info("Create Task Test");
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
@@ -236,7 +235,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void destroyAllTasks() {
+	void destroyAllTasks() {
 		logger.info("Create Task Test");
 		String taskName1 = generateUniqueStreamOrTaskName();
 		task().create(taskName1, "timestamp");
@@ -246,11 +245,11 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testTaskExecutionList() {
+	void taskExecutionList() {
 		logger.info("Retrieve Task Execution List Test");
 		Object result = task().taskExecutionList();
 		Table table = (Table) result;
-		assertThat(table.getModel().getColumnCount()).isEqualTo(6);
+		assertThat(table.getModel().getColumnCount()).isEqualTo(5);
 		verifyTableValue(table, 0, 0, "Task Name");
 		verifyTableValue(table, 0, 1, "ID");
 		verifyTableValue(table, 0, 2, "Start Time");
@@ -275,12 +274,12 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testTaskExecutionListByName() {
+	void taskExecutionListByName() {
 		logger.info("Retrieve Task Execution List By Name Test");
 		task().create("mytask", "timestamp");
 		Object result = task().taskExecutionListByName("mytask");
 		Table table = (Table) result;
-		assertThat(table.getModel().getColumnCount()).isEqualTo(6);
+		assertThat(table.getModel().getColumnCount()).isEqualTo(5);
 
 		verifyTableValue(table,0, 0, "Task Name");
 		verifyTableValue(table,0, 1, "ID");
@@ -290,7 +289,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testViewExecution() {
+	void viewExecution() {
 		logger.info("Retrieve Task Execution Status by Id");
 
 		Object idResult = task().taskExecutionList();
@@ -313,8 +312,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 10, 0, "Exit Code ");
 		verifyTableValue(table, 11, 0, "Exit Message ");
 		verifyTableValue(table, 12, 0, "Error Message ");
-		verifyTableValue(table, 13, 0, "Schema Target ");
-		verifyTableValue(table, 14, 0, "External Execution Id ");
+		verifyTableValue(table, 13, 0, "External Execution Id ");
 
 		verifyTableValue(table, 1, 1, TASK_EXECUTION_ID);
 		verifyTableValue(table, 3, 1, TASK_NAME);
@@ -323,12 +321,11 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 		verifyTableValue(table, 10, 1, EXIT_CODE);
 		verifyTableValue(table, 11, 1, EXIT_MESSAGE);
 		verifyTableValue(table, 12, 1, ERROR_MESSAGE);
-		verifyTableValue(table, 13, 1, BOOT3_SCHEMA);
-		verifyTableValue(table, 14, 1, EXTERNAL_EXECUTION_ID);
+		verifyTableValue(table, 13, 1, EXTERNAL_EXECUTION_ID);
 	}
 
 	@Test
-	public void testValidate() {
+	void validate() {
 		String taskName = generateUniqueStreamOrTaskName();
 		task().create(taskName, "timestamp");
 
@@ -355,7 +352,7 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testCurrentExecutions() {
+	void currentExecutions() {
 		Object result = task().taskExecutionCurrent();
 		Table table = (Table) result;
 		assertThat(table.getModel().getColumnCount()).isEqualTo(4);
@@ -370,13 +367,13 @@ public class TaskCommandTests extends AbstractShellIntegrationTest {
 	}
 
 	@Test
-	public void testTaskExecutionCleanupById() {
+	void taskExecutionCleanupById() {
 		Object result = task().taskExecutionCleanup(10000);
-		assertThat(result.toString()).isEqualTo("Request to clean up resources for task execution 10000 has been submitted");
+		assertThat(result).hasToString("Request to clean up resources for task execution 10000 has been submitted");
 	}
 
 	@Test
-	public void testPlatformList() {
+	void platformList() {
 		Object result = task().taskPlatformList();
 		Table table = (Table) result;
 		assertThat(table.getModel().getColumnCount()).isEqualTo(3);

@@ -28,12 +28,12 @@ import org.springframework.core.env.SystemEnvironmentPropertySource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class DataFlowClientPropertiesTests {
+class DataFlowClientPropertiesTests {
 
 	private final ApplicationContextRunner contextRunner = new ApplicationContextRunner();
 
 	@Test
-	public void testDefaults() {
+	void defaults() {
 		this.contextRunner
 			.withUserConfiguration(Config1.class)
 			.run((context) -> {
@@ -52,7 +52,7 @@ public class DataFlowClientPropertiesTests {
 	}
 
 	@Test
-	public void testBasicAuth() {
+	void basicAuth() {
 		this.contextRunner
 			.withInitializer(context -> {
 				Map<String, Object> map = new HashMap<>();
@@ -70,7 +70,7 @@ public class DataFlowClientPropertiesTests {
 	}
 
 	@Test
-	public void testLegacyOauth() {
+	void legacyOauth() {
 		this.contextRunner
 			.withInitializer(context -> {
 				Map<String, Object> map = new HashMap<>();
@@ -94,7 +94,7 @@ public class DataFlowClientPropertiesTests {
 	}
 
 	@Test
-	public void testCommonSpringSecurity() {
+	void commonSpringSecurity() {
 		this.contextRunner
 			.withInitializer(context -> {
 				Map<String, Object> map = new HashMap<>();

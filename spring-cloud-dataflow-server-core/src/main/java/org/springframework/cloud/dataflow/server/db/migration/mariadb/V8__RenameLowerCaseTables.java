@@ -18,11 +18,8 @@ package org.springframework.cloud.dataflow.server.db.migration.mariadb;
 import java.util.Arrays;
 import java.util.List;
 
-import org.flywaydb.core.api.migration.Context;
-
 import org.springframework.cloud.dataflow.common.flyway.SqlCommand;
 import org.springframework.cloud.dataflow.server.db.migration.AbstractCaseSensitiveMigration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Since MariaDB operates in a case-sensitive mode for table and column names we need TASK_ tables referenced with a prefix to be uppercase.

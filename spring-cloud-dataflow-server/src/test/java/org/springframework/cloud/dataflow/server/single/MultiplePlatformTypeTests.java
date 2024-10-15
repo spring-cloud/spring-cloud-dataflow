@@ -66,13 +66,13 @@ import static org.mockito.Mockito.when;
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.scheduler-url=https://localhost"
 		})
-public class MultiplePlatformTypeTests {
+class MultiplePlatformTypeTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
 
 	@Test
-	public void localTaskPlatform() {
+	void localTaskPlatform() {
 		assertThat(taskPlatforms).hasSize(3);
 
 		TaskPlatform localDefault = taskPlatforms.stream()
@@ -87,7 +87,7 @@ public class MultiplePlatformTypeTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatform() {
+	void cloudFoundryTaskPlatform() {
 		TaskPlatform cloudFoundry = taskPlatforms.stream()
 				.filter(taskPlatform -> taskPlatform.getName().equals("Cloud Foundry")).findFirst().get();
 
@@ -100,7 +100,7 @@ public class MultiplePlatformTypeTests {
 	}
 
 	@Test
-	public void kubernetesTaskPlatform() {
+	void kubernetesTaskPlatform() {
 		TaskPlatform kubernetes = taskPlatforms.stream()
 				.filter(taskPlatform -> taskPlatform.getName().equals("Kubernetes")).findFirst().get();
 

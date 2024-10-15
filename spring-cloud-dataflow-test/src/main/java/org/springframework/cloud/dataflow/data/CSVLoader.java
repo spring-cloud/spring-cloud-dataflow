@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.csv.CSVFormat;
@@ -48,7 +49,7 @@ public class CSVLoader {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		String sql = "insert into " + tableName + " (" + StringUtils.collectionToCommaDelimitedString(headerNames) + ") values (";
 		sql += StringUtils.collectionToCommaDelimitedString(headerNames.stream().map(s -> "?").collect(Collectors.toList())) + ")";
-		jdbcTemplate.batchUpdate(sql, records, 100, (ps, record) -> {
+		jdbcTemplate.batchUpdate(sql, records, 50, (ps, record) -> {
 			for (int i = 0; i < headerNames.size(); i++) {
 				String name = headerNames.get(i);
 				int type = deriveType.deriveFromColumnName(name);

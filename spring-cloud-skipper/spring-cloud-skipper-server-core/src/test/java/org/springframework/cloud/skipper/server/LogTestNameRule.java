@@ -25,17 +25,18 @@ import org.slf4j.LoggerFactory;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class LogTestNameRule implements AfterEachCallback, BeforeEachCallback {
+public class LogTestNameRule implements BeforeEachCallback, AfterEachCallback {
 
 	private final static Logger log = LoggerFactory.getLogger("junit.logTestName");
 
 	@Override
-	public void beforeEach(ExtensionContext context) throws Exception {
-		log.info("Starting Test {}", context.getRequiredTestMethod());
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		log.info("Finished Test: {}", extensionContext.getRequiredTestMethod().getName());
 	}
 
 	@Override
-	public void afterEach(ExtensionContext context) throws Exception {
-		log.info("Finished Test {}", context.getRequiredTestMethod());
+	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+		log.info("Starting Test {}", extensionContext.getRequiredTestMethod().getName());
 	}
+
 }

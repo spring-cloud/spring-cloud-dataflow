@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link DefaultEnvironmentPostProcessor}.
@@ -31,32 +30,41 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @auhor Chris Bono
  * @author Corneil du Plessis
  */
-public class DefaultEnvironmentPostProcessorTests {
+class DefaultEnvironmentPostProcessorTests {
 
-	private static final String MANAGEMENT_CONTEXT_PATH = "management.contextPath";
-
-	private static final String CONTRIBUTED_PATH = "/bar";
+	private static final String MANAGEMENT_CONTEXT_PATH = "management.server.base-path";
 
 	@Test
-	public void testDefaultsBeingContributedByServerModule() throws Exception {
+	void defaultsAreContributedByServerModule() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class, "--server.port=0",
 				"--spring.main.allow-bean-definition-overriding=true",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration")) {
-			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
-			assertEquals(CONTRIBUTED_PATH, cp);
+
+			// this one comes from <test>/resources/dataflow-server.yml
+			assertThat(ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH)).isEqualTo("/foo");
+
+			// this one comes from dataflow-server-defaults.yml (we use 'spring.flyway.enabled' as the indicator)
+			assertThat(ctx.getEnvironment().getProperty("spring.flyway.enabled", Boolean.class)).isTrue();
 		}
 	}
 
 	@Test
-	public void testOverridingDefaultsWithAConfigFile() {
+	void defaultsCanBeOverridden() {
 		try (ConfigurableApplicationContext ctx = SpringApplication.run(EmptyDefaultTestApplication.class,
-				"--spring.config.name=test", "--server.port=0",
+				//"--spring.profiles.active=test",
+				"--server.port=0",
+				"--spring.config.name=test",
+				"--spring.flyway.enabled=false",
 				"--spring.main.allow-bean-definition-overriding=true",
 				"--spring.cloud.dataflow.server.profileapplicationlistener.ignore=true",
 				"--spring.autoconfigure.exclude=org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration,org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration")) {
-			String cp = ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH);
-			assertEquals(cp, "/foo");
-			assertNotNull(ctx.getEnvironment().getProperty("spring.flyway.locations[0]"));
+
+			// this one comes from <test>/resources/test.yml and overrides the entry from <test>/resources/dataflow-server.yml
+			assertThat(ctx.getEnvironment().getProperty(MANAGEMENT_CONTEXT_PATH)).isEqualTo("/bar");
+
+			// sys props overrides this one from dataflow-server-defaults.yml
+			assertThat(ctx.getEnvironment().getProperty("spring.flyway.enabled", Boolean.class)).isFalse();
+
 		}
 	}
 }

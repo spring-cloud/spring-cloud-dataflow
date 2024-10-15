@@ -20,15 +20,16 @@ import java.util.concurrent.Executor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
-import org.springframework.boot.task.TaskExecutorBuilder;
+import org.springframework.boot.task.ThreadPoolTaskExecutorBuilder;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 
@@ -41,7 +42,7 @@ import static org.springframework.cloud.dataflow.server.config.DataflowAsyncAuto
  *
  * @author Tobias Soloschenko
  */
-@Configuration(proxyBeanMethods = false)
+@AutoConfiguration
 @ConditionalOnBean({EnableDataFlowServerConfiguration.Marker.class})
 @ConditionalOnProperty(prefix = ASYNC_PROPS_PREFIX, name = "enabled", havingValue = "true")
 @AutoConfigureAfter(TaskExecutionAutoConfiguration.class)
@@ -56,9 +57,9 @@ public class DataflowAsyncAutoConfiguration implements AsyncConfigurer {
 
 	private static final String THREAD_NAME_PREFIX = "scdf-async-";
 
-	private final TaskExecutorBuilder taskExecutorBuilder;
+	private final ThreadPoolTaskExecutorBuilder taskExecutorBuilder;
 
-	public DataflowAsyncAutoConfiguration(TaskExecutorBuilder taskExecutorBuilder) {
+	public DataflowAsyncAutoConfiguration(ThreadPoolTaskExecutorBuilder taskExecutorBuilder) {
 		this.taskExecutorBuilder = taskExecutorBuilder;
 	}
 

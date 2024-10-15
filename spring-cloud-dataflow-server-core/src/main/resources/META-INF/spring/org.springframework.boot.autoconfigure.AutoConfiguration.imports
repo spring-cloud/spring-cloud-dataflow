@@ -1,0 +1,4 @@
+org.springframework.cloud.dataflow.server.config.DataFlowControllerAutoConfiguration
+org.springframework.cloud.dataflow.server.config.DataFlowServerAutoConfiguration
+org.springframework.cloud.dataflow.server.config.DataflowAsyncAutoConfiguration
+org.springframework.cloud.dataflow.server.config.SpringDocAutoConfiguration

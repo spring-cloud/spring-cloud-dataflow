@@ -5,15 +5,20 @@ on:
   schedule:
     - cron: '0 6 * * 1'
 
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 jobs:
   test:
     name: Security IT
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
     - uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'liberica'
     - uses: jvalkeal/setup-maven@v1
       with:
@@ -26,17 +31,14 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Run Security IT
-      env:
-        ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-        ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      shell: bash
       run: |
-        mvn clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am
-        mvn \
-          -s .settings.xml \
+        ./mvnw clean install -DskipTests -T 1C -s .settings.xml -pl spring-cloud-dataflow-server -am  -B --no-transfer-progress
+        ./mvnw -s .settings.xml \
           -pl spring-cloud-dataflow-server \
           -Dgroups=oauth \
           -Pfailsafe \
-          --batch-mode \
+          --batch-mode --no-transfer-progress \
           test
     - name: Test Report
       uses: dorny/test-reporter@v1

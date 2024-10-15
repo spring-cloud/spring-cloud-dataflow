@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.junit5;
 
-import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthChecks.toHaveAllPortsOpen;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +26,8 @@ import java.util.Map.Entry;
 import org.springframework.cloud.dataflow.common.test.docker.compose.DockerComposeRule;
 import org.springframework.cloud.dataflow.common.test.docker.compose.DockerComposeRule.Builder;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
+
+import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthChecks.toHaveAllPortsOpen;
 
 /**
  *

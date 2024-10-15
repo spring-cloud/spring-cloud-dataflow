@@ -2666,7 +2666,7 @@ include::{snippets}/job-executions-documentation/job-restart/path-parameters.ado
 [[api-guide-resources-job-executions-restart-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/job-restart/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/job-restart/query-parameters.adoc[]
 
 
 

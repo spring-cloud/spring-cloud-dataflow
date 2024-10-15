@@ -15,8 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +22,8 @@ import java.util.Set;
 
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
+
+import static java.util.stream.Collectors.toSet;
 
 public class ContainerCache {
 

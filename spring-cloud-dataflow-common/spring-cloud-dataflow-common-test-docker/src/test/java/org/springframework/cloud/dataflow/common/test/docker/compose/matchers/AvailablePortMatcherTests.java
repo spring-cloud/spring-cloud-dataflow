@@ -15,16 +15,18 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.matchers;
 
-import static java.util.Collections.emptyList;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.AvailablePortMatcher.areAvailable;
-
 import java.util.Arrays;
 import java.util.List;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
+
+import static java.util.Collections.emptyList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.cloud.dataflow.common.test.docker.compose.matchers.AvailablePortMatcher.areAvailable;
 
 public class AvailablePortMatcherTests {
 

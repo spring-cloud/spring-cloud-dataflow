@@ -21,7 +21,6 @@ import java.util.List;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistrationException;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,10 +69,9 @@ public interface AppRegistryService {
 	 * @param version Version of the AppRegistration to save
 	 * @param uri Resource uri of the AppRegistration to save
 	 * @param metadataUri metadata of the AppRegistration to save
-	 * @param bootVersion Spring Boot schema version indicating Task 2, Batch 4 or Task 3, Batch 5
 	 * @return the saved AppRegistration
 	 */
-	AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri, AppBootSchemaVersion bootVersion);
+	AppRegistration save(String name, ApplicationType type, String version, URI uri, URI metadataUri);
 
 	/**
 	 * Deletes an {@link AppRegistration}. If the {@link AppRegistration} does not exist, a

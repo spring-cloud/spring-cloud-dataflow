@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2019 the original author or authors.
+ * Copyright 2015-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.context.config.ConfigDataEnvironmentPostProcessor;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -48,6 +49,16 @@ import org.springframework.core.io.Resource;
 public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultEnvironmentPostProcessor.class);
+
+	/**
+	 * The order the processor is invoked.
+	 * <p>Must execute after the {@link ConfigDataEnvironmentPostProcessor} because they both use the {@code addLast}
+	 * API to add their property source and the default EPP should have lower precedence.
+	 * <p>Must execute before the {@code ConfigDataMissingEnvironmentPostProcessor} because the legacy config data
+	 * flag is set in the default dataflow properties and without this flag the server will not start. The config data
+	 * missing has an order of {@code ConfigDataEnvironmentPostProcessor.ORDER + 1000} so we simply anchor below that.
+	 */
+	public static final int ORDER = ConfigDataEnvironmentPostProcessor.ORDER + 900;
 
 	private final Resource serverResource = new ClassPathResource("/dataflow-server.yml");
 
@@ -106,6 +117,6 @@ public class DefaultEnvironmentPostProcessor implements EnvironmentPostProcessor
 
 	@Override
 	public int getOrder() {
-		return 0;
+		return ORDER;
 	}
 }

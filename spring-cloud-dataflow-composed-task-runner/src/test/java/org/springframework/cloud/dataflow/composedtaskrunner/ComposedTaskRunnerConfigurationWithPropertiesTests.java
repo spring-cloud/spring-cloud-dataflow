@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -32,8 +31,6 @@ import org.springframework.batch.core.step.tasklet.TaskletStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfiguration;
-import org.springframework.boot.test.system.CapturedOutput;
-import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.cloud.common.security.CommonSecurityAutoConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.configuration.DataFlowTestConfiguration;
 import org.springframework.cloud.dataflow.composedtaskrunner.properties.ComposedTaskProperties;
@@ -57,14 +54,13 @@ import static org.mockito.Mockito.verify;
 		DataFlowTestConfiguration.class, StepBeanDefinitionRegistrar.class,
 		ComposedTaskRunnerConfiguration.class,
 		StepBeanDefinitionRegistrar.class})
-@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC","max-wait-time=1010",
-		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS ,
+@TestPropertySource(properties = {"graph=ComposedTest-AAA && ComposedTest-BBB && ComposedTest-CCC", "max-wait-time=1010",
+		"composed-task-properties=" + ComposedTaskRunnerConfigurationWithPropertiesTests.COMPOSED_TASK_PROPS,
 		"interval-time-between-checks=1100", "composed-task-arguments=--baz=boo --AAA.foo=bar BBB.que=qui",
-		"transaction-isolation-level=ISOLATION_READ_COMMITTED","spring.cloud.task.closecontext-enabled=true",
-		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest","max-start-wait-time=1011"})
-@EnableAutoConfiguration(exclude = { CommonSecurityAutoConfiguration.class})
-@ExtendWith(OutputCaptureExtension.class)
-public class ComposedTaskRunnerConfigurationWithPropertiesTests {
+		"transaction-isolation-level=ISOLATION_READ_COMMITTED", "spring.cloud.task.closecontext-enabled=true",
+		"dataflow-server-uri=https://bar", "spring.cloud.task.name=ComposedTest", "max-start-wait-time=1011"})
+@EnableAutoConfiguration(exclude = {CommonSecurityAutoConfiguration.class})
+class ComposedTaskRunnerConfigurationWithPropertiesTests {
 
 	@Autowired
 	private JobRepository jobRepository;
@@ -82,16 +78,14 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 	ApplicationContext context;
 
 	protected static final String COMPOSED_TASK_PROPS = "app.ComposedTest-AAA.format=yyyy, "
-		+ "app.ComposedTest-AAA.spring.cloud.task.table-prefix=BOOT3_,"
-		+ "app.ComposedTest-BBB.spring.cloud.task.tableprefix=BOOT3_,"
-		+ "app.ComposedTest-CCC.spring.cloud.task.tablePrefix=BOOT3_,"
 		+ "app.ComposedTest-BBB.format=mm, "
 		+ "deployer.ComposedTest-AAA.memory=2048m";
 
 	@Test
 	@DirtiesContext
-	public void testComposedConfiguration(CapturedOutput outputCapture) throws Exception {
+	void composedConfiguration() throws Exception {
 		assertThat(composedTaskProperties.isSkipTlsCertificateVerification()).isFalse();
+
 
 		JobExecution jobExecution = this.jobRepository.createJobExecution(
 				"ComposedTest", new JobParameters());
@@ -104,8 +98,6 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		Map<String, String> props = new HashMap<>(1);
 		props.put("format", "yyyy");
 		props.put("memory", "2048m");
-		props.put("spring.cloud.task.table-prefix", "BOOT3_");
-
 		assertThat(composedTaskProperties.getComposedTaskProperties()).isEqualTo(COMPOSED_TASK_PROPS);
 		assertThat(composedTaskProperties.getMaxWaitTime()).isEqualTo(1010);
 		assertThat(composedTaskProperties.getMaxStartWaitTime()).isEqualTo(1011);
@@ -117,16 +109,8 @@ public class ComposedTaskRunnerConfigurationWithPropertiesTests {
 		List<String> args = new ArrayList<>(2);
 		args.add("--baz=boo --foo=bar");
 		args.add("--spring.cloud.task.parent-execution-id=1");
-		args.add("--spring.cloud.task.parent-schema-target=boot2");
 		Assert.notNull(job.getJobParametersIncrementer(), "JobParametersIncrementer must not be null.");
 
 		verify(taskOperations).launch("ComposedTest-AAA", props, args);
-
-		String logEntries = outputCapture.toString();
-		assertThat(logEntries).contains("taskExplorerContainer:adding:ComposedTest-AAA:BOOT3_");
-
-		assertThat(logEntries).contains("taskExplorerContainer:adding:ComposedTest-BBB:BOOT3_");
-		assertThat(logEntries).contains("taskExplorerContainer:adding:ComposedTest-CCC:BOOT3_");
-
 	}
 }

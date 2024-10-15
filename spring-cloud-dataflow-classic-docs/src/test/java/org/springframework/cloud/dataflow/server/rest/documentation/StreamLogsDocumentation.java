@@ -19,7 +19,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -27,7 +27,6 @@ import org.springframework.cloud.skipper.domain.LogInfo;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -37,11 +36,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@TestMethodOrder(MethodName.class)
-public class StreamLogsDocumentation extends BaseDocumentation {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class StreamLogsDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getLogsByStreamName() throws Exception {
+	void getLogsByStreamName() throws Exception {
 		LogInfo logInfo = new LogInfo();
 		Map<String, String> logs = new HashMap<>();
 		logs.put("ticktock-log-v1", "Logs-log");
@@ -55,7 +54,7 @@ public class StreamLogsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getLogsByAppName() throws Exception {
+	void getLogsByAppName() throws Exception {
 		LogInfo logInfo = new LogInfo();
 		Map<String, String> logs = new HashMap<>();
 		logs.put("ticktock-log-v1", "Logs-log");

@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 				"kubernetes_service_host=foo",
 				"spring.cloud.dataflow.features.schedules-enabled=true"
 		})
-public class KubernetesSchedulerTests {
+class KubernetesSchedulerTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
@@ -51,7 +51,7 @@ public class KubernetesSchedulerTests {
 	SchedulerService schedulerService;
 
 	@Test
-	public void schedulerServiceCreated() {
+	void schedulerServiceCreated() {
 		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Kubernetes");

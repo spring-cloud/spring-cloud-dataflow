@@ -21,16 +21,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 import org.hibernate.annotations.Type;
 
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
 import org.springframework.cloud.skipper.SkipperException;
 import org.springframework.cloud.skipper.domain.AbstractEntity;
 
@@ -53,7 +53,7 @@ public class AppDeployerData extends AbstractEntity {
 
 	// Store deployment Ids associated with the given release.
 	@Lob
-	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
+	@Type(DatabaseAwareLobUserType.class)
 	private String deploymentData;
 
 	public AppDeployerData() {

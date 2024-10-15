@@ -7,11 +7,16 @@ on:
         description: 'Build Zoo Handler Payload'
         required: true
 
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
 jobs:
   ghrelease:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - uses: jvalkeal/setup-maven@v1
         with:
           maven-version: 3.8.8
@@ -44,10 +49,10 @@ jobs:
             --draft \
             --title "Spring Cloud Data Flow $BUILD_ZOO_HANDLER_spring_cloud_dataflow_version" \
             --notes-file "${{runner.temp}}/release_notes.md"
-          # retrieve spring-cloud-dataflow-package and upload to github release          
-          ./mvnw -s .settings.xml build-helper:parse-version versions:set -DskipResolution=true -DprocessAllModules=true -DgenerateBackupPoms=false -Dartifactory.publish.artifacts=false -DnewVersion=$PACKAGE_VERSION
+          # retrieve spring-cloud-dataflow-package and upload to github release
+          ./mvnw -s .settings.xml build-helper:parse-version versions:set -DskipResolution=true -DprocessAllModules=true -DgenerateBackupPoms=false -Dartifactory.publish.artifacts=false -DnewVersion=$PACKAGE_VERSION  -B --no-transfer-progress
           ./spring-cloud-dataflow-package/set-package-version.sh
-          ./mvnw -s .settings.xml package -pl spring-cloud-dataflow-package          
+          ./mvnw -s .settings.xml package -pl spring-cloud-dataflow-package  -B --no-transfer-progress          
           PACKAGE_FILE="./spring-cloud-dataflow-package/target/spring-cloud-dataflow-oss-install-${PACKAGE_VERSION}.zip"          
           gh release upload v$PACKAGE_VERSION $PACKAGE_FILE --clobber
         # zoo success

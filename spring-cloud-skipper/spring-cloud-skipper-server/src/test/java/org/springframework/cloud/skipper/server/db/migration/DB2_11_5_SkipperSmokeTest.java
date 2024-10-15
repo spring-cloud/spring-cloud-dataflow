@@ -25,6 +25,7 @@ import org.springframework.cloud.dataflow.server.db.DB2_11_5_ContainerSupport;
  * Basic database schema and JPA tests for DB2.
  *
  * @author Corneil du Plessis
+ * @author Corneil du Plessis
  */
 @EnabledIfEnvironmentVariable(named = "ENABLE_DB2", matches = "true", disabledReason = "Container is too big")
 @Tag("DB2")

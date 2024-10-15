@@ -15,11 +15,13 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
+
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.dataflow.server.service.TaskJobService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
@@ -28,8 +30,6 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,42 +45,31 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @ExposesResourceFor(TaskExecutionThinResource.class)
 public class TaskExecutionThinController {
 
-	private final AggregateTaskExplorer explorer;
+	private final DataflowTaskExplorer explorer;
 	private final TaskExecutionThinResourceAssembler resourceAssembler;
 
-	private final TaskJobService taskJobService;
-
-	public TaskExecutionThinController(AggregateTaskExplorer explorer, TaskJobService taskJobService) {
+	public TaskExecutionThinController(DataflowTaskExplorer explorer) {
 		this.explorer = explorer;
-		this.taskJobService = taskJobService;
 		this.resourceAssembler = new TaskExecutionThinResourceAssembler();
 	}
 
 	@GetMapping(produces = "application/json")
 	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<TaskExecutionThinResource> listTasks(Pageable pageable, PagedResourcesAssembler<AggregateTaskExecution> pagedAssembler) {
-		Page<AggregateTaskExecution> page = explorer.findAll(pageable, true);
-		taskJobService.populateComposeTaskRunnerStatus(page.getContent());
-		return pagedAssembler.toModel(page, resourceAssembler);
+	public PagedModel<TaskExecutionThinResource> listTasks(Pageable pageable, PagedResourcesAssembler<ThinTaskExecution> pagedAssembler) {
+		Page<TaskExecution> page = explorer.findAll(pageable);
+		Page<ThinTaskExecution> thinTaskExecutions = new PageImpl<>(page.stream().map(ThinTaskExecution::new).toList(), pageable, page.getTotalElements());
+		explorer.populateCtrStatus(thinTaskExecutions.getContent());
+		return pagedAssembler.toModel(thinTaskExecutions, resourceAssembler);
 	}
 
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
-	@ResponseStatus(HttpStatus.OK)
-	public PagedModel<TaskExecutionThinResource> retrieveTasksByName(@RequestParam("name") String taskName,
-			Pageable pageable, PagedResourcesAssembler<AggregateTaskExecution> pagedAssembler) {
-		Page<AggregateTaskExecution> page = this.explorer.findTaskExecutionsByName(taskName, pageable);
-		taskJobService.populateComposeTaskRunnerStatus(page.getContent());
-		return pagedAssembler.toModel(page, resourceAssembler);
-	}
-
-	static class TaskExecutionThinResourceAssembler extends RepresentationModelAssemblerSupport<AggregateTaskExecution, TaskExecutionThinResource> {
+	static class TaskExecutionThinResourceAssembler extends RepresentationModelAssemblerSupport<ThinTaskExecution, TaskExecutionThinResource> {
 		public TaskExecutionThinResourceAssembler() {
 			super(TaskExecutionThinController.class, TaskExecutionThinResource.class);
 		}
 		@Override
-		public TaskExecutionThinResource toModel(AggregateTaskExecution entity) {
+		public TaskExecutionThinResource toModel(ThinTaskExecution entity) {
 			TaskExecutionThinResource resource = new TaskExecutionThinResource(entity);
-			resource.add(linkTo(methodOn(TaskExecutionController.class).view(resource.getExecutionId(), resource.getSchemaTarget())).withSelfRel());
+			resource.add(linkTo(methodOn(TaskExecutionController.class).view(resource.getExecutionId())).withSelfRel());
 			resource.add(linkTo(methodOn(TaskDefinitionController.class).display(resource.getTaskName(), true)).withRel("tasks/definitions"));
 			return resource;
 		}

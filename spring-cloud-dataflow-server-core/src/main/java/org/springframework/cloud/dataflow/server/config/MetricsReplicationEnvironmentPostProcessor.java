@@ -18,11 +18,8 @@ package org.springframework.cloud.dataflow.server.config;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import io.micrometer.prometheus.rsocket.autoconfigure.PrometheusRSocketClientProperties;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -32,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.influx.InfluxProperties;
 import org.springframework.boot.actuate.autoconfigure.metrics.export.prometheus.PrometheusProperties;
-import org.springframework.boot.actuate.autoconfigure.metrics.export.wavefront.WavefrontProperties;
+import org.springframework.boot.actuate.autoconfigure.wavefront.WavefrontProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.cloud.dataflow.core.RelaxedNames;
@@ -49,7 +46,7 @@ import org.springframework.util.StringUtils;
  * spring.cloud.dataflow.applicationProperties.stream.* and spring.cloud.dataflow.applicationProperties.task.* as well.
  * This allows to reuse the same metrics configuration for all deployed stream applications and launched tasks.
  * <br>
- * The post-processor also automatically computes some of the the Monitoring Dashboard properties from the server's
+ * The post-processor also automatically computes some Monitoring Dashboard properties from the server's
  * metrics properties.
  * <br>
  * Only the properties not explicitly set are updated. That means that you can explicitly set any monitoring dashboard or
@@ -67,7 +64,6 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	private static final String COMMON_APPLICATION_PREFIX = retrievePropertyPrefix(CommonApplicationProperties.class);
 	private static final String COMMON_STREAM_PROPS_PREFIX = COMMON_APPLICATION_PREFIX + ".stream.";
 	private static final String COMMON_TASK_PROPS_PREFIX = COMMON_APPLICATION_PREFIX + ".task.";
-	private static final Pattern METRIC_PROP_NAME_PATTERN = Pattern.compile("(management\\.)(metrics\\.export\\.)(\\w+\\.)(.+)");
 
 	@Override
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
@@ -91,9 +87,6 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 							String serverPropValue = environment.getProperty(metricsPropName);
 							ensurePropIsReplicatedExactlyOnceToCommonStreamsAndTasksProps(metricsPropName, serverPropValue,
 									environment, additionalProperties);
-							metricsPropertyNameInBoot3(metricsPropName).ifPresent((metricsPropNameBoot3) ->
-									ensurePropIsReplicatedExactlyOnceToCommonStreamsAndTasksProps(metricsPropNameBoot3,
-											serverPropValue, environment, additionalProperties));
 						}
 						catch (Throwable throwable) {
 							logger.error("Failed with replicating {}, because of {}", metricsPropName,
@@ -137,46 +130,34 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 		}
 	}
 
-	private Optional<String> metricsPropertyNameInBoot3(String metricsPropertyName) {
-		// Handle the Spring Boot 3 form of the metrics property
-		//
-		// Boot 2.x: 'management.metrics.export.<meter-registry>.<property-path>'
-		// Boot 3.x: 'management.<meter-registry>.metrics.export.<property-path>'
-		//
-		// Regex breaks the original into 4 groups:
-		// 			1			  2 			    3				4
-		// 	  (management.)(metrics.export.)(<meter-registry>.)(<property-path>)
-		//
-		// We simply swap groups 2 and 3 to get Boot3 version of the property
-		//
-		Matcher matcher = METRIC_PROP_NAME_PATTERN.matcher(metricsPropertyName);
-		if (matcher.matches()) {
-			return Optional.of(matcher.group(1) + matcher.group(3) + matcher.group(2) + matcher.group(4));
-		}
-		return Optional.empty();
-	}
-
 	/**
-	 * Checks if the management.metrics.export.<meter-registry>.enabled property is set to ture for the provided
-	 * meterRegistryPropertyClass.
+	 * Checks if the 'management.<meter-registry>.metrics.export.enabled' property is set to true for the specified
+	 * meter registry.
 	 *
-	 * @param meterRegistryPropertyClass Property class that follows Boot's meter-registry properties convention.
-	 * @param environment Spring configuration environment.
-	 * @return Returns true if the provide class contains {@link ConfigurationProperties} prefix of type:
-	 *         management.metrics.export.<meter-registry> and the management.metrics.export.<meter-registry>.enabled
-	 *         property is set to true. Returns false otherwise.
+	 * @param meterRegistryConfigPropsClass the SpringBoot configuration properties for the meter registry
+	 * @param environment the application environment
+	 * @return whether the 'management.<meter-registry>.metrics.export.enabled' property is set to true for the
+	 * specified meter registry class.
 	 */
-	private boolean isMetricsRegistryEnabled(Class<?> meterRegistryPropertyClass, ConfigurableEnvironment environment) {
-		String metricsPrefix = retrievePropertyPrefix(meterRegistryPropertyClass);
-		return StringUtils.hasText(metricsPrefix) &&
-				environment.getProperty(metricsPrefix + ".enabled", Boolean.class, false);
+	private boolean isMetricsRegistryEnabled(Class<?> meterRegistryConfigPropsClass, ConfigurableEnvironment environment) {
+		String metricsPrefix = retrievePropertyPrefix(meterRegistryConfigPropsClass);
+		if (!StringUtils.hasText(metricsPrefix)) {
+			logger.warn("Meter registry properties class %s is not a @ConfigurationProperties".formatted(meterRegistryConfigPropsClass));
+			return false;
+		}
+		// Some metrics props have their 'metrics.export' portion factored into nested classes (e.g. Wavefront) but
+		// some metrics props still contain 'metrics.export' in their config props prefix (e.g. Influx).
+		if (!metricsPrefix.endsWith(".metrics.export")) {
+			metricsPrefix += ".metrics.export";
+		}
+		return environment.getProperty(metricsPrefix + ".enabled", Boolean.class, false);
 	}
 
 	/**
-	 * Retrieve the prefix name from the ConfigurationProperties annotation if present.
-	 * Return null otherwise.
-	 * @param metricsPropertyClass Property class annotated by the {@link ConfigurationProperties} annotation.
-	 * @return Returns the ConfigurationProperties the non empty prefix or value.
+	 * Get the value of the {@code prefix} attribute of the {@link ConfigurationProperties} that the property class is
+	 * annotated with.
+	 * @param metricsPropertyClass property class annotated with the config properties
+	 * @return return the value for the prefix of the config properties or null
 	 */
 	private static String retrievePropertyPrefix(Class<?> metricsPropertyClass) {
 		if (metricsPropertyClass.isAnnotationPresent(ConfigurationProperties.class)) {
@@ -197,14 +178,14 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 				logger.info("Dashboard type:" + MonitoringDashboardType.WAVEFRONT);
 				properties.setProperty(MONITORING_DASHBOARD_PREFIX + ".type", MonitoringDashboardType.WAVEFRONT.name());
 				if (!environment.containsProperty(MONITORING_DASHBOARD_PREFIX + ".wavefront.source")
-						&& environment.containsProperty("management.metrics.export.wavefront.source")) {
+						&& environment.containsProperty("management.wavefront.source")) {
 					properties.setProperty(MONITORING_DASHBOARD_PREFIX + ".wavefront.source",
-							environment.getProperty("management.metrics.export.wavefront.source"));
+							environment.getProperty("management.wavefront.source"));
 				}
 				if (!environment.containsProperty(MONITORING_DASHBOARD_PREFIX + ".url") &&
-						environment.containsProperty("management.metrics.export.wavefront.uri")) {
+						environment.containsProperty("management.wavefront.uri")) {
 					properties.setProperty(MONITORING_DASHBOARD_PREFIX + ".url",
-							environment.getProperty("management.metrics.export.wavefront.uri"));
+							environment.getProperty("management.wavefront.uri"));
 				}
 			}
 			else if (isMetricsRegistryEnabled(PrometheusProperties.class, environment)
@@ -232,9 +213,9 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 			Class<?> propertyClass, Consumer<String> propertyReplicator) {
 		try {
 			if (isMetricsRegistryEnabled(propertyClass, environment)) {
-				// Note: For some meter registries, the management.metrics.export.<meter-registry>.enabled property
+				// Note: For some meter registries, the management.<meter-registry>.metrics.export.enabled property
 				// is not defined as explicit field. We need to handle it explicitly.
-				propertyReplicator.accept(retrievePropertyPrefix(propertyClass) + ".enabled");
+				propertyReplicator.accept(retrievePropertyPrefix(propertyClass) + ".metrics.export.enabled");
 				traversePropertyClassFields(propertyClass, propertyReplicator);
 			}
 		}
@@ -280,13 +261,16 @@ public class MetricsReplicationEnvironmentPostProcessor implements EnvironmentPo
 	private void traverseClassFieldsRecursively(Class<?> metricsPropertyClass, String metricsPrefix,
 			Consumer<String> metricsReplicationHandler) {
 		for (Field field : metricsPropertyClass.getDeclaredFields()) {
-			if (field.getType().isMemberClass() && Modifier.isStatic(field.getType().getModifiers())) {
+			var isStaticMemberClass = field.getType().isMemberClass() && Modifier.isStatic(field.getType().getModifiers());
+			if (isStaticMemberClass && !field.getType().isEnum()) {
 				// traverse the inner class recursively.
-				String innerMetricsPrefix = metricsPrefix + "." + RelaxedNames.camelCaseToHyphenLower(field.getName());
+				String innerMetricsPrefix = metricsPrefix + "."
+						+ RelaxedNames.camelCaseToHyphenLower(field.getName());
 				traverseClassFieldsRecursively(field.getType(), innerMetricsPrefix, metricsReplicationHandler);
 			}
 			else {
-				metricsReplicationHandler.accept(metricsPrefix + "." + RelaxedNames.camelCaseToHyphenLower(field.getName()));
+				metricsReplicationHandler
+					.accept(metricsPrefix + "." + RelaxedNames.camelCaseToHyphenLower(field.getName()));
 			}
 		}
 	}

@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.shell.config;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -26,84 +25,74 @@ import org.springframework.cloud.dataflow.shell.TargetHolder;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class DataFlowShellTests {
+class DataFlowShellTests {
 
 	@Test
-	public void testHasAccessWithNoOperation() {
+	void hasAccessWithNoOperation() {
 		final DataFlowShell dataFlowShell = new DataFlowShell();
 		dataFlowShell.setDataFlowOperations(null);
 
-		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM)).isFalse();
 
 	}
 
 	@Test
-	public void testHasAccessWithOperations() {
+	void hasAccessWithOperations() {
 		final Target target = new Target("https://myUri");
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM)).isTrue();
 
 	}
 
 	@Test
-	public void testHasAccessWithOperationsAndNullRole() {
+	void hasAccessWithOperationsAndNullRole() {
 		final Target target = new Target("https://myUri");
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(null, OpsType.STREAM)).isTrue();
 
 	}
 
 	@Test
-	public void testHasAccessWithOperationsAndAuthenticationEnabledButNotAuthenticated() {
+	void hasAccessWithOperationsAndAuthenticationEnabledButNotAuthenticated() {
 		final Target target = new Target("https://myUri");
 		target.setAuthenticationEnabled(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM)).isFalse();
 
 	}
 
 	@Test
-	public void testHasAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
+	void hasAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
 		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.VIEW);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertTrue(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM)).isTrue();
 	}
 
 	@Test
-	public void testHasNotAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
+	void hasNotAccessWithOperationsAndAuthenticationEnabledAndAuthenticated() {
 		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
 		target.setAuthenticationEnabled(true);
 		target.setAuthenticated(true);
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM)).isFalse();
 	}
 
 	@Test
-	public void testHasWrongRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
-
-		final Target target = new Target("https://myUri", "username", "password", true);
-		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
-		target.setAuthenticationEnabled(true);
-		target.setAuthenticated(true);
-
-		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertFalse(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM));
-	}
-
-	@Test
-	public void testHasNullRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
+	void hasWrongRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
 
 		final Target target = new Target("https://myUri", "username", "password", true);
 		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
@@ -111,7 +100,19 @@ public class DataFlowShellTests {
 		target.setAuthenticated(true);
 
 		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
-		Assertions.assertTrue(dataFlowShell.hasAccess(null, OpsType.STREAM));
+		assertThat(dataFlowShell.hasAccess(RoleType.VIEW, OpsType.STREAM)).isFalse();
+	}
+
+	@Test
+	void hasNullRoleWithOperationsAndAuthenticationEnabledAndAuthenticated() {
+
+		final Target target = new Target("https://myUri", "username", "password", true);
+		target.getTargetCredentials().getRoles().add(RoleType.CREATE);
+		target.setAuthenticationEnabled(true);
+		target.setAuthenticated(true);
+
+		final DataFlowShell dataFlowShell = prepareDataFlowShellWithStreamOperations(target);
+		assertThat(dataFlowShell.hasAccess(null, OpsType.STREAM)).isTrue();
 	}
 
 	private DataFlowShell prepareDataFlowShellWithStreamOperations(Target target) {

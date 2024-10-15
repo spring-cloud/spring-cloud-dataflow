@@ -57,7 +57,6 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,10 +68,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
+
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class RuntimeStreamsControllerTests {
+class RuntimeStreamsControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -89,7 +89,7 @@ public class RuntimeStreamsControllerTests {
 	private SkipperClient skipperClient;
 
 	@BeforeEach
-	public void setupMocks() throws Exception {
+	void setupMocks() throws Exception {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 		this.appRegistrationRepository.deleteAll();
@@ -157,7 +157,7 @@ public class RuntimeStreamsControllerTests {
 	}
 
 	@Test
-	public void testMultiStreamNames() throws Exception {
+	void multiStreamNames() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/streams/ticktock1,ticktock2,ticktock3")
 						.accept(MediaType.APPLICATION_JSON))
@@ -189,7 +189,7 @@ public class RuntimeStreamsControllerTests {
 
 
 	@Test
-	public void testPagedStreamNames() throws Exception {
+	void pagedStreamNames() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/streams?page=0&size=2")
 						.accept(MediaType.APPLICATION_JSON))
@@ -213,7 +213,7 @@ public class RuntimeStreamsControllerTests {
 	}
 
 	@Test
-	public void testGetResponseForAllRunningStreams() throws Exception {
+	void getResponseForAllRunningStreams() throws Exception {
 		this.mockMvc.perform(
 				get("/runtime/streams")
 						.accept(MediaType.APPLICATION_JSON))
@@ -243,7 +243,7 @@ public class RuntimeStreamsControllerTests {
 	}
 
 	@Test
-	public void testGetResponseByStreamNames() throws Exception {
+	void getResponseByStreamNames() throws Exception {
 		mockMvc.perform(
 				get("/runtime/streams")
 						.param("names", "ticktock1,ticktock2,ticktock3")

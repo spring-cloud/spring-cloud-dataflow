@@ -67,6 +67,7 @@ set -o pipefail
   -Dspring.cloud.dataflow.client.serverUri=$DATAFLOW_IP \
   -Dspring.cloud.dataflow.client.skipSslValidation=true \
   -Dtest=!DataFlowAT#streamAppCrossVersion \
+   -B --no-transfer-progress \
   -X clean test verify $EXTRA | tee -a build.log | grep -v -F "DEBUG"
-./mvnw surefire-report:failsafe-report-only
+./mvnw surefire-report:failsafe-report-only  -B --no-transfer-progress
 popd > /dev/null

@@ -30,7 +30,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -38,10 +37,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class ListDocumentation extends BaseDocumentation {
+class ListDocumentation extends BaseDocumentation {
 
 	@Test
-	public void listRelease() throws Exception {
+	void listRelease() throws Exception {
 		List<Release> releaseList = new ArrayList<>();
 		releaseList.add(createTestRelease());
 		when(this.releaseService.list()).thenReturn(releaseList);
@@ -108,7 +107,7 @@ public class ListDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listReleasesByReleaseName() throws Exception {
+	void listReleasesByReleaseName() throws Exception {
 		Release release = createTestRelease();
 		List<Release> releaseList = new ArrayList<>();
 		releaseList.add(release);

@@ -15,21 +15,20 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.junit5;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerExecutionException;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerCompose;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeInfo;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 @DockerCompose(locations = {"classpath:org/springframework/cloud/dataflow/common/test/docker/junit5/docker-compose-cp1.yml"})
-public class DockerCompose3Tests {
+class DockerCompose3Tests {
 
 	@Test
-	public void testCompose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
+	void compose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
 		assertThat(dockerComposeInfo).isNotNull();
 		assertThat(dockerComposeInfo.id("").getRule()).isNotNull();
 		assertThat(dockerComposeInfo.id("").getRule().containers().container("testservice1")).isNotNull();

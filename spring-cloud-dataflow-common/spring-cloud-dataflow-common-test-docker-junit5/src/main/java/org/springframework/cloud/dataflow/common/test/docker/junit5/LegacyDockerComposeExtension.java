@@ -15,18 +15,18 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.junit5;
 
+import java.util.List;
+
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.DockerComposeRule;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.DockerComposeFiles;
 import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.ProjectName;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.ClusterWait;
 import org.springframework.cloud.dataflow.common.test.docker.compose.logging.LogCollector;
-
-import java.util.List;
-
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class LegacyDockerComposeExtension extends DockerComposeRule implements BeforeAllCallback, AfterAllCallback {
 

@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class ExecutionContextSerializationTests {
+class ExecutionContextSerializationTests {
 
 	@Test
-	public void testSerializationOfExecutionContext() throws IOException {
+	void serializationOfExecutionContext() throws IOException {
 		final ObjectMapper objectMapper = DataFlowTemplate.prepareObjectMapper(new ObjectMapper());
 
 		final ExecutionContext stepExecutionExecutionContext = new ExecutionContext();

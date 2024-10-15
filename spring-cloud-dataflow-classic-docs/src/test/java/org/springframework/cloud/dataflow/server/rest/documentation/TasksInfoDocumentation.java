@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -30,7 +30,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -40,26 +39,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-@TestMethodOrder(MethodName.class)
-public class TasksInfoDocumentation extends BaseDocumentation {
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class TasksInfoDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+	void setup() throws Exception {
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		createTaskDefinition("taskA");
 		createTaskDefinition("taskB");
 
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		destroyTaskDefinition("taskA");
 		destroyTaskDefinition("taskB");
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
 	@Test
-	public void getTaskExecutionsInfo() throws Exception {
+	void getTaskExecutionsInfo() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/info/executions?completed=false"))
 				.andExpect(status().isOk())

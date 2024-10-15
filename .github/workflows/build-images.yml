@@ -12,12 +12,9 @@ on:
         default: false
         description: 'Delete the image tags'
 
-    secrets:
-      DOCKERHUB_USERNAME:
-      DOCKERHUB_TOKEN:
-      GCR_JSON_KEY:
-      ARTIFACTORY_USERNAME:
-      ARTIFACTORY_PASSWORD:
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   # test templating before publishing a package
@@ -26,19 +23,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Load matrix
         id: matrix
         shell: bash
-        run: |
-          echo "Input version: ${{ inputs.version }}"
+        run: |          
           if [ "${{ inputs.version }}" == "" ]; then
-            ./mvnw help:evaluate -Dexpression=project.version -q
-            echo "VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
+            ./mvnw help:evaluate -Dexpression=project.version -s .settings.xml -B --no-transfer-progress > /dev/null
+            VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
+            echo "::notice::VERSION=$VERSION"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
+            echo "::notice::VERSION=${{ inputs.version }}"
             echo "VERSION=${{ inputs.version }}" >> $GITHUB_ENV
           fi          
           MATRIX=$(cat .github/workflows/images.json | jq -c)
@@ -58,9 +58,10 @@ jobs:
       group: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
       - name: Install pack
         uses: jvalkeal/build-zoo-handler@v0.0.4
@@ -81,9 +82,7 @@ jobs:
         shell: bash
         env:
           TAG: ${{ needs.prepare.outputs.version }}
-          DEFAULT_JDK: '11'
-          ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          DEFAULT_JDK: '17'
           DELETE_TAGS: ${{ inputs.delete-tags }}
         run: |
           .github/workflows/build-image.sh ${{ matrix.path }} ${{ matrix.image }} ${{ matrix.name }}
@@ -92,6 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
       - name: Login to docker.io
         uses: docker/login-action@v3
         with:

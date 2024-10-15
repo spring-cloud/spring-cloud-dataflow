@@ -35,14 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class DifferenceTests {
+class DifferenceTests {
 
 	private final SpringCloudDeployerApplicationManifestReader applicationManifestReader = new SpringCloudDeployerApplicationManifestReader();
 
 	private final ApplicationManifestDifferenceFactory applicationManifestDifferenceFactory = new ApplicationManifestDifferenceFactory();
 
 	@Test
-	public void versionDifference() {
+	void versionDifference() {
 		List<SpringCloudDeployerApplicationManifest> applicationManifestsV1 = getManifest("m1-v1.yml");
 
 		List<SpringCloudDeployerApplicationManifest> applicationManifestsV2 = getManifest("m1-v2.yml");
@@ -67,7 +67,7 @@ public class DifferenceTests {
 	}
 
 	@Test
-	public void appPropDifference() {
+	void appPropDifference() {
 		List<SpringCloudDeployerApplicationManifest> applicationManifestsV1 = getManifest("m2-v1.yml");
 
 		List<SpringCloudDeployerApplicationManifest> applicationManifestsV2 = getManifest("m2-v2.yml");
@@ -97,7 +97,7 @@ public class DifferenceTests {
 	}
 
 	@Test
-	public void deploymentPropDifference() {
+	void deploymentPropDifference() {
 		List<SpringCloudDeployerApplicationManifest> applicationManifestsV1 = getManifest("m3-v1.yml");
 
 		List<SpringCloudDeployerApplicationManifest> applicationManifestsV2 = getManifest("m3-v2.yml");

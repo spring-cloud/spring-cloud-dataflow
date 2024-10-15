@@ -18,7 +18,6 @@ package org.springframework.cloud.skipper.server.controller;
 import org.junit.jupiter.api.Test;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -26,10 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-public class RootControllerTests extends AbstractControllerTests {
+class RootControllerTests extends AbstractControllerTests {
 
 	@Test
-	public void indexUrlShouldRedirect() throws Exception {
+	void indexUrlShouldRedirect() throws Exception {
 		mockMvc.perform(get("/")).andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/api"));
 	}

@@ -15,9 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
@@ -27,6 +24,9 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.util.Assert;
+
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class DockerComposeFiles {
 

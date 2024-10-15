@@ -49,11 +49,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = { JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class })
-@EnableConfigurationProperties({ CommonApplicationProperties.class })
+@SpringBootTest(classes = {JobDependencies.class, PropertyPlaceholderAutoConfiguration.class, BatchProperties.class})
+@EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TaskLogsControllerTests {
+class TaskLogsControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -70,7 +70,7 @@ public class TaskLogsControllerTests {
 	private TaskPlatform taskPlatform;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() {
 		assertThat(this.launcherRepository.findByName("default")).isNull();
 		Launcher launcher = new Launcher("default", "local", taskLauncher);
 		launcherRepository.save(launcher);
@@ -80,7 +80,7 @@ public class TaskLogsControllerTests {
 	}
 
 	@Test
-	public void testGetCurrentExecutionLog() throws Exception {
+	void getCurrentExecutionLog() throws Exception {
 		when(taskLauncher.getLog("mytask1")).thenReturn("Log");
 		mockMvc.perform(get("/tasks/logs/mytask1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());

@@ -6,33 +6,35 @@ on:
       version:
         description: 'Version to publish'
         required: true
+env:
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/install-xmlutils
       - uses: actions/setup-java@v3
         with:
-          java-version: '8'
+          java-version: '17'
           distribution: 'liberica'
-      - uses: jvalkeal/setup-maven@v1
-        with:
-          maven-version: 3.8.8
-          maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-      - uses: jfrog/setup-jfrog-cli@v1
-        with:
-          version: 1.46.4
-        env:
-          JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-m2-
-
-#       target deploy repos
+      - uses: jvalkeal/setup-maven@v1
+        with:
+          maven-version: 3.8.8
+          maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+      - uses: jfrog/setup-jfrog-cli@v1
+        with:
+          version: 1.54.0
+        env:
+          JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
       - name: Configure JFrog Cli
         run: |
           jfrog rt mvnc \
@@ -45,36 +47,34 @@ jobs:
           echo JFROG_CLI_BUILD_NAME=spring-cloud-dataflow-main-release >> $GITHUB_ENV
           echo JFROG_CLI_BUILD_NUMBER=$GITHUB_RUN_NUMBER >> $GITHUB_ENV
 
-      - name: 'Install: xmllint'
-        uses: ./.github/actions/install-xmlutils
 #       build and publish to configured target
       - name: Build and Publish
         run: |
-          jfrog rt mvn build-helper:parse-version versions:set \
+          ./mvnw build-helper:parse-version versions:set \
             -gs .github/settings.xml \
             -DskipResolution=true \
             -DprocessAllModules=true \
             -DgenerateBackupPoms=false \
             -Dartifactory.publish.artifacts=false \
             -DnewVersion=${{ inputs.version }} \
-            -B          
-          jfrog rt mvn versions:set-property \
+            -B --no-transfer-progress
+          ./mvnw versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
             -DgenerateBackupPoms=false \
             -Dproperty=dataflow.version \
             -DnewVersion=${{ inputs.version }} \
-            -B
-          jfrog rt mvn versions:set-property \
+            -B --no-transfer-progress
+          ./mvnw versions:set-property \
             -gs .github/settings.xml \
             -Pstagingrelease \
             -DskipResolution=true \
             -DgenerateBackupPoms=false \
             -Dproperty=skipper.version \
             -DnewVersion=${{ inputs.version }} \
-            -B
-          spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+            -B --no-transfer-progress
+          spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "spring_cloud_dataflow_version=$spring_cloud_dataflow_version" >> $GITHUB_ENV
           echo "::notice ::set dataflow.version=${spring_cloud_dataflow_version}"
           echo "::notice ::build-clean"
@@ -82,11 +82,11 @@ jobs:
           echo "::notice ::set-package-version"
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
-          mvn -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C
+          ./mvnw -gs .github/settings.xml -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C  -B --no-transfer-progress
           jfrog rt mvn -gs .github/settings.xml \
             -Pstagingrelease,full,deploymentfiles,docs \
             -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-docs \
-            -B install -DskipTests
+            -B install -DskipTests --no-transfer-progress
           echo "::notice ::build-publish"
           jfrog rt build-publish                    
           echo "::info ::spring_cloud_dataflow_version=$spring_cloud_dataflow_version" 

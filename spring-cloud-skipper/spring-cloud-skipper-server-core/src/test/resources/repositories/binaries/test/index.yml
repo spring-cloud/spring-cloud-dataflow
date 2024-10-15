@@ -39,6 +39,30 @@ description: The log sink uses the application logger to output the data for ins
 apiVersion: skipper.spring.io/v1
 kind: SkipperPackageMetadata
 origin: samples-package-repository
+name: log
+version: 3.2.1
+packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v4.0.0
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
+tags: logging, sink
+maintainer: https://github.com/sobychacko
+description: The log sink uses the application logger to output the data for inspection.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: log
+version: 4.0.0
+packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/log/tree/v4.0.0
+packageHomeUrl: https://cloud.spring.io/spring-cloud-stream-app-starters/
+tags: logging, sink
+maintainer: https://github.com/sobychacko
+description: The log sink uses the application logger to output the data for inspection.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
 name: time
 version: 2.0.0
 packageSourceUrl: https://github.com/spring-cloud-stream-app-starters/time/tree/v1.2.0.RELEASE
@@ -53,6 +77,18 @@ kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: ticktock
 version: 1.0.0
+packageSourceUrl: https://example.com/dataflow/ticktock
+packageHomeUrl: https://example.com/dataflow/ticktock
+tags: stream, time, log
+maintainer: https://github.com/markpollack
+description: The ticktock stream sends a time stamp and logs the value.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: ticktock
+version: 4.0.0
 packageSourceUrl: https://example.com/dataflow/ticktock
 packageHomeUrl: https://example.com/dataflow/ticktock
 tags: stream, time, log
@@ -125,6 +161,30 @@ kind: SkipperPackageMetadata
 origin: samples-package-repository
 name: testapp
 version: 1.2.0
+packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
+packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
+tags: logging, sink
+maintainer: https://github.com/jvalkeal
+description: The testapp up starts and conditionally fails.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: testapp
+version: 2.9.0
+packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
+packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
+tags: logging, sink
+maintainer: https://github.com/jvalkeal
+description: The testapp up starts and conditionally fails.
+
+---
+apiVersion: skipper.spring.io/v1
+kind: SkipperPackageMetadata
+origin: samples-package-repository
+name: testapp
+version: 2.9.1
 packageSourceUrl: https://github.com/spring-cloud/spring-cloud-deployer
 packageHomeUrl: https://cloud.spring.io/spring-cloud-dataflow/
 tags: logging, sink

@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.server.stream;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,8 +63,8 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -83,10 +82,10 @@ import static org.mockito.Mockito.when;
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-public class SkipperStreamDeployerTests {
+class SkipperStreamDeployerTests {
 
 	@Test
-	public void testEscapeBackslashProperties() throws IOException {
+	void escapeBackslashProperties() throws IOException {
 
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
@@ -149,7 +148,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testInstallUploadProperties() {
+	void installUploadProperties() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
@@ -181,7 +180,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testInvalidPlatformName() {
+	void invalidPlatformName() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
@@ -197,7 +196,7 @@ public class SkipperStreamDeployerTests {
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 		try {
 			skipperStreamDeployer.deployStream(streamDeploymentRequest);
-			fail();
+			fail("");
 		}
 		catch (IllegalArgumentException expected) {
 			assertThat(expected).hasMessage("No platform named 'badPlatform'");
@@ -205,7 +204,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testNoPlatforms() {
+	void noPlatforms() {
 		Map<String, String> skipperDeployerProperties = new HashMap<>();
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_NAME, "package1");
 		skipperDeployerProperties.put(SkipperStream.SKIPPER_PACKAGE_VERSION, "1.0.1");
@@ -221,7 +220,7 @@ public class SkipperStreamDeployerTests {
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class), new DefaultStreamDefinitionService());
 		try {
 			skipperStreamDeployer.deployStream(streamDeploymentRequest);
-			fail();
+			fail("");
 		}
 		catch (IllegalArgumentException expected) {
 			assertThat(expected).hasMessage("No platforms configured");
@@ -229,7 +228,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testDeployWithRegisteredApps() {
+	void deployWithRegisteredApps() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
 		when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
@@ -244,8 +243,8 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testDeployWithNotRegisteredApps() {
-		assertThrows(IllegalStateException.class, () -> {
+	void deployWithNotRegisteredApps() {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
 			AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
 			when(appRegistryService.appExist(eq("time"), eq(ApplicationType.source), eq("1.2.0.RELEASE")))
@@ -300,7 +299,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testStateOfUndefinedUndeployedStream() {
+	void stateOfUndefinedUndeployedStream() {
 
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
@@ -319,24 +318,25 @@ public class SkipperStreamDeployerTests {
 
 		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Collections.singletonList(streamDefinition));
 
-		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(1);
+		assertThat(state)
+				.isNotNull()
+				.hasSize(1);
 		assertThat(state.get(streamDefinition).equals(DeploymentState.undeployed));
 	}
 
 	@Test
-	public void testNullCheckOnDeserializeAppStatus() {
+	void nullCheckOnDeserializeAppStatus() {
 		List<AppStatus> appStatusList = SkipperStreamDeployer.deserializeAppStatus(null);
 		assertThat(appStatusList).isNotNull();
-		assertThat(appStatusList.size()).isEqualTo(0);
+		assertThat(appStatusList).isEmpty();
 
 		appStatusList = SkipperStreamDeployer.deserializeAppStatus("blah");
 		assertThat(appStatusList).isNotNull();
-		assertThat(appStatusList.size()).isEqualTo(0);
+		assertThat(appStatusList).isEmpty();
 	}
 
 	@Test
-	public void testStateOfUndeployedStream() {
+	void stateOfUndeployedStream() {
 
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
@@ -355,8 +355,9 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.statuses(any())).thenReturn(mockInfo);
 
 		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Collections.singletonList(streamDefinition));
-		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(1);
+		assertThat(state)
+				.isNotNull()
+				.hasSize(1);
 		assertThat(state.get(streamDefinition).equals(DeploymentState.undeployed));
 
 		// Stream is in failed state
@@ -366,8 +367,9 @@ public class SkipperStreamDeployerTests {
 		mockInfo.put("foo", info);
 
 		state = skipperStreamDeployer.streamsStates(Collections.singletonList(streamDefinition));
-		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(1);
+		assertThat(state)
+				.isNotNull()
+				.hasSize(1);
 		assertThat(state.get(streamDefinition).equals(DeploymentState.failed));
 
 		// Stream is deployed (rare case if ever...)
@@ -378,8 +380,9 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
 
 		state = skipperStreamDeployer.streamsStates(Collections.singletonList(streamDefinition));
-		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(1);
+		assertThat(state)
+				.isNotNull()
+				.hasSize(1);
 		assertThat(state.get(streamDefinition).equals(DeploymentState.deployed));
 
 		// Stream is in unknown state
@@ -390,14 +393,15 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.status(eq(streamDefinition.getName()))).thenReturn(info);
 
 		state = skipperStreamDeployer.streamsStates(Collections.singletonList(streamDefinition));
-		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(1);
+		assertThat(state)
+				.isNotNull()
+				.hasSize(1);
 		assertThat(state.get(streamDefinition).equals(DeploymentState.unknown));
 
 	}
 
 	@Test
-	public void testStreamDeployWithLongAppName() {
+	void streamDeployWithLongAppName() {
 
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 
@@ -450,7 +454,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testGetStreamStatuses() throws IOException {
+	void getStreamStatuses() throws IOException {
 
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
@@ -474,12 +478,13 @@ public class SkipperStreamDeployerTests {
 		when(skipperClient.status(eq("stream1"))).thenReturn(info);
 
 		List<AppStatus> appStatues = skipperStreamDeployer.getStreamStatuses("stream1");
-		assertThat(appStatues).isNotNull();
-		assertThat(appStatues.size()).isEqualTo(4);
+		assertThat(appStatues)
+				.isNotNull()
+				.hasSize(4);
 	}
 
 	@Test
-	public void testStateOfDefinedUndeployedStream() {
+	void stateOfDefinedUndeployedStream() {
 
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
@@ -498,15 +503,16 @@ public class SkipperStreamDeployerTests {
 
 		Map<StreamDefinition, DeploymentState> state = skipperStreamDeployer.streamsStates(Collections.singletonList(streamDefinition));
 
-		assertThat(state).isNotNull();
-		assertThat(state.size()).isEqualTo(1);
-		assertThat(state).containsKeys(streamDefinition);
-		assertThat(state.get(streamDefinition)).isEqualTo(DeploymentState.undeployed);
+		assertThat(state)
+				.isNotNull()
+				.hasSize(1)
+				.containsKeys(streamDefinition)
+				.containsEntry(streamDefinition, DeploymentState.undeployed);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testUndeployPackageAndReleaseExistAllGood() {
+	void undeployPackageAndReleaseExistAllGood() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
@@ -527,7 +533,7 @@ public class SkipperStreamDeployerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testUndeployPackageExistsWithoutReleaseStillDeletesPackage() {
+	void undeployPackageExistsWithoutReleaseStillDeletesPackage() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
@@ -551,7 +557,7 @@ public class SkipperStreamDeployerTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testUndeployPackageDoesNotExistSkipsDelete() {
+	void undeployPackageDoesNotExistSkipsDelete() {
 		AppRegistryService appRegistryService = mock(AppRegistryService.class);
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		StreamDefinitionRepository streamDefinitionRepository = mock(StreamDefinitionRepository.class);
@@ -569,7 +575,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testManifestWithRelease() {
+	void manifestWithRelease() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class)
@@ -583,7 +589,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testManifest() {
+	void manifest() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class)
@@ -594,7 +600,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testPlatformList() {
+	void platformList() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.listDeployers()).thenReturn(new ArrayList<>());
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
@@ -605,7 +611,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testHistory() {
+	void history() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.history(eq("release1"))).thenReturn(new ArrayList<>());
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
@@ -616,7 +622,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testRollback() {
+	void rollback() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
 				mock(StreamDefinitionRepository.class), mock(AppRegistryService.class), mock(ForkJoinPool.class),
@@ -629,7 +635,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testGetLogByReleaseName() {
+	void getLogByReleaseName() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.getLog(eq("release1"))).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
@@ -640,7 +646,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testGetLogByReleaseNameAndAppName() {
+	void getLogByReleaseNameAndAppName() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		when(skipperClient.getLog(eq("release1"), eq("myapp"))).thenReturn(new LogInfo(Collections.EMPTY_MAP));
 		SkipperStreamDeployer skipperStreamDeployer = new SkipperStreamDeployer(skipperClient,
@@ -651,7 +657,7 @@ public class SkipperStreamDeployerTests {
 	}
 
 	@Test
-	public void testEnvironmentInfo() {
+	void environmentInfo() {
 		SkipperClient skipperClient = mock(SkipperClient.class);
 		AboutResource about = new AboutResource();
 		about.setVersionInfo(new VersionInfo());

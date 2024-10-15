@@ -25,13 +25,5 @@ export KUBECONFIG=$HOME/.kube/config-gke
 gcloud container clusters get-credentials $GKE_CLUSTER --region $REGION
 echo "KUBECONFIG set to $KUBECONFIG"
 shift
-if [ "$1" != "" ]; then
-  export NS=$1
-  shift
-fi
-if [ "$NS" = "" ]; then
-  export NS=scdf
-fi
-echo "Namespace: $NS"
-source $SCDIR/set-ver.sh
+source $SCDIR/set-ver.sh $*
 

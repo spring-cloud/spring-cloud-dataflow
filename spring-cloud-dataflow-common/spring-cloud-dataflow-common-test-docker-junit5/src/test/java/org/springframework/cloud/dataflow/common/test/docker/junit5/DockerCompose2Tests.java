@@ -19,9 +19,6 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerCompose;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeExtension;
-import org.springframework.cloud.dataflow.common.test.docker.junit5.DockerComposeInfo;
 
 @DockerCompose(id = DockerCompose2Tests.CLUSTER1, locations = {"src/test/resources/docker-compose-1.yml"})
 @DockerCompose(id = DockerCompose2Tests.CLUSTER2, locations = {"src/test/resources/docker-compose-2.yml"}, start = false)
@@ -36,7 +33,7 @@ public class DockerCompose2Tests {
 	@Test
 	@DockerCompose(id = DockerCompose2Tests.CLUSTER3, locations = {"src/test/resources/docker-compose-3.yml"})
 	@DockerCompose(id = DockerCompose2Tests.CLUSTER4, locations = {"src/test/resources/docker-compose-4.yml"}, start = false)
-	public void testCompose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
+	void compose(DockerComposeInfo dockerComposeInfo) throws IOException, InterruptedException {
 
 		dockerComposeInfo.id(CLUSTER2).start();
 		Thread.sleep(1000);

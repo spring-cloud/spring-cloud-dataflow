@@ -36,29 +36,29 @@ import static org.mockito.Mockito.mock;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class TaskTemplateTests {
+class TaskTemplateTests {
 
 	private static final String CURRENT_TASK_EXECUTION_LINK = "tasks/executions/current";
 
 	private RestTemplate restTemplate;
 
 	@BeforeEach
-	public void setup() {
+	void setup() {
 		restTemplate = mock(RestTemplate.class);
 	}
 
 	@Test
-	public void testOldDataFlow() {
+	void oldDataFlow() {
 		validateExecutionLinkNotPresent("1.6.0");
 	}
 
 	@Test
-	public void testMinDataFlow() {
+	void minDataFlow() {
 		validateExecutionLinkPresent("1.7.0");
 	}
 
 	@Test
-	public void testFutureDataFlow() {
+	void futureDataFlow() {
 		validateExecutionLinkPresent("1.8.0");
 		validateExecutionLinkPresent("1.9.0");
 		validateExecutionLinkPresent("2.0.0");

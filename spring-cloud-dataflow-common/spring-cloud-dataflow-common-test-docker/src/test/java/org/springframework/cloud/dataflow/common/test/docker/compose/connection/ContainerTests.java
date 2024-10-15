@@ -15,26 +15,27 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
+import java.io.IOException;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.MockDockerEnvironment;
+import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
+import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.failureWithMessage;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.successful;
-
-import java.io.IOException;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.springframework.cloud.dataflow.common.test.docker.compose.configuration.MockDockerEnvironment;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
-import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
-import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
+// @checkstyle:on
 
 public class ContainerTests {
 
@@ -52,14 +53,14 @@ public class ContainerTests {
     public void return_port_for_container_when_external_port_number_given() throws Exception {
         DockerPort expected = env.availableService("service", IP, 5433, 5432);
         DockerPort port = container.portMappedExternallyTo(5433);
-        assertThat(port, is(expected));
+		assertThat(port).isEqualTo(expected);
     }
 
     @Test
     public void return_port_for_container_when_internal_port_number_given() throws Exception {
         DockerPort expected = env.availableService("service", IP, 5433, 5432);
         DockerPort port = container.port(5432);
-        assertThat(port, is(expected));
+		assertThat(port).isEqualTo(expected);
     }
 
     @Test
@@ -79,7 +80,7 @@ public class ContainerTests {
         int prePort = port.getExternalPort();
 
         DockerPort samePort = container.port(internalPort);
-        assertThat(prePort, is(samePort.getExternalPort()));
+		assertThat(prePort).isEqualTo(samePort.getExternalPort());
 
         container.stop();
         container.start();
@@ -111,7 +112,7 @@ public class ContainerTests {
     public void have_all_ports_open_if_all_exposed_ports_are_open() throws Exception {
         env.availableHttpService("service", IP, 1234, 1234);
 
-        assertThat(container.areAllPortsOpen(), is(successful()));
+		assertThat(container.areAllPortsOpen(), successful());
     }
 
     @Test
@@ -122,7 +123,7 @@ public class ContainerTests {
         env.availableService("service", IP, 1234, 1234);
         env.unavailableService("service", IP, unavailablePort, unavailablePort);
 
-        assertThat(container.areAllPortsOpen(), is(failureWithMessage(containsString(unavailablePortString))));
+		assertThat(container.areAllPortsOpen(), failureWithMessage(containsString(unavailablePortString)));
     }
 
     @Test
@@ -131,7 +132,7 @@ public class ContainerTests {
 
         assertThat(
                 container.portIsListeningOnHttp(2345, port -> "http://some.url:" + port),
-                is(successful()));
+				successful());
     }
 
     @Test
@@ -143,10 +144,9 @@ public class ContainerTests {
 
         assertThat(
                 container.portIsListeningOnHttp(unavailablePort, port -> "http://some.url:" + port.getInternalPort()),
-                is(failureWithMessage(both(
-                    containsString(unvaliablePortString)).and(
+				failureWithMessage(
                     containsString("http://some.url:" + unvaliablePortString)
-                ))));
+				));
     }
 
 }

@@ -15,13 +15,11 @@
  */
 package org.springframework.cloud.dataflow.rest.resource;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.task.repository.TaskExecution;
+import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.util.StringUtils;
 
 
 /**
@@ -52,12 +50,12 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 	/**
 	 * Time of when the task was started.
 	 */
-	private Date startTime;
+	private LocalDateTime startTime;
 
 	/**
 	 * Timestamp of when the task was completed/terminated.
 	 */
-	private Date endTime;
+	private LocalDateTime endTime;
 
 	/**
 	 * Message returned from the task or stacktrace.
@@ -69,32 +67,22 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 
 	private String errorMessage;
 
-	private String taskExecutionStatus;
-
 	private String composedTaskJobExecutionStatus;
-
-	/**
-	 * @since 2.11.0
-	 */
-
-	private String schemaTarget;
-
 
 	public TaskExecutionThinResource() {
 	}
 
-	public TaskExecutionThinResource(AggregateTaskExecution aggregateTaskExecution) {
-		this.executionId = aggregateTaskExecution.getExecutionId();
-		this.schemaTarget = aggregateTaskExecution.getSchemaTarget();
-		this.taskName = aggregateTaskExecution.getTaskName();
-		this.externalExecutionId = aggregateTaskExecution.getExternalExecutionId();
-		this.parentExecutionId =aggregateTaskExecution.getParentExecutionId();
-		this.startTime = aggregateTaskExecution.getStartTime();
-		this.endTime = aggregateTaskExecution.getEndTime();
-		this.exitCode = aggregateTaskExecution.getExitCode();
-		this.exitMessage = aggregateTaskExecution.getExitMessage();
-		this.errorMessage = aggregateTaskExecution.getErrorMessage();
-		this.composedTaskJobExecutionStatus = aggregateTaskExecution.getCtrTaskStatus();
+	public TaskExecutionThinResource(ThinTaskExecution taskExecution) {
+		this.executionId = taskExecution.getExecutionId();
+		this.taskName = taskExecution.getTaskName();
+		this.externalExecutionId = taskExecution.getExternalExecutionId();
+		this.parentExecutionId =taskExecution.getParentExecutionId();
+		this.startTime = taskExecution.getStartTime();
+		this.endTime = taskExecution.getEndTime();
+		this.exitCode = taskExecution.getExitCode();
+		this.exitMessage = taskExecution.getExitMessage();
+		this.errorMessage = taskExecution.getErrorMessage();
+		this.composedTaskJobExecutionStatus = taskExecution.getCtrTaskStatus();
 	}
 
 	public long getExecutionId() {
@@ -129,19 +117,19 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.taskName = taskName;
 	}
 
-	public Date getStartTime() {
+	public LocalDateTime getStartTime() {
 		return startTime;
 	}
 
-	public void setStartTime(Date startTime) {
+	public void setStartTime(LocalDateTime startTime) {
 		this.startTime = startTime;
 	}
 
-	public Date getEndTime() {
+	public LocalDateTime getEndTime() {
 		return endTime;
 	}
 
-	public void setEndTime(Date endTime) {
+	public void setEndTime(LocalDateTime endTime) {
 		this.endTime = endTime;
 	}
 
@@ -169,36 +157,15 @@ public class TaskExecutionThinResource extends RepresentationModel<TaskExecution
 		this.errorMessage = errorMessage;
 	}
 
-	public String getSchemaTarget() {
-		return schemaTarget;
+	public String getComposedTaskJobExecutionStatus() {
+		return composedTaskJobExecutionStatus;
 	}
 
-	public void setSchemaTarget(String schemaTarget) {
-		this.schemaTarget = schemaTarget;
+	public void setComposedTaskJobExecutionStatus(String composedTaskJobExecutionStatus) {
+		this.composedTaskJobExecutionStatus = composedTaskJobExecutionStatus;
 	}
 
-	public void setTaskExecutionStatus(String taskExecutionStatus) {
-		this.taskExecutionStatus = taskExecutionStatus;
-	}
-
-	/**
-	 * Returns the calculated status of this {@link TaskExecution}.
-	 *
-	 * If {@link #startTime} is
-	 * null, the {@link TaskExecution} is considered to be not running (never executed).
-	 *
-	 * If {@link #endTime} is
-	 * null, the {@link TaskExecution} is considered to be still running:
-	 * {@link TaskExecutionStatus#RUNNING}. If the {@link #endTime} is defined and the
-	 * {@link #exitCode} is non-zero, an status of {@link TaskExecutionStatus#ERROR} is assumed,
-	 * if {@link #exitCode} is zero, {@link TaskExecutionStatus#COMPLETE} is returned.
-	 *
-	 * @return TaskExecutionStatus, never null
-	 */
 	public TaskExecutionStatus getTaskExecutionStatus() {
-		if (StringUtils.hasText(this.taskExecutionStatus)) {
-			return TaskExecutionStatus.valueOf(this.taskExecutionStatus);
-		}
 		if (this.startTime == null) {
 			return TaskExecutionStatus.UNKNOWN;
 		}

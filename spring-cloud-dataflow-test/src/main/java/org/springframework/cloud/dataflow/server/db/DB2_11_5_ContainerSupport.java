@@ -20,14 +20,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.testcontainers.containers.Db2Container;
-import org.testcontainers.utility.DockerImageName;
 
 import org.springframework.cloud.dataflow.server.db.arm64.Db2Arm64ContainerSupport;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 /**
- * Provides support for running a {@link Db2Container DB2 11.5 Testcontainer}.
+ * Provides support for running a {@link Db2Container DB2 11.5.8.0 Testcontainer}.
  *
  * @author Chris Bono
  */
@@ -37,8 +36,8 @@ public interface DB2_11_5_ContainerSupport extends Db2Arm64ContainerSupport {
 
 	@BeforeAll
 	static void startContainer() {
-		DockerImageName imageName = DockerImageName.parse("icr.io/db2_community/db2").asCompatibleSubstituteFor("ibmcom/db2").withTag("11.5.8.0");
-		Db2Container container = Db2Arm64ContainerSupport.startContainer(() -> new Db2Container(imageName).acceptLicense());
+		Db2Container container = Db2Arm64ContainerSupport.startContainer(() ->
+				new Db2Container("icr.io/db2_community/db2:11.5.8.0").acceptLicense());
 		containerReference.set(container);
 	}
 

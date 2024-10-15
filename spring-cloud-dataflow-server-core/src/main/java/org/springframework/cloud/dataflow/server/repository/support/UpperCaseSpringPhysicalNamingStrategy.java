@@ -15,16 +15,15 @@
  */
 package org.springframework.cloud.dataflow.server.repository.support;
 
+import org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
-
-import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 
 /**
  * Override {@code isCaseInsensitive} to always return false
  *
  * @author Mark Pollack
  */
-public class UpperCaseSpringPhysicalNamingStrategy extends SpringPhysicalNamingStrategy {
+public class UpperCaseSpringPhysicalNamingStrategy extends CamelCaseToUnderscoresNamingStrategy {
 
 	@Override
 	protected boolean isCaseInsensitive(JdbcEnvironment jdbcEnvironment) {

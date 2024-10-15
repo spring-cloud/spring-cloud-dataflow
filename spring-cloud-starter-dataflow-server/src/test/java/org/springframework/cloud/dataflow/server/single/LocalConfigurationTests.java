@@ -37,11 +37,9 @@ import org.springframework.cloud.dataflow.server.single.nodataflowapp.LocalTestN
 import org.springframework.cloud.deployer.resource.support.DelegatingResourceLoader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.SocketUtils;
+import org.springframework.test.util.TestSocketUtils;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -54,22 +52,22 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-@Disabled
-public class LocalConfigurationTests {
+
+class LocalConfigurationTests {
 
 	private ConfigurableApplicationContext context;
 
 	@AfterEach
-	public void tearDown() {
+	void tearDown() {
 		if (context != null) {
 			context.close();
 		}
 	}
 
 	@Test
-	public void testConfig() {
+	void config() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
-		int randomPort = SocketUtils.findAvailableTcpPort();
+		int randomPort = TestSocketUtils.findAvailableTcpPort();
 		String dataSourceUrl = String.format("jdbc:h2:tcp://localhost:%s/mem:dataflow;DATABASE_TO_UPPER=FALSE", randomPort);
 		context = app.run("--debug","--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.datasource.url=" + dataSourceUrl);
 		assertNotNull(context.getBean(AppRegistryService.class));
@@ -79,19 +77,19 @@ public class LocalConfigurationTests {
 	}
 
 	@Test
-	public void testLocalAutoConfigApplied() throws Exception {
+	void localAutoConfigApplied() throws Exception {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0");
 		// LocalDataFlowServerAutoConfiguration also adds docker and maven resource loaders.
 		DelegatingResourceLoader delegatingResourceLoader = context.getBean(DelegatingResourceLoader.class);
 		Map<String, ResourceLoader> loaders = TestUtils.readField("loaders", delegatingResourceLoader);
-		assertThat(loaders.size(), is(2));
-		assertThat(loaders.get("maven"), notNullValue());
-		assertThat(loaders.get("docker"), notNullValue());
+		assertThat(loaders.size()).isEqualTo(2);
+		assertThat(loaders.get("maven")).isNotNull();
+		assertThat(loaders.get("docker")).isNotNull();
 	}
 
 	@Test
-	public void testConfigWithStreamsDisabled() {
+	void configWithStreamsDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0",
 			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "=false");
@@ -106,8 +104,10 @@ public class LocalConfigurationTests {
 		}
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x DataflowServerConfiguration requires DataflowTaskExecutionQueryDao bean.  Doesn't seem like it is needed.")
 	@Test
-	public void testConfigWithTasksDisabled() {
+	void configWithTasksDisabled() {
 		SpringApplication app = new SpringApplication(LocalTestDataFlowServer.class);
 		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0",
 			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "=false");
@@ -123,9 +123,9 @@ public class LocalConfigurationTests {
 	}
 
 	@Test
-	public void testNoDataflowConfig() {
+	void noDataflowConfig() {
 		SpringApplication app = new SpringApplication(LocalTestNoDataFlowServer.class);
 		context = app.run("--spring.cloud.kubernetes.enabled=false", "--server.port=0", "--spring.jpa.database=H2", "--spring.flyway.enabled=false");
-		assertThat(context.containsBean("appRegistry"), is(false));
+		assertThat(context.containsBean("appRegistry")).isEqualTo(false);
 	}
 }

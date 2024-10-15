@@ -1,5 +1,3 @@
-version: '3'
-
 # CI specific test Task (scenario) registered from maven resource
 services:
 

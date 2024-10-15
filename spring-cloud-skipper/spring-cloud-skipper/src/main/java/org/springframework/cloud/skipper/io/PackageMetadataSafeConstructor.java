@@ -16,8 +16,6 @@
 
 package org.springframework.cloud.skipper.io;
 
-import org.springframework.cloud.skipper.domain.PackageMetadata;
-
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.constructor.Construct;
@@ -28,6 +26,8 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.Tag;
+
+import org.springframework.cloud.skipper.domain.PackageMetadata;
 
 /**
  * Extends {@link SafeConstructor} so that we can construct an instance of {@link org.springframework.cloud.skipper.domain.PackageMetadata}
@@ -52,8 +52,9 @@ class PackageMetadataSafeConstructor extends SafeConstructor {
 	private static final String SHA256 = "sha256";
 	private static final String ICON_URL = "iconUrl";
 
-	PackageMetadataSafeConstructor(LoaderOptions loadingConfig) {
-		super(loadingConfig);
+	PackageMetadataSafeConstructor() {
+		super(new LoaderOptions());
+		this.loadingConfig.setTagInspector(tag -> tag.getClassName().equals(PackageMetadata.class.getName()));
 		this.yamlConstructors.put(new TypeDescription(PackageMetadata.class).getTag(), new ConstructYamlPackageMetadata());
 		rootTag = new Tag(new TypeDescription(PackageMetadata.class).getType());
 	}

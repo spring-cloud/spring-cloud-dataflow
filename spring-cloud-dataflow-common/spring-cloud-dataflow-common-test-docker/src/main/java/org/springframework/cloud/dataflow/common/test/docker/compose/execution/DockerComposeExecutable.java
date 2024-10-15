@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,10 +42,9 @@ public class DockerComposeExecutable implements Executable {
 	private static String defaultDockerComposePath() {
 		String pathToUse = DOCKER_COMPOSE_LOCATIONS.preferredLocation()
 				.orElseThrow(() -> new IllegalStateException(
-						"Could not find docker-compose, looked in: " + DOCKER_COMPOSE_LOCATIONS));
+					"Could not find docker-compose or docker, looked in: " + DOCKER_COMPOSE_LOCATIONS));
 
 		log.debug("Using docker-compose found at " + pathToUse);
-
 		return pathToUse;
 	}
 
@@ -55,12 +53,11 @@ public class DockerComposeExecutable implements Executable {
 
 			@Override
 			public String commandName() {
-				File file = new File(defaultDockerComposePath());
-				return file.getName().equals("docker-compose") ? "docker-compose" : "docker";
+				return defaultDockerComposePath();
 			}
 
 			@Override
-			public Process execute(String... commands) throws IOException {
+			public Process execute(boolean composeCommand, String... commands) throws IOException {
 				List<String> args = new ArrayList<>();
 				String dockerComposePath = defaultDockerComposePath();
 				args.add(dockerComposePath);
@@ -73,7 +70,7 @@ public class DockerComposeExecutable implements Executable {
 			}
 		}, log::debug);
 
-		String versionOutput = dockerCompose.execute(Command.throwingOnError(), "-v");
+		String versionOutput = dockerCompose.execute(Command.throwingOnError(), false, "-v");
 		return DockerComposeVersion.parseFromDockerComposeVersion(versionOutput);
 	}
 
@@ -106,8 +103,7 @@ public class DockerComposeExecutable implements Executable {
 
 	@Override
 	public final String commandName() {
-		File file = new File(defaultDockerComposePath());
-		return file.getName().equals("docker-compose") ? "docker-compose" : "docker";
+		return defaultDockerComposePath().endsWith("/docker") ? "docker" : "docker-compose";
 	}
 
 	protected String dockerComposePath() {
@@ -115,13 +111,12 @@ public class DockerComposeExecutable implements Executable {
 	}
 
 	@Override
-	public Process execute(String... commands) throws IOException {
+	public Process execute(boolean composeCommand, String... commands) throws IOException {
 		DockerForMacHostsIssue.issueWarning();
 
 		List<String> args = new ArrayList<>();
-		String dockerComposePath = dockerComposePath();
-		args.add(dockerComposePath);
-		if(commandName().equals("docker")) {
+		args.add(dockerComposePath());
+		if (composeCommand && commandName().equalsIgnoreCase("docker")) {
 			args.add("compose");
 		}
 		// if a single option is provided that starts with - skips the file commands.

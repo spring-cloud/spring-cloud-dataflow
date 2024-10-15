@@ -24,8 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -60,8 +58,9 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.ExceptionHandlingConfigurer;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
@@ -104,8 +103,9 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Corneil du Plessis
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnClass(WebSecurityConfigurerAdapter.class)
-@ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
+// TODO SCDF 3.0 Migration - Need to re add this later with a different class or bean.
+// @ConditionalOnClass(WebSecurityConfigurerAdapter.class)
+// @ConditionalOnMissingBean(WebSecurityConfigurerAdapter.class)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.ANY)
 @EnableWebSecurity
 @Conditional(OnOAuth2SecurityEnabled.class)
@@ -122,7 +122,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 		OAuthSecurityConfiguration.ProviderManagerConfig.class,
 		OAuthSecurityConfiguration.AuthenticationProviderConfig.class
 })
-public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class OAuthSecurityConfiguration {
 
 	private static final Logger logger = LoggerFactory.getLogger(OAuthSecurityConfiguration.class);
 
@@ -199,8 +199,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		this.securityStateBean = securityStateBean;
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	protected HttpBasicConfigurer configure(HttpSecurity http) throws Exception {
 
 		final RequestMatcher textHtmlMatcher = new MediaTypeRequestMatcher(
 				new BrowserDetectingContentNegotiationStrategy(),
@@ -228,17 +227,17 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 
 				http.authorizeRequests()
-						.antMatchers(this.authorizationProperties.getPermitAllPaths()
+						.requestMatchers(this.authorizationProperties.getPermitAllPaths()
 								.toArray(new String[0]))
 						.permitAll()
-						.antMatchers(this.authorizationProperties.getAuthenticatedPaths()
+						.requestMatchers(this.authorizationProperties.getAuthenticatedPaths()
 								.toArray(new String[0]))
 						.authenticated();
 		security = SecurityConfigUtils.configureSimpleSecurity(security, this.authorizationProperties);
 		security.anyRequest().denyAll();
 
 
-		http.httpBasic().and()
+		ExceptionHandlingConfigurer configurer = http.httpBasic().and()
 				.logout()
 				.logoutSuccessHandler(logoutSuccessHandler)
 				.and().csrf().disable()
@@ -268,6 +267,7 @@ public class OAuthSecurityConfiguration extends WebSecurityConfigurerAdapter {
 		}
 
 		this.securityStateBean.setAuthenticationEnabled(true);
+		return http.getConfigurer(HttpBasicConfigurer.class);
 	}
 
 	protected static String dashboard(AuthorizationProperties authorizationProperties, String path) {

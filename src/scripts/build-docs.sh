@@ -6,5 +6,5 @@ fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
 pushd "$SCDIR" > /dev/null || exit
-    ./mvnw install -DskipTests -am -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-server-core,:spring-cloud-skipper-docs -Pfull,docs
+    ./mvnw install -DskipTests -am -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-server-core,:spring-cloud-skipper-docs -Pfull,docs  -B --no-transfer-progress
 popd > /dev/null || exit

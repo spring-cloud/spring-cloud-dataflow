@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
@@ -28,17 +27,16 @@ import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Janne Valkealahti
  * @author Corneil du Plessis
  */
-public class CancelDocumentation extends BaseDocumentation {
+class CancelDocumentation extends BaseDocumentation {
 
 	@Test
-	public void cancelRelease() throws Exception {
+	void cancelRelease() throws Exception {
 		final String releaseName = "myLogRelease";
 
 		when(this.skipperStateMachineService.cancelRelease(releaseName)).thenReturn(Boolean.TRUE);

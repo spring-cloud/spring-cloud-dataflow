@@ -82,15 +82,15 @@ public class DefaultStreamServiceUpdateTests {
 	private StreamValidationService streamValidationService;
 
 	@Test
-	public void testCreateUpdateRequestsWithRegisteredApp() throws IOException {
+	void createUpdateRequestsWithRegisteredApp() throws IOException {
 		this.appRegistryService.save("log", ApplicationType.sink, "1.1.1.RELEASE",
-				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:3.2.1"),
-				null, null);
+				URI.create("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:5.0.0"),
+				null);
 		testCreateUpdateRequests();
 	}
 
 	@Test
-	public void testCreateUpdateRequestsWithoutRegisteredApp() throws IOException {
+	void createUpdateRequestsWithoutRegisteredApp() throws IOException {
 		try {
 			testCreateUpdateRequests();
 			fail("IllegalStateException is expected.");

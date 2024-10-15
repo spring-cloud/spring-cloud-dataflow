@@ -32,7 +32,7 @@ import org.springframework.util.FileCopyUtils;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Tests for {@link DeploymentPropertiesUtils}.
  *
@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-public class DeploymentPropertiesUtilsTests {
+class DeploymentPropertiesUtilsTests {
 
 	private static void assertArrays(String[] left, String[] right) {
 		ArrayList<String> params = new ArrayList<>(Arrays.asList(left));
@@ -50,7 +50,7 @@ public class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
-	public void testDeploymentPropertiesParsing() {
+	void deploymentPropertiesParsing() {
 		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
 				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww, scheduler.other.key = baz");
 		assertThat(props.entrySet()).contains(entry("app.foo.bar", "v"));
@@ -91,7 +91,7 @@ public class DeploymentPropertiesUtilsTests {
 		}
 
 		props = DeploymentPropertiesUtils.parse("deployer.foo=bar,invalidkeyvalue2");
-		assertThat(props.size()).isEqualTo(1);
+		assertThat(props).hasSize(1);
 		assertThat(props.entrySet()).contains(entry("deployer.foo", "bar,invalidkeyvalue2"));
 
 		props = DeploymentPropertiesUtils.parse("app.foo.bar1=jee1,jee2,jee3,deployer.foo.bar2=jee4,jee5,jee6");
@@ -109,15 +109,16 @@ public class DeploymentPropertiesUtilsTests {
 
 
 	@Test
-	public void testDeploymentPropertiesParsing2() {
+	void deploymentPropertiesParsing2() {
 		List<String> props = DeploymentPropertiesUtils.parseParamList("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
 				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww,special=koza=boza,more", ",");
 
-		assertTrue(props.contains("app.foo.bar=v"));
-		assertTrue(props.contains(" app.other.key = value  "));
-		assertTrue(props.contains(" app.foo.wizz=v2  "));
-		assertTrue(props.contains(" deployer.foo.pot=fern"));
-		assertTrue(props.contains(" deployer.other.cow = meww,special=koza=boza,more"));
+		assertThat(props)
+				.contains("app.foo.bar=v")
+				.contains(" app.other.key = value  ")
+				.contains(" app.foo.wizz=v2  ")
+				.contains(" deployer.foo.pot=fern")
+				.contains(" deployer.other.cow = meww,special=koza=boza,more");
 
 		try {
 			DeploymentPropertiesUtils.parseParamList("a=b", " ");
@@ -128,77 +129,88 @@ public class DeploymentPropertiesUtilsTests {
 		}
 
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b c=d", " ");
-		assertTrue(props.contains("c=d"));
-		assertTrue(props.contains("a=b"));
+		assertThat(props)
+				.contains("c=d")
+				.contains("a=b");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b    c=d   ", " ");
 
-		assertTrue(props.contains("a=b"));
-		assertTrue(props.contains("c=d"));
+		assertThat(props)
+				.contains("a=b")
+				.contains("c=d");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("foo1=bar1 foo2=bar2 foo3=bar3 xxx3", " ");
-		assertTrue(props.contains("foo1=bar1"));
-		assertTrue(props.contains("foo2=bar2"));
-		assertTrue(props.contains("foo3=bar3 xxx3"));
+		assertThat(props)
+				.contains("foo1=bar1")
+				.contains("foo2=bar2")
+				.contains("foo3=bar3 xxx3");
 	}
 
 	@Test
-	public void parseArgumentTestsWithQuotes() {
+	void parseArgumentTestsWithQuotes() {
 
 		List<String> props = DeploymentPropertiesUtils.parseArgumentList("a=\"b c\" e=f g=h", " ");
-		assertTrue(props.contains("a=\"b c\""));
-		assertTrue(props.contains("e=f"));
-		assertTrue(props.contains("g=h"));
+		assertThat(props)
+				.contains("a=\"b c\"")
+				.contains("e=f")
+				.contains("g=h");
 		props = DeploymentPropertiesUtils.parseArgumentList("--composedTaskArguments=\"1.timestamp.format=YYYY " +
 				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\" " +
 				"a=b c=d --foo=bar", " ");
-		assertTrue(props.contains("--composedTaskArguments=\"1.timestamp.format=YYYY " +
-				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\""));
-		assertTrue(props.contains("a=b"));
-		assertTrue(props.contains("c=d"));
-		assertTrue(props.contains("--foo=bar"));
+		assertThat(props)
+				.contains("--composedTaskArguments=\"1.timestamp.format=YYYY " +
+				"--timestamp.timestamp.format=MM --foo=bar bar=\"bazzz buzz\"\"")
+				.contains("a=b")
+				.contains("c=d")
+				.contains("--foo=bar");
 	}
 
 	@Test
-	public void parseArgumentTestsWithMultipleQuotes() {
+	void parseArgumentTestsWithMultipleQuotes() {
 
 		List<String> props = DeploymentPropertiesUtils.parseArgumentList("arg2=\"Argument 2\" arg3=val3", " ");
-		assertTrue(props.contains("arg2=\"Argument 2\""));
-		assertTrue(props.contains("arg3=val3"));
+		assertThat(props)
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("arg0=val0 arg1=val1 arg2=\"Argument 2\" arg3=val3", " ");
-		assertTrue(props.contains("arg0=val0"));
-		assertTrue(props.contains("arg1=val1"));
-		assertTrue(props.contains("arg2=\"Argument 2\""));
-		assertTrue(props.contains("arg3=val3"));
+		assertThat(props)
+				.contains("arg0=val0")
+				.contains("arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=val3", " ");
-		assertTrue(props.contains("-arg1=val1"));
-		assertTrue(props.contains("arg2=\"Argument 2\""));
-		assertTrue(props.contains("arg3=val3"));
+		assertThat(props)
+				.contains("-arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=val3 arg4=\"Argument 4\"", " ");
-		assertTrue(props.contains("-arg1=val1"));
-		assertTrue(props.contains("arg2=\"Argument 2\""));
-		assertTrue(props.contains("arg3=val3"));
-		assertTrue(props.contains("arg4=\"Argument 4\""));
+		assertThat(props)
+				.contains("-arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=val3")
+				.contains("arg4=\"Argument 4\"");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=val1 arg2=\"Argument 2\" arg3=\"val3\" arg4=\"Argument 4\"", " ");
-		assertTrue(props.contains("-arg1=val1"));
-		assertTrue(props.contains("arg2=\"Argument 2\""));
-		assertTrue(props.contains("arg3=\"val3\""));
-		assertTrue(props.contains("arg4=\"Argument 4\""));
+		assertThat(props)
+				.contains("-arg1=val1")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=\"val3\"")
+				.contains("arg4=\"Argument 4\"");
 
 		props = DeploymentPropertiesUtils.parseArgumentList("-arg1=\"val1\" arg2=\"Argument 2\" arg3=\"val3\" arg4=\"Argument 4\"", " ");
-		assertTrue(props.contains("-arg1=\"val1\""));
-		assertTrue(props.contains("arg2=\"Argument 2\""));
-		assertTrue(props.contains("arg3=\"val3\""));
-		assertTrue(props.contains("arg4=\"Argument 4\""));
+		assertThat(props)
+				.contains("-arg1=\"val1\"")
+				.contains("arg2=\"Argument 2\"")
+				.contains("arg3=\"val3\"")
+				.contains("arg4=\"Argument 4\"");
 
 	}
 
 	@Test
-	public void testLongDeploymentPropertyValues() {
+	void longDeploymentPropertyValues() {
 		Map<String, String> props = DeploymentPropertiesUtils
 				.parse("app.foo.bar=FoooooooooooooooooooooBar,app.foo" + ".bar2=FoooooooooooooooooooooBar");
 		assertThat(props.entrySet()).contains(entry("app.foo.bar", "FoooooooooooooooooooooBar"));
@@ -207,7 +219,7 @@ public class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
-	public void testDeployerProperties() {
+	void deployerProperties() {
 		Map<String, String> props = new LinkedHashMap<>();
 		props.put("app.myapp.foo", "bar");
 		props.put("deployer.myapp.count", "2");
@@ -224,7 +236,7 @@ public class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
-	public void testDeployerPropertiesWithApp() {
+	void deployerPropertiesWithApp() {
 		Map<String, String> props = new LinkedHashMap<>();
 		props.put("app.myapp.foo", "bar");
 		props.put("deployer.myapp.count", "2");
@@ -237,11 +249,11 @@ public class DeploymentPropertiesUtilsTests {
 		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.count", "2"));
 		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.foo", "bar"));
 		assertThat(result.entrySet()).contains(entry("spring.cloud.deployer.precedence", "app"));
-		assertThat(result.keySet()).contains("app.myapp.foo");
+		assertThat(result).containsKey("app.myapp.foo");
 	}
 
 	@Test
-	public void testCommandLineParamsParsing() {
+	void commandLineParamsParsing() {
 		assertArrays(new String[] { "--format=x,y,z" }, new String[] { "--format=x,y,z" });
 		assertArrays(new String[] { "--format=yyyy-MM-dd" }, new String[] { "--format=yyyy-MM-dd" });
 		assertArrays(new String[] { "'--format=yyyy-MM-dd HH:mm:ss.SSS'" },
@@ -260,16 +272,18 @@ public class DeploymentPropertiesUtilsTests {
 	}
 
 	@Test
-	public void testParseDeploymentProperties() throws IOException {
+	void parseDeploymentProperties() throws IOException {
 		File file = Files.createTempFile(null, ".yaml").toFile();
 		FileCopyUtils.copy("app.foo1:\n  bar1: spam".getBytes(), file);
 
 		Map<String, String> props = DeploymentPropertiesUtils.parseDeploymentProperties("app.foo2=bar2", file, 0);
-		assertThat(props.size()).isEqualTo(1);
-		assertThat(props.get("app.foo2")).isEqualTo("bar2");
+		assertThat(props)
+				.hasSize(1)
+				.containsEntry("app.foo2", "bar2");
 
 		props = DeploymentPropertiesUtils.parseDeploymentProperties("foo2=bar2", file, 1);
-		assertThat(props.size()).isEqualTo(1);
-		assertThat(props.get("app.foo1.bar1")).isEqualTo("spam");
+		assertThat(props)
+				.hasSize(1)
+				.containsEntry("app.foo1.bar1", "spam");
 	}
 }

@@ -15,15 +15,20 @@
  */
 package org.springframework.cloud.dataflow.server.batch;
 
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.springframework.batch.core.repository.dao.Jackson2ExecutionContextStringSerializer;
 
 /**
  * Implements the same logic as used in Batch 5.x

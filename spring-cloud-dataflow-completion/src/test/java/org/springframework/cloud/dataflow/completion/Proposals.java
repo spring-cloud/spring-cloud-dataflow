@@ -20,12 +20,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.assertj.core.api.Condition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Contains helper Hamcrest matchers for testing completion proposal related code.
@@ -34,32 +32,25 @@ import org.slf4j.LoggerFactory;
  * @author Corneil du Plessis
  */
 class Proposals {
-	private static final Logger log = LoggerFactory.getLogger(Proposals.class);
-
-	static Condition<CompletionProposal> proposalThatIs(String text) {
-		return new Condition<>(item -> text.equals(item.getText()), "proposalThatIs");
+	static Condition<CompletionProposal> proposal(String text) {
+		return new Condition<>(actual -> text.equals(actual.getText()) , "text:" + text);
 	}
-	static Condition<CompletionProposal> proposalThatStartsWith(String text) {
-		return new Condition<>(item -> item.getText().startsWith(text), "proposalThatStartsWith");
+	static Condition<CompletionProposal> proposal(Predicate<String> check) {
+		return new Condition<>(actual -> check.test(actual.getText()) , "check");
 	}
-	public static Condition<? super List<? extends CompletionProposal>> proposalThatHas(boolean all, String ...text) {
-		Set<String> texts = new HashSet<>(Arrays.asList(text));
-		if(all) {
-			return new Condition<>(items -> {
-				Set<String> itemStrings = items.stream().map(completionProposal -> completionProposal.getText()).collect(Collectors.toSet());
-				return texts.stream().allMatch(txt -> itemStrings.contains(txt));
-				},"proposalThatHasAll");
-		} else {
-			return new Condition<>(items ->  {
-				Set<String> itemStrings = items.stream().map(completionProposal -> completionProposal.getText()).collect(Collectors.toSet());
-				return texts.stream().anyMatch(txt -> itemStrings.contains(txt));
-				}, "proposalThatHasAny");
-		}
+	static boolean hasAny(List<? extends CompletionProposal> proposals, String ... text) {
+		Set<String> items = new HashSet<>(Arrays.asList(text));
+		return proposals.stream().anyMatch(item -> items.contains(item.getText()));
 	}
-	public static Condition<? super List<? extends CompletionProposal>> proposalThatHasAll(String ...text) {
-		return proposalThatHas(true, text);
+	static boolean hasAll(List<? extends CompletionProposal> proposals, String ... text) {
+		Set<String> items = new HashSet<>(Arrays.asList(text));
+		Set<String> proposalTextItems = proposals.stream().map(completionProposal -> completionProposal.getText()).collect(Collectors.toSet());
+		return items.stream().allMatch(proposalTextItems::contains);
 	}
-	public static Condition<? super List<? extends CompletionProposal>> proposalThatHasAny(String ...text) {
-		return proposalThatHas(false, text);
+	static Condition<List<? extends CompletionProposal>> any(String ... text) {
+		return new Condition<>(actual-> hasAny(actual, text), "hasAny");
+	}
+	static Condition<List<? extends CompletionProposal>> all(String ... text) {
+		return new Condition<>(actual-> hasAll(actual, text), "hasAll");
 	}
 }

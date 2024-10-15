@@ -56,6 +56,13 @@ The **$$dataflow-tasklauncher$$** $$sink$$ supports the following configuration 
 Properties grouped by prefix:
 
 
+=== retry
+
+$$initial-delay$$:: $$The initial delay in milliseconds.$$ *($$Integer$$, default: `$$1000$$`)*
+$$max-attempts$$:: $$Maximum number of attempts$$ *($$Integer$$, default: `$$-1$$`)*
+$$max-period$$:: $$The maximum polling period in milliseconds. Must be greater than initialDelay.$$ *($$Integer$$, default: `$$30000$$`)*
+$$multiplier$$:: $$The multiplier used by retry template exponential backoff.$$ *($$Double$$, default: `$$1.5$$`)*
+
 === spring.cloud.dataflow.client.authentication
 
 $$access-token$$:: $$OAuth2 Access Token.$$ *($$String$$, default: `$$<none>$$`)*
@@ -84,9 +91,9 @@ $$skip-ssl-validation$$:: $$Skip Ssl validation.$$ *($$Boolean$$, default: `$$fa
 
 == Using the TaskLauncher
 The dataflow-tasklauncher sink consumes `LaunchRequest` messages, as described above, and launches a task using the target Data Flow server (given by `--spring.cloud.dataflow.client.server-uri`).
-The task launcher periodically polls its input source for launch requests but will pause polling when the platform has reached it's concurrent task execution limit, given by `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].maximum-concurrent-tasks`.
+The task launcher periodically polls its input source for launch requests but will pause polling when the platform has reached its concurrent task execution limit, given by `spring.cloud.dataflow.task.platform.<platform-type>.accounts[<account-name>].maximum-concurrent-tasks`.
 This prevents the SCDF deployer's deployment platform from exhausting its resources under heavy task load.
-The poller is scheduled using a `DynamicPeriodicTrigger`. By default the initial polling rate is 1 second, but may be configured to any duration. When polling is paused, or if there are no launch requests present, the trigger period will increase, applying exponential backoff, up to a configured maximum (30 seconds by default).
+The poller is scheduled using a `DynamicPeriodicTrigger`. By default, the initial polling rate is 1 second, but may be configured to any duration. When polling is paused, or if there are no launch requests present, the trigger period will increase, applying exponential backoff, up to a configured maximum (30 seconds by default).
 
 NOTE: This version of the Data Flow task launcher is certified for the corresponding Spring Cloud Dataflow Server version.
 
@@ -111,15 +118,17 @@ The Data Flow client supports both basic and OAuth2 authentication.
 
 For basic authentication set the username and password:
 
-```
+[source]
+----
 --spring.cloud.dataflow.client.authentication.basic.username=<username> --spring.cloud.dataflow.client.authentication.basic.password=<password>
-```
+----
 
 For OAuth2 authentication, set the `client-id`, `client-secret`, and `token-uri` at a minimum. These values correspond to values set in the SCDF server's OAuth2 configuration.
 For more details, see https://docs.spring.io/spring-cloud-dataflow/docs/current/reference/htmlsingle/#configuration-local-security[the Security section in the Data Flow reference].
 
-```
+[source]
+----
 --spring.cloud.dataflow.client.authentication.client-id=<client-id> --spring.cloud.dataflow.client.authentication.client-secret=<client-secret> spring.cloud.dataflow.client.authentication.token-uri: <token-uri>
-```
+----
 
 //end::ref-doc[]

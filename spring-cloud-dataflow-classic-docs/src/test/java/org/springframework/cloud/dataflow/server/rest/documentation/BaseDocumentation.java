@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,14 +33,7 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
-import org.springframework.cloud.dataflow.core.database.support.MultiSchemaIncrementerFactory;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.TaskSchedulerController;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.JdbcDataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.single.LocalDataflowResource;
 import org.springframework.cloud.deployer.spi.app.ActuatorOperations;
@@ -56,11 +48,9 @@ import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.VersionInfo;
-import org.springframework.cloud.task.repository.support.DatabaseType;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
@@ -95,7 +85,7 @@ public abstract class BaseDocumentation {
 
 	@RegisterExtension
 	public final static LocalDataflowResource springDataflowServer = new LocalDataflowResource(
-			"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
+		"classpath:rest-docs-config.yml", true, true, true, true, skipperServerPort);
 
 	@BeforeEach
 	public void setupMocks(RestDocumentationContextProvider restDocumentationContextProvider) throws Exception {
@@ -120,7 +110,7 @@ public abstract class BaseDocumentation {
 		when(springDataflowServer.getSkipperClient().search(ArgumentMatchers.anyString(), ArgumentMatchers.anyBoolean())).thenReturn(new ArrayList<>());
 
 		this.prepareDocumentationTests(springDataflowServer.getWebApplicationContext(),
-				restDocumentationContextProvider);
+			restDocumentationContextProvider);
 	}
 
 	public static final String TARGET_DIRECTORY = "target/generated-snippets";
@@ -136,14 +126,14 @@ public abstract class BaseDocumentation {
 	protected ApplicationContext context;
 
 	protected void prepareDocumentationTests(WebApplicationContext context,
-			RestDocumentationContextProvider restDocumentationContextProvider) throws Exception {
+											 RestDocumentationContextProvider restDocumentationContextProvider) {
 		this.context = context;
 		this.documentationHandler = document("{class-name}/{method-name}", preprocessResponse(prettyPrint()));
 		this.documentation = new ToggleableResultHandler(documentationHandler);
 
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(context)
 			.apply(documentationConfiguration(restDocumentationContextProvider).uris().withPort(9393))
-				.alwaysDo((ToggleableResultHandler) this.documentation).build();
+			.alwaysDo((ToggleableResultHandler) this.documentation).build();
 
 		this.dataSource = springDataflowServer.getWebApplicationContext().getBean(DataSource.class);
 		TaskSchedulerController controller = springDataflowServer.getWebApplicationContext()
@@ -162,7 +152,7 @@ public abstract class BaseDocumentation {
 	 * @param version the version to register
 	 */
 	void registerApp(ApplicationType type, String name, String version) throws Exception {
-		String group = type == ApplicationType.task ? "org.springframework.cloud.task.app" : "org.springframework.cloud.stream.app";
+		String group = type == ApplicationType.task ? "io.spring" : "org.springframework.cloud.stream.app";
 		String binder = type == ApplicationType.task ? "" : "-rabbit";
 
 		documentation.dontDocument(
@@ -208,28 +198,6 @@ public abstract class BaseDocumentation {
 								delete("/streams/definitions/{name}", name))
 						.andExpect(status().isOk())
 		);
-	}
-
-	protected DataflowTaskExecutionMetadataDaoContainer createDataFlowTaskExecutionMetadataDaoContainer(SchemaService schemaService) {
-		DataflowTaskExecutionMetadataDaoContainer result = new DataflowTaskExecutionMetadataDaoContainer();
-		MultiSchemaIncrementerFactory incrementerFactory = new MultiSchemaIncrementerFactory(dataSource);
-		String databaseType;
-		try {
-			databaseType = DatabaseType.fromMetaData(dataSource).name();
-		} catch (MetaDataAccessException e) {
-			throw new IllegalStateException(e);
-		}
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			DataflowTaskExecutionMetadataDao dao = new JdbcDataflowTaskExecutionMetadataDao(
-					dataSource,
-					incrementerFactory.getIncrementer(databaseType,
-							SchemaUtilities.getQuery("%PREFIX%EXECUTION_METADATA_SEQ", target.getTaskPrefix())
-					),
-					target.getTaskPrefix()
-			);
-			result.add(target.getName(), dao);
-		}
-		return result;
 	}
 
 	/**

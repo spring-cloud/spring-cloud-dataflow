@@ -15,12 +15,14 @@
  */
 package org.springframework.cloud.skipper.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.Type;
+
+import org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobUserType;
+
 
 /**
  * @author Mark Pollack
@@ -31,7 +33,7 @@ public class Manifest extends AbstractEntity {
 
 	@NotNull
 	@Lob
-	@Type(type = "org.springframework.cloud.dataflow.common.persistence.type.DatabaseAwareLobType")
+	@Type(DatabaseAwareLobUserType.class)
 	private String data;
 
 	public Manifest() {

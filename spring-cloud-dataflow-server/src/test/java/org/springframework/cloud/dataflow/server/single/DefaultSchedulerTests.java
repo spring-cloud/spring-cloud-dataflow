@@ -18,14 +18,12 @@ package org.springframework.cloud.dataflow.server.single;
 
 import java.util.List;
 
-
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.dataflow.core.TaskPlatform;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 		properties = {
 				"spring.cloud.dataflow.features.schedules-enabled=true"
 		})
-public class DefaultSchedulerTests {
+class DefaultSchedulerTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
@@ -47,7 +45,7 @@ public class DefaultSchedulerTests {
 	SchedulerService schedulerService;
 
 	@Test
-	public void shouldBeLocalPrimaryPlatformIfSchedulesEnabled() {
+	void shouldBeLocalPrimaryPlatformIfSchedulesEnabled() {
 		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Local");

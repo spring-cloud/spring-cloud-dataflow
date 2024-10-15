@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-dataflow-tasklauncher</artifactId>
-		<version>2.11.5-SNAPSHOT</version>
+		<version>3.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>spring-cloud-dataflow-tasklauncher-function</artifactId>
@@ -16,6 +16,7 @@
 
 	<properties>
 		<failIfNoTests>true</failIfNoTests>
+		<java.version>17</java.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 	</properties>
 	<dependencies>

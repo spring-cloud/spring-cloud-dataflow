@@ -15,18 +15,15 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
+import org.junit.Test;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.failure;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.successful;
-
-import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthCheck;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthChecks;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure;
 
 public class PortsHealthCheckTests {
     private final HealthCheck<Container> healthCheck = HealthChecks.toHaveAllPortsOpen();
@@ -36,14 +33,14 @@ public class PortsHealthCheckTests {
     public void be_healthy_when_all_ports_are_listening() {
         whenTheContainerHasAllPortsOpen();
 
-        assertThat(healthCheck.isHealthy(container), is(successful()));
+        assertThat(healthCheck.isHealthy(container), successful());
     }
 
     @Test
     public void be_unhealthy_when_all_ports_are_not_listening() {
         whenTheContainerDoesNotHaveAllPortsOpen();
 
-        assertThat(healthCheck.isHealthy(container), is(failure()));
+        assertThat(healthCheck.isHealthy(container), failure());
     }
 
     private void whenTheContainerDoesNotHaveAllPortsOpen() {

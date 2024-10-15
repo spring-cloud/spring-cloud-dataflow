@@ -18,11 +18,19 @@ package org.springframework.cloud.dataflow.server.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.info.BuildInfoContributor;
@@ -40,6 +48,7 @@ import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironment
 import org.springframework.cloud.dataflow.rest.resource.about.RuntimeEnvironmentDetails;
 import org.springframework.cloud.dataflow.rest.resource.about.SecurityInfo;
 import org.springframework.cloud.dataflow.rest.resource.about.VersionInfo;
+import org.springframework.cloud.dataflow.rest.util.HttpUtils;
 import org.springframework.cloud.dataflow.server.config.DataflowMetricsProperties;
 import org.springframework.cloud.dataflow.server.config.VersionInfoProperties;
 import org.springframework.cloud.dataflow.server.config.features.FeaturesProperties;
@@ -58,8 +67,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
@@ -140,7 +149,7 @@ public class AboutController {
 	 * @return Detailed information about the enabled features, versions of implementation
 	 * libraries, and security configuration
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public AboutResource getAboutResource() {
 		final AboutResource aboutResource = new AboutResource();
@@ -281,8 +290,14 @@ public class AboutController {
 			String version) {
 		String result = defaultValue;
 		if (result == null && StringUtils.hasText(url)) {
+			ConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(HttpUtils.buildCertificateIgnoringSslContext(), NoopHostnameVerifier.INSTANCE);
+
+			Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+				.register("https", sslsf)
+				.register("http", new PlainConnectionSocketFactory())
+				.build();
 			CloseableHttpClient httpClient = HttpClients.custom()
-					.setSSLHostnameVerifier(new NoopHostnameVerifier())
+					.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup))
 					.build();
 			HttpComponentsClientHttpRequestFactory requestFactory
 					= new HttpComponentsClientHttpRequestFactory();

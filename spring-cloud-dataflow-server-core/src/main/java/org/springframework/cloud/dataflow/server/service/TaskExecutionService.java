@@ -54,40 +54,37 @@ public interface TaskExecutionService {
 	 * @param taskId       the ID that uniquely identifies the task
 	 * @return the logs of the task application.
 	 */
-	String getLog(String platformName, String taskId, String schemaTarget);
+	String getLog(String platformName, String taskId);
 
 	/**
 	 * Request the platform to stop the task executions for the ids provided.
 	 *
 	 * @param ids a set of ids for the task executions to be stopped.
 	 */
-	void stopTaskExecution(Set<Long> ids, String schemaTarget);
+	void stopTaskExecution(Set<Long> ids);
 
 	/**
 	 * Request the platform to stop the task executions for the ids provided.
 	 *
 	 * @param ids          a set of ids for the task executions to be stopped.
-	 * @param schemaTarget the schema target of the task execution.
 	 * @param platform     The name of the platform where the tasks are executing.
 	 */
-	void stopTaskExecution(Set<Long> ids, String schemaTarget, String platform);
+	void stopTaskExecution(Set<Long> ids, String platform);
 
 	/**
 	 * Retrieve the TaskManifest for the execution id provided
 	 *
 	 * @param id           task exectution id
-	 * @param schemaTarget the schema target of the task execution.
 	 * @return {@code TaskManifest} or null if not found.
 	 */
-	TaskManifest findTaskManifestById(Long id, String schemaTarget);
+	TaskManifest findTaskManifestById(Long id);
 
 	/**
 	 *
 	 * @param ids A set of task execution ids.
-	 * @param schemaTarget Relevant schema target.
 	 * @return collection of manifests mapped by the relevant task execution id.
 	 */
-	Map<Long, TaskManifest> findTaskManifestByIds(Set<Long> ids, String schemaTarget);
+	Map<Long, TaskManifest> findTaskManifestByIds(Set<Long> ids);
 
 	/**
 	 * Returns all the task execution IDs with the option to include only the completed task executions.

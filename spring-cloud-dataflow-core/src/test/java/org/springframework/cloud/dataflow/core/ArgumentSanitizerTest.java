@@ -22,13 +22,14 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Christian Tzolov
  * @author Ilayaperumal Gopinathan
+ * @author Corneil du Plessis
  */
-public class ArgumentSanitizerTest {
+class ArgumentSanitizerTest {
 
 	private ArgumentSanitizer sanitizer;
 
@@ -36,20 +37,20 @@ public class ArgumentSanitizerTest {
 			"vcap_services", "url" };
 
 	@BeforeEach
-	public void before() {
+	void before() {
 		sanitizer = new ArgumentSanitizer();
 	}
 
 	@Test
-	public void testSanitizeProperties() {
+	void sanitizeProperties() {
 		for (String key : keys) {
-			assertEquals("--" + key + "=******", sanitizer.sanitize("--" + key + "=foo"));
-			assertEquals("******", sanitizer.sanitize(key, "bar"));
+			assertThat(sanitizer.sanitize("--" + key + "=foo")).isEqualTo("--" + key + "=******");
+			assertThat(sanitizer.sanitize(key, "bar")).isEqualTo("******");
 		}
 	}
 
 	@Test
-	public void testSanitizeArguments() {
+	void sanitizeArguments() {
 		final List<String> arguments = new ArrayList<>();
 
 		for (String key : keys) {
@@ -58,21 +59,21 @@ public class ArgumentSanitizerTest {
 
 		final List<String> sanitizedArguments = sanitizer.sanitizeArguments(arguments);
 
-		assertEquals(keys.length, sanitizedArguments.size());
+		assertThat(sanitizedArguments).hasSize(keys.length);
 
 		int order = 0;
 		for(String sanitizedString : sanitizedArguments) {
-			assertEquals("--" + keys[order] + "=******", sanitizedString);
+			assertThat(sanitizedString).isEqualTo("--" + keys[order] + "=******");
 			order++;
 		}
 	}
 
 
 	@Test
-	public void testMultipartProperty() {
-		assertEquals("--password=******", sanitizer.sanitize("--password=boza"));
-		assertEquals("--one.two.password=******", sanitizer.sanitize("--one.two.password=boza"));
-		assertEquals("--one_two_password=******", sanitizer.sanitize("--one_two_password=boza"));
+	void multipartProperty() {
+		assertThat(sanitizer.sanitize("--password=boza")).isEqualTo("--password=******");
+		assertThat(sanitizer.sanitize("--one.two.password=boza")).isEqualTo("--one.two.password=******");
+		assertThat(sanitizer.sanitize("--one_two_password=boza")).isEqualTo("--one_two_password=******");
 	}
 
 //	@Test

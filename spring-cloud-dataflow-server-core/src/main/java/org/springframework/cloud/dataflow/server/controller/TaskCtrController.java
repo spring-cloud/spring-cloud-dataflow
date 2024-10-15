@@ -25,8 +25,8 @@ import org.springframework.cloud.dataflow.server.service.impl.ComposedTaskRunner
 import org.springframework.cloud.dataflow.server.service.impl.TaskConfigurationProperties;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,7 +56,7 @@ public class TaskCtrController {
 		this.appResourceCommon = appResourceCommon;
 	}
 
-	@RequestMapping(value = "/options", method = RequestMethod.GET)
+	@GetMapping("/options")
 	@ResponseStatus(HttpStatus.OK)
 	public List<ConfigurationMetadataProperty> options() {
 		URI ctrUri = null;

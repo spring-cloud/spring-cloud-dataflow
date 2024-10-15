@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.springframework.cloud</groupId>
 	<artifactId>spring-cloud-dataflow-build</artifactId>
-	<version>2.11.5-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Spring Cloud Dataflow Build</name>
 	<description>Spring Cloud Dataflow Build, managing plugins and dependencies</description>
@@ -14,20 +14,16 @@
 	</modules>
 	<url>https://spring.io/projects/spring-cloud-dataflow</url>
 	<properties>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 		<resource.delimiter>@</resource.delimiter>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<main.basedir>${basedir}</main.basedir>
 		<docs.main>${project.artifactId}</docs.main>
 		<!-- Keep spring boot version in sync between spring-cloud-dataflow-build and spring-boot-dependencies (parent and properties) -->
-		<spring-boot.version>2.7.18</spring-boot.version>
-		<!-- Required by spring-cloud-skipper-docs/pom.xml for javadoc processing -->
-		<spring-framework.version>5.3.39</spring-framework.version>
-		<spring-cloud.version>2021.0.9</spring-cloud.version>
-		<spring-security.version>5.7.12</spring-security.version>
-		<spring-shell.version>2.1.15</spring-shell.version>
-		<dataflow.version>2.11.5-SNAPSHOT</dataflow.version>
+		<spring-boot.version>3.3.4</spring-boot.version>
+		<spring-framework.version>6.1.13</spring-framework.version>
+		<dataflow.version>3.0.0-SNAPSHOT</dataflow.version>
 		<docs.resources.dir>${project.build.directory}/build-docs</docs.resources.dir>
 		<refdocs.build.directory>${project.build.directory}/refdocs/</refdocs.build.directory>
 		<spring-asciidoctor-extensions.version>0.1.3.RELEASE</spring-asciidoctor-extensions.version>
@@ -46,18 +42,18 @@
 		<sonar.language>java</sonar.language>
 
 		<!-- Plugins -->
-		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
 		<maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
 		<!-- for backwards compatibility, use maven-checkstyle-plugin.version -->
 		<checkstyle.version>${maven-checkstyle-plugin.version}</checkstyle.version>
 		<puppycrawl-tools-checkstyle.version>8.29</puppycrawl-tools-checkstyle.version>
 		<spring-javaformat.version>0.0.9</spring-javaformat.version>
-		<maven-failsafe-plugin.version>3.2.3</maven-failsafe-plugin.version>
+		<maven-failsafe-plugin.version>3.5.0</maven-failsafe-plugin.version>
 		<maven-javadoc-plugin.version>3.4.1</maven-javadoc-plugin.version>
 		<maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 		<maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
-		<maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
-		<maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
+		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 		<maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
 		<git-commit-id-plugin.version>4.9.9</git-commit-id-plugin.version>
@@ -70,7 +66,7 @@
 		<artifactory-maven-plugin.version>2.2.1</artifactory-maven-plugin.version>
 		<license-maven-plugin.version>1.20</license-maven-plugin.version>
 		<spring-javaformat-checkstyle.version>0.0.7</spring-javaformat-checkstyle.version>
-		<maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
+		<maven-checkstyle-plugin.version>3.5.0</maven-checkstyle-plugin.version>
 		<disable.checks>false</disable.checks>
 		<maven-checkstyle-plugin.failsOnError>true</maven-checkstyle-plugin.failsOnError>
 		<maven-checkstyle-plugin.failOnViolation>true</maven-checkstyle-plugin.failOnViolation>
@@ -95,13 +91,17 @@
 		<maven-dependency-plugin-for-guides.phase>generate-resources</maven-dependency-plugin-for-guides.phase>
 		<groups />
 		<excludedGroups>slow,docker</excludedGroups>
+		<junit-jupiter.version>5.10.3</junit-jupiter.version>
+		<junit.version>4.13.1</junit.version>
+		<!--Specific Spring framework javadoc version for attach-javadocs plugin-->
+		<javadoc-spring.version>6.1.3</javadoc-spring.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dataflow-build-dependencies</artifactId>
-				<version>2.11.5-SNAPSHOT</version>
+				<version>3.0.0-SNAPSHOT</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -190,11 +190,9 @@
 					<artifactId>maven-failsafe-plugin</artifactId>
 					<version>${maven-failsafe-plugin.version}</version>
 					<configuration>
+						<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 						<groups>${groups}</groups>
 						<excludedGroups>${excludedGroups}</excludedGroups>
-						<excludes>
-							<exclude>**/Abstract*.*</exclude>
-						</excludes>
 					</configuration>
 					<executions>
 						<execution>
@@ -226,9 +224,8 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.2.5</version>
+					<version>${maven-surefire-plugin.version}</version>
 					<configuration>
-						<failIfNoTests>true</failIfNoTests>
 						<threadCount>1</threadCount>
 						<forkCount>1</forkCount>
 						<includes>
@@ -382,6 +379,7 @@
 						</execution>
 					</executions>
 					<configuration>
+						<loaderImplementation>CLASSIC</loaderImplementation>
 						<mainClass>${start-class}</mainClass>
 					</configuration>
 				</plugin>
@@ -466,7 +464,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-report-plugin</artifactId>
-					<version>3.0.0</version>
+					<version>${maven-surefire-report-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -474,10 +472,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
-				</configuration>
+                <configuration>
+                    <parameters>true</parameters>
+					<release>${java.version}</release>
+                </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -519,7 +517,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>${maven-surefire-report-plugin.version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -640,7 +638,7 @@
 					<plugin>
 						<groupId>org.jacoco</groupId>
 						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>0.8.8</version>
+						<version>0.8.12</version>
 						<configuration>
 							<destFile>${sonar.jacoco.reportPath}</destFile>
 							<append>true</append>
@@ -657,8 +655,9 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
+						<version>${maven-surefire-plugin.version}</version>
 						<configuration>
-							<failIfNoTests>true</failIfNoTests>
+							<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
 							<threadCount>1</threadCount>
 							<forkCount>1</forkCount>
 							<properties>
@@ -717,11 +716,6 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<version>${maven-failsafe-plugin.version}</version>
-						<configuration>
-							<excludes>
-								<exclude>**/Abstract*.*</exclude>
-							</excludes>
-						</configuration>
 					</plugin>
 				</plugins>
 			</build>

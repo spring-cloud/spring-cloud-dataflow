@@ -27,7 +27,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -35,10 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class StatusDocumentation extends BaseDocumentation {
+class StatusDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getStatusOfRelease() throws Exception {
+	void getStatusOfRelease() throws Exception {
 		Release release = createTestRelease();
 		when(this.releaseService.status(release.getName())).thenReturn(release.getInfo());
 		this.mockMvc.perform(
@@ -59,7 +58,7 @@ public class StatusDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getStatusOfReleaseForVersion() throws Exception {
+	void getStatusOfReleaseForVersion() throws Exception {
 		Release release = createTestRelease();
 		when(this.releaseService.status(release.getName(), release.getVersion())).thenReturn(release.getInfo());
 		this.mockMvc.perform(

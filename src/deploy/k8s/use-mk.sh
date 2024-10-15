@@ -10,7 +10,7 @@ if [ -z "$BASH_VERSION" ]; then
     exit 0
 fi
 if [ "$1" = "" ]; then
-  echo "Arguments <driver> [--namespace <namespace>] [database] [broker] [--pro] [--skip-reg] [--release] [--snapshot] [--milestone]"
+  echo "Arguments <driver> [--release | --snapshot | --milestone] [--pro] [--skip-reg] [--namespace <namespace> | -ns <namespace>] [postgres | postgresql | maria | mariadb | mysql | mysql57] [rabbit | rabbitmq | kafka] [prometheus | grafana]"
   echo "Driver must be one of kind, Or a valid driver for minikube like kvm2, docker, vmware, virtualbox, podman, vmwarefusion, hyperkit"
   return 0
 fi
@@ -20,5 +20,5 @@ export K8S_DRIVER
 KUBECONFIG=
 export KUBECONFIG
 shift
-source $SCDIR/set-ver.sh
+source $SCDIR/set-ver.sh $*
 

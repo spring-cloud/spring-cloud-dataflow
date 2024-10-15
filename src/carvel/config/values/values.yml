@@ -112,5 +112,5 @@ scdf:
         enabled: false
         image:
           repository: micrometermetrics/prometheus-rsocket-proxy
-          tag: 1.5.2
+          tag: 2.0.0-M1
           digest: ""

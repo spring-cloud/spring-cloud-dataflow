@@ -39,13 +39,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Corneil du Plessis
  */
 @SpringBootTest(classes = PackageMetadataServiceTests.TestConfig.class, properties = "spring.main.allow-bean-definition-overriding=true")
-public class PackageMetadataServiceTests {
+class PackageMetadataServiceTests {
 
 	@Autowired
 	private PackageMetadataService packageMetadataService;
 
 	@Test
-	public void calculateFilename() throws IOException {
+	void calculateFilename() throws IOException {
 		UrlResource urlResource = new UrlResource("file:./spring-cloud-skipper-server/src/test/resources/index.yml");
 		String filename = packageMetadataService.computeFilename(urlResource);
 		assertThat(filename).isEqualTo("file_dot_spring-cloud-skipper-server_src_test_resources_index.yml");

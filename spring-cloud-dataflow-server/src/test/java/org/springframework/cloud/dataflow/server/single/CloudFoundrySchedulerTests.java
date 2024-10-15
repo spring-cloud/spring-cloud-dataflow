@@ -69,7 +69,7 @@ import static org.mockito.Mockito.when;
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].connection.space=space",
 				"spring.cloud.dataflow.task.platform.cloudfoundry.accounts[cf].deployment.schedulerurl=https://localhost"
 		})
-public class CloudFoundrySchedulerTests {
+class CloudFoundrySchedulerTests {
 
 	@Autowired
 	List<TaskPlatform> taskPlatforms;
@@ -78,7 +78,7 @@ public class CloudFoundrySchedulerTests {
 	SchedulerService schedulerService;
 
 	@Test
-	public void schedulerServiceCreated() {
+	void schedulerServiceCreated() {
 		for (TaskPlatform taskPlatform : taskPlatforms) {
 			if (taskPlatform.isPrimary()) {
 				assertThat(taskPlatform.getName()).isEqualTo("Cloud Foundry");

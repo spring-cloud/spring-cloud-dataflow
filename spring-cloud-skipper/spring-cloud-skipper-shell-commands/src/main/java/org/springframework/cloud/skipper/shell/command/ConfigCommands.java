@@ -15,7 +15,6 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClientProperties;
 import org.springframework.cloud.skipper.client.SkipperServerException;
 import org.springframework.cloud.skipper.domain.AboutResource;
@@ -45,7 +44,6 @@ public class ConfigCommands extends AbstractSkipperCommand {
 
 	private final TargetHolder targetHolder;
 
-	@Autowired
 	public ConfigCommands(TargetHolder targetHolder,
 			ConsoleUserInput userInput) {
 		this.targetHolder = targetHolder;

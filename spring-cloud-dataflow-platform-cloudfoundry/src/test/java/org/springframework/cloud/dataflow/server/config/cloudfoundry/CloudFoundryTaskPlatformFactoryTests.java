@@ -16,7 +16,7 @@
 
 package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  **/
-public class CloudFoundryTaskPlatformFactoryTests {
+class CloudFoundryTaskPlatformFactoryTests {
 
 	private CloudFoundryPlatformTokenProvider platformTokenProvider;
 
@@ -80,7 +80,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	private CloudFoundryDeploymentProperties deploymentProperties;
 
 	@BeforeEach
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		cloudFoundryClientProvider = mock(CloudFoundryPlatformClientProvider.class);
 		cloudFoundrySchedulerClientProvider = mock(CloudFoundrySchedulerClientProvider.class);
 		cloudFoundryClient = mock(CloudFoundryClient.class);
@@ -100,14 +100,14 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		this.defaultConnectionProperties = new CloudFoundryConnectionProperties();
 		this.defaultConnectionProperties.setOrg("org");
 		this.defaultConnectionProperties.setSpace("space");
-		this.defaultConnectionProperties.setUrl(new URL("https://localhost:9999"));
+		this.defaultConnectionProperties.setUrl(URI.create("https://localhost:9999").toURL());
 
 		this.deploymentProperties = new CloudFoundryDeploymentProperties();
 		this.deploymentProperties.setApiTimeout(1L);
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatformNoScheduler() {
+	void cloudFoundryTaskPlatformNoScheduler() {
 		setupSinglePlatform();
 		TaskPlatformFactory taskPlatformFactory = CloudFoundryTaskPlatformFactory
 				.builder()
@@ -128,7 +128,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskPlatformWithScheduler() {
+	void cloudFoundryTaskPlatformWithScheduler() {
 		setupSinglePlatform();
 		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));
@@ -148,7 +148,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 	}
 
 	@Test
-	public void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
+	void cloudFoundryTaskMultiPlatformWithScheduler() throws Exception{
 		setupMultiPlatform();
 		when(this.cloudFoundrySchedulerClientProvider.cloudFoundrySchedulerClient(anyString())).thenReturn(
 				mock(SchedulerClient.class));
@@ -212,7 +212,7 @@ public class CloudFoundryTaskPlatformFactoryTests {
 		this.anotherOrgSpaceConnectionProperties = new CloudFoundryConnectionProperties();
 		this.anotherOrgSpaceConnectionProperties.setOrg("another-org");
 		this.anotherOrgSpaceConnectionProperties.setSpace("another-space");
-		this.anotherOrgSpaceConnectionProperties.setUrl(new URL("https://localhost:9999"));
+		this.anotherOrgSpaceConnectionProperties.setUrl(URI.create("https://localhost:9999").toURL());
 
 
 		CloudFoundryProperties cloudFoundryProperties = new CloudFoundryProperties();

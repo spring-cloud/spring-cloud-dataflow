@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2016-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,27 +26,26 @@ import org.springframework.boot.loader.archive.Archive;
 
 /**
  * Strategy interface for creating a ClassLoader that mimics the one used when a boot
- * uber-jar runs.
+ * uber jar runs.
  *
  * @author Eric Bottard
+ * @author Chris Bono
  */
 public class BootClassLoaderFactory {
 
-	private static final String BOOT_13_LIBS_LOCATION = "lib/";
+	private static final String BOOT_LIBS_LOCATION = "BOOT-INF/lib/";
 
-	private static final String BOOT_14_LIBS_LOCATION = "BOOT-INF/lib/";
-
-	private static final String BOOT_14_CLASSESS_LOCATION = "BOOT-INF/classes/";
+	private static final String BOOT_CLASSES_LOCATION = "BOOT-INF/classes/";
 
 	private final Archive archive;
 
 	private final ClassLoader parent;
 
 	/**
-	 * Create a new factory for dealing with the given boot uberjar archive.
+	 * Create a new factory for dealing with the given boot uber archive.
 	 *
-	 * @param archive a boot uberjar Archive
-	 * @param parent the parent classloader to set for new created ClassLoaders
+	 * @param archive a boot uber archive
+	 * @param parent the parent classloader to set for created classloader
 	 */
 	public BootClassLoaderFactory(Archive archive, ClassLoader parent) {
 		this.archive = archive;
@@ -54,31 +53,16 @@ public class BootClassLoaderFactory {
 	}
 
 	public URLClassLoader createClassLoader() {
-		boolean useBoot14Layout = false;
-		for (Archive.Entry entry : archive) {
-			if (entry.getName().startsWith(BOOT_14_LIBS_LOCATION)) {
-				useBoot14Layout = true;
-				break;
-			}
-		}
-
-		ClassLoaderExposingLauncher launcher = useBoot14Layout ? new Boot14ClassLoaderExposingLauncher()
-				: new Boot13ClassLoaderExposingLauncher();
-
-		return launcher.createClassLoader();
+		return new ClassLoaderExposingLauncher().createClassLoader();
 	}
 
-	private abstract class ClassLoaderExposingLauncher extends ExecutableArchiveLauncher {
+	private class ClassLoaderExposingLauncher extends ExecutableArchiveLauncher {
+
 		ClassLoaderExposingLauncher() {
 			super(archive);
 		}
 
-		@Override
-		protected ClassLoader createClassLoader(URL[] urls) throws Exception {
-			return new LaunchedURLClassLoader(urls, parent);
-		}
-
-		public URLClassLoader createClassLoader() {
+		URLClassLoader createClassLoader() {
 			try {
 				return (URLClassLoader) createClassLoader(getClassPathArchivesIterator());
 			}
@@ -87,30 +71,19 @@ public class BootClassLoaderFactory {
 			}
 		}
 
-	}
-
-	private class Boot13ClassLoaderExposingLauncher extends ClassLoaderExposingLauncher {
+		@Override
+		protected ClassLoader createClassLoader(URL[] urls) {
+			return new LaunchedURLClassLoader(urls, parent);
+		}
 
 		@Override
 		protected boolean isNestedArchive(Archive.Entry entry) {
-			return !entry.isDirectory() && entry.getName().startsWith(BOOT_13_LIBS_LOCATION);
+			return (!entry.isDirectory() && entry.getName().startsWith(BOOT_LIBS_LOCATION))
+					|| (entry.isDirectory() && entry.getName().equals(BOOT_CLASSES_LOCATION));
 		}
 
 		@Override
-		protected void postProcessClassPathArchives(List<Archive> archives) throws Exception {
-			archives.add(0, getArchive());
-		}
-	}
-
-	private class Boot14ClassLoaderExposingLauncher extends ClassLoaderExposingLauncher {
-		@Override
-		protected boolean isNestedArchive(Archive.Entry entry) {
-			return (!entry.isDirectory() && entry.getName().startsWith(BOOT_14_LIBS_LOCATION))
-					|| (entry.isDirectory() && entry.getName().equals(BOOT_14_CLASSESS_LOCATION));
-		}
-
-		@Override
-		protected void postProcessClassPathArchives(List<Archive> archives) throws Exception {
+		protected void postProcessClassPathArchives(List<Archive> archives) {
 			archives.add(0, getArchive());
 		}
 	}

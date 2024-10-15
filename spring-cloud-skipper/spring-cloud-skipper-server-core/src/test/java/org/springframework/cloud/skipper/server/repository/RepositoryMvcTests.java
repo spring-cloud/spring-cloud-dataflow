@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.cloud.skipper.server.AbstractMockMvcTests;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,10 +27,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Mark Pollack
  * @author Corneil du Plessis
  */
-public class RepositoryMvcTests extends AbstractMockMvcTests {
+class RepositoryMvcTests extends AbstractMockMvcTests {
 
 	@Test
-	public void shouldReturnRepositoryIndex() throws Exception {
+	void shouldReturnRepositoryIndex() throws Exception {
 		mockMvc.perform(get("/api")).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.repositories").exists());
 	}

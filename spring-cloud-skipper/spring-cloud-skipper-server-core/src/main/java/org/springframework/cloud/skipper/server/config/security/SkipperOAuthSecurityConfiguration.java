@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.ExpressionUrlAuthorizationConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -48,7 +49,7 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 	private AuthorizationProperties authorizationProperties;
 
 	@Override
-	protected void configure(HttpSecurity http) throws Exception {
+	protected HttpBasicConfigurer configure(HttpSecurity http) throws Exception {
 
 		final BasicAuthenticationEntryPoint basicAuthenticationEntryPoint = new BasicAuthenticationEntryPoint();
 		basicAuthenticationEntryPoint.setRealmName(SecurityConfigUtils.BASIC_AUTH_REALM_NAME);
@@ -69,10 +70,10 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry security =
 				http.authorizeRequests()
-						.antMatchers(getAuthorizationProperties().getPermitAllPaths()
+						.requestMatchers(getAuthorizationProperties().getPermitAllPaths()
 								.toArray(new String[0]))
 						.permitAll()
-						.antMatchers(getAuthorizationProperties().getAuthenticatedPaths()
+						.requestMatchers(getAuthorizationProperties().getAuthenticatedPaths()
 								.toArray(new String[0]))
 						.authenticated();
 
@@ -99,5 +100,6 @@ public class SkipperOAuthSecurityConfiguration extends OAuthSecurityConfiguratio
 		}
 
 		getSecurityStateBean().setAuthenticationEnabled(true);
+		return http.getConfigurer(HttpBasicConfigurer.class);
 	}
 }

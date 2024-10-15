@@ -103,7 +103,7 @@ Working build file for _Maven_ would look like something shown below:
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
 		<spring-cloud.version>2021.0.9</spring-cloud.version>
 		<spring-cloud-skipper.version>{project-version}</spring-cloud-skipper.version>
 		<!--
@@ -179,14 +179,14 @@ apply plugin: 'org.springframework.boot'
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = 1.8
+sourceCompatibility = 17
 
 repositories {
 	mavenLocal()
 	mavenCentral()
-	maven { url "https://repo.springsource.org/libs-snapshot" }
-	maven { url "https://repo.springsource.org/libs-release" }
-	maven { url "https://repo.springsource.org/libs-milestone" }
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/release" }
+	maven { url "https://repo.spring.io/milestone" }
 }
 
 

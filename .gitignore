@@ -22,6 +22,7 @@ logs/
 scdf-logs/
 .attach_pid*
 .jfrog/
+.gradle
 
 # Eclipse artifacts, including WTP generated manifests
 .classpath

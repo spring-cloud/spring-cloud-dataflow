@@ -31,7 +31,6 @@ import org.springframework.cloud.dataflow.rest.job.TaskJobExecution;
 import org.springframework.cloud.dataflow.rest.job.support.TimeUtils;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,10 +40,9 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,7 +69,6 @@ public class JobInstanceController {
 	 * @param taskJobService the {@link TaskJobService} used for retrieving batch instance
 	 *                       data.
 	 */
-	@Autowired
 	public JobInstanceController(TaskJobService taskJobService) {
 		Assert.notNull(taskJobService, "taskJobService must not be null");
 		this.taskJobService = taskJobService;
@@ -86,7 +83,7 @@ public class JobInstanceController {
 	 * @return a list of Job Instance
 	 * @throws NoSuchJobException if the job for jobName specified does not exist.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET, params = "name")
+	@GetMapping(value = "", params = "name")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<JobInstanceResource> list(
 			@RequestParam("name") String jobName,
@@ -104,24 +101,20 @@ public class JobInstanceController {
 	 * @throws NoSuchJobInstanceException if job instance for the id does not exist.
 	 * @throws NoSuchJobException         if the job for the job instance does not exist.
 	 */
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+	@GetMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
 	public JobInstanceResource view(
-			@PathVariable("id") long id,
-			@RequestParam(name = "schemaTarget", required = false) String schemaTarget
+			@PathVariable long id
 	) throws NoSuchJobInstanceException, NoSuchJobException {
-		if (!StringUtils.hasText(schemaTarget)) {
-			schemaTarget = SchemaVersionTarget.defaultTarget().getName();
-		}
-		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id, schemaTarget);
+		JobInstanceExecutions jobInstance = taskJobService.getJobInstance(id);
 		if (jobInstance == null) {
-			throw new NoSuchJobInstanceException(String.format("No job instance for id '%d' and schema target '%s'", id, schemaTarget));
+			throw new NoSuchJobInstanceException(String.format("No job instance for id '%d'", id));
 		}
 		return jobAssembler.toModel(jobInstance);
 	}
 
 	/**
-	 * {@link org.springframework.hateoas.server.ResourceAssembler} implementation that converts
+	 * {@link RepresentationModelAssemblerSupport} implementation that converts
 	 * {@link JobInstance}s to {@link JobInstanceResource}s.
 	 */
 	private static class Assembler extends RepresentationModelAssemblerSupport<JobInstanceExecutions, JobInstanceResource> {

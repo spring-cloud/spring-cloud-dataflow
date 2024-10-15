@@ -15,12 +15,12 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import static java.util.Arrays.asList;
-
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static java.util.Arrays.asList;
 
 public class DockerCommandLocations {
     private static final Predicate<String> IS_NOT_NULL = path -> path != null;

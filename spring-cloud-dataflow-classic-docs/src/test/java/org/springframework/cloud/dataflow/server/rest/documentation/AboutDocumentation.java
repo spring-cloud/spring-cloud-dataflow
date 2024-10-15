@@ -24,7 +24,6 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -34,10 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @SuppressWarnings("NewClassNamingConvention")
-public class AboutDocumentation extends BaseDocumentation {
+class AboutDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getMetaInformation() throws Exception {
+	void getMetaInformation() throws Exception {
 		this.mockMvc.perform(
 			get("/about")
 				.accept(MediaType.APPLICATION_JSON))

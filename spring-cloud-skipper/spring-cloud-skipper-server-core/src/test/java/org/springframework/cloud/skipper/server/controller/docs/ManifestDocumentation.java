@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,6 @@ import org.springframework.http.MediaType;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseBody;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -35,10 +33,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class ManifestDocumentation extends BaseDocumentation {
+class ManifestDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getManifestOfRelease() throws Exception {
+	void getManifestOfRelease() throws Exception {
 		Release release = createTestRelease();
 		when(this.releaseService.manifest(release.getName())).thenReturn(release.getManifest());
 		final MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -53,7 +51,7 @@ public class ManifestDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getManifestOfReleaseForVersion() throws Exception {
+	void getManifestOfReleaseForVersion() throws Exception {
 		Release release = createTestRelease();
 
 		when(this.releaseService.manifest(release.getName(), 1)).thenReturn(release.getManifest());

@@ -21,7 +21,6 @@ import java.util.Properties;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.hateoas.PagedModel;
 
 /**
@@ -83,23 +82,10 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, String, String, AppBootSchemaVersion, boolean)}
 	 */
 	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, boolean force);
 
-	/**
-	 * Register an application name, type, and boot version with its Maven coordinates.
-	 *
-	 * @param name application name
-	 * @param type application type
-	 * @param uri URI for the application artifact
-	 * @param metadataUri URI for the application metadata artifact
-	 * @param bootVersion application boot version
-	 * @param force if {@code true}, overwrites a pre-existing registration
-	 * @return the new app registration
-	 */
-	AppRegistrationResource register(String name, ApplicationType type, String uri, String metadataUri, AppBootSchemaVersion bootVersion, boolean force);
 
 	/**
 	 * Register an application name, type and version with its Maven coordinates.
@@ -111,31 +97,10 @@ public interface AppRegistryOperations {
 	 * @param metadataUri URI for the application metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 * @return the new app registration
-	 * @deprecated in favor of {@link #register(String, ApplicationType, String, String, String, AppBootSchemaVersion, boolean)}
 	 */
 	@Deprecated
 	AppRegistrationResource register(String name, ApplicationType type, String version, String uri,
 			String metadataUri, boolean force);
-
-	/**
-	 * Register an application name, type, boot version, and version with its Maven coordinates.
-	 *
-	 * @param name application name
-	 * @param type application type
-	 * @param version application version
-	 * @param uri URI for the application artifact
-	 * @param metadataUri URI for the application metadata artifact
-	 * @param bootVersion application boot version
-	 * @param force if {@code true}, overwrites a pre-existing registration
-	 * @return the new app registration
-	 */
-	AppRegistrationResource register(String name,
-									 ApplicationType type,
-									 String version,
-									 String uri,
-									 String metadataUri,
-									 AppBootSchemaVersion bootVersion,
-									 boolean force);
 
 	/**
 	 * Unregister an application name and type.

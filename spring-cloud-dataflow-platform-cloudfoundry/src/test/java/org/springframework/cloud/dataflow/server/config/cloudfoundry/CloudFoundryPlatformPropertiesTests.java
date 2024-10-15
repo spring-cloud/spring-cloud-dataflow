@@ -17,7 +17,6 @@ package org.springframework.cloud.dataflow.server.config.cloudfoundry;
 
 import java.util.Map;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +34,18 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(classes = CloudFoundryPlatformPropertiesTests.TestConfig.class)
 @ActiveProfiles("cloudfoundry-platform-properties")
-public class CloudFoundryPlatformPropertiesTests {
+class CloudFoundryPlatformPropertiesTests {
 
 	@Autowired
 	private CloudFoundryPlatformProperties cloudFoundryPlatformProperties;
 
 	@Test
-	public void deserializationTest() {
+	void deserializationTest() {
 		Map<String, CloudFoundryPlatformProperties.CloudFoundryProperties> cfAccounts = this.cloudFoundryPlatformProperties
 				.getAccounts();
-		Assertions.assertThat(cfAccounts).hasSize(2);
-		Assertions.assertThat(cfAccounts).containsKeys("dev", "qa");
+		assertThat(cfAccounts)
+				.hasSize(2)
+				.containsKeys("dev", "qa");
 		assertThat(cfAccounts.get("dev").getConnection().getOrg()).isEqualTo("myOrg");
 		assertThat(cfAccounts.get("dev").getConnection().getClientId()).isEqualTo("id1");
 		assertThat(cfAccounts.get("dev").getConnection().getClientSecret()).isEqualTo("secret1");

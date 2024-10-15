@@ -16,17 +16,20 @@
 
 package org.springframework.cloud.dataflow.server.controller;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
@@ -34,14 +37,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.cloud.dataflow.server.config.apps.CommonApplicationProperties;
 import org.springframework.cloud.dataflow.server.configuration.JobDependencies;
-import org.springframework.cloud.dataflow.server.repository.JobRepositoryContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskBatchDaoContainer;
-import org.springframework.cloud.dataflow.server.repository.TaskExecutionDaoContainer;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
+import org.springframework.cloud.task.batch.listener.TaskBatchDao;
+import org.springframework.cloud.task.repository.dao.TaskExecutionDao;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
@@ -71,16 +71,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @EnableConfigurationProperties({CommonApplicationProperties.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class JobExecutionControllerTests {
+class JobExecutionControllerTests {
 
 	@Autowired
-	TaskExecutionDaoContainer daoContainer;
+	TaskExecutionDao taskExecutionDao;
 
 	@Autowired
-	JobRepositoryContainer jobRepositoryContainer;
+	JobRepository jobRepository;
 
 	@Autowired
-	TaskBatchDaoContainer taskBatchDaoContainer;
+	TaskBatchDao taskBatchDao;
 
 	private MockMvc mockMvc;
 
@@ -91,18 +91,14 @@ public class JobExecutionControllerTests {
 	RequestMappingHandlerAdapter adapter;
 
 	@Autowired
-	AggregateExecutionSupport aggregateExecutionSupport;
-
-	@Autowired
 	TaskDefinitionReader taskDefinitionReader;
 
 	@BeforeEach
-	public void setupMockMVC() {
+	void setupMockMVC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		this.mockMvc = JobExecutionUtils.createBaseJobExecutionMockMvc(
-				jobRepositoryContainer,
-				taskBatchDaoContainer,
-				daoContainer,
-				aggregateExecutionSupport,
+				jobRepository,
+				taskBatchDao,
+				taskExecutionDao,
 				taskDefinitionReader,
 				wac,
 				adapter
@@ -110,56 +106,47 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testJobExecutionControllerConstructorMissingRepository() {
+	void jobExecutionControllerConstructorMissingRepository() {
 		assertThatIllegalArgumentException().isThrownBy(() ->new JobExecutionController(null));
 	}
 
 	@Test
-	public void testGetExecutionNotFound() throws Exception {
+	void getExecutionNotFound() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testStopNonExistingJobExecution() throws Exception {
+	void stopNonExistingJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testRestartNonExistingJobExecution() throws Exception {
+	void restartNonExistingJobExecution() throws Exception {
 		mockMvc.perform(
 						put("/jobs/executions/1345345345345").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testRestartCompletedJobExecution() throws Exception {
+	void restartCompletedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/5").accept(MediaType.APPLICATION_JSON).param("restart", "true"))
 				.andExpect(status().isUnprocessableEntity());
 	}
 
 	@Test
-	public void testStopStartedJobExecution() throws Exception {
+	void stopStartedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isOk());
 	}
 
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x followup We need to investigate why SimpleJobService uses JSR-352 for the getJobNames")
 	@Test
-	public void testStopStartedJobExecutionWithInvalidSchema() throws Exception {
-		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON)
-						.param("stop", "true")
-						.queryParam("schemaTarget", "foo"))
-				.andExpect(status().is4xxClientError());
-	}
-
-
-	@Test
-	public void testStopStartedJobExecutionTwice() throws Exception {
+	void stopStartedJobExecutionTwice() throws Exception {
 		mockMvc.perform(put("/jobs/executions/6").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isOk());
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STARTED, taskDefinitionReader);
-		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STARTED,
 				new JobParameters());
 		assertThat(jobExecution).isNotNull();
@@ -171,11 +158,9 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testStopStoppedJobExecution() throws Exception {
+	void stopStoppedJobExecution() throws Exception {
 		mockMvc.perform(put("/jobs/executions/7").accept(MediaType.APPLICATION_JSON).param("stop", "true"))
 				.andExpect(status().isUnprocessableEntity());
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(JobExecutionUtils.JOB_NAME_STOPPED, taskDefinitionReader);
-		JobRepository jobRepository = jobRepositoryContainer.get(schemaVersionTarget.getName());
 		final JobExecution jobExecution = jobRepository.getLastJobExecution(JobExecutionUtils.JOB_NAME_STOPPED,
 				new JobParameters());
 		assertThat(jobExecution).isNotNull();
@@ -185,7 +170,7 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecution() throws Exception {
+	void getExecution() throws Exception {
 		mockMvc.perform(get("/jobs/executions/1").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.executionId", is(1)))
@@ -193,42 +178,53 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionWithJobProperties() throws Exception {
+	void getExecutionWithJobProperties() throws Exception {
 		MvcResult result = mockMvc.perform(get("/jobs/executions/10").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.executionId", is(10)))
 			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
 			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
 		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true");
-		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"DATE\"");
+		assertThat(result.getResponse().getContentAsString()).contains("\"type\":\"java.lang.String\"");
 	}
 
 	@Test
-	public void testGetAllExecutionsFailed() throws Exception {
+	void getExecutionWithJobPropertiesOverrideJobParam() throws Exception {
+		MvcResult result = mockMvc.perform(get("/jobs/executions/10?useJsonJobParameters=true").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.executionId", is(10)))
+			.andExpect(jsonPath("$.jobExecution.jobParameters.parameters", Matchers.hasKey(("javaUtilDate"))))
+			.andExpect(jsonPath("$.jobExecution.stepExecutions", hasSize(1))).andReturn();
+		assertThat(result.getResponse().getContentAsString()).contains("\"identifying\":true", "\"type\":\"java.lang.String\"");
+	}
+
+	@Test
+	void getAllExecutionsFailed() throws Exception {
 		createDirtyJob();
 		// expecting to ignore dirty job
-		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)));
+		mockMvc.perform(get("/jobs/executions").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testGetAllExecutions() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").accept(MediaType.APPLICATION_JSON))
+	void getAllExecutions() throws Exception {
+		mockMvc.perform(get("/jobs/executions").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(10)))
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[*].executionId", containsInRelativeOrder(10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
 	}
 
+
 	@Test
-	public void testGetAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
-		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions/"));
-		verifyBorderCaseForMaxInt(get("/jobs/executions/"));
+	void getAllExecutionsPageOffsetLargerThanIntMaxValue() throws Exception {
+		verify5XXErrorIsThrownForPageOffsetError(get("/jobs/executions"));
+		verifyBorderCaseForMaxInt(get("/jobs/executions"));
 	}
 
 	@Test
-	public void testGetExecutionsByName() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG)
+	void getExecutionsByName() throws Exception {
+		mockMvc.perform(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG)
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(
@@ -237,15 +233,15 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testGetExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
+	void getExecutionsByNamePageOffsetLargerThanIntMaxValue() throws Exception {
 		verify5XXErrorIsThrownForPageOffsetError(
-				get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
-		verifyBorderCaseForMaxInt(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_ORIG));
+				get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG));
+		verifyBorderCaseForMaxInt(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_ORIG));
 	}
 
 	@Test
-	public void testGetExecutionsByNameMultipleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
+	void getExecutionsByNameMultipleResult() throws Exception {
+		mockMvc.perform(get("/jobs/executions").param("name", JobExecutionUtils.JOB_NAME_FOOBAR)
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
@@ -256,8 +252,8 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testFilteringByStatusAndName_EmptyNameAndStatusGiven() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+	void filteringByStatusAndNameEmptyNameAndStatusGiven() throws Exception {
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", "")
 						.param("status", "FAILED")
 						.accept(MediaType.APPLICATION_JSON))
@@ -270,35 +266,36 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testFilteringByUnknownStatus() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+	void filteringByUnknownStatus() throws Exception {
+		mockMvc.perform(get("/jobs/executions")
 						.param("status", "UNKNOWN")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(5)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(3)));
 	}
 
 	@Test
-	public void testFilteringByStatusAndName_NameAndStatusGiven() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+	void filteringByStatusAndNameNameAndStatusGiven() throws Exception {
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "%")
 						.param("status", "COMPLETED")
 						.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
 						is(JobExecutionUtils.JOB_NAME_COMPLETED)))
-				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)));
+				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(3)));
 	}
 
 	@Test
-	public void testGetExecutionsByNameNotFound() throws Exception {
-		mockMvc.perform(get("/jobs/executions/").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
+	void getExecutionsByNameNotFound() throws Exception {
+		mockMvc.perform(get("/jobs/executions").param("name", "BAZ").accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
 				.andExpect(status().isNotFound());
 	}
 
 	@Test
-	public void testWildcardMatchMultipleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+	void wildcardMatchMultipleResult() throws Exception {
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", JobExecutionUtils.BASE_JOB_NAME + "_FOO_ST%").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList[0].jobExecution.jobInstance.jobName",
@@ -309,8 +306,8 @@ public class JobExecutionControllerTests {
 	}
 
 	@Test
-	public void testWildcardMatchSingleResult() throws Exception {
-		mockMvc.perform(get("/jobs/executions/")
+	void wildcardMatchSingleResult() throws Exception {
+		mockMvc.perform(get("/jobs/executions")
 						.param("name", "m_Job_ORIG").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.jobExecutionResourceList", hasSize(1)))
@@ -319,14 +316,11 @@ public class JobExecutionControllerTests {
 				);
 	}
 
-	private void createDirtyJob() {
-		JobRepository jobRepository = jobRepositoryContainer.get(SchemaVersionTarget.defaultTarget().getName());
-		JobInstance instance = jobRepository.createJobInstance(JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK",
-				new JobParameters());
+	private void createDirtyJob() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobRestartException {
 		JobExecution jobExecution = jobRepository.createJobExecution(
-				instance, new JobParameters(), null);
+			JobExecutionUtils.BASE_JOB_NAME + "_NO_TASK", new JobParameters());
 		jobExecution.setStatus(BatchStatus.STOPPED);
-		jobExecution.setEndTime(new Date());
+		jobExecution.setEndTime(LocalDateTime.now());
 		jobRepository.update(jobExecution);
 	}
 

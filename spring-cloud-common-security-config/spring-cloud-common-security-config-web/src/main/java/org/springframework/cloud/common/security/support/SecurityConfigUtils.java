@@ -69,7 +69,7 @@ public class SecurityConfigUtils {
 			String attribute = matcher.group(3).trim();
 
 			logger.info("Authorization '{}' | '{}' | '{}'", method, attribute, urlPattern);
-			security = security.antMatchers(method, urlPattern).access(attribute);
+			security = security.requestMatchers(method, urlPattern).access(attribute);
 		}
 		return security;
 	}

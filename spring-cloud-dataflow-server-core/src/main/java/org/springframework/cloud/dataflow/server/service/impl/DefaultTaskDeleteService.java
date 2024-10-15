@@ -34,7 +34,6 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.audit.service.AuditRecordService;
 import org.springframework.cloud.dataflow.core.AuditActionType;
 import org.springframework.cloud.dataflow.core.AuditOperationType;
@@ -45,24 +44,20 @@ import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.core.dsl.TaskNode;
 import org.springframework.cloud.dataflow.core.dsl.TaskParser;
 import org.springframework.cloud.dataflow.rest.util.ArgumentSanitizer;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.controller.support.TaskExecutionControllerDeleteAction;
 import org.springframework.cloud.dataflow.server.job.LauncherRepository;
 import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowJobExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDao;
-import org.springframework.cloud.dataflow.server.repository.DataflowTaskExecutionMetadataDaoContainer;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
 import org.springframework.cloud.dataflow.server.repository.NoSuchTaskExecutionException;
 import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.repository.TaskDeploymentRepository;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
 import org.springframework.cloud.dataflow.server.service.TaskDeleteService;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.deployer.spi.task.TaskLauncher;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,7 +93,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	/**
 	 * Used to read TaskExecutions.
 	 */
-	private final AggregateTaskExplorer taskExplorer;
+	private final DataflowTaskExplorer taskExplorer;
 
 	private final LauncherRepository launcherRepository;
 
@@ -108,33 +103,30 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 
 	protected final AuditRecordService auditRecordService;
 
-	protected final DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer;
+	protected final DataflowTaskExecutionDao dataflowTaskExecutionDao;
 
-	protected final DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer;
+	protected final DataflowJobExecutionDao dataflowJobExecutionDao;
 
-	protected final DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer;
+	protected final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao;
 
 	private final SchedulerService schedulerService;
 
 	private final ArgumentSanitizer argumentSanitizer = new ArgumentSanitizer();
-
-	private final SchemaService schemaService;
 
 	private final int taskDeleteChunkSize;
 
 	private final DataSource dataSource;
 
 	public DefaultTaskDeleteService(
-			AggregateTaskExplorer taskExplorer,
+			DataflowTaskExplorer taskExplorer,
 			LauncherRepository launcherRepository,
 			TaskDefinitionRepository taskDefinitionRepository,
 			TaskDeploymentRepository taskDeploymentRepository,
 			AuditRecordService auditRecordService,
-			DataflowTaskExecutionDaoContainer dataflowTaskExecutionDaoContainer,
-			DataflowJobExecutionDaoContainer dataflowJobExecutionDaoContainer,
-			DataflowTaskExecutionMetadataDaoContainer dataflowTaskExecutionMetadataDaoContainer,
+			DataflowTaskExecutionDao dataflowTaskExecutionDao,
+			DataflowJobExecutionDao dataflowJobExecutionDao,
+			DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
 			SchedulerService schedulerService,
-			SchemaService schemaService,
 			TaskConfigurationProperties taskConfigurationProperties,
 			DataSource dataSource
 	) {
@@ -143,9 +135,9 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		Assert.notNull(taskDefinitionRepository, "TaskDefinitionRepository must not be null");
 		Assert.notNull(taskDeploymentRepository, "TaskDeploymentRepository must not be null");
 		Assert.notNull(auditRecordService, "AuditRecordService must not be null");
-		Assert.notNull(dataflowTaskExecutionDaoContainer, "DataflowTaskExecutionDaoContainer must not be null");
-		Assert.notNull(dataflowJobExecutionDaoContainer, "DataflowJobExecutionDaoContainer must not be null");
-		Assert.notNull(dataflowTaskExecutionMetadataDaoContainer, "DataflowTaskExecutionMetadataDaoContainer must not be null");
+		Assert.notNull(dataflowTaskExecutionDao, "DataflowTaskExecutionDao must not be null");
+		Assert.notNull(dataflowJobExecutionDao, "DataflowJobExecutionDao must not be null");
+		Assert.notNull(dataflowTaskExecutionMetadataDao, "DataflowTaskExecutionMetadataDao must not be null");
 		Assert.notNull(taskConfigurationProperties, "TaskConfigurationProperties must not be null");
 		Assert.notNull(dataSource, "DataSource must not be null");
 
@@ -154,23 +146,22 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.taskDeploymentRepository = taskDeploymentRepository;
 		this.auditRecordService = auditRecordService;
-		this.dataflowTaskExecutionDaoContainer = dataflowTaskExecutionDaoContainer;
-		this.dataflowJobExecutionDaoContainer = dataflowJobExecutionDaoContainer;
-		this.dataflowTaskExecutionMetadataDaoContainer = dataflowTaskExecutionMetadataDaoContainer;
+		this.dataflowTaskExecutionDao = dataflowTaskExecutionDao;
+		this.dataflowJobExecutionDao = dataflowJobExecutionDao;
+		this.dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDao;
 		this.schedulerService = schedulerService;
-		this.schemaService = schemaService;
 		this.taskDeleteChunkSize = taskConfigurationProperties.getExecutionDeleteChunkSize();
 		this.dataSource = dataSource;
 	}
 
 	@Override
 	@Transactional
-	public void cleanupExecution(long id, String schemaTarget) {
-		performCleanupExecution(id, schemaTarget);
+	public void cleanupExecution(long id) {
+		performCleanupExecution(id);
 	}
 
-	private void performCleanupExecution(long id, String schemaTarget) {
-		AggregateTaskExecution taskExecution = taskExplorer.getTaskExecution(id, schemaTarget);
+	private void performCleanupExecution(long id) {
+		TaskExecution taskExecution = taskExplorer.getTaskExecution(id);
 		Assert.notNull(taskExecution, "There was no task execution with id " + id);
 		String launchId = taskExecution.getExternalExecutionId();
 		if (!StringUtils.hasText(launchId)) {
@@ -200,17 +191,17 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	@Override
 	@Transactional
 	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, String taskName, boolean completed, Integer days) {
-		List<AggregateTaskExecution> tasks;
+		List<TaskExecution> tasks;
 		if (days != null) {
 			tasks = this.taskExplorer.findTaskExecutionsBeforeEndTime(taskName, TaskServicesDateUtils.numDaysAgoFromLocalMidnightToday(days));
 		} else {
 			tasks = this.taskExplorer.findTaskExecutions(taskName, completed);
 		}
-		final Set<AggregateTaskExecution> parentExecutions = new HashSet<>();
-		final Set<AggregateTaskExecution> childExecutions = new HashSet<>();
+		final Set<TaskExecution> parentExecutions = new HashSet<>();
+		final Set<TaskExecution> childExecutions = new HashSet<>();
 		boolean removeData = actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA);
 		boolean cleanUp = actionsAsSet.contains(TaskExecutionControllerDeleteAction.CLEANUP);
-		for (AggregateTaskExecution taskExecution : tasks) {
+		for (TaskExecution taskExecution : tasks) {
 			if (taskExecution.getParentExecutionId() == null) {
 				parentExecutions.add(taskExecution);
 			} else {
@@ -218,8 +209,8 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			}
 		}
 		if (cleanUp) {
-			for (AggregateTaskExecution taskExecution : tasks) {
-				this.performCleanupExecution(taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
+			for (TaskExecution taskExecution : tasks) {
+				this.performCleanupExecution(taskExecution.getExecutionId());
 			}
 		}
 
@@ -228,56 +219,49 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 				deleteTaskExecutions(childExecutions);
 			}
 			if (!parentExecutions.isEmpty()) {
-				Map<String, List<AggregateTaskExecution>> parents = parentExecutions.stream()
-						.collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
-				for (String schemaTarget : parents.keySet()) {
-					SortedSet<Long> parentIds = parents.get(schemaTarget)
-							.stream()
-							.map(AggregateTaskExecution::getExecutionId)
-							.collect(Collectors.toCollection(TreeSet::new));
-					Map<String, List<AggregateTaskExecution>> children = this.taskExplorer.findChildTaskExecutions(parentIds, schemaTarget)
-							.stream()
-							.collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
-					for (String group : children.keySet()) {
-						SortedSet<Long> childIds = children.get(group)
-								.stream()
-								.map(AggregateTaskExecution::getExecutionId)
-								.collect(Collectors.toCollection(TreeSet::new));
-						this.performDeleteTaskExecutions(childIds, group);
-
-					}
-					this.performDeleteTaskExecutions(parentIds, schemaTarget);
+				SortedSet<Long> parentIds = parentExecutions
+					.stream()
+					.map(TaskExecution::getExecutionId)
+					.collect(Collectors.toCollection(TreeSet::new));
+				List<TaskExecution> children = this.taskExplorer.findChildTaskExecutions(parentIds);
+				SortedSet<Long> childIds = children
+					.stream()
+					.map(TaskExecution::getExecutionId)
+					.collect(Collectors.toCollection(TreeSet::new));
+				if(childIds.size() > 0) {
+					this.performDeleteTaskExecutions(childIds);
+				}
+				if(parentIds.size() > 0) {
+					this.performDeleteTaskExecutions(parentIds);
 				}
 			}
 		}
 	}
 
-	private void deleteTaskExecutions(Collection<AggregateTaskExecution> taskExecutions) {
-		Map<String, List<AggregateTaskExecution>> executions = taskExecutions.stream()
-				.collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
-		for (String schemaTarget : executions.keySet()) {
-			SortedSet<Long> executionIds = executions.get(schemaTarget)
+	private void deleteTaskExecutions(Collection<TaskExecution> taskExecutions) {
+		List<TaskExecution> executions = taskExecutions.stream()
+				.collect(Collectors.toList());
+			SortedSet<Long> executionIds = executions
 					.stream()
-					.map(AggregateTaskExecution::getExecutionId)
+					.map(TaskExecution::getExecutionId)
 					.collect(Collectors.toCollection(TreeSet::new));
-			this.performDeleteTaskExecutions(executionIds, schemaTarget);
-		}
+			this.performDeleteTaskExecutions(executionIds);
 	}
 
 	@Override
 	@Transactional
-	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids, String schemaTarget) {
-		performCleanupExecutions(actionsAsSet, ids, schemaTarget);
+	public void cleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids) {
+		performCleanupExecutions(actionsAsSet, ids);
 	}
 
-	private void performCleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids, String schemaTarget) {
+	private void performCleanupExecutions(Set<TaskExecutionControllerDeleteAction> actionsAsSet, Set<Long> ids) {
 		final SortedSet<Long> nonExistingTaskExecutions = new TreeSet<>();
 		final SortedSet<Long> parentExecutions = new TreeSet<>();
 		final SortedSet<Long> childExecutions = new TreeSet<>();
 		boolean removeData = actionsAsSet.contains(TaskExecutionControllerDeleteAction.REMOVE_DATA);
 		boolean cleanUp = actionsAsSet.contains(TaskExecutionControllerDeleteAction.CLEANUP);
 		for (Long id : ids) {
-			final AggregateTaskExecution taskExecution = this.taskExplorer.getTaskExecution(id, schemaTarget);
+			final TaskExecution taskExecution = this.taskExplorer.getTaskExecution(id);
 			if (taskExecution == null) {
 				nonExistingTaskExecutions.add(id);
 			} else if (taskExecution.getParentExecutionId() == null) {
@@ -288,57 +272,52 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		}
 		if (!nonExistingTaskExecutions.isEmpty()) {
 			if (nonExistingTaskExecutions.size() == 1) {
-				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first(), schemaTarget);
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions.first());
 			} else {
-				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions, schemaTarget);
+				throw new NoSuchTaskExecutionException(nonExistingTaskExecutions);
 			}
 		}
 
 		if (cleanUp) {
 			for (Long id : ids) {
-				this.performCleanupExecution(id, schemaTarget);
+				this.performCleanupExecution(id);
 			}
 		}
 
 		if (removeData) {
 			if (!childExecutions.isEmpty()) {
-				this.performDeleteTaskExecutions(childExecutions, schemaTarget);
+				this.performDeleteTaskExecutions(childExecutions);
 			}
 			if (!parentExecutions.isEmpty()) {
-				List<AggregateTaskExecution> children = this.taskExplorer.findChildTaskExecutions(parentExecutions, schemaTarget);
+				List<TaskExecution> children = this.taskExplorer.findChildTaskExecutions(parentExecutions);
 				if (!children.isEmpty()) {
 					this.deleteTaskExecutions(children);
 				}
-				this.performDeleteTaskExecutions(parentExecutions, schemaTarget);
+				this.performDeleteTaskExecutions(parentExecutions);
 			}
 		}
 	}
 
 	@Override
 	@Transactional
-	public void deleteTaskExecutions(Set<Long> taskExecutionIds, String schemaTarget) {
-		performDeleteTaskExecutions(taskExecutionIds, schemaTarget);
+	public void deleteTaskExecutions(Set<Long> taskExecutionIds) {
+		performDeleteTaskExecutions(taskExecutionIds);
 	}
 
 	@Override
 	public void deleteTaskExecutions(String taskName, boolean onlyCompleted) {
-		Map<String, List<AggregateTaskExecution>> tasks = this.taskExplorer.findTaskExecutions(taskName, onlyCompleted)
-				.stream().collect(Collectors.groupingBy(AggregateTaskExecution::getSchemaTarget));
-		for (String schemaTarget : tasks.keySet()) {
-			Set<Long> executionIds = tasks.get(schemaTarget)
+		List<TaskExecution> taskExecutions = this.taskExplorer.findTaskExecutions(taskName, onlyCompleted);
+
+			Set<Long> executionIds = taskExecutions
 					.stream()
-					.map(AggregateTaskExecution::getExecutionId)
-					.collect(Collectors.toSet());
-			performDeleteTaskExecutions(executionIds, schemaTarget);
-		}
+					.map(TaskExecution::getExecutionId)
+					.collect(Collectors.toCollection(TreeSet::new));
+			performDeleteTaskExecutions(executionIds);
 	}
 
-	private void performDeleteTaskExecutions(Set<Long> taskExecutionIds, String schemaTarget) {
-		logger.info("performDeleteTaskExecutions:{}:{}", schemaTarget, taskExecutionIds);
+	private void performDeleteTaskExecutions(Set<Long> taskExecutionIds) {
+		logger.info("performDeleteTaskExecutions:{}", taskExecutionIds);
 		Assert.notEmpty(taskExecutionIds, "You must provide at least 1 task execution id.");
-
-		final DataflowTaskExecutionDao dataflowTaskExecutionDao = dataflowTaskExecutionDaoContainer.get(schemaTarget);
-		final DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao = dataflowTaskExecutionMetadataDaoContainer.get(schemaTarget);
 
 		final Set<Long> taskExecutionIdsWithChildren = new HashSet<>(taskExecutionIds);
 		final Set<Long> childTaskExecutionIds = dataflowTaskExecutionDao.findChildTaskExecutionIds(taskExecutionIds);
@@ -357,7 +336,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		final Set<Long> jobExecutionIds = new HashSet<>();
 
 		for (Long taskExecutionId : taskExecutionIdsWithChildren) {
-			jobExecutionIds.addAll(taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecutionId, schemaTarget));
+			jobExecutionIds.addAll(taskExplorer.getJobExecutionIdsByTaskExecutionId(taskExecutionId));
 		}
 
 		logger.info("There are {} associated job executions.", jobExecutionIds.size());
@@ -369,7 +348,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 		int chunkSize = getTaskExecutionDeleteChunkSize(this.dataSource);
 
 		if (!jobExecutionIds.isEmpty()) {
-			deleteRelatedJobAndStepExecutions(jobExecutionIds, auditData, chunkSize, schemaTarget);
+			deleteRelatedJobAndStepExecutions(jobExecutionIds, auditData, chunkSize);
 		}
 
 		// Delete Task Related Data
@@ -399,11 +378,12 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			});
 		}
 
-		logger.info("Deleted the following Task Execution related data for {} Task Executions:\n" +
-						"Task Execution Param Rows:    {}\n" +
-						"Task Batch Relationship Rows: {}\n" +
-						"Task Manifest Rows:           {}\n" +
-						"Task Execution Rows:          {}.",
+		logger.info("""
+						Deleted the following Task Execution related data for {} Task Executions:
+						Task Execution Param Rows:    {}
+						Task Batch Relationship Rows: {}
+						Task Manifest Rows:           {}
+						Task Execution Rows:          {}.""",
 				taskExecutionIdsWithChildren.size(),
 				numberOfDeletedTaskExecutionParamRows,
 				numberOfDeletedTaskTaskBatchRelationshipRows,
@@ -420,21 +400,20 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 				null);
 	}
 
-	private void deleteRelatedJobAndStepExecutions(Set<Long> jobExecutionIds, Map<String, Object> auditData, int chunkSize, String schemaTarget) {
+	private void deleteRelatedJobAndStepExecutions(Set<Long> jobExecutionIds, Map<String, Object> auditData, int chunkSize) {
 
-		final Set<Long> stepExecutionIds = findStepExecutionIds(jobExecutionIds, chunkSize, schemaTarget);
+		final Set<Long> stepExecutionIds = findStepExecutionIds(jobExecutionIds, chunkSize);
 
 		final AtomicInteger numberOfDeletedBatchStepExecutionContextRows = new AtomicInteger(0);
 		if (!stepExecutionIds.isEmpty()) {
-			deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds, chunkSize, numberOfDeletedBatchStepExecutionContextRows, schemaTarget);
+			deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds, chunkSize, numberOfDeletedBatchStepExecutionContextRows);
 		}
-		deleteStepAndJobExecutionsByJobExecutionId(jobExecutionIds, chunkSize, auditData, numberOfDeletedBatchStepExecutionContextRows, schemaTarget);
+		deleteStepAndJobExecutionsByJobExecutionId(jobExecutionIds, chunkSize, auditData, numberOfDeletedBatchStepExecutionContextRows);
 
 	}
 
-	private Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds, int chunkSize, String schemaTarget) {
+	private Set<Long> findStepExecutionIds(Set<Long> jobExecutionIds, int chunkSize) {
 		final Set<Long> stepExecutionIds = ConcurrentHashMap.newKeySet();
-		DataflowJobExecutionDao dataflowJobExecutionDao = dataflowJobExecutionDaoContainer.get(schemaTarget);
 		if (chunkSize <= 0) {
 			stepExecutionIds.addAll(dataflowJobExecutionDao.findStepExecutionIds(jobExecutionIds));
 		} else {
@@ -450,10 +429,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	private void deleteBatchStepExecutionContextByStepExecutionIds(
 			Set<Long> stepExecutionIds,
 			int chunkSize,
-			AtomicInteger numberOfDeletedBatchStepExecutionContextRows,
-			String schemaTarget
-	) {
-		final DataflowJobExecutionDao dataflowJobExecutionDao = dataflowJobExecutionDaoContainer.get(schemaTarget);
+			AtomicInteger numberOfDeletedBatchStepExecutionContextRows) {
 		if (chunkSize <= 0) {
 			numberOfDeletedBatchStepExecutionContextRows.addAndGet(dataflowJobExecutionDao.deleteBatchStepExecutionContextByStepExecutionIds(stepExecutionIds));
 
@@ -470,10 +446,7 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 			Set<Long> jobExecutionIds,
 			int chunkSize,
 			Map<String, Object> auditData,
-			AtomicInteger numberOfDeletedBatchStepExecutionContextRows,
-			String schemaTarget
-	) {
-		DataflowJobExecutionDao dataflowJobExecutionDao = dataflowJobExecutionDaoContainer.get(schemaTarget);
+			AtomicInteger numberOfDeletedBatchStepExecutionContextRows) {
 		final AtomicInteger numberOfDeletedBatchStepExecutionRows = new AtomicInteger(0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionContextRows = new AtomicInteger(0);
 		final AtomicInteger numberOfDeletedBatchJobExecutionParamRows = new AtomicInteger(0);
@@ -563,16 +536,13 @@ public class DefaultTaskDeleteService implements TaskDeleteService {
 	@Override
 	public void deleteTaskDefinition(String name, boolean cleanup) {
 		if (cleanup) {
-			for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-				DataflowTaskExecutionDao dataflowTaskExecutionDao = dataflowTaskExecutionDaoContainer.get(target.getName());
 				Set<Long> taskExecutionIds = dataflowTaskExecutionDao.getTaskExecutionIdsByTaskName(name);
 				final Set<TaskExecutionControllerDeleteAction> actionsAsSet = new HashSet<>();
 				actionsAsSet.add(TaskExecutionControllerDeleteAction.CLEANUP);
 				actionsAsSet.add(TaskExecutionControllerDeleteAction.REMOVE_DATA);
 				if (!taskExecutionIds.isEmpty()) {
-					performCleanupExecutions(actionsAsSet, taskExecutionIds, target.getName());
+					performCleanupExecutions(actionsAsSet, taskExecutionIds);
 				}
-			}
 		}
 		this.deleteTaskDefinition(name);
 	}

@@ -16,7 +16,6 @@
 package org.springframework.cloud.dataflow.common.test.docker.compose.configuration;
 
 import java.util.Arrays;
-
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;

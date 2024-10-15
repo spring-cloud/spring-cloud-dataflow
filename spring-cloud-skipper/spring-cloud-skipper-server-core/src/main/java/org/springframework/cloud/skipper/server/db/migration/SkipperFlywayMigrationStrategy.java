@@ -16,8 +16,8 @@
 package org.springframework.cloud.skipper.server.db.migration;
 
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.CoreMigrationType;
 import org.flywaydb.core.api.MigrationInfo;
-import org.flywaydb.core.api.MigrationType;
 import org.flywaydb.core.api.MigrationVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class SkipperFlywayMigrationStrategy implements FlywayMigrationStrategy {
 	@Override
 	public void migrate(Flyway flyway) {
 		MigrationInfo current = flyway.info().current();
-		if (current != null && current.getVersion().equals(INITIAL) && current.getType() == MigrationType.SQL) {
+		if (current != null && current.getVersion().equals(INITIAL) && current.getType() == CoreMigrationType.SQL) {
 			logger.info("Detected initial version based on SQL scripts, doing repair to switch to Java based migrations.");
 			flyway.repair();
 		}

@@ -29,7 +29,6 @@ import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.rest.client.AppRegistryOperations;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
 import org.springframework.cloud.dataflow.shell.command.support.TablesInfo;
@@ -143,9 +142,6 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 				if (info.getShortDescription() != null) {
 					result.addHeader(info.getShortDescription());
 				}
-				if (info.getBootVersion() != null) {
-					result.addHeader(String.format("Boot version: %s:", info.getBootVersion().getBootVersion()));
-				}
 				if (options == null) {
 					result.addHeader("Application options metadata is not available");
 				}
@@ -243,13 +239,11 @@ public class AppRegistryCommands implements ResourceLoaderAware {
 	public String register(
 			@ShellOption(value = { "", "--name" }, help = "the name for the registered application") String name,
 			@ShellOption(help = "the type for the registered application", valueProvider = EnumValueProvider.class) ApplicationType type,
-			@ShellOption(value = { "-b", "--bootVersion" }, help = "the boot version to use for the registered application", defaultValue = ShellOption.NULL) AppBootSchemaVersion bootVersion,
 			@ShellOption(help = "URI for the application artifact") String uri,
 			@ShellOption(value = { "-m", "--metadata-uri", "--metadataUri"}, help = "Metadata URI for the application artifact", defaultValue = ShellOption.NULL) String metadataUri,
 			@ShellOption(help = "force update if application is already registered (only if not in use)", defaultValue = "false") boolean force) {
-		appRegistryOperations().register(name, type, uri, metadataUri, bootVersion, force);
-		return String.format(("Successfully registered application '%s:%s%s"), type, name,
-				bootVersion == null ? "" : " (boot " + bootVersion.getBootVersion() + ")");
+		appRegistryOperations().register(name, type, uri, metadataUri, force);
+		return String.format(("Successfully registered application '%s:%s"), type, name);
 	}
 
 	@ShellMethod(key = LIST_APPLICATIONS, value = "List all registered applications")

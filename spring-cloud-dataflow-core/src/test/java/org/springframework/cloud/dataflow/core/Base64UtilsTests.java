@@ -24,11 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Tests for {@code Base64Utils}.
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
-public class Base64UtilsTests {
+class Base64UtilsTests {
 
 	@Test
-	public void testBase64() {
+	void base64() {
 		assertThat(Base64Utils.decode(null)).isNull();
 		assertThat(Base64Utils.encode(null)).isNull();
 		assertThat(Base64Utils.decode(Base64Utils.encode("foo"))).isEqualTo("foo");

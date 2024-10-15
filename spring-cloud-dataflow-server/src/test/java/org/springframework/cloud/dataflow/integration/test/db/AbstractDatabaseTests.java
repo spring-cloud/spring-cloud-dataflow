@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.integration.test.db;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
  * have for all databases.
  *
  * @author Janne Valkealahti
+ * @author Corneil du Plessis
  */
 @Database
 public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
@@ -45,8 +47,8 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 	 */
 	@Test
 	@DataflowMain
-	public void testLatestDb() {
-		log.info("Running testLatestDb()");
+	public void latestSharedDb() {
+		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
@@ -62,42 +64,27 @@ public abstract class AbstractDatabaseTests extends AbstractDataflowTests {
 
 	@Test
 	@DataflowMain
-	public void testLatestDbJdk8() {
-		log.info("Running testLatestDbJdk8()");
+	//TODO: Boot3x followup
+	@Disabled("TODO: Boot3x  Enable once Java 21 images are supported")
+	public void latestSharedDbJdk21() {
+		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
 
 		// start defined skipper server and check it started
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk8");
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk21");
 		assertSkipperServerRunning(this.dataflowCluster);
 
 		// start defined dataflow server and check it started
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk8");
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk21");
 		assertDataflowServerRunning(this.dataflowCluster);
 	}
 
 	@Test
 	@DataflowMain
-	public void testLatestDbJdk11() {
-		log.info("Running testLatestDbJdk11()");
-		// start defined database
-		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
-		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
-
-		// start defined skipper server and check it started
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main + "-jdk11");
-		assertSkipperServerRunning(this.dataflowCluster);
-
-		// start defined dataflow server and check it started
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main + "-jdk11");
-		assertDataflowServerRunning(this.dataflowCluster);
-	}
-
-	@Test
-	@DataflowMain
-	public void testLatestDbJdk17() {
-		log.info("Running testLatestDbJdk17()");
+	public void latestSharedDbJdk17() {
+		log.info("Running testLatestSharedDb()");
 		// start defined database
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());

@@ -82,8 +82,8 @@ public class DefaultValidationService implements ValidationService {
 		boolean result = false;
 		if(resource != null) {
 			try {
-				if ((resource instanceof DockerResource)) {
-					result = validateDockerResource(dockerValidatorProperties, (DockerResource) resource);
+				if ((resource instanceof DockerResource dockerResource)) {
+					result = validateDockerResource(dockerValidatorProperties, dockerResource);
 				}
 				else {
 					new BootClassLoaderFactory(resolveAsArchive(resource), null)

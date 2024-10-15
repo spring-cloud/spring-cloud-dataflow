@@ -71,7 +71,7 @@ import static org.mockito.Mockito.when;
  * @author Chris Bono
  * @author Corneil du Plessis
  */
-public class ConfigCommandTests {
+class ConfigCommandTests {
 
 	private ConfigCommands configCommands;
 
@@ -84,7 +84,7 @@ public class ConfigCommandTests {
 
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		if (this.mapper == null) {
 			this.mapper = new ObjectMapper();
 			this.mapper.registerModule(new Jdk8Module());
@@ -110,7 +110,7 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testInfo() throws IOException {
+	void info() throws IOException {
 		if (!isWindows()) {
 			DataFlowOperations dataFlowOperations = mock(DataFlowOperations.class);
 			AboutOperations aboutOperations = mock(AboutOperations.class);
@@ -141,7 +141,7 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testApiRevisionMismatch() throws Exception {
+	void apiRevisionMismatch() throws Exception {
 		RootResource value = new RootResource(-12);
 		value.add(Link.of("http://localhost:9393/dashboard", "dashboard"));
 		when(restTemplate.getForObject(Mockito.any(URI.class), Mockito.eq(RootResource.class))).thenReturn(value);
@@ -152,7 +152,7 @@ public class ConfigCommandTests {
 	}
 
 	@Test
-	public void testModeWithSkipperShellAndSkipperServer() throws Exception {
+	void modeWithSkipperShellAndSkipperServer() throws Exception {
 		String expectedTargetMessage = "Successfully targeted http://localhost:9393/";
 		AboutResource aboutResource = new AboutResource();
 

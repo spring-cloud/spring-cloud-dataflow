@@ -15,8 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.repository;
 
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
+import org.springframework.cloud.dataflow.server.task.TaskDefinitionReader;
 
 /**
  * Provide a simple interface for reading Task Definitions when required by Aggregate Task Explorer

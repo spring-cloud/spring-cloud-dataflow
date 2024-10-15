@@ -4,6 +4,6 @@ if [ "$1" == "" ]; then
     exit 1
 fi
 while [ "$1" != "" ]; do
-    ./mvnw test -Pfailsafe -Dgroups="$1" -pl spring-cloud-dataflow-server
+    ./mvnw test -Pfailsafe -Dgroups="$1" -pl spring-cloud-dataflow-server  -B --no-transfer-progress
     shift
 done

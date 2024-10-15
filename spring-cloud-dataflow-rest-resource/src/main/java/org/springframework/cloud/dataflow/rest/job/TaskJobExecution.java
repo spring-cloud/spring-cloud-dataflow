@@ -33,19 +33,16 @@ public class TaskJobExecution {
 
 	private final int stepExecutionCount;
 
-	private final String schemaTarget;
-
-	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined, String schemaTarget) {
-		this(taskId, jobExecution, isTaskDefined, 0, schemaTarget);
+	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined) {
+		this(taskId, jobExecution, isTaskDefined, 0);
 	}
 
-	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined, int stepExecutionCount, String schemaTarget) {
+	public TaskJobExecution(long taskId, JobExecution jobExecution, boolean isTaskDefined, int stepExecutionCount) {
 		Assert.notNull(jobExecution, "jobExecution must not be null");
 		this.taskId = taskId;
 		this.jobExecution = jobExecution;
 		this.isTaskDefined = isTaskDefined;
 		this.stepExecutionCount = stepExecutionCount;
-		this.schemaTarget = schemaTarget;
 	}
 
 	/**
@@ -78,10 +75,6 @@ public class TaskJobExecution {
 		return stepExecutionCount;
 	}
 
-	public String getSchemaTarget() {
-		return schemaTarget;
-	}
-
 	@Override
 	public String toString() {
 		return "TaskJobExecution{" +
@@ -89,7 +82,6 @@ public class TaskJobExecution {
 				", isTaskDefined=" + isTaskDefined +
 				", jobExecution=" + jobExecution +
 				", stepExecutionCount=" + stepExecutionCount +
-				", schemaTarget='" + schemaTarget + '\'' +
 				'}';
 	}
 }

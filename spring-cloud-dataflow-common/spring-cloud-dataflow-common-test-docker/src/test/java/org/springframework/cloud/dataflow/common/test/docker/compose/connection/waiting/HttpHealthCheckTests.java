@@ -15,19 +15,18 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting;
 
+import java.util.function.Function;
+
+import org.junit.Test;
+
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
+import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.failure;
 import static org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailureMatchers.successful;
-
-import java.util.function.Function;
-import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.Container;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.HealthChecks;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.waiting.SuccessOrFailure;
 
 public class HttpHealthCheckTests {
     private static final Function<DockerPort, String> URL_FUNCTION = port -> null;
@@ -40,7 +39,7 @@ public class HttpHealthCheckTests {
 
         assertThat(
                 HealthChecks.toRespondOverHttp(PORT, URL_FUNCTION).isHealthy(container),
-                is(successful()));
+                successful());
     }
 
     @Test
@@ -49,7 +48,7 @@ public class HttpHealthCheckTests {
 
         assertThat(
                 HealthChecks.toRespondOverHttp(PORT, URL_FUNCTION).isHealthy(container),
-                is(failure()));
+                failure());
     }
 
     private void whenTheContainerIsListeningOnHttpTo(int port, Function<DockerPort, String> urlFunction) {

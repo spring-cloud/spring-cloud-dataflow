@@ -39,34 +39,35 @@ import static org.mockito.Mockito.verify;
  * @author Mark Pollack
  * @author Ilayaperumal Gopinathan
  * @author Christian Tzolov
+ * @author Corneil du Plessis
  */
-public class AppResourceCommonTests {
+class AppResourceCommonTests {
 
 	private ResourceLoader resourceLoader = mock(ResourceLoader.class);
 	private AppResourceCommon appResourceCommon = new AppResourceCommon(new MavenProperties(), resourceLoader);
 
 	@Test
-	public void testBadNamedJars() throws Exception {
-		UrlResource urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/3.2.1/file-sink-rabbit.jar");
+	void badNamedJars() throws Exception {
+		UrlResource urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/5.0.0/file-sink-rabbit.jar");
 		assertThatIllegalArgumentException().isThrownBy( () -> appResourceCommon.getUrlResourceVersion(urlResource));
 	}
 
 	@Test
-	public void testInvalidUrlResourceWithoutVersion() throws Exception {
+	void invalidUrlResourceWithoutVersion() throws Exception {
 		assertThat(appResourceCommon.getUrlResourceWithoutVersion(
-				new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/3.2.1/file-sink-rabbit-3.2.1.jar")))
-				.isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/3.2.1/file-sink-rabbit");
+				new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/5.0.0/file-sink-rabbit-5.0.0.jar")))
+				.isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/5.0.0/file-sink-rabbit");
 	}
 
 	@Test
-	public void testInvalidURIPath() throws Exception {
+	void invalidURIPath() throws Exception {
 		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT");
 		assertThatThrownBy(() -> appResourceCommon.getUrlResourceVersion(urlResource))
 				.hasMessage("URI path doesn't exist");
 	}
 
 	@Test
-	public void testInvalidUriSchema() {
+	void invalidUriSchema() {
 		assertThatIllegalArgumentException().isThrownBy(() ->
 				appResourceCommon.getResource("springcloud/polyglot-python-processor:0.1"))
 				.withMessage("Invalid URI schema for resource: " +
@@ -75,128 +76,128 @@ public class AppResourceCommonTests {
 	}
 
 	@Test
-	public void testDefaultResource() {
+	void defaultResource() {
 		String classpathUri = "classpath:AppRegistryTests-importAll.properties";
 		Resource resource = appResourceCommon.getResource(classpathUri);
 		assertThat(resource instanceof ClassPathResource).isTrue();
 	}
 
 	@Test
-	public void testDockerUriString() throws Exception {
-		String dockerUri = "docker:springcloudstream/log-sink-rabbit:3.2.1";
+	void dockerUriString() throws Exception {
+		String dockerUri = "docker:springcloudstream/log-sink-rabbit:5.0.0";
 		Resource resource = appResourceCommon.getResource(dockerUri);
 		assertThat(resource instanceof DockerResource).isTrue();
 		assertThat(resource.getURI().toString().equals(dockerUri));
 	}
 
 	@Test
-	public void testJarMetadataUriDockerApp() throws Exception {
-		String appUri = "docker:springcloudstream/log-sink-rabbit:3.2.1";
-		String metadataUri = "https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/3.2.1/file-sink-rabbit-3.2.1.jar";
+	void jarMetadataUriDockerApp() throws Exception {
+		String appUri = "docker:springcloudstream/log-sink-rabbit:5.0.0";
+		String metadataUri = "https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/5.0.0/file-sink-rabbit-5.0.0.jar";
 		appResourceCommon.getMetadataResource(new URI(appUri), new URI(metadataUri));
 		verify(resourceLoader).getResource(eq(metadataUri));
 	}
 
 	@Test
-	public void testMetadataUriHttpApp() throws Exception {
-		String appUri = "https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/3.2.1/file-sink-rabbit-3.2.1.jar";
+	void metadataUriHttpApp() throws Exception {
+		String appUri = "https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/5.0.0/file-sink-rabbit-5.0.0.jar";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
 		assertThat(metadataResource instanceof UrlResource).isTrue();
 		assertThat(metadataResource.getURI().toString().equals(appUri));
 	}
 
 	@Test
-	public void testMetadataUriDockerApp() throws Exception {
-		String appUri = "docker:springcloudstream/log-sink-rabbit:3.2.1";
+	void metadataUriDockerApp() throws Exception {
+		String appUri = "docker:springcloudstream/log-sink-rabbit:5.0.0";
 		Resource metadataResource = appResourceCommon.getMetadataResource(new URI(appUri), null);
 		assertThat(metadataResource).isNotNull();
 		assertThat(metadataResource instanceof DockerResource).isTrue();
 	}
 
 	@Test
-	public void testResourceURIWithMissingFileNameExtension() throws Exception {
+	void resourceURIWithMissingFileNameExtension() throws Exception {
 		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT/test");
 		assertThatThrownBy(() -> appResourceCommon.getUrlResourceVersion(urlResource))
 				.hasMessage("URI file name extension doesn't exist");
 	}
 
 	@Test
-	public void testInvalidUrlResourceURI() throws Exception {
+	void invalidUrlResourceURI() throws Exception {
 		UrlResource urlResource = new UrlResource("https://com.com-0.0.2-SNAPSHOT/test.zip");
 		assertThatThrownBy(() -> appResourceCommon.getUrlResourceVersion(urlResource))
 				.hasMessageStartingWith("Could not parse version from https://com.com-0.0.2-SNAPSHOT/test.zip, expected format is <artifactId>-<version>.jar");
 	}
 
 	@Test
-	public void testJars() throws MalformedURLException {
+	void jars() throws MalformedURLException {
 		//Dashes in artifact name
-		UrlResource urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-3.2.1.jar");
+		UrlResource urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-5.0.0.jar");
 		String version = appResourceCommon.getUrlResourceVersion(urlResource);
-		assertThat(version).isEqualTo("3.2.1");
+		assertThat(version).isEqualTo("5.0.0");
 
 		String theRest = appResourceCommon.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 		//No dashes in artfiact name - BUILD-SNAPSHOT
-		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file/file-3.2.1-SNAPSHOT.jar");
+		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file/file-5.0.1-SNAPSHOT.jar");
 		version = appResourceCommon.getUrlResourceVersion(urlResource);
-		assertThat(version).isEqualTo("3.2.1-SNAPSHOT");
+		assertThat(version).isEqualTo("5.0.1-SNAPSHOT");
 		theRest = appResourceCommon.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file/file");
 
 		//No dashes in artfiact name - RELEASE
-		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file/file-3.2.1.jar");
+		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file/file-5.0.0.jar");
 		version = appResourceCommon.getUrlResourceVersion(urlResource);
-		assertThat(version).isEqualTo("3.2.1");
+		assertThat(version).isEqualTo("5.0.0");
 		theRest = appResourceCommon.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file/file");
 
 		//Spring style snapshots naming scheme
-		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-3.2.1-SNAPSHOT.jar");
+		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-5.0.1-SNAPSHOT.jar");
 		version = appResourceCommon.getUrlResourceVersion(urlResource);
-		assertThat(version).isEqualTo("3.2.1-SNAPSHOT");
+		assertThat(version).isEqualTo("5.0.1-SNAPSHOT");
 		theRest = appResourceCommon.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 
 		//Standard maven style naming scheme
-		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-3.2.1-SNAPSHOT.jar");
+		urlResource = new UrlResource("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit-5.0.1-SNAPSHOT.jar");
 		version = appResourceCommon.getUrlResourceVersion(urlResource);
-		assertThat(version).isEqualTo("3.2.1-SNAPSHOT");
+		assertThat(version).isEqualTo("5.0.1-SNAPSHOT");
 		theRest = appResourceCommon.getResourceWithoutVersion(urlResource);
 		assertThat(theRest).isEqualTo("https://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/file-sink-rabbit/file-sink-rabbit");
 	}
 
 	@Test
-	public void testGetResourceWithoutVersion() {
+	void getResourceWithoutVersion() {
 		assertThat(appResourceCommon.getResourceWithoutVersion(
-				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec:3.2.1")))
+				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec:5.0.0")))
 				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:war:exec");
 		assertThat(appResourceCommon.getResourceWithoutVersion(
-				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit::exec:3.2.1")))
+				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit::exec:5.0.0")))
 				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:jar:exec");
 		assertThat(appResourceCommon.getResourceWithoutVersion(
-				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:3.2.1")))
+				MavenResource.parse("org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:5.0.0")))
 				.isEqualTo("maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:jar");
 	}
 
 	@Test
-	public void testGetResource() {
-		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:3.2.1";
+	void getResource() {
+		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:5.0.0";
 		Resource resource = appResourceCommon.getResource(mavenUri);
 		assertThat(resource).isInstanceOf(MavenResource.class);
 	}
 
 	@Test
-	public void testGetResourceVersion() {
-		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:3.2.1";
+	void getResourceVersion() {
+		String mavenUri = "maven://org.springframework.cloud.stream.app:aggregate-counter-sink-rabbit:5.0.0";
 		String version = appResourceCommon.getResourceVersion(appResourceCommon.getResource(mavenUri));
-		assertThat(version).isEqualTo("3.2.1");
+		assertThat(version).isEqualTo("5.0.0");
 	}
 
 	@Test
-	public void testGetMetadataResourceVersion() {
-		String httpUri = "http://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/cassandra-sink-rabbit/3.2.1-SNAPSHOT/cassandra-sink-rabbit-3.2.1-SNAPSHOT-metadata.jar";
+	void getMetadataResourceVersion() {
+		String httpUri = "http://repo.maven.apache.org/maven2/org/springframework/cloud/stream/app/cassandra-sink-rabbit/5.0.1-SNAPSHOT/cassandra-sink-rabbit-5.0.1-SNAPSHOT-metadata.jar";
 		String version = appResourceCommon.getResourceVersion(appResourceCommon.getResource(httpUri));
-		assertThat(version).isEqualTo("3.2.1-SNAPSHOT");
+		assertThat(version).isEqualTo("5.0.1-SNAPSHOT");
 	}
 }

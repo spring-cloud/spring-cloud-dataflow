@@ -15,41 +15,31 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.connection;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
 import org.junit.Test;
-import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerPort;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DockerPortFormattingTests {
     private final DockerPort dockerPort = new DockerPort("hostname", 1234, 4321);
 
     @Test public void
     have_no_effect_on_a_string_with_no_substitutions() {
-        assertThat(
-                dockerPort.inFormat("no substitutions"),
-                is("no substitutions"));
+		assertThat(dockerPort.inFormat("no substitutions")).isEqualTo("no substitutions");
     }
 
     @Test public void
     allow_building_an_externally_accessible_address() {
-        assertThat(
-                dockerPort.inFormat("http://$HOST:$EXTERNAL_PORT/api"),
-                is("http://hostname:1234/api"));
+		assertThat(dockerPort.inFormat("http://$HOST:$EXTERNAL_PORT/api")).isEqualTo("http://hostname:1234/api");
     }
 
     @Test public void
     allow_building_an_address_with_an_internal_port() {
-        assertThat(
-                dockerPort.inFormat("http://localhost:$INTERNAL_PORT/api"),
-                is("http://localhost:4321/api"));
+		assertThat(dockerPort.inFormat("http://localhost:$INTERNAL_PORT/api")).isEqualTo("http://localhost:4321/api");
     }
 
     @Test public void
     allow_multiple_copies_of_each_substitution() {
-        assertThat(
-                dockerPort.inFormat("$HOST,$HOST,$INTERNAL_PORT,$INTERNAL_PORT,$EXTERNAL_PORT,$EXTERNAL_PORT"),
-                is("hostname,hostname,4321,4321,1234,1234"));
+		assertThat(dockerPort.inFormat("$HOST,$HOST,$INTERNAL_PORT,$INTERNAL_PORT,$EXTERNAL_PORT,$EXTERNAL_PORT")).isEqualTo("hostname,hostname,4321,4321,1234,1234");
     }
 
 }

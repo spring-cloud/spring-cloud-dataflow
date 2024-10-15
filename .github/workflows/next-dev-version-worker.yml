@@ -8,7 +8,8 @@ on:
         required: true
 
 env:
-  MAVEN_THREADS: ''
+  ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+  ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
 
 jobs:
   build:
@@ -16,20 +17,15 @@ jobs:
     steps:
 
     - uses: actions/checkout@v4
+    - run: find . -type f -name "*.sh" -exec chmod a+x '{}' \;
     - uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'liberica'
     - uses: jvalkeal/setup-maven@v1
       with:
         maven-version: 3.8.8
         maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.46.4
-      env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
-
     # cache maven .m2
     - uses: actions/cache@v3
       with:
@@ -37,8 +33,15 @@ jobs:
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-m2-
-
-    # target deploy repos
+    - uses: jvalkeal/setup-maven@v1
+      with:
+        maven-version: 3.8.8
+        maven-mirror: 'https://dlcdn.apache.org/maven/maven-3/'
+    - uses: jfrog/setup-jfrog-cli@v1
+      with:
+        version: 1.54.0
+      env:
+        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Configure JFrog Cli
       run: |
         jfrog rt mvnc \
@@ -60,34 +63,34 @@ jobs:
     # build and publish to configured target
     - name: Build and Publish
       run: |
-        jfrog rt mvn build-helper:parse-version versions:set \
+        ./mvnw build-helper:parse-version versions:set \
           -DprocessAllModules=true \
           -DgenerateBackupPoms=false \
           -Dartifactory.publish.artifacts=false \
           -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT' \
-          -B
-        BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          -B --no-transfer-progress
+        BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$BUILD_ZOO_HANDLER_spring_cloud_dataflow_version >> $GITHUB_ENV
         echo "::notice ::set dataflow.version=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version}"        
-        jfrog rt mvn versions:set-property \
+        ./mvnw versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=dataflow.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_version} \
-          -B        
-        jfrog rt mvn versions:set-property \
+          -B --no-transfer-progress
+        ./mvnw versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-deployer.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_deployer_version} \
-          -B
-        jfrog rt mvn versions:set-property \
+          -B --no-transfer-progress
+        ./mvnw versions:set-property \
           -DgenerateBackupPoms=false \
           -Dproperty=spring-cloud-dataflow-ui.version \
           -DnewVersion=${BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_version} \
-          -B
+          -B --no-transfer-progress
         jfrog rt build-clean
-        mvn clean
         ./spring-cloud-dataflow-package/set-package-version.sh
-        jfrog rt mvn install -DskipTests -B         
+        ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -DskipTests -B -T 1C --no-transfer-progress         
         jfrog rt build-publish
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname=spring-cloud-dataflow-main-ndv >> $GITHUB_ENV
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber=$GITHUB_RUN_NUMBER >> $GITHUB_ENV

@@ -16,7 +16,6 @@
 package org.springframework.cloud.skipper.server.statemachine;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.Disabled;
@@ -26,6 +25,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.cloud.skipper.domain.AbstractEntity;
 import org.springframework.cloud.skipper.domain.DeleteProperties;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallProperties;
@@ -92,7 +92,7 @@ import static org.mockito.Mockito.never;
 @SuppressWarnings("unchecked")
 @SpringJUnitConfig(classes = TestConfig.class)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-public class StateMachineTests {
+class StateMachineTests {
 
 	@Autowired
 	private ApplicationContext context;
@@ -140,7 +140,7 @@ public class StateMachineTests {
 	private ErrorAction errorAction;
 
 	@Test
-	public void testFactory() {
+	void factory() {
 		StateMachineFactory<SkipperStates, SkipperEvents> factory = context.getBean(StateMachineFactory.class);
 		assertThat(factory).isNotNull();
 		StateMachine<SkipperStates, SkipperEvents> stateMachine = factory.getStateMachine("testFactory");
@@ -148,7 +148,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testSimpleInstallShouldNotError() throws Exception {
+	void simpleInstallShouldNotError() throws Exception {
 		Mockito.when(packageService.downloadPackage(any()))
 				.thenReturn(new org.springframework.cloud.skipper.domain.Package());
 		Mockito.when(releaseService.install(any(), any())).thenReturn(new Release());
@@ -186,7 +186,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testRestoreFromInstallUsingInstallRequest() throws Exception {
+	void restoreFromInstallUsingInstallRequest() throws Exception {
 		Mockito.when(releaseService.install(any(InstallRequest.class))).thenReturn(new Release());
 
 		DefaultExtendedState extendedState = new DefaultExtendedState();
@@ -216,7 +216,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testRestoreFromUpgradeUsingUpgradeRequest() throws Exception {
+	void restoreFromUpgradeUsingUpgradeRequest() throws Exception {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
@@ -252,7 +252,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testRestoreFromInstallUsingInstallProperties() throws Exception {
+	void restoreFromInstallUsingInstallProperties() throws Exception {
 		Mockito.when(releaseService.install(any(), any(InstallProperties.class))).thenReturn(new Release());
 
 		DefaultExtendedState extendedState = new DefaultExtendedState();
@@ -282,7 +282,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testSimpleUpgradeShouldNotError() throws Exception {
+	void simpleUpgradeShouldNotError() throws Exception {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
@@ -322,7 +322,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testUpgradeFailsNewAppFailToDeploy() throws Exception {
+	void upgradeFailsNewAppFailToDeploy() throws Exception {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
@@ -375,7 +375,7 @@ public class StateMachineTests {
 
 	@Disabled("Flaky, what it tests not actually used yet")
 	@Test
-	public void testUpgradeCancelWhileCheckingApps() throws Exception {
+	void upgradeCancelWhileCheckingApps() throws Exception {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);
@@ -444,7 +444,7 @@ public class StateMachineTests {
 
 
 	@Test
-	public void testRollbackInstall() throws Exception {
+	void rollbackInstall() throws Exception {
 		Release release = new Release();
 		Status status = new Status();
 		status.setStatusCode(StatusCode.DELETED);
@@ -491,7 +491,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testDeleteSucceed() throws Exception {
+	void deleteSucceed() throws Exception {
 		Mockito.when(releaseService.delete(any(String.class), any(boolean.class))).thenReturn(new Release());
 		DeleteProperties deleteProperties = new DeleteProperties();
 		Message<SkipperEvents> message1 = MessageBuilder
@@ -526,7 +526,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testScaleSucceed() throws Exception {
+	void scaleSucceed() throws Exception {
 		Mockito.when(releaseService.scale(any(String.class), any(ScaleRequest.class))).thenReturn(new Release());
 		ScaleRequest scaleRequest = new ScaleRequest();
 		Message<SkipperEvents> message1 = MessageBuilder
@@ -561,7 +561,7 @@ public class StateMachineTests {
 	}
 
 	@Test
-	public void testRestoreFromDeleteUsingDeleteProperties() throws Exception {
+	void restoreFromDeleteUsingDeleteProperties() throws Exception {
 		Mockito.when(releaseService.delete(nullable(String.class), any(boolean.class))).thenReturn(new Release());
 		DeleteProperties deleteProperties = new DeleteProperties();
 
@@ -595,7 +595,7 @@ public class StateMachineTests {
 		PackageMetadata packageMetadata1 = new PackageMetadata();
 		packageMetadata1.setApiVersion("skipper.spring.io/v1");
 		packageMetadata1.setKind("SpringCloudDeployerApplication");
-		setId(PackageMetadata.class, packageMetadata1, "id", 1L);
+		setId(AbstractEntity.class, packageMetadata1, "id", 1L);
 		packageMetadata1.setRepositoryId(1L);
 		packageMetadata1.setName("package1");
 		packageMetadata1.setVersion("1.0.0");
@@ -605,23 +605,14 @@ public class StateMachineTests {
 	}
 
 	private static void setId(Class<?> clazz, Object instance, String fieldName, Object value) {
-		try {
-			Field field = ReflectionUtils.findField(clazz, fieldName);
-			field.setAccessible(true);
-			int modifiers = field.getModifiers();
-			Field modifierField = field.getClass().getDeclaredField("modifiers");
-			modifiers = modifiers & ~Modifier.FINAL;
-			modifierField.setAccessible(true);
-			modifierField.setInt(field, modifiers);
-			ReflectionUtils.setField(field, instance, value);
-		}
-		catch (ReflectiveOperationException e) {
-			throw new IllegalArgumentException(e);
-		}
+		Field field = ReflectionUtils.findField(clazz, fieldName);
+		assertThat(field).isNotNull();
+		field.setAccessible(true);
+		ReflectionUtils.setField(field, instance, value);
 	}
 
 	@Test
-	public void testInstallDeniedWhileUpgrading() throws Exception {
+	void installDeniedWhileUpgrading() throws Exception {
 		Manifest manifest = new Manifest();
 		Release release = new Release();
 		release.setManifest(manifest);

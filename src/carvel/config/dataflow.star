@@ -41,10 +41,10 @@ def dataflow_container_env():
     envs.extend([{"name": "SPRING_JPA_DATABASE_PLATFORM", "value": dataflow_db_dialect()}])
   end
   if grafana_enabled():
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED", "value": "true"}])
+    envs.extend([{"name": "MANAGEMENT_PROMETHEUS_METRICS_EXPORT_ENABLED", "value": "true"}])
   end
   if prometheus_rsocket_proxy_enabled():
-    envs.extend([{"name": "MANAGEMENT_METRICS_EXPORT_PROMETHEUS_RSOCKET_ENABLED", "value": "true"}])
+    envs.extend([{"name": "MANAGEMENT_PROMETHEUS_METRICS_EXPORT_RSOCKET_ENABLED", "value": "true"}])
   end
   if non_empty_string(data.values.scdf.server.database.secretName):
     if non_empty_string(data.values.scdf.server.database.secretUsernameKey):

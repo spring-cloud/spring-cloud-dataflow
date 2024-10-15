@@ -37,16 +37,15 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Christian Tzolov
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = { TestDependencies.class })
+@SpringBootTest(classes = {TestDependencies.class})
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class RootControllerTests {
+class RootControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -54,13 +53,13 @@ public class RootControllerTests {
 	private WebApplicationContext wac;
 
 	@BeforeEach
-	public void setupMocks() {
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
 	@Test
-	public void testRootControllerResponse() throws Exception {
+	void rootControllerResponse() throws Exception {
 		String mvcResult = mockMvc.perform(get("/").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andReturn()

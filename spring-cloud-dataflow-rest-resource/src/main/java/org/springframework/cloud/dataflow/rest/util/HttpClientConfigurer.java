@@ -17,20 +17,28 @@ package org.springframework.cloud.dataflow.rest.util;
 
 import java.net.URI;
 
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.CredentialsProvider;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.impl.DefaultAuthenticationStrategy;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.auth.SystemDefaultCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.HttpRequestInterceptor;
+import org.apache.hc.core5.http.config.Registry;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.Assert;
+
 
 /**
  * Utility for configuring a {@link CloseableHttpClient}. This class allows for
@@ -60,12 +68,18 @@ public class HttpClientConfigurer {
 
 	protected HttpClientConfigurer(URI targetHost) {
 		httpClientBuilder = HttpClientBuilder.create();
-		this.targetHost = new HttpHost(targetHost.getHost(), targetHost.getPort(), targetHost.getScheme());
+		this.targetHost = new HttpHost(targetHost.getScheme(), targetHost.getHost(), targetHost.getPort());
 	}
 
 	public HttpClientConfigurer basicAuthCredentials(String username, String password) {
 		final CredentialsProvider credentialsProvider = this.getOrInitializeCredentialsProvider();
-		credentialsProvider.setCredentials(new AuthScope(this.targetHost), new UsernamePasswordCredentials(username, password));
+		if(credentialsProvider instanceof BasicCredentialsProvider basicCredentialsProvider) {
+			basicCredentialsProvider.setCredentials(new AuthScope(this.targetHost),
+				new UsernamePasswordCredentials(username, password.toCharArray()));
+		} else if (credentialsProvider instanceof SystemDefaultCredentialsProvider systemDefaultCredProvider) {
+			systemDefaultCredProvider.setCredentials(new AuthScope(this.targetHost),
+				new UsernamePasswordCredentials(username, password.toCharArray()));
+		}
 		httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 		useBasicAuth = true;
 		return this;
@@ -94,14 +108,18 @@ public class HttpClientConfigurer {
 		Assert.hasText(proxyUri.getScheme(), "The scheme component of the proxyUri must not be empty.");
 
 		httpClientBuilder
-			.setProxy(new HttpHost(proxyUri.getHost(), proxyUri.getPort(), proxyUri.getScheme()));
+			.setProxy(new HttpHost(proxyUri.getScheme(), proxyUri.getHost(), proxyUri.getPort()));
 		if (proxyUsername !=null && proxyPassword != null) {
 			final CredentialsProvider credentialsProvider = this.getOrInitializeCredentialsProvider();
-			credentialsProvider.setCredentials(
-				new AuthScope(proxyUri.getHost(), proxyUri.getPort()),
-				new UsernamePasswordCredentials(proxyUsername, proxyPassword));
+			if(credentialsProvider instanceof BasicCredentialsProvider basicCredentialsProvider) {
+				basicCredentialsProvider.setCredentials(new AuthScope(proxyUri.getHost(), proxyUri.getPort()),
+					new UsernamePasswordCredentials(proxyUsername, proxyPassword.toCharArray()));
+			} else if (credentialsProvider instanceof SystemDefaultCredentialsProvider systemDefaultCredProvider) {
+				systemDefaultCredProvider.setCredentials(new AuthScope(proxyUri.getHost(), proxyUri.getPort()),
+					new UsernamePasswordCredentials(proxyUsername, proxyPassword.toCharArray()));
+			}
 			httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-				.setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy());
+				.setProxyAuthenticationStrategy(new DefaultAuthenticationStrategy());
 		}
 		return this;
 	}
@@ -113,8 +131,14 @@ public class HttpClientConfigurer {
 	 * @return a reference to {@code this} to enable chained method invocation
 	 */
 	public HttpClientConfigurer skipTlsCertificateVerification() {
-		httpClientBuilder.setSSLContext(HttpUtils.buildCertificateIgnoringSslContext());
-		httpClientBuilder.setSSLHostnameVerifier(new NoopHostnameVerifier());
+		ConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(HttpUtils.buildCertificateIgnoringSslContext(), NoopHostnameVerifier.INSTANCE);
+			Registry<ConnectionSocketFactory> socketFactoryRegistry =
+				RegistryBuilder.<ConnectionSocketFactory> create()
+					.register("https", sslsf)
+					.register("http", new PlainConnectionSocketFactory())
+					.build();
+			final BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(socketFactoryRegistry);
+			httpClientBuilder.setConnectionManager(connectionManager);
 
 		return this;
 	}
@@ -128,7 +152,7 @@ public class HttpClientConfigurer {
 	}
 
 	public HttpClientConfigurer addInterceptor(HttpRequestInterceptor interceptor) {
-		httpClientBuilder.addInterceptorLast(interceptor);
+		httpClientBuilder.addRequestInterceptorLast(interceptor);
 
 		return this;
 	}

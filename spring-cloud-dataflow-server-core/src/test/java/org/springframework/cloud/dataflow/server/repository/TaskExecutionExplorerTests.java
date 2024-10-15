@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,19 +34,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateExecutionSupport;
-import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
-import org.springframework.cloud.dataflow.aggregate.task.TaskDefinitionReader;
 import org.springframework.cloud.dataflow.core.AppRegistration;
 import org.springframework.cloud.dataflow.core.ApplicationType;
 import org.springframework.cloud.dataflow.core.TaskDefinition;
 import org.springframework.cloud.dataflow.registry.service.AppRegistryService;
-import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
-import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
-import org.springframework.cloud.dataflow.schema.service.SchemaService;
 import org.springframework.cloud.dataflow.server.configuration.TaskServiceDependencies;
-import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
+import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -61,28 +56,20 @@ import static org.mockito.Mockito.when;
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SpringBootTest(classes = { TaskServiceDependencies.class }, properties = {
-		"spring.main.allow-bean-definition-overriding=true" })
+
+@SpringBootTest(classes = {TaskServiceDependencies.class}, properties = {
+		"spring.main.allow-bean-definition-overriding=true"})
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class TaskExecutionExplorerTests {
+class TaskExecutionExplorerTests {
 
 	@Autowired
 	private DataSource dataSource;
 
 	@Autowired
-	private AggregateTaskExplorer explorer;
-
-	@Autowired
-	private AggregateExecutionSupport aggregateExecutionSupport;
+	private DataflowTaskExplorer explorer;
 
 	private JdbcTemplate template;
-
-	@Autowired
-	private SchemaService schemaService;
-
-	@Autowired
-	private TaskDefinitionReader taskDefinitionReader;
 
 	@Autowired
 	private AppRegistryService appRegistryService;
@@ -91,86 +78,79 @@ public class TaskExecutionExplorerTests {
 	private TaskDefinitionRepository definitionRepository;
 
 	@BeforeEach
-	public void setup() throws Exception {
+	void setup() throws Exception {
 		template = new JdbcTemplate(dataSource);
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			String prefix = target.getTaskPrefix();
-			template.execute(SchemaUtilities.getQuery("DELETE FROM %PREFIX%EXECUTION", prefix));
-		}
+		template.execute("DELETE FROM TASK_EXECUTION");
 		TaskDefinition taskDefinition = new TaskDefinition("baz", "baz");
 		definitionRepository.save(taskDefinition);
 	}
 
 	@Test
-	public void testInitializer() {
-		for (SchemaVersionTarget target : schemaService.getTargets().getSchemas()) {
-			String prefix = target.getTaskPrefix();
-			int actual = template.queryForObject(
-					SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION", prefix), Integer.class);
-			assertThat(actual).isEqualTo(0);
-			actual = template.queryForObject(
-					SchemaUtilities.getQuery("SELECT COUNT(*) from %PREFIX%EXECUTION_PARAMS", prefix), Integer.class);
-			assertThat(actual).isEqualTo(0);
-		}
+	void initializer() {
+		int actual = template.queryForObject(
+			"SELECT COUNT(*) from TASK_EXECUTION", Integer.class);
+		assertThat(actual).isEqualTo(0);
+		actual = template.queryForObject(
+			"SELECT COUNT(*) from TASK_EXECUTION_PARAMS", Integer.class);
+		assertThat(actual).isEqualTo(0);
 	}
 
 	@Test
-	public void testExplorerFindAll() {
+	void explorerFindAll() {
 		final int ENTRY_COUNT = 4;
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "foo");
 		insertTestExecutionDataIntoRepo(template, 1L, "foo");
 		insertTestExecutionDataIntoRepo(template, 0L, "foo");
 
-		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10), true).getContent();
-		assertThat(resultList.size()).isEqualTo(ENTRY_COUNT);
-		Map<String, AggregateTaskExecution> actual = new HashMap<>();
-		for (AggregateTaskExecution taskExecution : resultList) {
-			String key = String.format("%d:%s", taskExecution.getExecutionId(), taskExecution.getSchemaTarget());
+		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10)).getContent();
+		assertThat(resultList).hasSize(ENTRY_COUNT);
+		Map<String, TaskExecution> actual = new HashMap<>();
+		for (TaskExecution taskExecution : resultList) {
+			String key = String.format("%d", taskExecution.getExecutionId());
 			actual.put(key, taskExecution);
 		}
 		Set<String> allKeys = new HashSet<>();
-		for (AggregateTaskExecution execution : actual.values()) {
-			String key = String.format("%d:%s", execution.getExecutionId(), execution.getSchemaTarget());
-			assertThat(allKeys.contains(key)).isFalse();
+		for (TaskExecution execution : actual.values()) {
+			String key = String.format("%d", execution.getExecutionId());
+			assertThat(allKeys).doesNotContain(key);
 			allKeys.add(key);
 		}
-		assertThat(actual.size()).isEqualTo(allKeys.size());
+		assertThat(actual).hasSize(allKeys.size());
 	}
 
 	@Test
-	public void testExplorerFindByName() throws Exception {
+	void explorerFindByName() throws Exception {
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "bar");
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
-		List<AggregateTaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
-		assertThat(resultList.size()).isEqualTo(1);
-		AggregateTaskExecution taskExecution = resultList.get(0);
+		List<TaskExecution> resultList = explorer.findTaskExecutionsByName("fee", PageRequest.of(0, 10)).getContent();
+		assertThat(resultList).hasSize(1);
+		TaskExecution taskExecution = resultList.get(0);
 		assertThat(taskExecution.getExecutionId()).isEqualTo(0);
 		assertThat(taskExecution.getTaskName()).isEqualTo("fee");
 	}
 
 	@Test
-	public void testExplorerSort() throws Exception {
-		when(appRegistryService.find(eq("baz"), any(ApplicationType.class))).thenReturn(new AppRegistration("baz", ApplicationType.task, "1.0.0", new URI("file://src/test/resources/register-all.txt"),null, AppBootSchemaVersion.BOOT3));
+	void explorerSort() throws Exception {
+		when(appRegistryService.find(eq("baz"), any(ApplicationType.class))).thenReturn(new AppRegistration("baz", ApplicationType.task, "1.0.0", new URI("file://src/test/resources/register-all.txt"),null));
 		insertTestExecutionDataIntoRepo(template, 3L, "foo");
 		insertTestExecutionDataIntoRepo(template, 2L, "bar");
 		insertTestExecutionDataIntoRepo(template, 1L, "baz");
 		insertTestExecutionDataIntoRepo(template, 0L, "fee");
 
-		List<AggregateTaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("SCHEMA_TARGET")), true).getContent();
-		assertThat(resultList.size()).isEqualTo(4);
-		List<Long> ids = resultList.stream().map(AggregateTaskExecution::getExecutionId).collect(Collectors.toList());
-		assertThat(ids).containsExactly(0L, 2L, 3L, 1L);
+		List<TaskExecution> resultList = explorer.findAll(PageRequest.of(0, 10, Sort.by("TASK_EXECUTION_ID"))).getContent();
+		assertThat(resultList).hasSize(4);
+		List<Long> ids = resultList.stream().map(TaskExecution::getExecutionId).collect(Collectors.toList());
+		assertThat(ids).containsExactly(0L, 1L, 2L, 3L);
 	}
 
 	private void insertTestExecutionDataIntoRepo(JdbcTemplate template, long id, String taskName) {
-		SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(taskName, taskDefinitionReader);
-		final String INSERT_STATEMENT = SchemaUtilities.getQuery("INSERT INTO %PREFIX%EXECUTION (task_execution_id, "
+		final String INSERT_STATEMENT = "INSERT INTO TASK_EXECUTION (task_execution_id, "
 				+ "start_time, end_time, task_name, " + "exit_code,exit_message,last_updated) "
-				+ "VALUES (?,?,?,?,?,?,?)", schemaVersionTarget.getTaskPrefix());
+				+ "VALUES (?,?,?,?,?,?,?)";
 		Object[] param = new Object[] { id, new Date(id), new Date(), taskName, 0, null, new Date() };
 		template.update(INSERT_STATEMENT, param);
 	}

@@ -77,18 +77,16 @@ public interface TaskOperations {
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 *
 	 * @param ids          comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
-	 * @param schemaTarget the schema target of the task execution.
 	 */
-	void stop(String ids, String schemaTarget);
+	void stop(String ids);
 
 	/**
 	 * Request the stop of a group {@link org.springframework.cloud.task.repository.TaskExecution}s.
 	 *
 	 * @param ids          comma delimited set of {@link org.springframework.cloud.task.repository.TaskExecution} ids to stop.
-	 * @param schemaTarget the schema target of the task execution.
 	 * @param platform     the platform name where the task is executing.
 	 */
-	void stop(String ids, String schemaTarget, String platform);
+	void stop(String ids, String platform);
 
 	/**
 	 * Destroy an existing task.
@@ -127,10 +125,9 @@ public interface TaskOperations {
 	 * Return the {@link TaskExecutionResource} for the id specified.
 	 *
 	 * @param id           identifier of the task execution
-	 * @param schemaTarget the schema target of the task execution.
 	 * @return {@link TaskExecutionResource}
 	 */
-	TaskExecutionResource taskExecutionStatus(long id, String schemaTarget);
+	TaskExecutionResource taskExecutionStatus(long id);
 
 	/**
 	 * Return the task execution log.  The platform from which to retrieve the log will be set to {@code default}.
@@ -161,18 +158,16 @@ public interface TaskOperations {
 	 * Cleanup any resources associated with the execution for the id specified.
 	 *
 	 * @param id           identifier of the task execution
-	 * @param schemaTarget the schema target of the task execution.
 	 */
-	void cleanup(long id, String schemaTarget);
+	void cleanup(long id);
 
 	/**
 	 * Cleanup any resources associated with the execution for the id specified.
 	 *
 	 * @param id           identifier of the task execution
-	 * @param schemaTarget the schema target of the task execution.
 	 * @param removeData   delete the history of the execution
 	 */
-	void cleanup(long id, String schemaTarget, boolean removeData);
+	void cleanup(long id, boolean removeData);
 
 
 	/**

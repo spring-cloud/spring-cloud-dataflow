@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.servlet.Filter;
-
+import jakarta.servlet.Filter;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -56,9 +55,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.test.util.TestSocketUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.SocketUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -135,7 +134,7 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 	}
 
 	public LocalDataflowResource(String configurationLocation, boolean streamsEnabled, boolean tasksEnabled,
-			boolean metricsEnabled, boolean schedulesEnabled, String skipperServerPort) {
+								 boolean metricsEnabled, boolean schedulesEnabled, String skipperServerPort) {
 		this.configurationLocation = configurationLocation;
 		this.streamsEnabled = streamsEnabled;
 		this.tasksEnabled = tasksEnabled;
@@ -147,7 +146,7 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
 		originalDataflowServerPort = System.getProperty(DATAFLOW_PORT_PROPERTY);
 
-		this.dataflowServerPort = SocketUtils.findAvailableTcpPort();
+		this.dataflowServerPort = TestSocketUtils.findAvailableTcpPort();
 
 		logger.info("Setting Dataflow Server port to " + this.dataflowServerPort);
 
@@ -158,7 +157,7 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 		if (!StringUtils.isEmpty(configurationLocation)) {
 			final Resource resource = new PathMatchingResourcePatternResolver().getResource(configurationLocation);
 			if (!resource.exists()) {
-			  throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
+				throw new IllegalArgumentException(String.format("Resource 'configurationLocation' ('%s') does not exist.", configurationLocation));
 			}
 			System.setProperty("spring.config.additional-location", configurationLocation);
 		}
@@ -166,14 +165,14 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 		app = new SpringApplication(TestConfig.class);
 
 		configurableApplicationContext = (WebApplicationContext) app.run(new String[] {
-				"--spring.cloud.kubernetes.enabled=false",
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
-						+ this.streamsEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
-						+ this.tasksEnabled,
-				"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
-						+ this.schedulesEnabled,
-				"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
+			"--spring.cloud.kubernetes.enabled=false",
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.STREAMS_ENABLED + "="
+				+ this.streamsEnabled,
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.TASKS_ENABLED + "="
+				+ this.tasksEnabled,
+			"--" + FeaturesProperties.FEATURES_PREFIX + "." + FeaturesProperties.SCHEDULES_ENABLED + "="
+				+ this.schedulesEnabled,
+			"--spring.cloud.skipper.client.serverUri=http://localhost:" + this.skipperServerPort + "/api"
 		});
 		skipperClient = configurableApplicationContext.getBean(SkipperClient.class);
 		LauncherRepository launcherRepository = configurableApplicationContext.getBean(LauncherRepository.class);
@@ -192,7 +191,7 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 		logger.info("launcher:{}:maximumConcurrentTasks={}", launcher.getName(), maximumConcurrentTasks);
 		Collection<Filter> filters = configurableApplicationContext.getBeansOfType(Filter.class).values();
 		mockMvc = MockMvcBuilders.webAppContextSetup(configurableApplicationContext)
-				.addFilters(filters.toArray(new Filter[0])).build();
+			.addFilters(filters.toArray(new Filter[0])).build();
 		dataflowPort = configurableApplicationContext.getEnvironment().resolvePlaceholders("${server.port}");
 	}
 
@@ -241,14 +240,14 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 
 	@EnableAutoConfiguration(
 		exclude = {
-				DataFlowClientAutoConfiguration.class,
-				SessionAutoConfiguration.class,
-				ManagementWebSecurityAutoConfiguration.class,
-				//SecurityAutoConfiguration.class,
-				UserDetailsServiceAutoConfiguration.class,
-				LocalDeployerAutoConfiguration.class,
-				CloudFoundryDeployerAutoConfiguration.class,
-				KubernetesAutoConfiguration.class
+			DataFlowClientAutoConfiguration.class,
+			SessionAutoConfiguration.class,
+			ManagementWebSecurityAutoConfiguration.class,
+			//SecurityAutoConfiguration.class,
+			UserDetailsServiceAutoConfiguration.class,
+			LocalDeployerAutoConfiguration.class,
+			CloudFoundryDeployerAutoConfiguration.class,
+			KubernetesAutoConfiguration.class
 		},
 		excludeName = "org.springframework.cloud.dataflow.rest.client.config.DataFlowClientAutoConfiguration")
 	@EnableDataFlowServer
@@ -296,5 +295,4 @@ public class LocalDataflowResource implements BeforeEachCallback, AfterEachCallb
 		}
 
 	}
-
 }

@@ -18,7 +18,7 @@ package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer.MethodName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -31,7 +31,7 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,34 +41,34 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Glenn Renfro
  * @author Corneil du Plessis
  */
-@SuppressWarnings({"NewClassNamingConvention", "SameParameterValue"})
-@TestMethodOrder(MethodName.class)
-public class TaskSchedulerDocumentation extends BaseDocumentation {
+@SuppressWarnings({"NewClassNamingConvention","SameParameterValue"})
+@TestMethodOrder(MethodOrderer.MethodName.class)
+class TaskSchedulerDocumentation extends BaseDocumentation {
 
 	@BeforeEach
-	public void setup() throws Exception {
-		registerApp(ApplicationType.task, "timestamp", "1.2.0.RELEASE");
+	void setup() throws Exception {
+		registerApp(ApplicationType.task, "timestamp", "3.0.0");
 		createTaskDefinition("mytaskname");
 	}
 
 	@AfterEach
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		destroyTaskDefinition("mytaskname");
 		unregisterApp(ApplicationType.task, "timestamp");
 	}
 
 	@Test
-	public void createSchedule() throws Exception {
+	void createSchedule() throws Exception {
 		this.mockMvc.perform(
 				post("/tasks/schedules")
-						.param("scheduleName", "myschedule")
-						.param("taskDefinitionName", "mytaskname")
-						.param("platform", "default")
-						.param("properties", "scheduler.cron.expression=00 22 17 ? *")
-						.param("arguments", "--foo=bar"))
+						.queryParam("scheduleName", "myschedule")
+						.queryParam("taskDefinitionName", "mytaskname")
+						.queryParam("platform", "default")
+						.queryParam("properties", "scheduler.cron.expression=00 22 17 ? *")
+						.queryParam("arguments", "--foo=bar"))
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("scheduleName").description("The name for the created schedule"),
 								parameterWithName("platform").description("The name of the platform the task is launched"),
 								parameterWithName("taskDefinitionName")
@@ -79,7 +79,7 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void deleteSchedule() throws Exception {
+	void deleteSchedule() throws Exception {
 		this.mockMvc.perform(
 				delete("/tasks/schedules/{scheduleName}", "mytestschedule"))
 				.andExpect(status().isOk())
@@ -89,16 +89,17 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listFilteredSchedules() throws Exception {
+	void listFilteredSchedules() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/schedules/instances/{task-definition-name}", "FOO")
-						.param("page", "0")
-						.param("size", "10"))
+						.queryParam("page", "0")
+						.queryParam("size", "10"))
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("task-definition-name")
 								.description("Filter schedules based on the specified task definition (required)")),
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -111,14 +112,15 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void listAllSchedules() throws Exception {
+	void listAllSchedules() throws Exception {
 		this.mockMvc.perform(
 				get("/tasks/schedules")
-						.param("page", "0")
-						.param("size", "10"))
+						.queryParam("page", "0")
+						.queryParam("size", "10"))
+				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						requestParameters(
+						queryParameters(
 								parameterWithName("page")
 										.description("The zero-based page number (optional)"),
 								parameterWithName("size")
@@ -133,8 +135,8 @@ public class TaskSchedulerDocumentation extends BaseDocumentation {
 	private void createTaskDefinition(String taskName) throws Exception{
 		documentation.dontDocument( () -> this.mockMvc.perform(
 				post("/tasks/definitions")
-						.param("name", taskName)
-						.param("definition", "timestamp --format='yyyy MM dd'"))
+						.queryParam("name", taskName)
+						.queryParam("definition", "timestamp --format='yyyy MM dd'"))
 				.andExpect(status().isOk()));
 	}
 

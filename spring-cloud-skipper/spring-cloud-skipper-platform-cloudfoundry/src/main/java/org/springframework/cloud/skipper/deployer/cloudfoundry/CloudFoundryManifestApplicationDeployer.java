@@ -225,8 +225,8 @@ public class CloudFoundryManifestApplicationDeployer {
 	}
 
 	public static Predicate<Throwable> isNotFoundError() {
-		return t -> t instanceof AbstractCloudFoundryException
-				&& ((AbstractCloudFoundryException) t).getStatusCode() == HttpStatus.NOT_FOUND.value();
+		return t -> t instanceof AbstractCloudFoundryException acfe
+				&& acfe.getStatusCode() == HttpStatus.NOT_FOUND.value();
 	}
 
 }

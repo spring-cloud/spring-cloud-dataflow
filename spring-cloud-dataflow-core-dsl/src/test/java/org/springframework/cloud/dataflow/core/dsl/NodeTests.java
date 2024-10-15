@@ -19,26 +19,23 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 /**
  * @author Oleg Zhurakousky
  * @author Andy Clement
  * @author Corneil du Plessis
  */
-public class NodeTests {
+class NodeTests {
 
 	@Test
-	public void testDestinationNodeDestinationName(){
+	void destinationNodeDestinationName(){
 		DestinationNode node = new DestinationNode(0, 0, "foo.bar.bazz", null);
 		assertThat(node.getDestinationName()).isEqualTo("foo.bar.bazz");
 	}
 
 	@Test
-	public void testDestinationNodeToString(){
+	void destinationNodeToString(){
 		ArgumentNode an1 = new ArgumentNode("foo", "bar", 0, 4);
 		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", 0, 4);
 		DestinationNode node = new DestinationNode(0, 4, "foo.bar.bazz", new ArgumentNode[]{an1, an2});
@@ -46,8 +43,9 @@ public class NodeTests {
 		assertThat(node.toString()).isEqualTo(":foo.bar.bazz");
 	}
 
-	@Test // see https://github.com/spring-cloud/spring-cloud-dataflow/issues/1568
-	public void testStreamNodesToString(){
+	// see https://github.com/spring-cloud/spring-cloud-dataflow/issues/1568
+	@Test
+	void streamNodesToString(){
 		ArgumentNode an1 = new ArgumentNode("foo", "bar", 0, 4);
 		ArgumentNode an2 = new ArgumentNode("abc", "'xyz'", 0, 4);
 		AppNode appNode = new AppNode(null, "bar", 0, 2, new ArgumentNode[]{an1, an2});

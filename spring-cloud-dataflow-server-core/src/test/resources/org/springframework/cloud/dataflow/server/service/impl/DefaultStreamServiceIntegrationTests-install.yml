@@ -23,5 +23,4 @@
     "wavefront.application.service": ${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}-${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
   "version": "1.2.0.RELEASE"
   "deploymentProperties":
-    "spring.cloud.deployer.bootVersion": "2"
     "spring.cloud.deployer.group": "ticktock"

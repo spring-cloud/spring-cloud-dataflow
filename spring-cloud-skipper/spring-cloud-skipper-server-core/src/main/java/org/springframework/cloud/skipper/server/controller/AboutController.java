@@ -15,9 +15,14 @@
  */
 package org.springframework.cloud.skipper.server.controller;
 
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +34,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
@@ -59,7 +64,7 @@ public class AboutController {
 	 * @return Detailed information about the enabled features, versions of implementation
 	 * libraries, and security configuration
 	 */
-	@RequestMapping(method = RequestMethod.GET)
+	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
 	public AboutResource getAboutResource() {
 		final AboutResource aboutResource = new AboutResource();
@@ -93,8 +98,7 @@ public class AboutController {
 			String version) {
 		String result = defaultValue;
 		if (result == null && StringUtils.hasText(url)) {
-			CloseableHttpClient httpClient = HttpClients.custom()
-					.setSSLHostnameVerifier(new NoopHostnameVerifier())
+			CloseableHttpClient httpClient = httpClientBuilder()
 					.build();
 			HttpComponentsClientHttpRequestFactory requestFactory
 					= new HttpComponentsClientHttpRequestFactory();
@@ -115,7 +119,14 @@ public class AboutController {
 		}
 		return result;
 	}
-
+	private HttpClientBuilder httpClientBuilder() {
+		// Register http/s connection factories
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		return HttpClients.custom()
+			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
+	}
 	private void updateDependency(Dependency dependency, VersionInfoProperties.DependencyAboutInfo dependencyAboutInfo) {
 		dependency.setName(dependencyAboutInfo.getName());
 		if (dependencyAboutInfo.getUrl() != null) {

@@ -15,12 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.db.migration;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import org.flywaydb.core.api.migration.BaseJavaMigration;
-import org.flywaydb.core.api.migration.Context;
 
 import org.springframework.cloud.dataflow.common.flyway.AbstractMigration;
 import org.springframework.cloud.dataflow.common.flyway.SqlCommand;

@@ -31,7 +31,6 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -43,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = TestDependencies.class)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = Replace.ANY)
-public class CompletionControllerTests {
+class CompletionControllerTests {
 
 	private MockMvc mockMvc;
 
@@ -51,40 +50,40 @@ public class CompletionControllerTests {
 	private WebApplicationContext wac;
 
 	@BeforeEach
-	public void setupMocks() {
+	void setupMocks() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(wac)
 				.defaultRequest(get("/").accept(MediaType.APPLICATION_JSON)).build();
 	}
 
 	@Test
-	public void testMissingArgumentFailure() throws Exception {
+	void missingArgumentFailure() throws Exception {
 		mockMvc.perform(get("/completions/stream").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
 
 	}
 
 	@Test
-	public void testNegativeDetailLevelFailureForStreamCompletion() throws Exception {
+	void negativeDetailLevelFailureForStreamCompletion() throws Exception {
 		mockMvc.perform(get("/completions/stream").param("start", "abc").param("detailLevel", "-123")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("_embedded.errors[0].message", is("The provided detail level must be greater than zero.")));
 	}
 
 	@Test
-	public void testPositiveDetailLevelForStreamCompletion() throws Exception {
+	void positiveDetailLevelForStreamCompletion() throws Exception {
 		mockMvc.perform(get("/completions/stream").param("start", "abc").param("detailLevel", "2")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 
 	@Test
-	public void testNegativeDetailLevelFailureForTaskCompletion() throws Exception {
+	void negativeDetailLevelFailureForTaskCompletion() throws Exception {
 		mockMvc.perform(get("/completions/task").param("start", "abc").param("detailLevel", "-123")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest())
 				.andExpect(jsonPath("_embedded.errors[0].message", is("The provided detail level must be greater than zero.")));
 	}
 
 	@Test
-	public void testPositiveDetailLevelForTaskCompletion() throws Exception {
+	void positiveDetailLevelForTaskCompletion() throws Exception {
 		mockMvc.perform(get("/completions/task").param("start", "abc").param("detailLevel", "2")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}

@@ -56,14 +56,14 @@ public class DockerComposeFactory {
 	/**
 	 * Pre-registered Task apps used for testing.
 	 */
-	public static final String DEFAULT_TASK_APPS_URI = "https://dataflow.spring.io/task-maven-latest&force=true";
+	public static final String DEFAULT_TASK_APPS_URI = "https://dataflow.spring.io/task-maven-3-0-x&force=true";
 
 	/**
 	 * Common Apps URIs
 	 */
-	public static final String KAFKA_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-maven-latest&force=true"; // local/kafka
-	public static final String RABBITMQ_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/rabbitmq-maven-latest&force=true"; // cf or local/rabbit
-	public static final String KAFKA_DOCKER_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-docker-latest&force=true"; // k8s
+	public static final String KAFKA_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-maven-5-0-x&force=true"; // local/kafka
+	public static final String RABBITMQ_MAVEN_STREAM_APPS_URI = "https://dataflow.spring.io/rabbitmq-maven-5-0-x&force=true"; // cf or local/rabbit
+	public static final String KAFKA_DOCKER_STREAM_APPS_URI = "https://dataflow.spring.io/kafka-docker-5-0-x&force=true"; // k8s
 
 	/**
 	 * Pre-registered Stream apps used in the tests
@@ -106,7 +106,7 @@ public class DockerComposeFactory {
 			.withAdditionalEnvironmentVariable("STREAM_APPS_URI",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, (isDood ? KAFKA_DOCKER_STREAM_APPS_URI : DEFAULT_STREAM_APPS_URI)))
 			.withAdditionalEnvironmentVariable("TASK_APPS_URI",
-					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)))
+					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-3-0-x" : DEFAULT_TASK_APPS_URI)))
 			.withAdditionalEnvironmentVariable("APPS_PORT_RANGE",
 					DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_APPS_PORT_RANGE, "20000-20195:20000-20195"))
 			.withAdditionalEnvironmentVariable("DOCKER_DELETE_CONTAINER_ON_EXIT",
@@ -139,13 +139,16 @@ public class DockerComposeFactory {
 			return (BeforeAllCallback) context -> logger.debug("Docker Compose installation is disabled!");
 		}
 
-		logger.info("Docker Compose based Integration Tests. \nFollowing environment variables or properties can be used to configure the testing fixture: \n" +
-				" - TEST_DOCKER_COMPOSE_PATHS (test.docker.compose.paths) configures the list of docker-compose files. \n" +
-				" - TEST_DOCKER_COMPOSE_DATAFLOW_VERSION (test.docker.compose.dataflow.version) sets the Data Flow version used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_SKIPPER_VERSION (test.docker.compose.skipper.version) sets the Skipper version used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_STREAM_APPS_URI (test.docker.compose.stream.apps.uri) version of the Streaming apps used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_TASK_APPS_URI (test.docker.compose.taks.apps.uri)  sets the Tasks apps version used for testing. \n" +
-				" - TEST_DOCKER_COMPOSE_PULLONSTARTUP (test.docker.compose.pullOnStartup) enable/disable pulling latest docker images from the Docker Hub. \n");
+		logger.info("""
+				Docker Compose based Integration Tests.\s
+				Following environment variables or properties can be used to configure the testing fixture:\s
+				 - TEST_DOCKER_COMPOSE_PATHS (test.docker.compose.paths) configures the list of docker-compose files.\s
+				 - TEST_DOCKER_COMPOSE_DATAFLOW_VERSION (test.docker.compose.dataflow.version) sets the Data Flow version used for testing.\s
+				 - TEST_DOCKER_COMPOSE_SKIPPER_VERSION (test.docker.compose.skipper.version) sets the Skipper version used for testing.\s
+				 - TEST_DOCKER_COMPOSE_STREAM_APPS_URI (test.docker.compose.stream.apps.uri) version of the Streaming apps used for testing.\s
+				 - TEST_DOCKER_COMPOSE_TASK_APPS_URI (test.docker.compose.taks.apps.uri)  sets the Tasks apps version used for testing.\s
+				 - TEST_DOCKER_COMPOSE_PULLONSTARTUP (test.docker.compose.pullOnStartup) enable/disable pulling latest docker images from the Docker Hub.\s
+				""");
 
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN,
 				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_DATAFLOW_VERSIONN, "default version set in ../src/docker-compose/docker-compose.yml"));
@@ -156,7 +159,7 @@ public class DockerComposeFactory {
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI,
 				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_STREAM_APPS_URI, (isDood ? KAFKA_DOCKER_STREAM_APPS_URI : DEFAULT_STREAM_APPS_URI)));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI,
-				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-latest" : DEFAULT_TASK_APPS_URI)));
+				DockerComposeFactoryProperties.get(DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_TASK_APPS_URI, (isDood ? "https://dataflow.spring.io/task-docker-3-0-x" : DEFAULT_TASK_APPS_URI)));
 		logger.info("{} = {}", DockerComposeFactoryProperties.TEST_DOCKER_COMPOSE_PATHS,
 				DockerComposeFactoryProperties.getDockerComposePaths(DEFAULT_DOCKER_COMPOSE_PATHS));
 

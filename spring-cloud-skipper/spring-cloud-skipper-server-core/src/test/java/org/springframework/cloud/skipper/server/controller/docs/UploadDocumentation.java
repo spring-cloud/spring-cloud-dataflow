@@ -16,7 +16,6 @@
 
 package org.springframework.cloud.skipper.server.controller.docs;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
@@ -38,7 +37,6 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -46,10 +44,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class UploadDocumentation extends BaseDocumentation {
+class UploadDocumentation extends BaseDocumentation {
 
 	@Test
-	public void uploadRelease() throws Exception {
+	void uploadRelease() throws Exception {
 
 		final UploadRequest uploadProperties = new UploadRequest();
 		uploadProperties.setRepoName("local");

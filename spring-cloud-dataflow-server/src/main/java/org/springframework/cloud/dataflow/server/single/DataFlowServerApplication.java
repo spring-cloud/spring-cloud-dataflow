@@ -26,7 +26,6 @@ import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
 import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
-import org.springframework.cloud.task.configuration.MetricsAutoConfiguration;
 import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
 
 /**
@@ -37,7 +36,6 @@ import org.springframework.cloud.task.configuration.SimpleTaskAutoConfiguration;
  * @author Janne Valkealahti
  */
 @SpringBootApplication(exclude = {
-		MetricsAutoConfiguration.class,
 		SessionAutoConfiguration.class,
 		SimpleTaskAutoConfiguration.class,
 		ManagementWebSecurityAutoConfiguration.class,

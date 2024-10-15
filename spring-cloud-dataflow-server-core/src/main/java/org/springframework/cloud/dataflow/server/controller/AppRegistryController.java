@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ import org.springframework.cloud.dataflow.registry.support.NoSuchAppRegistration
 import org.springframework.cloud.dataflow.rest.SkipperStream;
 import org.springframework.cloud.dataflow.rest.resource.AppRegistrationResource;
 import org.springframework.cloud.dataflow.rest.resource.DetailedAppRegistrationResource;
-import org.springframework.cloud.dataflow.schema.AppBootSchemaVersion;
 import org.springframework.cloud.dataflow.server.controller.assembler.AppRegistrationAssemblerProvider;
 import org.springframework.cloud.dataflow.server.repository.InvalidApplicationNameException;
 import org.springframework.cloud.dataflow.server.repository.StreamDefinitionRepository;
@@ -64,10 +62,12 @@ import org.springframework.hateoas.server.ExposesResourceFor;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -141,7 +141,7 @@ public class AppRegistryController {
 	public PagedModel<? extends AppRegistrationResource> list(
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
-			@RequestParam(value = "type", required = false) ApplicationType type,
+			@RequestParam(required = false) ApplicationType type,
 			@RequestParam(required = false) String search,
 			@RequestParam(required = false) String version,
 			@RequestParam(required = false) boolean defaultVersion) {
@@ -161,21 +161,21 @@ public class AppRegistryController {
 	 * @param exhaustive if set to true all properties are returned
 	 * @return detailed application information
 	 */
-	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.GET)
+	@GetMapping("/{type}/{name}/{version:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public DetailedAppRegistrationResource info(@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name, @PathVariable("version") String version,
-			@RequestParam(required = false, name = "exhaustive") boolean exhaustive) {
+	public DetailedAppRegistrationResource info(@PathVariable ApplicationType type,
+			@PathVariable String name, @PathVariable String version,
+			@RequestParam(required = false) boolean exhaustive) {
 
 		return getInfo(type, name, version, exhaustive);
 	}
 
 	@Deprecated
-	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.GET)
+	@GetMapping("/{type}/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedAppRegistrationResource info(
-			@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
-			@RequestParam(required = false, name = "exhaustive") boolean exhaustive) {
+			@PathVariable ApplicationType type, @PathVariable String name,
+			@RequestParam(required = false) boolean exhaustive) {
 		if (!this.appRegistryService.appExist(name, type)) {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
@@ -229,16 +229,16 @@ public class AppRegistryController {
 	 * @param metadataUri URI for the metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
 	 */
-	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.POST)
+	@PostMapping("/{type}/{name}/{version:.+}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(
-			@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name,
-			@PathVariable("version") String version,
-			@RequestParam(name = "bootVersion", required = false) String bootVersion,
-			@RequestParam("uri") String uri,
+			@PathVariable ApplicationType type,
+			@PathVariable String name,
+			@PathVariable String version,
+			@RequestParam(required = false) String bootVersion,
+			@RequestParam String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(defaultValue = "false") boolean force) {
 		validateApplicationName(name);
 		appRegistryService.validate(appRegistryService.getDefaultApp(name, type), uri, version);
 		AppRegistration previous = appRegistryService.find(name, type, version);
@@ -251,8 +251,7 @@ public class AppRegistryController {
 					type,
 					version,
 					new URI(uri),
-					metadataUri != null ? new URI(metadataUri) : null,
-					bootVersion != null ? AppBootSchemaVersion.fromBootVersion(bootVersion) : AppBootSchemaVersion.defaultVersion()
+					metadataUri != null ? new URI(metadataUri) : null
 			);
 			prefetchMetadata(Collections.singletonList(registration));
 		}
@@ -262,15 +261,15 @@ public class AppRegistryController {
 	}
 
 	@Deprecated
-	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.POST)
+	@PostMapping("/{type}/{name}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(
-			@PathVariable("type") ApplicationType type,
-			@PathVariable("name") String name,
-			@RequestParam(name = "bootVersion", required = false) String bootVersion,
-			@RequestParam("uri") String uri,
+			@PathVariable ApplicationType type,
+			@PathVariable String name,
+			@RequestParam(required = false) String bootVersion,
+			@RequestParam String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(defaultValue = "false") boolean force) {
 		String version = this.appRegistryService.getResourceVersion(uri);
 		this.register(
 				type,
@@ -290,10 +289,10 @@ public class AppRegistryController {
 	 * @param name module name
 	 * @param version module version
 	 */
-	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.PUT)
+	@PutMapping("/{type}/{name}/{version:.+}")
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	public void makeDefault(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
-			@PathVariable("version") String version) {
+	public void makeDefault(@PathVariable ApplicationType type, @PathVariable String name,
+			@PathVariable String version) {
 		this.appRegistryService.setDefaultApp(name, type, version);
 	}
 
@@ -305,10 +304,10 @@ public class AppRegistryController {
 	 * @param name the application name
 	 * @param version application version
 	 */
-	@RequestMapping(value = "/{type}/{name}/{version:.+}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{type}/{name}/{version:.+}")
 	@ResponseStatus(HttpStatus.OK)
-	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name,
-			@PathVariable("version") String version) {
+	public void unregister(@PathVariable ApplicationType type, @PathVariable String name,
+			@PathVariable String version) {
 
 		if (type != ApplicationType.task) {
 			String streamWithApp = findStreamContainingAppOf(type, name, version);
@@ -377,9 +376,9 @@ public class AppRegistryController {
 	}
 
 	@Deprecated
-	@RequestMapping(value = "/{type}/{name}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{type}/{name}")
 	@ResponseStatus(HttpStatus.OK)
-	public void unregister(@PathVariable("type") ApplicationType type, @PathVariable("name") String name) {
+	public void unregister(@PathVariable ApplicationType type, @PathVariable String name) {
 		if (this.appRegistryService.find(name, type) == null) {
 			throw new NoSuchAppRegistrationException(name, type);
 		}
@@ -390,7 +389,7 @@ public class AppRegistryController {
 		this.unregister(type, name, appRegistration.getVersion());
 	}
 
-	@RequestMapping(method = RequestMethod.DELETE)
+	@DeleteMapping
 	@ResponseStatus(HttpStatus.OK)
 	public void unregisterAll() {
 		List<AppRegistration> appRegistrations = appRegistryService.findAll();
@@ -427,14 +426,14 @@ public class AppRegistryController {
 	 * @param force if {@code true}, overwrites any pre-existing registrations
 	 * @return the collection of registered applications
 	 */
-	@RequestMapping(method = RequestMethod.POST)
+	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public PagedModel<? extends AppRegistrationResource> registerAll(
 			Pageable pageable,
 			PagedResourcesAssembler<AppRegistration> pagedResourcesAssembler,
-			@RequestParam(value = "uri", required = false) String uri,
-			@RequestParam(value = "apps", required = false) String apps,
-			@RequestParam(value = "force", defaultValue = "false") boolean force) {
+			@RequestParam(required = false) String uri,
+			@RequestParam(required = false) String apps,
+			@RequestParam(defaultValue = "false") boolean force) {
 		List<AppRegistration> registrations = new ArrayList<>();
 
 		if (StringUtils.hasText(uri)) {

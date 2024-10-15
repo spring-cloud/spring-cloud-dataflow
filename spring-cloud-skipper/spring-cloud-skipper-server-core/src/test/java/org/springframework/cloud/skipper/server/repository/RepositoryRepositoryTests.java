@@ -31,14 +31,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class RepositoryRepositoryTests extends AbstractIntegrationTest {
+class RepositoryRepositoryTests extends AbstractIntegrationTest {
 
 	@Autowired
 	private RepositoryRepository repositoryRepository;
 
 	@AfterEach
 	@BeforeEach
-	public void cleanupRepository() {
+	void cleanupRepository() {
 		deleteRepoIfExists("stable");
 		deleteRepoIfExists("unstable");
 	}
@@ -51,7 +51,7 @@ public class RepositoryRepositoryTests extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void basicCrud() {
+	void basicCrud() {
 		RepositoryCreator.createTwoRepositories(repositoryRepository);
 		Iterable<Repository> repositories = repositoryRepository.findAll();
 		assertThat(repositories).isNotEmpty();

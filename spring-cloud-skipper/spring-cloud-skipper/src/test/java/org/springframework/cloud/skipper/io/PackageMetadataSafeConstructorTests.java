@@ -17,57 +17,58 @@
 package org.springframework.cloud.skipper.io;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
+import org.springframework.cloud.skipper.domain.PackageMetadata;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
-public class PackageMetadataSafeConstructorTests {
-	private String testYaml = "!!org.springframework.cloud.skipper.domain.PackageMetadata\n" +
-		"apiVersion: skipper.spring.io/v1\n" +
-		"description: time --management.endpoints.web.exposure.include=health,info,bindings\n" +
-		"  --management.metrics.tags.application.type=${spring.cloud.dataflow.stream.app.type:unknown}\n" +
-		"  --management.metrics.tags.stream.name=${spring.cloud.dataflow.stream.name:unknown}\n" +
-		"  --management.metrics.tags.application=${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}\n" +
-		"  --management.metrics.tags.instance.index=${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}\n" +
-		"  --wavefront.application.service=${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}-${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}\n" +
-		"  --management.metrics.tags.application.guid=${spring.cloud.application.guid:unknown}\n" +
-		"  --management.metrics.tags.application.name=${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}\n" +
-		"  --wavefront.application.name=${spring.cloud.dataflow.stream.name:unknown} | log\n" +
-		"  --management.endpoints.web.exposure.include=health,info,bindings --management.metrics.tags.application.type=${spring.cloud.dataflow.stream.app.type:unknown}\n" +
-		"  --management.metrics.tags.stream.name=${spring.cloud.dataflow.stream.name:unknown}\n" +
-		"  --management.metrics.tags.application=${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}\n" +
-		"  --management.metrics.tags.instance.index=${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}\n" +
-		"  --wavefront.application.service=${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}-${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}\n" +
-		"  --management.metrics.tags.application.guid=${spring.cloud.application.guid:unknown}\n" +
-		"  --management.metrics.tags.application.name=${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}\n" +
-		"  --wavefront.application.name=${spring.cloud.dataflow.stream.name:unknown}\n" +
-		"displayName: null\n" +
-		"iconUrl: null\n" +
-		"kind: SpringCloudDeployerApplication\n" +
-		"maintainer: dataflow\n" +
-		"name: ticktock\n" +
-		"origin: null\n" +
-		"packageFile: null\n" +
-		"packageHomeUrl: null\n" +
-		"packageSourceUrl: null\n" +
-		"repositoryId: 11\n" +
-		"repositoryName: repositoryName\n" +
-		"sha256: null\n" +
-		"tags: null\n" +
-		"version: 1.0.0";
+class PackageMetadataSafeConstructorTests {
+	private String testYaml = """
+		!!org.springframework.cloud.skipper.domain.PackageMetadata
+		apiVersion: skipper.spring.io/v1
+		description: time --management.endpoints.web.exposure.include=health,info,bindings
+		  --management.metrics.tags.application.type=${spring.cloud.dataflow.stream.app.type:unknown}
+		  --management.metrics.tags.stream.name=${spring.cloud.dataflow.stream.name:unknown}
+		  --management.metrics.tags.application=${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
+		  --management.metrics.tags.instance.index=${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
+		  --wavefront.application.service=${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}-${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
+		  --management.metrics.tags.application.guid=${spring.cloud.application.guid:unknown}
+		  --management.metrics.tags.application.name=${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}
+		  --wavefront.application.name=${spring.cloud.dataflow.stream.name:unknown} | log
+		  --management.endpoints.web.exposure.include=health,info,bindings --management.metrics.tags.application.type=${spring.cloud.dataflow.stream.app.type:unknown}
+		  --management.metrics.tags.stream.name=${spring.cloud.dataflow.stream.name:unknown}
+		  --management.metrics.tags.application=${spring.cloud.dataflow.stream.name:unknown}-${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}
+		  --management.metrics.tags.instance.index=${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
+		  --wavefront.application.service=${spring.cloud.dataflow.stream.app.label:unknown}-${spring.cloud.dataflow.stream.app.type:unknown}-${vcap.application.instance_index:${spring.cloud.stream.instanceIndex:0}}
+		  --management.metrics.tags.application.guid=${spring.cloud.application.guid:unknown}
+		  --management.metrics.tags.application.name=${vcap.application.application_name:${spring.cloud.dataflow.stream.app.label:unknown}}
+		  --wavefront.application.name=${spring.cloud.dataflow.stream.name:unknown}
+		displayName: null
+		iconUrl: null
+		kind: SpringCloudDeployerApplication
+		maintainer: dataflow
+		name: ticktock
+		origin: null
+		packageFile: null
+		packageHomeUrl: null
+		packageSourceUrl: null
+		repositoryId: 11
+		repositoryName: repositoryName
+		sha256: null
+		tags: null
+		version: 1.0.0""";
 
 	@Test
-	public void testSafeConstructor() {
+	void safeConstructor() {
 		DumperOptions options = new DumperOptions();
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(), representer);
 		PackageMetadata packageMetadata =  yaml.load(testYaml);
 		assertThat(packageMetadata.getApiVersion()).isEqualTo("skipper.spring.io/v1");
 		assertThat(packageMetadata.getOrigin()).isEqualTo("null");
@@ -87,14 +88,14 @@ public class PackageMetadataSafeConstructorTests {
 	}
 
 	@Test
-	public void testBadYaml() {
+	void badYaml() {
 		DumperOptions options = new DumperOptions();
 		Representer representer = new Representer(options);
 		representer.getPropertyUtils().setSkipMissingProperties(true);
-		LoaderOptions loaderOptions = new LoaderOptions();
-		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(loaderOptions), representer);
-		assertThatThrownBy( () -> yaml.load("!!org.springframework.cloud.skipper.domain.PackageMetadata\n" +
-			"apiVersion: !!javax.script.ScriptEngineManager [!!java.lang.String [\"helloworld\"]]"))
+		Yaml yaml = new Yaml(new PackageMetadataSafeConstructor(), representer);
+		assertThatThrownBy( () -> yaml.load("""
+			!!org.springframework.cloud.skipper.domain.PackageMetadata
+			apiVersion: !!javax.script.ScriptEngineManager [!!java.lang.String ["helloworld"]]"""))
 			.isInstanceOf(YAMLException.class);
 	}
 

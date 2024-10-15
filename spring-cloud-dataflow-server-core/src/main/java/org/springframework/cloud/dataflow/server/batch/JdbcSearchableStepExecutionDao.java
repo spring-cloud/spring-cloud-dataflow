@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2013 the original author or authors.
+ * Copyright 2006-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.batch;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,9 +35,8 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.core.repository.dao.JdbcStepExecutionDao;
 import org.springframework.batch.item.database.Order;
-import org.springframework.batch.item.database.PagingQueryProvider;
-import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.support.PatternMatcher;
+import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -137,7 +137,8 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 			whereClause = whereClause + " AND STEP_NAME = ?";
 		}
 
-		PagingQueryProvider queryProvider = getPagingQueryProvider(whereClause);
+		DataflowSqlPagingQueryProvider queryProvider = getPagingQueryProvider(whereClause);
+
 
 		List<StepExecution> stepExecutions;
 		if (start <= 0) {
@@ -174,11 +175,9 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 	}
 
 	/**
-	 * @return a {@link PagingQueryProvider} with a where clause to narrow the
-	 * query
-	 * @throws Exception
+	 * @return a {@link DataflowSqlPagingQueryProvider} with a where clause to narrow the query
 	 */
-	private PagingQueryProvider getPagingQueryProvider(String whereClause) {
+	private DataflowSqlPagingQueryProvider getPagingQueryProvider(String whereClause) {
 		SqlPagingQueryProviderFactoryBean factory = new SqlPagingQueryProviderFactoryBean();
 		factory.setDataSource(dataSource);
 		factory.setFromClause(getQuery("%PREFIX%STEP_EXECUTION S, %PREFIX%JOB_EXECUTION J, %PREFIX%JOB_INSTANCE I"));
@@ -191,7 +190,7 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 					+ " AND S.JOB_EXECUTION_ID = J.JOB_EXECUTION_ID AND J.JOB_INSTANCE_ID = I.JOB_INSTANCE_ID");
 		}
 		try {
-			return (PagingQueryProvider) factory.getObject();
+			return factory.getObject();
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Unexpected exception creating paging query provide", e);
@@ -203,8 +202,11 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 		public StepExecution mapRow(ResultSet rs, int rowNum) throws SQLException {
 			StepExecution stepExecution = new StepExecution(rs.getString(2), null);
 			stepExecution.setId(rs.getLong(1));
-			stepExecution.setStartTime(rs.getTimestamp(3));
-			stepExecution.setEndTime(rs.getTimestamp(4));
+			Timestamp startTimeStamp = rs.getTimestamp(3);
+			Timestamp endTimeStamp = rs.getTimestamp(4);
+
+			stepExecution.setStartTime((startTimeStamp == null) ? null : startTimeStamp.toLocalDateTime());
+			stepExecution.setEndTime((endTimeStamp == null) ? null : endTimeStamp.toLocalDateTime());
 			stepExecution.setStatus(BatchStatus.valueOf(rs.getString(5)));
 			stepExecution.setCommitCount(rs.getInt(6));
 			stepExecution.setReadCount(rs.getInt(7));
@@ -215,7 +217,7 @@ public class JdbcSearchableStepExecutionDao extends JdbcStepExecutionDao impleme
 			stepExecution.setWriteSkipCount(rs.getInt(13));
 			stepExecution.setProcessSkipCount(rs.getInt(14));
 			stepExecution.setRollbackCount(rs.getInt(15));
-			stepExecution.setLastUpdated(rs.getTimestamp(16));
+			stepExecution.setLastUpdated(rs.getTimestamp(16).toLocalDateTime());
 			stepExecution.setVersion(rs.getInt(17));
 			return stepExecution;
 		}

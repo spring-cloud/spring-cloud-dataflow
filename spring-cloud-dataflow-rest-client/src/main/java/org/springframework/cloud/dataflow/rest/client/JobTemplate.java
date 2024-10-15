@@ -16,10 +16,6 @@
 
 package org.springframework.cloud.dataflow.rest.client;
 
-import java.time.temporal.ValueRange;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionResource;
 import org.springframework.cloud.dataflow.rest.resource.JobExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.resource.JobInstanceResource;
@@ -29,11 +25,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.util.Assert;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
@@ -111,12 +103,17 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public void executionRestart(long id, String schemaTarget) {
+	public void executionRestart(long id) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionLink.expand(id).getHref()).queryParam("restart", "true");
 
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
+		restTemplate.put(builder.toUriString(), null);
+	}
+
+	@Override
+	public void executionRestart(long id, Boolean useJsonJobParameters) {
+		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(executionLink.expand(id).getHref()).queryParam("restart", "true")
+			.queryParam("useJsonJobParameters", useJsonJobParameters);
+
 		restTemplate.put(builder.toUriString(), null);
 	}
 
@@ -142,40 +139,28 @@ public class JobTemplate implements JobOperations {
 	}
 
 	@Override
-	public JobExecutionResource jobExecution(long id, String schemaTarget) {
+	public JobExecutionResource jobExecution(long id) {
 		String url = executionLink.expand(id).getHref();
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(url);
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 
 		return restTemplate.getForObject(builder.toUriString(), JobExecutionResource.class);
 	}
 
 	@Override
-	public JobInstanceResource jobInstance(long id, String schemaTarget) {
+	public JobInstanceResource jobInstance(long id) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(instanceLink.expand(id).getHref());
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 		return restTemplate.getForObject(builder.toUriString(), JobInstanceResource.class);
 	}
 
 	@Override
-	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId, String schemaTarget) {
+	public PagedModel<StepExecutionResource> stepExecutionList(long jobExecutionId) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(stepExecutionsLink.expand(jobExecutionId).getHref());
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 		return restTemplate.getForObject(builder.toUriString(), StepExecutionResource.Page.class);
 	}
 
 	@Override
-	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId, String schemaTarget) {
+	public StepExecutionProgressInfoResource stepExecutionProgress(long jobExecutionId, long stepExecutionId) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(stepExecutionProgressLink.expand(jobExecutionId, stepExecutionId).getHref());
-		if (StringUtils.hasText(schemaTarget)) {
-			builder.queryParam("schemaTarget", schemaTarget);
-		}
 		return restTemplate.getForObject(builder.toUriString(), StepExecutionProgressInfoResource.class);
 	}
 

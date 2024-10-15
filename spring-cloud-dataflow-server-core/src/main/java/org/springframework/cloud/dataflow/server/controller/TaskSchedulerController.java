@@ -35,9 +35,11 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,11 +81,11 @@ public class TaskSchedulerController {
 	 * @param pageable {@link Pageable} to be used
 	 * @return a list of Schedules
 	 */
-	@RequestMapping(value = "", method = RequestMethod.GET)
+	@GetMapping("")
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<ScheduleInfoResource> list(
 			Pageable pageable,
-			@RequestParam(value = "platform", required = false) String platform,
+			@RequestParam(required = false) String platform,
 			PagedResourcesAssembler<ScheduleInfo> assembler
 	) {
 		List<ScheduleInfo> result = this.schedulerService.listForPlatform(platform);
@@ -97,11 +99,11 @@ public class TaskSchedulerController {
 	 * @param platform the name of the platform from which the schedule will be retrieved.
 	 * @return a {@link ScheduleInfoResource} instance for the scheduleName specified.
 	 */
-	@RequestMapping(value = "/{name}", method = RequestMethod.GET)
+	@GetMapping("/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public ScheduleInfoResource getSchedule(
 			@PathVariable("name") String scheduleName,
-			@RequestParam(value = "platform", required = false) String platform
+			@RequestParam(required = false) String platform
 	) {
 		ScheduleInfo schedule = this.schedulerService.getSchedule(scheduleName, platform);
 		if (schedule == null) {
@@ -122,7 +124,7 @@ public class TaskSchedulerController {
 	@RequestMapping("/instances/{taskDefinitionName}")
 	public PagedModel<ScheduleInfoResource> filteredList(
 			@PathVariable String taskDefinitionName,
-			@RequestParam(value = "platform", required = false) String platform,
+			@RequestParam(required = false) String platform,
 			PagedResourcesAssembler<ScheduleInfo> assembler
 	) {
 		List<ScheduleInfo> result = this.schedulerService.list(taskDefinitionName, platform);
@@ -138,7 +140,7 @@ public class TaskSchedulerController {
 	 *
 	 * @param taskDefinitionName the name of the {@link org.springframework.cloud.dataflow.core.TaskDefinition}.
 	 */
-	@RequestMapping(value = "/instances/{taskDefinitionName}", method = RequestMethod.DELETE)
+	@DeleteMapping("/instances/{taskDefinitionName}")
 	@ResponseStatus(HttpStatus.OK)
 	public void deleteSchedulesforDefinition(@PathVariable String taskDefinitionName) {
 		this.schedulerService.unscheduleForTaskDefinition(taskDefinitionName);
@@ -155,14 +157,14 @@ public class TaskSchedulerController {
 	 * @param arguments the runtime commandline arguments
 	 * @param platform the name of the platform for which the schedule is created.
 	 */
-	@RequestMapping(value = "", method = RequestMethod.POST)
+	@PostMapping("")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void save(
-			@RequestParam("scheduleName") String scheduleName,
-			@RequestParam("taskDefinitionName") String taskDefinitionName,
+			@RequestParam String scheduleName,
+			@RequestParam String taskDefinitionName,
 			@RequestParam String properties,
 			@RequestParam(required = false) String arguments,
-			@RequestParam(value = "platform", required = false) String platform
+			@RequestParam(required = false) String platform
 	) {
 		Map<String, String> propertiesToUse = DeploymentPropertiesUtils.parse(properties);
 		List<String> argumentsToUse = DeploymentPropertiesUtils.parseArgumentList(arguments, " ");
@@ -176,11 +178,11 @@ public class TaskSchedulerController {
 	 * @param scheduleName name of the schedule to be deleted
 	 * @param platform name of the platform from which the schedule is deleted.
 	 */
-	@RequestMapping(value = "/{scheduleName}", method = RequestMethod.DELETE)
+	@DeleteMapping("/{scheduleName}")
 	@ResponseStatus(HttpStatus.OK)
 	public void unschedule(
-			@PathVariable("scheduleName") String scheduleName,
-			@RequestParam(value = "platform", required = false) String platform
+			@PathVariable String scheduleName,
+			@RequestParam(required = false) String platform
 	) {
 		schedulerService.unschedule(scheduleName, platform);
 	}

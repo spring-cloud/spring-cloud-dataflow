@@ -25,7 +25,6 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,19 +34,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author Corneil du Plessis
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class PackageMetadataMvcTests extends AbstractMockMvcTests {
+class PackageMetadataMvcTests extends AbstractMockMvcTests {
 
 	@Autowired
 	private PackageMetadataRepository packageMetadataRepository;
 
 	@Test
-	public void shouldReturnRepositoryIndex() throws Exception {
+	void shouldReturnRepositoryIndex() throws Exception {
 		mockMvc.perform(get("/api")).andExpect(status().isOk()).andExpect(
 				jsonPath("$._links.packageMetadata").exists());
 	}
 
 	@Test
-	public void testProjection() throws Exception {
+	void projection() throws Exception {
 		PackageMetadataCreator.createTwoPackages(packageMetadataRepository);
 		PackageMetadata packageMetadata = packageMetadataRepository.findByNameAndVersionByMaxRepoOrder("package1", "1.0.0");
 		assertThat(packageMetadata.getId()).isNotNull();

@@ -15,21 +15,19 @@
  */
 package org.springframework.cloud.skipper.shell.command;
 
-import javax.validation.constraints.NotNull;
-
+import jakarta.validation.constraints.NotNull;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+import org.yaml.snakeyaml.representer.Representer;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.skipper.client.SkipperClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
-import org.yaml.snakeyaml.representer.Representer;
 
 /**
  * Commands that operation on the manifest.
@@ -40,7 +38,6 @@ public class ManifestCommands extends AbstractSkipperCommand {
 
 	private Yaml yaml;
 
-	@Autowired
 	public ManifestCommands(SkipperClient skipperClient) {
 		this.skipperClient = skipperClient;
 		DumperOptions dumperOptions = new DumperOptions();

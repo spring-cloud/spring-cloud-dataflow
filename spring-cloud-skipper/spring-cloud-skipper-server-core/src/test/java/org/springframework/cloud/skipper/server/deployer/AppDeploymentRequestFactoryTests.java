@@ -32,10 +32,10 @@ import static org.mockito.Mockito.when;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-public class AppDeploymentRequestFactoryTests {
+class AppDeploymentRequestFactoryTests {
 
 	@Test
-	public void testGetResourceExceptionHandler() {
+	void getResourceExceptionHandler() {
 		DelegatingResourceLoader resourceLoader = mock(DelegatingResourceLoader.class);
 		AppDeploymentRequestFactory appDeploymentRequestFactory = new AppDeploymentRequestFactory(resourceLoader);
 		when(resourceLoader.getResource(anyString())).thenThrow(RuntimeException.class);
@@ -55,7 +55,7 @@ public class AppDeploymentRequestFactoryTests {
 	}
 
 	@Test
-	public void testGetResourceLocation() {
+	void getResourceLocation() {
 		SpringCloudDeployerApplicationSpec springBootAppSpec1 = mock(SpringCloudDeployerApplicationSpec.class);
 		String mavenSpecResource = "maven://org.springframework.cloud.stream.app:log-sink-rabbit";
 		String mavenSpecVersion = "1.2.0.RELEASE";

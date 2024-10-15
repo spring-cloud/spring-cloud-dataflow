@@ -15,19 +15,18 @@
  */
 package org.springframework.cloud.dataflow.common.test.docker.compose.execution;
 
-import com.github.zafarkhaja.semver.Version;
-
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.github.zafarkhaja.semver.Version;
 import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.DockerMachine;
 import org.springframework.cloud.dataflow.common.test.docker.compose.connection.State;
 import org.springframework.util.Assert;
@@ -50,7 +49,7 @@ public class Docker {
 	}
 
 	public Version configuredVersion() throws IOException, InterruptedException {
-		String versionString = command.execute(Command.throwingOnError(), "-v");
+		String versionString = command.execute(Command.throwingOnError(), false, "-v");
 		Matcher matcher = VERSION_PATTERN.matcher(versionString);
 		Assert.state(matcher.matches(), "Unexpected output of docker -v: " + versionString);
 		return Version.forIntegers(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
@@ -65,7 +64,7 @@ public class Docker {
 
 	public State state(String containerId) throws IOException, InterruptedException {
 		String formatString = SystemUtils.IS_OS_WINDOWS ? HEALTH_STATUS_FORMAT_WINDOWS : HEALTH_STATUS_FORMAT;
-		String stateString = command.execute(Command.throwingOnError(), "inspect", formatString, containerId);
+		String stateString = command.execute(Command.throwingOnError(), false,"inspect", formatString, containerId);
 		return State.valueOf(stateString);
 	}
 
@@ -82,14 +81,14 @@ public class Docker {
 				commands.add(containerName);
 			}
 		}
-		command.execute(Command.throwingOnError(), commands.toArray(new String[0]));
+		command.execute(Command.throwingOnError(), false, commands.toArray(new String[0]));
 	}
 
 	public String listNetworks() throws IOException, InterruptedException {
-		return command.execute(Command.throwingOnError(), "network", "ls");
+		return command.execute(Command.throwingOnError(), false, "network", "ls");
 	}
 
 	public String pruneNetworks() throws IOException, InterruptedException {
-		return command.execute(Command.throwingOnError(), "network", "prune", "--force");
+		return command.execute(Command.throwingOnError(), false,"network", "prune", "--force");
 	}
 }

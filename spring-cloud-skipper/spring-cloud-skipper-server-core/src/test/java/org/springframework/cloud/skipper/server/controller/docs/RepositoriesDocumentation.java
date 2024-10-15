@@ -23,18 +23,17 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author Gunnar Hillert
  * @author Corneil du Plessis
  */
-@ActiveProfiles({ "repository" })
-public class RepositoriesDocumentation extends BaseDocumentation {
+@ActiveProfiles({"repository"})
+class RepositoriesDocumentation extends BaseDocumentation {
 
 	@Test
-	public void getAllRepositories() throws Exception {
+	void getAllRepositories() throws Exception {
 		this.mockMvc.perform(
 				get("/api/repositories")
 						.param("page", "0")
@@ -60,7 +59,7 @@ public class RepositoriesDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	public void getSingleRepository() throws Exception {
+	void getSingleRepository() throws Exception {
 
 		this.mockMvc.perform(
 				get("/api/repositories/search/findByName?name={name}", "local"))

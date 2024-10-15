@@ -18,9 +18,14 @@ package org.springframework.cloud.dataflow.server.service.impl.validation;
 
 import java.net.URI;
 
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
+import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
+import org.apache.hc.core5.http.config.Lookup;
+import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +49,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -72,46 +76,46 @@ public class DefaultAppValidationServiceTests {
 
 	@Test
 	@DirtiesContext
-	public void validateValidTaskTest() {
+	void validateValidTaskTest() {
 		initializeSuccessfulRegistry(this.appRegistry);
-		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
+		assertThat(appValidationService.validate("AAA", ApplicationType.task)).isTrue();
 	}
 
 	@Test
 	@DirtiesContext
-	public void validateInvalidTaskTest() {
+	void validateInvalidTaskTest() {
 		initializeFailRegistry(appRegistry);
-		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
+		assertThat(appValidationService.validate("AAA", ApplicationType.task)).isFalse();
 	}
 
 	@Test
 	@DirtiesContext
-	public void validateInvalidDockerTest() {
+	void validateInvalidDockerTest() {
 		initializeDockerRegistry(appRegistry,"notThere/log-sink-rabbit:1.3.1.RELEASE");
-		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
+		assertThat(appValidationService.validate("AAA", ApplicationType.task)).isFalse();
 	}
 
 	@Test
 	@DirtiesContext
-	public void validateDockerTest() {
+	void validateDockerTest() {
 		org.junit.jupiter.api.Assumptions.assumeTrue(dockerCheck());
 		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:latest");
-		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
+		assertThat(appValidationService.validate("AAA", ApplicationType.task)).isTrue();
 	}
 
 	@Test
 	@DirtiesContext
-	public void validateDockerMultiPageTest() {
+	void validateDockerMultiPageTest() {
 		org.junit.jupiter.api.Assumptions.assumeTrue(dockerCheck());
 		initializeDockerRegistry(appRegistry, "springcloudstream/log-sink-rabbit:1.3.1.RELEASE");
-		assertTrue(appValidationService.validate("AAA", ApplicationType.task));
+		assertThat(appValidationService.validate("AAA", ApplicationType.task)).isTrue();
 	}
 
 	@Test
 	@DirtiesContext
-	public void validateMissingTagDockerTest() {
+	void validateMissingTagDockerTest() {
 		initializeDockerRegistry(appRegistry,"springcloudstream/log-sink-rabbit:1.3.1.NOTHERE");
-		assertFalse(appValidationService.validate("AAA", ApplicationType.task));
+		assertThat(appValidationService.validate("AAA", ApplicationType.task)).isFalse();
 	}
 
 	private void initializeSuccessfulRegistry(AppRegistryService appRegistry) {
@@ -139,14 +143,12 @@ public class DefaultAppValidationServiceTests {
 		boolean result = true;
 		try {
 			CloseableHttpClient httpClient
-					= HttpClients.custom()
-					.setSSLHostnameVerifier(new NoopHostnameVerifier())
+					= httpClientBuilder()
 					.build();
 			HttpComponentsClientHttpRequestFactory requestFactory
 					= new HttpComponentsClientHttpRequestFactory();
 			requestFactory.setHttpClient(httpClient);
 			requestFactory.setConnectTimeout(10000);
-			requestFactory.setReadTimeout(10000);
 
 			RestTemplate restTemplate = new RestTemplate(requestFactory);
 			System.out.println("Testing access to " + DockerValidatorProperties.DOCKER_REGISTRY_URL
@@ -159,6 +161,14 @@ public class DefaultAppValidationServiceTests {
 			result = false;
 		}
 		return result;
+	}
+	private static HttpClientBuilder httpClientBuilder() {
+		// Register http/s connection factories
+		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
+			.register("http", new PlainConnectionSocketFactory())
+			.build();
+		return HttpClients.custom()
+			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
 	}
 
 }
