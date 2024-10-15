@@ -380,27 +380,6 @@ public class TaskServiceUtils {
 		}
 	}
 
-	static String getComposedTaskLauncherUri(TaskConfigurationProperties taskConfigurationProperties,
-									  ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
-		if(composedTaskRunnerConfigurationProperties != null &&
-				StringUtils.hasText(composedTaskRunnerConfigurationProperties.getUri())) {
-			return composedTaskRunnerConfigurationProperties.getUri();
-		}
-
-		return taskConfigurationProperties.getComposedTaskRunnerUri();
-	}
-
-	static boolean isUseUserAccessToken(TaskConfigurationProperties taskConfigurationProperties,
-						ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties) {
-		if (composedTaskRunnerConfigurationProperties != null) {
-			if (composedTaskRunnerConfigurationProperties.isUseUserAccessToken() != null) {
-				return composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
-			}
-		}
-
-		return taskConfigurationProperties.isUseUserAccessToken();
-	}
-
 	/**
 	 * Converts command lines args into a format acceptable for CTR.
 	 * <p>The input args are copied and entries that begin with {@code 'app.'}

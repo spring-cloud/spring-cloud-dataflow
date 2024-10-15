@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -76,21 +75,6 @@ public class TaskConfigurationProperties {
 
 	private boolean useJsonJobParameters = false;
 
-	@Deprecated
-	public String getComposedTaskRunnerUri() {
-		logDeprecationWarning("getUri");
-		return this.composedTaskRunnerConfigurationProperties.getUri();
-	}
-
-	@Deprecated
-	public void setComposedTaskRunnerUri(String composedTaskRunnerUri) {
-		logDeprecationWarning("setUri");
-
-		if (!StringUtils.hasText(this.composedTaskRunnerConfigurationProperties.getUri())) {
-			this.composedTaskRunnerConfigurationProperties.setUri(composedTaskRunnerUri);
-		}
-	}
-
 	public DeployerProperties getDeployerProperties() {
 		return deployerProperties;
 	}
@@ -105,23 +89,6 @@ public class TaskConfigurationProperties {
 
 	public void setAutoCreateTaskDefinitions(boolean autoCreateTaskDefinitions) {
 		this.autoCreateTaskDefinitions = autoCreateTaskDefinitions;
-	}
-
-	@Deprecated
-	public boolean isUseUserAccessToken() {
-		logDeprecationWarning();
-
-		return this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null ? false :
-				this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken();
-	}
-
-	@Deprecated
-	public void setUseUserAccessToken(boolean useUserAccessToken) {
-		logDeprecationWarning();
-
-		if (this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken() == null) {
-			this.composedTaskRunnerConfigurationProperties.setUseUserAccessToken(useUserAccessToken);
-		}
 	}
 
 	public static class DeployerProperties {
