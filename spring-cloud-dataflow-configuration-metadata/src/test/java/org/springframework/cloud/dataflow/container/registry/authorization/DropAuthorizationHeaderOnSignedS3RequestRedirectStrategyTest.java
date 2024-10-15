@@ -42,8 +42,6 @@ import static org.assertj.core.api.Assertions.entry;
  * @author Adam J. Weigold
  * @author Corneil du Plessis
  */
-//TODO: Boot3x followup
-@Disabled("TODO: Boot3x `org.springframework.web.client.HttpClientErrorException$BadRequest: 400 : [no body]` is thrown by REST Template")
 public class DropAuthorizationHeaderOnSignedS3RequestRedirectStrategyTest {
 	@RegisterExtension
 	public final static S3SignedRedirectRequestServerResource s3SignedRedirectRequestServerResource =
