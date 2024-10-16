@@ -18,12 +18,10 @@ package org.springframework.cloud.dataflow.container.registry.authorization;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.impl.DefaultRedirectStrategy;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpException;
@@ -62,6 +60,7 @@ import org.springframework.util.StringUtils;
  * @author Janne Valkealahti
  * @author Christian Tzolov
  * @author Cheng Guan Poh
+ * @author Corneil du Plessis
  */
 public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedirectStrategy {
 
@@ -92,43 +91,73 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 		URI httpUriRequest = super.getLocationURI(request, response, context);
 		String query = httpUriRequest.getQuery();
 		String method = request.getMethod();
-
 		// Handle Amazon requests
 		if (StringUtils.hasText(query) && query.contains(AMZ_CREDENTIAL)) {
 			if (isHeadOrGetMethod(method)) {
-                try {
-                    return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest, method).getUri();
-                } catch (URISyntaxException e) {
-                    throw new HttpException("Unable to get location URI", e);
-                }
-            }
+				removeAuthorizationHeader(request, response, false);
+				try {
+					if (isHeadMethod(method)) {
+						return new HttpHead(httpUriRequest).getUri();
+					}
+					else {
+						return new HttpGet(httpUriRequest).getUri();
+					}
+				}
+				catch (URISyntaxException e) {
+					throw new HttpException("Unable to get location URI", e);
+				}
+			}
 		}
 
 		// Handle Azure requests
-        try {
-            if (request.getUri().getRawPath().contains(AZURECR_URI_SUFFIX)) {
-                if (isHeadOrGetMethod(method)) {
-                    return (new DropAuthorizationHeaderHttpRequestBase(httpUriRequest, method) {
-                        // Drop headers only for the Basic Auth and leave unchanged for OAuth2
-                        @Override
-                        protected boolean isDropHeader(String name, Object value) {
-                            return name.equalsIgnoreCase(AUTHORIZATION_HEADER) && StringUtils.hasText((String) value) && ((String)value).contains(BASIC_AUTH);
-                        }
-                    }).getUri();
-                }
-            }
+		try {
+			if (request.getUri().getRawPath().contains(AZURECR_URI_SUFFIX)) {
+				if (isHeadOrGetMethod(method)) {
+					removeAuthorizationHeader(request, response, true);
+					if (isHeadMethod(method)) {
+						return new HttpHead(httpUriRequest).getUri();
+					}
+					else {
+						return new HttpGet(httpUriRequest).getUri();
+					}
+				}
+			}
 
-
-        // Handle Custom requests
-		if (extra.containsKey(CUSTOM_REGISTRY) && request.getUri().getRawPath().contains(extra.get(CUSTOM_REGISTRY))) {
-			if (isHeadOrGetMethod(method)) {
-				return new DropAuthorizationHeaderHttpRequestBase(httpUriRequest, method).getUri();
+			// Handle Custom requests
+			if (extra.containsKey(CUSTOM_REGISTRY)
+					&& request.getUri().getRawPath().contains(extra.get(CUSTOM_REGISTRY))) {
+				if (isHeadOrGetMethod(method)) {
+					removeAuthorizationHeader(request, response, false);
+					if (isHeadMethod(method)) {
+						return new HttpHead(httpUriRequest).getUri();
+					}
+					else {
+						return new HttpGet(httpUriRequest).getUri();
+					}
+				}
 			}
 		}
-		} catch (URISyntaxException e) {
+		catch (URISyntaxException e) {
 			throw new HttpException("Unable to get Locaction URI", e);
 		}
 		return httpUriRequest;
+	}
+
+	private static void removeAuthorizationHeader(HttpRequest request, HttpResponse response, boolean onlyBasicAuth) {
+		for (Header header : response.getHeaders()) {
+			if (header.getName().equalsIgnoreCase(AUTHORIZATION_HEADER)
+					&& (!onlyBasicAuth || (onlyBasicAuth && header.getValue().contains(BASIC_AUTH)))) {
+				response.removeHeaders(header.getName());
+				break;
+			}
+		}
+		for (Header header : request.getHeaders()) {
+			if (header.getName().equalsIgnoreCase(AUTHORIZATION_HEADER)
+				&& (!onlyBasicAuth || (onlyBasicAuth && header.getValue().contains(BASIC_AUTH)))) {
+				request.removeHeaders(header.getName());
+				break;
+			}
+		}
 	}
 
 	private boolean isHeadOrGetMethod(String method) {
@@ -136,65 +165,8 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 				&& (method.equalsIgnoreCase(HttpHead.METHOD_NAME) || method.equalsIgnoreCase(HttpGet.METHOD_NAME));
 	}
 
-	/**
-	 * Overrides all header setter methods to filter out the Authorization headers.
-	 */
-	static class DropAuthorizationHeaderHttpRequestBase extends HttpUriRequestBase {
-
-		private final String method;
-
-		DropAuthorizationHeaderHttpRequestBase(URI uri, String method) {
-			super(method, uri);
-			this.method = method;
-		}
-
-		@Override
-		public String getMethod() {
-			return this.method;
-		}
-
-		@Override
-		public void addHeader(Header header) {
-			if (!isDropHeader(header)) {
-				super.addHeader(header);
-			}
-		}
-
-		@Override
-		public void addHeader(String name, Object value) {
-			if (!isDropHeader(name, value)) {
-				super.addHeader(name, value);
-			}
-		}
-
-		@Override
-		public void setHeader(Header header) {
-			if (!isDropHeader(header)) {
-				super.setHeader(header);
-			}
-		}
-
-		@Override
-		public void setHeader(String name, Object value) {
-			if (!isDropHeader(name, value)) {
-				super.setHeader(name, value);
-			}
-		}
-
-		@Override
-		public void setHeaders(Header[] headers) {
-			Header[] filteredHeaders = Arrays.stream(headers)
-					.filter(header -> !isDropHeader(header))
-					.toArray(Header[]::new);
-			super.setHeaders(filteredHeaders);
-		}
-
-		protected boolean isDropHeader(Header header) {
-			return isDropHeader(header.getName(), header.getValue());
-		}
-
-		protected boolean isDropHeader(String name, Object value) {
-			return name.equalsIgnoreCase(AUTHORIZATION_HEADER);
-		}
+	private boolean isHeadMethod(String method) {
+		return StringUtils.hasText(method) && method.equalsIgnoreCase(HttpHead.METHOD_NAME);
 	}
+
 }
