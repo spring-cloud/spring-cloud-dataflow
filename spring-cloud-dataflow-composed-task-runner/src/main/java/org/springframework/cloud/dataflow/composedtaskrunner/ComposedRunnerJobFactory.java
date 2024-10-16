@@ -85,15 +85,12 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 
 	private String dsl;
 
-	private boolean incrementInstanceEnabled;
-
 	private int nestedSplits;
 
 	public ComposedRunnerJobFactory(ComposedTaskProperties properties) {
 		this.composedTaskProperties = properties;
 		Assert.notNull(properties.getGraph(), "The DSL must not be null");
 		this.dsl = properties.getGraph();
-		this.incrementInstanceEnabled = properties.isIncrementInstanceEnabled();
 		this.flowBuilder = new FlowBuilder<>(UUID.randomUUID().toString());
 	}
 
@@ -112,12 +109,7 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 						.start(createFlow())
 						.end())
 				.end();
-		if(this.incrementInstanceEnabled && !this.composedTaskProperties.isUuidInstanceEnabled()) {
-			builder.incrementer(new RunIdIncrementer());
-		}
-		else if(this.composedTaskProperties.isUuidInstanceEnabled()) {
-			builder.incrementer(new UuidIncrementer());
-		}
+		builder.incrementer(new UuidIncrementer());
 		return builder.build();
 	}
 
