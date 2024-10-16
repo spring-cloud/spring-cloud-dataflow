@@ -242,10 +242,12 @@ public class SimpleJobService implements JobService, DisposableBean {
 		if (!jobExecution.isRunning()) {
 			throw new JobExecutionNotRunningException("JobExecution is not running and therefore cannot be stopped");
 		}
-
+		// Indicate the execution should be stopped by setting it's status to
+		// 'STOPPING'. It is assumed that
+		// the step implementation will check this status at chunk boundaries.
 		logger.info("Stopping job execution: " + jobExecution);
 
-		jobExecution.setStatus(BatchStatus.STOPPED);
+		jobExecution.setStatus(BatchStatus.STOPPING);
 		jobRepository.update(jobExecution);
 		return jobExecution;
 

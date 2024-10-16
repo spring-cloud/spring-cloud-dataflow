@@ -197,7 +197,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
 		jobService.stop(jobExecution.getId());
 		jobExecution = jobService.getJobExecution(jobExecution.getId());
-		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPED);
+		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
 	}
 
 	private void verifyJobInstance(long id, String name) throws Exception {
