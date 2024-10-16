@@ -225,9 +225,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 		Collection<JobExecution> result = jobExecutionDao.getRunningJobExecutions();
 		for (JobExecution jobExecution : result) {
 			try {
-				jobExecution.getStepExecutions().forEach(StepExecution::setTerminateOnly);
-				jobExecution.setStatus( BatchStatus.STOPPING);
-				jobRepository.update(jobExecution);
+				stop(jobExecution.getId());
 			} catch (Exception e) {
 				throw new IllegalArgumentException("The following JobExecutionId was not found: " + jobExecution.getId(), e);
 			}
@@ -246,7 +244,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 		// 'STOPPING'. It is assumed that
 		// the step implementation will check this status at chunk boundaries.
 		logger.info("Stopping job execution: " + jobExecution);
-
+		jobExecution.getStepExecutions().forEach(StepExecution::setTerminateOnly);
 		jobExecution.setStatus(BatchStatus.STOPPING);
 		jobRepository.update(jobExecution);
 		return jobExecution;

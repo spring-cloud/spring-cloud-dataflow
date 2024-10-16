@@ -28,6 +28,8 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.BatchStatus;
@@ -192,6 +194,18 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 	@Test
 	void stoppingJobExecutionShouldLeaveJobExecutionWithStatusOfStopping() throws Exception {
 		JobExecution jobExecution = createJobExecution(BASE_JOB_INST_NAME,true);
+		assertJobHasStopped(jobExecution);
+	}
+
+	@Test
+	void stoppingAllJobExecutionsShouldLeaveJobExecutionsWithStatusOfStopping() throws Exception {
+		JobExecution jobExecutionOne = createJobExecution(BASE_JOB_INST_NAME,true);
+		JobExecution jobExecutionTwo = createJobExecution(BASE_JOB_INST_NAME+"_TWO",true);
+		assertJobHasStopped(jobExecutionOne);
+		assertJobHasStopped(jobExecutionTwo);
+	}
+
+	private void assertJobHasStopped(JobExecution jobExecution) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
 		jobExecution = jobService.getJobExecution(jobExecution.getId());
 		assertThat(jobExecution.isRunning()).isTrue();
 		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
