@@ -87,7 +87,7 @@ public class ComposedRunnerVisitorTests {
 	@Test
 	void singleTestForuuIDIncrementer() {
 		setupContextForGraph("AAA", "--uuIdInstanceEnabled=true");
-		Collection<StepExecution> stepExecutions = getStepExecutions(true);
+		Collection<StepExecution> stepExecutions = getStepExecutions();
 		assertThat(stepExecutions).hasSize(1);
 		StepExecution stepExecution = stepExecutions.iterator().next();
 		assertThat(stepExecution.getStepName()).isEqualTo("AAA_0");
@@ -397,11 +397,8 @@ public class ComposedRunnerVisitorTests {
 				SimpleTaskAutoConfiguration.class}, args);
 	}
 
-	private Collection<StepExecution> getStepExecutions() {
-		return getStepExecutions(false);
-	}
 
-	private Collection<StepExecution> getStepExecutions(boolean isCTR) {
+	private Collection<StepExecution> getStepExecutions() {
 		JobExplorer jobExplorer = this.applicationContext.getBean(JobExplorer.class);
 		List<JobInstance> jobInstances = jobExplorer.findJobInstancesByJobName("job", 0, 1);
 		assertThat(jobInstances).hasSize(1);
@@ -409,11 +406,7 @@ public class ComposedRunnerVisitorTests {
 		List<JobExecution> jobExecutions = jobExplorer.getJobExecutions(jobInstance);
 		assertThat(jobExecutions).hasSize(1);
 		JobExecution jobExecution = jobExecutions.get(0);
-		if(isCTR) {
-			assertThat(jobExecution.getJobParameters().getParameters().get("ctr.id")).isNotNull();
-		} else {
-			assertThat(jobExecution.getJobParameters().getParameters()).containsEntry("run.id", new JobParameter(1L, Long.class));
-		}
+		assertThat(jobExecution.getJobParameters().getParameters().get("ctr.id")).isNotNull();
 		return jobExecution.getStepExecutions();
 	}
 

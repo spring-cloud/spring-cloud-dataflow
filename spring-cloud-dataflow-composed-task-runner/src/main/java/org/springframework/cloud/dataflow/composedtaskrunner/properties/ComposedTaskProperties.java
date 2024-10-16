@@ -190,19 +190,11 @@ public class ComposedTaskProperties {
 
 	/**
 	 * Allows a single ComposedTaskRunner instance to be re-executed without
-	 * changing the parameters. It does this by applying a {@code run.id} with a sequential
-	 * number based on the {@code run.id} from the previous execution.   Default is true.
-	 */
-	@Deprecated
-	private boolean incrementInstanceEnabled = true;
-
-	/**
-	 * Allows a single ComposedTaskRunner instance to be re-executed without
 	 * changing the parameters. It does this by applying a {@code run.id} with a UUid.
-	 * Default is false. If set to true then this will override incrementInstanceEnabled.
+	 * Default is true.
 	 * Set this option to `true` when running multiple instances of the same composed task definition at the same time.
 	 */
-	private boolean uuidInstanceEnabled = false;
+	private boolean uuidInstanceEnabled = true;
 
 	/**
 	 * The platform property that will be used for each task in the workflow when it is launched.
@@ -363,14 +355,6 @@ public class ComposedTaskProperties {
 
 	public void setSplitThreadWaitForTasksToCompleteOnShutdown(boolean splitThreadWaitForTasksToCompleteOnShutdown) {
 		this.splitThreadWaitForTasksToCompleteOnShutdown = splitThreadWaitForTasksToCompleteOnShutdown;
-	}
-
-	public boolean isIncrementInstanceEnabled() {
-		return incrementInstanceEnabled;
-	}
-
-	public void setIncrementInstanceEnabled(boolean incrementInstanceEnabled) {
-		this.incrementInstanceEnabled = incrementInstanceEnabled;
 	}
 
 	public String getDataflowServerAccessToken() {
