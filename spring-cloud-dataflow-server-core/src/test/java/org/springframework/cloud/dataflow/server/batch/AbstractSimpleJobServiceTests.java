@@ -28,6 +28,8 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.batch.core.launch.JobExecutionNotRunningException;
+import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.BatchStatus;
@@ -191,13 +193,25 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 
 	@Test
 	void stoppingJobExecutionShouldLeaveJobExecutionWithStatusOfStopping() throws Exception {
-		JobExecution jobExecution = createJobExecution(BASE_JOB_INST_NAME,true);
-		jobExecution = jobService.getJobExecution(jobExecution.getId());
-		assertThat(jobExecution.isRunning()).isTrue();
-		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
+		JobExecution jobExecution = createRunningJobExecution(BASE_JOB_INST_NAME);
 		jobService.stop(jobExecution.getId());
+		assertJobHasStopped(jobExecution);
+	}
+
+	@Test
+	void stoppingAllJobExecutionsShouldLeaveJobExecutionsWithStatusOfStopping() throws Exception {
+		JobExecution jobExecutionOne = createRunningJobExecution(BASE_JOB_INST_NAME);
+		JobExecution jobExecutionTwo = createRunningJobExecution(BASE_JOB_INST_NAME+"_TWO");
+		jobService.stop(jobExecutionOne.getId());
+		assertJobHasStopped(jobExecutionOne);
+		jobService.stop(jobExecutionTwo.getId());
+		assertJobHasStopped(jobExecutionTwo);
+	}
+
+	private void assertJobHasStopped(JobExecution jobExecution) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
 		jobExecution = jobService.getJobExecution(jobExecution.getId());
-		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPED);
+		assertThat(jobExecution.getStatus()).isEqualTo(BatchStatus.STOPPING);
+		assertThat(jobExecution.isRunning()).isTrue();
 	}
 
 	private void verifyJobInstance(long id, String name) throws Exception {
@@ -221,9 +235,13 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 		return createJobExecution(name, BatchStatus.STARTING, false);
 	}
 
-	private JobExecution createJobExecution(String name, boolean isRunning)
+	private JobExecution createRunningJobExecution(String name)
 			throws Exception {
-		return createJobExecution(name, BatchStatus.STARTING, isRunning);
+		JobExecution jobExecution = createJobExecution(name, BatchStatus.STARTING, true);
+		jobExecution = jobService.getJobExecution(jobExecution.getId());
+		assertThat(jobExecution.isRunning()).isTrue();
+		assertThat(jobExecution.getStatus()).isNotEqualTo(BatchStatus.STOPPING);
+		return jobExecution;
 	}
 
 	private JobExecution createJobExecution(String name, BatchStatus batchStatus, boolean isRunning) throws Exception {

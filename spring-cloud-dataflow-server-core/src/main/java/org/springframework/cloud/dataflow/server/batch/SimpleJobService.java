@@ -225,9 +225,7 @@ public class SimpleJobService implements JobService, DisposableBean {
 		Collection<JobExecution> result = jobExecutionDao.getRunningJobExecutions();
 		for (JobExecution jobExecution : result) {
 			try {
-				jobExecution.getStepExecutions().forEach(StepExecution::setTerminateOnly);
-				jobExecution.setStatus( BatchStatus.STOPPING);
-				jobRepository.update(jobExecution);
+				stopJobExecution(jobExecution);
 			} catch (Exception e) {
 				throw new IllegalArgumentException("The following JobExecutionId was not found: " + jobExecution.getId(), e);
 			}
@@ -238,14 +236,19 @@ public class SimpleJobService implements JobService, DisposableBean {
 
 	@Override
 	public JobExecution stop(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException {
-		JobExecution jobExecution = getJobExecution(jobExecutionId);
+		return stopJobExecution(getJobExecution(jobExecutionId));
+	}
+
+	private JobExecution stopJobExecution(JobExecution jobExecution) throws JobExecutionNotRunningException{
 		if (!jobExecution.isRunning()) {
 			throw new JobExecutionNotRunningException("JobExecution is not running and therefore cannot be stopped");
 		}
-
-		logger.info("Stopping job execution: " + jobExecution);
-
-		jobExecution.setStatus(BatchStatus.STOPPED);
+		// Indicate the execution should be stopped by setting it's status to
+		// 'STOPPING'. It is assumed that
+		// the step implementation will check this status at chunk boundaries.
+		logger.info("Stopping job execution: {}", jobExecution);
+		jobExecution.getStepExecutions().forEach(StepExecution::setTerminateOnly);
+		jobExecution.setStatus(BatchStatus.STOPPING);
 		jobRepository.update(jobExecution);
 		return jobExecution;
 
