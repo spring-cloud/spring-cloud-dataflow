@@ -31,7 +31,7 @@ import org.springframework.cloud.dataflow.server.config.features.FeaturesConfigu
 import org.springframework.cloud.dataflow.server.config.web.WebConfiguration;
 import org.springframework.cloud.dataflow.server.db.migration.DataFlowFlywayConfigurationCustomizer;
 import org.springframework.cloud.dataflow.server.support.AuthenticationSuccessEventListener;
-import org.springframework.cloud.dataflow.server.task.DataflowTaskConfiguration;
+import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorerConfiguration;
 import org.springframework.cloud.task.configuration.TaskProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -64,7 +64,7 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		FeaturesConfiguration.class,
 		WebConfiguration.class,
 		H2ServerConfiguration.class,
-		DataflowTaskConfiguration.class,
+		DataflowTaskExplorerConfiguration.class,
 		DataFlowTaskConfiguration.class
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
