@@ -94,18 +94,8 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 		// Handle Amazon requests
 		if (StringUtils.hasText(query) && query.contains(AMZ_CREDENTIAL)) {
 			if (isHeadOrGetMethod(method)) {
-				removeAuthorizationHeader(request, response, false);
-				try {
-					if (isHeadMethod(method)) {
-						return new HttpHead(httpUriRequest).getUri();
-					}
-					else {
-						return new HttpGet(httpUriRequest).getUri();
-					}
-				}
-				catch (URISyntaxException e) {
-					throw new HttpException("Unable to get location URI", e);
-				}
+				removeAuthorizationHeader(request, false);
+				return createResponseURI(method, httpUriRequest);
 			}
 		}
 
@@ -113,13 +103,8 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 		try {
 			if (request.getUri().getRawPath().contains(AZURECR_URI_SUFFIX)) {
 				if (isHeadOrGetMethod(method)) {
-					removeAuthorizationHeader(request, response, true);
-					if (isHeadMethod(method)) {
-						return new HttpHead(httpUriRequest).getUri();
-					}
-					else {
-						return new HttpGet(httpUriRequest).getUri();
-					}
+					removeAuthorizationHeader(request, true);
+					return createResponseURI(method, httpUriRequest);
 				}
 			}
 
@@ -127,30 +112,32 @@ public class DropAuthorizationHeaderRequestRedirectStrategy extends DefaultRedir
 			if (extra.containsKey(CUSTOM_REGISTRY)
 					&& request.getUri().getRawPath().contains(extra.get(CUSTOM_REGISTRY))) {
 				if (isHeadOrGetMethod(method)) {
-					removeAuthorizationHeader(request, response, false);
-					if (isHeadMethod(method)) {
-						return new HttpHead(httpUriRequest).getUri();
-					}
-					else {
-						return new HttpGet(httpUriRequest).getUri();
-					}
+					removeAuthorizationHeader(request, false);
+					return createResponseURI(method, httpUriRequest);
 				}
 			}
 		}
 		catch (URISyntaxException e) {
-			throw new HttpException("Unable to get Locaction URI", e);
+			throw new HttpException("Unable to get Location URI", e);
 		}
 		return httpUriRequest;
 	}
 
-	private static void removeAuthorizationHeader(HttpRequest request, HttpResponse response, boolean onlyBasicAuth) {
-		for (Header header : response.getHeaders()) {
-			if (header.getName().equalsIgnoreCase(AUTHORIZATION_HEADER)
-					&& (!onlyBasicAuth || (onlyBasicAuth && header.getValue().contains(BASIC_AUTH)))) {
-				response.removeHeaders(header.getName());
-				break;
+	private URI createResponseURI(String method, URI httpUriRequest) throws HttpException {
+		try {
+			if (isHeadMethod(method)) {
+				return new HttpHead(httpUriRequest).getUri();
+			}
+			else {
+				return new HttpGet(httpUriRequest).getUri();
 			}
 		}
+		catch (URISyntaxException e) {
+			throw new HttpException("Unable to get location URI", e);
+		}
+	}
+
+	private static void removeAuthorizationHeader(HttpRequest request, boolean onlyBasicAuth) {
 		for (Header header : request.getHeaders()) {
 			if (header.getName().equalsIgnoreCase(AUTHORIZATION_HEADER)
 				&& (!onlyBasicAuth || (onlyBasicAuth && header.getValue().contains(BASIC_AUTH)))) {

@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class S3SignedRedirectRequestController {
-	private final static Logger logger = LoggerFactory.getLogger(S3SignedRedirectRequestController.class);
 
 	@RequestMapping("/service/token")
 	public ResponseEntity<Map<String, String>> getToken() {
@@ -57,7 +56,6 @@ public class S3SignedRedirectRequestController {
 	@RequestMapping("/v2/test/s3-redirect-image/blobs/signed_redirect_digest")
 	public ResponseEntity<Map<String, String>> getBlobRedirect(@RequestHeader("Authorization") String token) {
 		if (!"bearer my_token_999".equals(token.trim().toLowerCase())) {
-			logger.info("getBlobRedirect=BAD_REQUEST");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		HttpHeaders redirectHeaders = new HttpHeaders();
@@ -68,15 +66,12 @@ public class S3SignedRedirectRequestController {
 				"&X-Amz-Expires=1200" +
 				"&X-Amz-SignedHeaders=host" +
 				"&X-Amz-Signature=test");
-		logger.info("getBlobRedirect:{}", redirectHeaders);
 		return new ResponseEntity<>(redirectHeaders, HttpStatus.TEMPORARY_REDIRECT);
 	}
 
 	@RequestMapping("/test/docker/registry/v2/blobs/test/data")
 	public ResponseEntity<Resource> getSignedBlob(@RequestHeader Map<String, String> headers) {
-		logger.info("getSignedBlob:{}", headers);
 		if (headers.containsKey("authorization")) {
-			logger.info("getSignedBlob=BAD_REQUEST");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		return buildFromString("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }");

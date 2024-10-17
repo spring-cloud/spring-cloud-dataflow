@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -216,14 +217,11 @@ public class ContainerImageRestTemplateFactory {
 			routePlanner = new DefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE);
 		}
 
-		DropAuthorizationHeaderRequestRedirectStrategy redirectStrategy = new DropAuthorizationHeaderRequestRedirectStrategy(
-				extra);
+		DropAuthorizationHeaderRequestRedirectStrategy redirectStrategy = new DropAuthorizationHeaderRequestRedirectStrategy(extra);
 		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory(
 				clientBuilder.setRedirectStrategy(redirectStrategy)
-					.replaceExecInterceptor(ChainElement.REDIRECT.name(),
-							new SpecialRedirectExec(routePlanner, redirectStrategy))
-					// Azure redirects may contain double slashes and on default those are
-					// normilised
+					.replaceExecInterceptor(ChainElement.REDIRECT.name(), new SpecialRedirectExec(routePlanner, redirectStrategy))
+					// Azure redirects may contain double slashes and on default those are normalised
 					.setDefaultRequestConfig(RequestConfig.custom().build())
 					.build());
 
@@ -232,7 +230,7 @@ public class ContainerImageRestTemplateFactory {
 		// Therefore we extend the MappingJackson2HttpMessageConverter media-types to
 		// include application/octet-stream and text/plain.
 		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
-		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
+		List<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		mediaTypeList.add(MediaType.TEXT_PLAIN);
 		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);
