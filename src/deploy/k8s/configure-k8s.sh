@@ -54,8 +54,11 @@ case "$K8S_DRIVER" in
     echo "Configure Microk8s"
     microk8s enable registry
     microk8s enable hostpath-storage
+    # change the range depending on network requirements. This is ideal for local testing.
     microk8s enable metallb:172.18.0.1-172.18.0.254
     microk8s kubectl get all --all-namespaces
+    kubectl rollout status deployment registry --namespace container-registry
+    kubectl rollout status deployment controller --namespace metallb-system
     ;;
 *)
     echo "Creating Minikube cluster with $K8S_DRIVER and k8s=$K8S_VERSION"
