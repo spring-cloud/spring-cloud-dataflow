@@ -61,9 +61,7 @@ public class TaskCtrController {
 	public List<ConfigurationMetadataProperty> options() {
 		URI ctrUri = null;
 		try {
-			ctrUri = new URI(composedTaskRunnerConfigurationProperties.getUri() != null
-					? composedTaskRunnerConfigurationProperties.getUri()
-					: this.taskConfigurationProperties.getComposedTaskRunnerUri());
+			ctrUri = new URI(composedTaskRunnerConfigurationProperties.getUri());
 		} catch (Exception e) {
 			throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 		}

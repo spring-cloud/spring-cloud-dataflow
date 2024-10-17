@@ -224,11 +224,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				appRegistration = new AppRegistration(
 						ComposedTaskRunnerConfigurationProperties.COMPOSED_TASK_RUNNER_NAME,
 						ApplicationType.task,
-						new URI(TaskServiceUtils.getComposedTaskLauncherUri(
-								this.taskConfigurationProperties,
-								this.composedTaskRunnerConfigurationProperties)
-						)
-				);
+						new URI(this.composedTaskRunnerConfigurationProperties.getUri()));
 			} catch (URISyntaxException e) {
 				throw new IllegalStateException("Invalid Compose Task Runner Resource", e);
 			}
@@ -528,8 +524,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		AppRegistration appRegistration = null;
 		if (TaskServiceUtils.isComposedTaskDefinition(taskDefinition.getDslText())) {
 			URI composedTaskUri = null;
-			String composedTaskLauncherUri = TaskServiceUtils.getComposedTaskLauncherUri(this.taskConfigurationProperties,
-					this.composedTaskRunnerConfigurationProperties);
+			String composedTaskLauncherUri = this.composedTaskRunnerConfigurationProperties.getUri();
 			try {
 				composedTaskUri = new URI(composedTaskLauncherUri);
 			} catch (URISyntaxException e) {

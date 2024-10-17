@@ -583,7 +583,7 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 				break;
 			}
 		}
-		if (TaskServiceUtils.isUseUserAccessToken(this.taskConfigurationProperties, this.composedTaskRunnerConfigurationProperties)) {
+		if ( this.composedTaskRunnerConfigurationProperties.isUseUserAccessToken()) {
 			useUserAccessToken = true;
 		}
 		if (!containsAccessToken && useUserAccessToken && oauth2TokenUtilsService != null) {

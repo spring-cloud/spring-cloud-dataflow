@@ -268,105 +268,10 @@ public class TaskServiceUtilsTests {
 	}
 
 	@Test
-	void composedTaskRunnerUriFromTaskProps() {
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
-				new ComposedTaskRunnerConfigurationProperties();
-		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
-		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(composedTaskRunnerConfigurationProperties);
-		taskConfigurationProperties.setComposedTaskRunnerUri("docker://something");
-
-		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
-				composedTaskRunnerConfigurationProperties);
-
-		assertThat(uri).as("Invalid task runner URI string").isEqualTo("docker://something");
-	}
-
-	@Test
-	void composedTaskRunnerUriFromCTRProps() {
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
-				new ComposedTaskRunnerConfigurationProperties();
-		composedTaskRunnerConfigurationProperties.setUri("docker://something");
-
-		String uri = TaskServiceUtils.getComposedTaskLauncherUri(new TaskConfigurationProperties(),
-				composedTaskRunnerConfigurationProperties);
-
-		assertThat(uri).as("Invalid task runner URI string").isEqualTo("docker://something");
-	}
-
-	@Test
-	void composedTaskRunnerUriFromCTRPropsOverridesTaskProps() {
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
-				new ComposedTaskRunnerConfigurationProperties();
-		composedTaskRunnerConfigurationProperties.setUri("gcr.io://something");
-
-		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
-		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(composedTaskRunnerConfigurationProperties);
-		taskConfigurationProperties.setComposedTaskRunnerUri("docker://something");
-
-		String uri = TaskServiceUtils.getComposedTaskLauncherUri(taskConfigurationProperties,
-				composedTaskRunnerConfigurationProperties);
-
-		assertThat(uri).as("Invalid task runner URI string").isEqualTo("gcr.io://something");
-	}
-
-	@Test
 	void imagePullSecretNullCTRProperties() {
 		Map<String, String> taskDeploymentProperties = new HashMap<>();
 		TaskServiceUtils.addImagePullSecretProperty(taskDeploymentProperties, null);
 		assertThat(taskDeploymentProperties.containsKey("deployer.composed-task-runner.kubernetes.imagePullSecret")).as("Task deployment properties should not contain imagePullSecret").isFalse();
-	}
-
-	@Test
-	void useUserAccessTokenFromCTRPropsEnabled() {
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
-				new ComposedTaskRunnerConfigurationProperties();
-		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(true);
-
-		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
-
-		assertThat(result).as("Use user access token should be true").isTrue();
-	}
-
-	@Test
-	void useUserAccessTokenFromCTRPropsDisabled() {
-		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
-				new ComposedTaskRunnerConfigurationProperties();
-		composedTaskRunnerConfigurationProperties.setUseUserAccessToken(false);
-
-		boolean result = TaskServiceUtils.isUseUserAccessToken(null, composedTaskRunnerConfigurationProperties);
-
-		assertThat(result).as("Use user access token should be false").isFalse();
-	}
-
-	@Test
-	void useUserAccessTokenFromNullCTRProps() {
-		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
-		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
-
-		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
-
-		assertThat(result).as("Use user access token should be false").isFalse();
-	}
-
-	@Test
-	void useUserAccessTokenFromTaskProps() {
-		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
-		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
-		taskConfigurationProperties.setUseUserAccessToken(true);
-
-		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
-
-		assertThat(result).as("Use user access token should be true").isTrue();
-	}
-
-	@Test
-	void useUserAccessTokenFromTaskPropsDefault() {
-		TaskConfigurationProperties taskConfigurationProperties = new TaskConfigurationProperties();
-		taskConfigurationProperties.setComposedTaskRunnerConfigurationProperties(new ComposedTaskRunnerConfigurationProperties());
-
-		boolean result = TaskServiceUtils.isUseUserAccessToken(taskConfigurationProperties, null);
-
-		assertThat(result).as("Use user access token should be false").isFalse();
 	}
 
 	@Test
