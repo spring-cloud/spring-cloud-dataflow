@@ -17,7 +17,7 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |
-        ./mvnw -B -s .github/settings.xml -Pdocs clean install --no-transfer-progress
+        ./mvnw -B -s .github/settings.xml -Pfull,docs clean install --no-transfer-progress
   scan:
     runs-on: ubuntu-latest
     steps:
