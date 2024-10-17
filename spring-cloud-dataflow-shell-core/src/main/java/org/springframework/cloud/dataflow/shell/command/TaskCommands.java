@@ -34,6 +34,7 @@ import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskAppStatusResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskDefinitionResource;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionResource;
+import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
 import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.shell.command.support.OpsType;
 import org.springframework.cloud.dataflow.shell.command.support.RoleType;
@@ -298,11 +299,11 @@ public class TaskCommands {
 	public Table executionListByName(
 			@ShellOption(value = {"", "--name"}, help = "the task name to be used as a filter", valueProvider = TaskNameValueProvider.class, defaultValue = ShellOption.NULL) String name) {
 
-		final PagedModel<TaskExecutionResource> tasks;
+		PagedModel<TaskExecutionThinResource> thinTasks = null;
 		if (name == null) {
-			tasks = taskOperations().executionList();
+			thinTasks = taskOperations().thinExecutionList();
 		} else {
-			tasks = taskOperations().executionListByTaskName(name);
+			thinTasks = taskOperations().thinExecutionListByTaskName(name);
 		}
 		LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
 		headers.put("taskName", "Task Name");
@@ -310,7 +311,7 @@ public class TaskCommands {
 		headers.put("startTime", "Start Time");
 		headers.put("endTime", "End Time");
 		headers.put("exitCode", "Exit Code");
-		final TableBuilder builder = new TableBuilder(new BeanListTableModel<>(tasks, headers));
+		TableBuilder builder = new TableBuilder(new BeanListTableModel<>(thinTasks, headers));
 		return DataFlowTables.applyStyle(builder).build();
 	}
 

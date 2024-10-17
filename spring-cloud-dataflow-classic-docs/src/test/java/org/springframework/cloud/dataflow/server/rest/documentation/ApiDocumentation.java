@@ -115,6 +115,7 @@ class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/executions/external").description("Returns Task execution by external id"),
 				linkWithRel("tasks/executions/current").description("Provides the current count of running tasks"),
 				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
+				linkWithRel("tasks/thinexecutions/name").description("Returns thin Task executions for a given task name"),
 				linkWithRel("tasks/info/executions").description("Provides the task executions info"),
 				linkWithRel("tasks/schedules").description("Provides schedule information of tasks"),
 				linkWithRel("tasks/schedules/instances").description("Provides schedule information of a specific task	"),
@@ -122,7 +123,6 @@ class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/executions/execution").description("Provides details for a specific task execution"),
 				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks.  The results can be filtered to show the platforms that support scheduling by adding a request parameter of 'schedulesEnabled=true"),
 				linkWithRel("tasks/logs").description("Retrieve the task application log"),
-				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
 
 				linkWithRel("streams/definitions").description("Exposes the Streams resource"),
 				linkWithRel("streams/definitions/definition").description("Handle a specific Stream definition"),
@@ -221,13 +221,14 @@ class ApiDocumentation extends BaseDocumentation {
 
 						fieldWithPath("_links.tasks/thinexecutions.href").description("Link to the tasks/thinexecutions"),
 
+						fieldWithPath("_links.tasks/thinexecutions/name.href").description("Link to the tasks/thinexecutions/name"),
+						fieldWithPath("_links.tasks/thinexecutions/name.templated").description("Link to the tasks/thinexecutions/name is templated"),
+
 						fieldWithPath("_links.tasks/info/executions.href").description("Link to the tasks/info/executions"),
 						fieldWithPath("_links.tasks/info/executions.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/info is templated"),
 
 						fieldWithPath("_links.tasks/logs.href").description("Link to the tasks/logs"),
 						fieldWithPath("_links.tasks/logs.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/logs is templated"),
-
-						fieldWithPath("_links.tasks/thinexecutions.href").description("Link to the tasks/thinexecutions"),
 
 						fieldWithPath("_links.tasks/schedules.href").description("Link to the tasks/executions/schedules"),
 						fieldWithPath("_links.tasks/schedules/instances.href").description("Link to the tasks/schedules/instances"),

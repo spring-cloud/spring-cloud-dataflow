@@ -71,6 +71,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
 
+	private static final String THIN_EXECUTIONS_BY_NAME_RELATION = "tasks/thinexecutions/name";
+
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
 	private static final String EXECUTION_RELATION = "tasks/executions/execution";
@@ -96,6 +98,8 @@ public class TaskTemplate implements TaskOperations {
 	private final Link executionsLink;
 
 	private final Link thinExecutionsLink;
+
+	private final Link thinExecutionsByNameLink;
 
 	private final Link executionLink;
 
@@ -160,6 +164,12 @@ public class TaskTemplate implements TaskOperations {
 		} else {
 			this.thinExecutionsLink = null;
 		}
+		if(resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).isPresent()) {
+			this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).get();
+		} else {
+			this.thinExecutionsByNameLink = null;
+		}
+
 		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
 			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
 		} else {
@@ -272,6 +282,15 @@ public class TaskTemplate implements TaskOperations {
 			return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
 		} else {
 			return restTemplate.getForObject(executionsLink.getHref(), TaskExecutionThinResource.Page.class);
+		}
+	}
+
+	@Override
+	public PagedModel<TaskExecutionThinResource> thinExecutionListByTaskName(String taskName) {
+		if(thinExecutionsByNameLink != null) {
+			return restTemplate.getForObject(thinExecutionsByNameLink.expand(taskName).getHref(), TaskExecutionThinResource.Page.class);
+		} else {
+			return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(), TaskExecutionThinResource.Page.class);
 		}
 	}
 

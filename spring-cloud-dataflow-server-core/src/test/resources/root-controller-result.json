@@ -116,6 +116,10 @@
     "tasks/executions": {
       "href": "http://localhost/tasks/executions"
     },
+    "tasks/thinexecutions/name": {
+      "href": "http://localhost/tasks/thinexecutions?name={name}",
+      "templated": true
+    },
     "tasks/executions/external": {
       "href": "http://localhost/tasks/executions/external/{externalExecutionId}{?platform}",
       "templated": true

@@ -30,6 +30,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,6 +58,19 @@ public class TaskExecutionThinController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionThinResource> listTasks(Pageable pageable, PagedResourcesAssembler<ThinTaskExecution> pagedAssembler) {
 		Page<TaskExecution> page = explorer.findAll(pageable);
+		Page<ThinTaskExecution> thinTaskExecutions = new PageImpl<>(page.stream().map(ThinTaskExecution::new).toList(), pageable, page.getTotalElements());
+		explorer.populateCtrStatus(thinTaskExecutions.getContent());
+		return pagedAssembler.toModel(thinTaskExecutions, resourceAssembler);
+	}
+
+	@GetMapping(value = "", params = "name")
+	@ResponseStatus(HttpStatus.OK)
+	public PagedModel<TaskExecutionThinResource> retrieveTasksByName(
+		@RequestParam("name") String taskName,
+		Pageable pageable,
+		PagedResourcesAssembler<ThinTaskExecution> pagedAssembler
+	) {
+		Page<TaskExecution> page = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<ThinTaskExecution> thinTaskExecutions = new PageImpl<>(page.stream().map(ThinTaskExecution::new).toList(), pageable, page.getTotalElements());
 		explorer.populateCtrStatus(thinTaskExecutions.getContent());
 		return pagedAssembler.toModel(thinTaskExecutions, resourceAssembler);
