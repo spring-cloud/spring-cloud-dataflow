@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,9 +32,13 @@ import javax.net.ssl.X509TrustManager;
 
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.ChainElement;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.routing.DefaultProxyRoutePlanner;
+import org.apache.hc.client5.http.impl.routing.DefaultRoutePlanner;
 import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
 import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
@@ -44,11 +49,11 @@ import org.apache.hc.core5.http.config.RegistryBuilder;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderRequestRedirectStrategy;
+import org.springframework.cloud.dataflow.container.registry.authorization.SpecialRedirectExec;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-
 
 /**
  * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the Container Registry access.
@@ -83,6 +88,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Christian Tzolov
  * @author Cheng Guan Poh
+ * @author Corneil du Plessis
  */
 public class ContainerImageRestTemplateFactory {
 
@@ -197,7 +203,7 @@ public class ContainerImageRestTemplateFactory {
 	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy, Map<String, String> extra) {
 
 		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.RELAXED).build());
-
+		DefaultRoutePlanner routePlanner;
 		// Set the HTTP proxy if configured.
 		if (withHttpProxy) {
 			if (!properties.getHttpProxy().isEnabled()) {
@@ -205,22 +211,26 @@ public class ContainerImageRestTemplateFactory {
 			}
 			HttpHost proxy = new HttpHost(properties.getHttpProxy().getHost(), properties.getHttpProxy().getPort());
 			clientBuilder.setProxy(proxy);
+			routePlanner = new DefaultProxyRoutePlanner(proxy, DefaultSchemePortResolver.INSTANCE);
+		}
+		else {
+			routePlanner = new DefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE);
 		}
 
-		HttpComponentsClientHttpRequestFactory customRequestFactory =
-				new HttpComponentsClientHttpRequestFactory(
-						clientBuilder
-								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy(extra))
-								// Azure redirects may contain double slashes and on default those are normilised
-								.setDefaultRequestConfig(RequestConfig.custom().build())
-								.build());
+		DropAuthorizationHeaderRequestRedirectStrategy redirectStrategy = new DropAuthorizationHeaderRequestRedirectStrategy(extra);
+		HttpComponentsClientHttpRequestFactory customRequestFactory = new HttpComponentsClientHttpRequestFactory(
+				clientBuilder.setRedirectStrategy(redirectStrategy)
+					.replaceExecInterceptor(ChainElement.REDIRECT.name(), new SpecialRedirectExec(routePlanner, redirectStrategy))
+					// Azure redirects may contain double slashes and on default those are normalised
+					.setDefaultRequestConfig(RequestConfig.custom().build())
+					.build());
 
 		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
 		// Similarly the Github CR response's media-type is always text/plain although the content is in JSON.
 		// Therefore we extend the MappingJackson2HttpMessageConverter media-types to
 		// include application/octet-stream and text/plain.
 		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
-		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
+		List<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		mediaTypeList.add(MediaType.TEXT_PLAIN);
 		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);

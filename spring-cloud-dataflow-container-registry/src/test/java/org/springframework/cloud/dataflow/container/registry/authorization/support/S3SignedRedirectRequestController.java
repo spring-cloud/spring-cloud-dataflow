@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Adam J. Weigold
+ * @author Corneil du Plessis
  */
 @RestController
 public class S3SignedRedirectRequestController {
@@ -68,7 +69,7 @@ public class S3SignedRedirectRequestController {
 
 	@RequestMapping("/test/docker/registry/v2/blobs/test/data")
 	public ResponseEntity<Resource> getSignedBlob(@RequestHeader Map<String, String> headers) {
-		if (headers.containsKey("authorization")) {
+		if (!headers.containsKey("authorization")) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		return buildFromString("{\"config\": {\"Labels\": {\"foo\": \"bar\"} } }");

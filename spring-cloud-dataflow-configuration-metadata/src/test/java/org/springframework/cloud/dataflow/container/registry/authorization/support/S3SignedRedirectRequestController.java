@@ -19,6 +19,9 @@ package org.springframework.cloud.dataflow.container.registry.authorization.supp
 import java.util.Collections;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author Adam J. Weigold
+ * @author Corneil du Plessis
  */
 @RestController
 public class S3SignedRedirectRequestController {
@@ -62,7 +66,6 @@ public class S3SignedRedirectRequestController {
 				"&X-Amz-Expires=1200" +
 				"&X-Amz-SignedHeaders=host" +
 				"&X-Amz-Signature=test");
-
 		return new ResponseEntity<>(redirectHeaders, HttpStatus.TEMPORARY_REDIRECT);
 	}
 
