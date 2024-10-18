@@ -45,7 +45,7 @@ import static org.joda.time.Duration.standardMinutes;
 
 public class DefaultDockerCompose implements DockerCompose {
 
-	public static final Version VERSION_1_7_0 = Version.valueOf("1.7.0");
+	public static final Version VERSION_1_7_0 = Version.parse("1.7.0");
 	private static final Duration COMMAND_TIMEOUT = standardMinutes(2);
 	private static final Duration LOG_WAIT_TIMEOUT = standardMinutes(30);
 	private static final Logger log = LoggerFactory.getLogger(DefaultDockerCompose.class);

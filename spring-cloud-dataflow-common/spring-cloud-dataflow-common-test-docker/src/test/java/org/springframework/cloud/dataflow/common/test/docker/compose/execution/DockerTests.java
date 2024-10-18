@@ -70,13 +70,13 @@ class DockerTests {
     void understandOldVersionFormat() throws Exception {
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 1.7.2"));
         Version version = docker.configuredVersion();
-		assertThat(version).isEqualTo(Version.valueOf("1.7.2"));
+		assertThat(version).isEqualTo(Version.parse("1.7.2"));
     }
 
     @Test
     void understandNewVersionFormat() throws Exception {
         when(executedProcess.getInputStream()).thenReturn(IOUtils.toInputStream("Docker version 17.03.1-ce"));
         Version version = docker.configuredVersion();
-		assertThat(version).isEqualTo(Version.valueOf("17.3.1"));
+		assertThat(version).isEqualTo(Version.parse("17.3.1"));
     }
 }
