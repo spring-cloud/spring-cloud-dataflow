@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +91,8 @@ class CommandTests {
 		assertThat(consumedLogLines).containsExactly("line 1", "line 2");
     }
 
-    @Test
+	@Disabled("flaky test: https://circleci.com/gh/palantir/docker-compose-rule/378, 370, 367, 366")
+	@Test
     void notCreateLongLivedThreadsAfterExecution() throws Exception {
 		Set<Thread> preEntries = Thread.getAllStackTraces().keySet().stream().filter(Thread::isAlive).collect(Collectors.toSet());
 		int preThreadCount = preEntries.size();
