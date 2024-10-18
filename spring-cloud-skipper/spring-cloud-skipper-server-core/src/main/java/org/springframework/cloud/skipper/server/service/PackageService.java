@@ -271,7 +271,7 @@ public class PackageService implements ResourceLoaderAware {
 		Assert.notNull(uploadRequest.getName(), "Name of package can not be null");
 		Assert.notNull(uploadRequest.getVersion(), "Version can not be null");
 		try {
-			Version.valueOf(uploadRequest.getVersion().trim());
+			Version.parse(uploadRequest.getVersion().trim());
 		}
 		catch (ParseException e) {
 			throw new SkipperException("UploadRequest doesn't have a valid semantic version.  Version = " +

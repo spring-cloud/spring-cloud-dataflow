@@ -51,9 +51,9 @@ public final class DockerComposeVersion {
 			if (version.charAt(i) >= '0' && version.charAt(i) <= '9' || version.charAt(i) == '.') {
 				builder.append(version.charAt(i));
 			} else {
-				return Version.valueOf(builder.toString());
+				return Version.parse(builder.toString());
 			}
 		}
-		return Version.valueOf(builder.toString());
+		return Version.parse(builder.toString());
 	}
 }
