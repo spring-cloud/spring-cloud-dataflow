@@ -136,7 +136,7 @@ public class CloudFoundryPlatformAutoConfiguration {
 					.build();
 			Version version = cloudFoundryClient.info()
 				.get(GetInfoRequest.builder().build())
-				.map(response -> Version.valueOf(response.getApiVersion()))
+				.map(response -> Version.parse(response.getApiVersion()))
 				.doOnNext(versionInfo -> logger.info(
 					"Connecting to Cloud Foundry with API Version {}",
 					versionInfo))

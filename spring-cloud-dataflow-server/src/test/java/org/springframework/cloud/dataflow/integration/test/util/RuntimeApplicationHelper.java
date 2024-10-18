@@ -85,7 +85,7 @@ public class RuntimeApplicationHelper {
 				.filter(p -> p.getName().equalsIgnoreCase(platformName))
 				.map(Deployer::getType).findFirst().get();
 
-		dataflowServerVersion = Version.valueOf(dataFlowTemplate.aboutOperation().get()
+		dataflowServerVersion = Version.parse(dataFlowTemplate.aboutOperation().get()
 				.getVersionInfo().getCore().getVersion());
 
 		Assert.hasText(this.platformType, "Could not find platform type for: " + platformName);
@@ -96,11 +96,11 @@ public class RuntimeApplicationHelper {
 	}
 
 	public boolean dataflowServerVersionEqualOrGreaterThan(String version) {
-		return dataflowServerVersion.compareTo(Version.valueOf(version)) >= 0;
+		return dataflowServerVersion.compareTo(Version.parse(version)) >= 0;
 	}
 
 	public boolean dataflowServerVersionLowerThan(String version) {
-		return dataflowServerVersion.compareTo(Version.valueOf(version)) < 0;
+		return dataflowServerVersion.compareTo(Version.parse(version)) < 0;
 	}
 
 	public String getPlatformName() {
