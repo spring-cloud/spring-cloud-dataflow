@@ -16,36 +16,26 @@
 
 package org.springframework.cloud.dataflow.container.registry;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLException;
 
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.StandardCookieSpec;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.config.Lookup;
-import org.apache.hc.core5.http.config.RegistryBuilder;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import reactor.netty.http.Http11SslContextSpec;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.transport.ProxyProvider;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderRequestRedirectStrategy;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ReactorNettyClientRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
@@ -153,67 +143,50 @@ public class ContainerImageRestTemplateFactory {
 		}
 	}
 
-	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra)
-			throws NoSuchAlgorithmException, KeyManagementException {
+	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {
+		HttpClient client = httpClientBuilder(skipSslVerification);
+		return initRestTemplate(client, withHttpProxy, extra);
+	}
 
-		if (!skipSslVerification) {
-			// Create a RestTemplate that uses custom request factory
-			return this.initRestTemplate(HttpClients.custom(), withHttpProxy, extra);
+	private static void removeAuthorization(HttpHeaders headers) {
+		for(Map.Entry<String,String> entry: headers.entries()) {
+			if(entry.getKey().equalsIgnoreCase(org.springframework.http.HttpHeaders.AUTHORIZATION)) {
+				headers.remove(entry.getKey());
+				break;
+			}
 		}
-
-		// Trust manager that blindly trusts all SSL certificates.
-		TrustManager[] trustAllCerts = new TrustManager[] {
-				new X509TrustManager() {
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-						return new X509Certificate[0];
-					}
-
-					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-					}
-
-					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-					}
-				}
-		};
-		SSLContext sslContext = SSLContext.getInstance("SSL");
-		// Install trust manager to SSL Context.
-		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-
-		// Create a RestTemplate that uses custom request factory
-		return initRestTemplate(
-				httpClientBuilder(sslContext),
-				withHttpProxy,
-				extra);
 	}
-	private HttpClientBuilder httpClientBuilder(SSLContext sslContext) {
-		// Register http/s connection factories
-		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
-			.register("https", new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
-			.register("http", new PlainConnectionSocketFactory())
-			.build();
-		return HttpClients.custom()
-			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
-	}
-	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy, Map<String, String> extra) {
 
-		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.RELAXED).build());
+	private HttpClient httpClientBuilder(boolean skipSslVerification) {
+
+        try {
+			SslContextBuilder builder = skipSslVerification ? SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE) : SslContextBuilder.forClient();
+			SslContext sslContext = builder.build();
+			HttpClient client = HttpClient.create().secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
+
+			return client.followRedirect(true, (entries, httpClientRequest) -> {
+						HttpHeaders httpHeaders = httpClientRequest.requestHeaders();
+						removeAuthorization(httpHeaders);
+						removeAuthorization(entries);
+						httpClientRequest.headers(httpHeaders);
+					});
+        } catch (SSLException e) {
+            throw new RuntimeException(e);
+        }
+
+	}
+	private RestTemplate initRestTemplate(HttpClient client, boolean withHttpProxy, Map<String, String> extra) {
 
 		// Set the HTTP proxy if configured.
 		if (withHttpProxy) {
 			if (!properties.getHttpProxy().isEnabled()) {
 				throw new ContainerRegistryException("Registry Configuration uses a HttpProxy but non is configured!");
 			}
-			HttpHost proxy = new HttpHost(properties.getHttpProxy().getHost(), properties.getHttpProxy().getPort());
-			clientBuilder.setProxy(proxy);
+			ProxyProvider.Builder builder = ProxyProvider.builder().type(ProxyProvider.Proxy.HTTP).host(properties.getHttpProxy().getHost()).port(properties.getHttpProxy().getPort());
+			client.proxy(typeSpec -> builder.build());
 		}
-
-		HttpComponentsClientHttpRequestFactory customRequestFactory =
-				new HttpComponentsClientHttpRequestFactory(
-						clientBuilder
-								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy(extra))
-								// Azure redirects may contain double slashes and on default those are normilised
-								.setDefaultRequestConfig(RequestConfig.custom().build())
-								.build());
+		// TODO what do we do with extra?
+		ClientHttpRequestFactory customRequestFactory = new ReactorNettyClientRequestFactory(client);
 
 		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
 		// Similarly the Github CR response's media-type is always text/plain although the content is in JSON.
