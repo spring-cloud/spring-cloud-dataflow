@@ -522,20 +522,19 @@ public class DefaultDataFlowTaskExecutionQueryDao implements DataflowTaskExecuti
 
 	@Override
 	public void populateCtrStatus(Collection<ThinTaskExecution> thinTaskExecutions) {
-		Map<Long, ThinTaskExecution> taskExecutionMap = thinTaskExecutions.stream()
+		if(!thinTaskExecutions.isEmpty()) {
+			Map<Long, ThinTaskExecution> taskExecutionMap = thinTaskExecutions.stream()
 				.collect(Collectors.toMap(ThinTaskExecution::getExecutionId, Function.identity()));
-		String ids = taskExecutionMap.keySet()
-				.stream()
-				.map(Object::toString)
-				.collect(Collectors.joining(","));
-		String sql = FIND_CTR_STATUS.replace(":taskExecutionIds", ids);
-		jdbcTemplate.query(sql, rs -> {
-			Long id = rs.getLong("TASK_EXECUTION_ID");
-			String ctrStatus = rs.getString("CTR_STATUS");
-			logger.debug("populateCtrStatus:{}={}", id, ctrStatus);
-			ThinTaskExecution execution = taskExecutionMap.get(id);
-			Assert.notNull(execution, "Expected TaskExecution for " + id + " from " + ids);
-			execution.setCtrTaskStatus(ctrStatus);
-		});
+			String ids = taskExecutionMap.keySet().stream().map(Object::toString).collect(Collectors.joining(","));
+			String sql = FIND_CTR_STATUS.replace(":taskExecutionIds", ids);
+			jdbcTemplate.query(sql, rs -> {
+				Long id = rs.getLong("TASK_EXECUTION_ID");
+				String ctrStatus = rs.getString("CTR_STATUS");
+				logger.debug("populateCtrStatus:{}={}", id, ctrStatus);
+				ThinTaskExecution execution = taskExecutionMap.get(id);
+				Assert.notNull(execution, "Expected TaskExecution for " + id + " from " + ids);
+				execution.setCtrTaskStatus(ctrStatus);
+			});
+		}
 	}
 }

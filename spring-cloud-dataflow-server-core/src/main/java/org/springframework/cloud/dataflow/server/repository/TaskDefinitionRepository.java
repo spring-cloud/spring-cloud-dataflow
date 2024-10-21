@@ -46,4 +46,5 @@ public interface TaskDefinitionRepository extends KeyValueRepository<TaskDefinit
 	 */
 	TaskDefinition findByTaskName(String name);
 
+    long countByTaskName(String taskName);
 }
