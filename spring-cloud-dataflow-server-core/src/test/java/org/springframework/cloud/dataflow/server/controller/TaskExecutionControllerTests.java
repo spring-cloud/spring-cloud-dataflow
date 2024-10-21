@@ -342,6 +342,13 @@ class TaskExecutionControllerTests {
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].taskExecutionStatus", containsInAnyOrder("RUNNING", "RUNNING","RUNNING","RUNNING")))
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(4)));
 	}
+	@Test
+	void getThinExecutionsByName() throws Exception {
+		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", "nope").accept(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.page.totalElements", is(0)));
+	}
 
 	@Test
 	void getCurrentExecutions() throws Exception {
