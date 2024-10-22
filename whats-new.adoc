@@ -1,0 +1,30 @@
+= What's new?
+
+[[what-s-new-in-3-0-since-2-11]]
+== What's New in 3.0.0 Since 2.11
+:page-section-summary-toc: 1
+
+This section covers the changes made from version 2.11.5 to version 3.0.0.
+
+=== New Feature
+Announce New Feature Here
+
+=== Next New Feature
+Announce Next New Feature Here
+
+=== Deprecations
+Announce new deprecations here
+
+=== Removals
+Deprecated methods, properties, and features that have been removed in this release.
+
+* `increment-instance-enabled` used by Composed Task Runner has been replaced by `uuid-instance-enabled`.
+* `spring.cloud.dataflow.task.use-user-access-token` has been replaced by `spring.cloud.dataflow.task.composedtaskrunner.use-user-access-token`.
+* `spring.cloud.dataflow.task.composed-task-runner-uri` has been replaced by `spring.cloud.dataflow.task.composedtaskrunner.uri`.
+* `AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
+VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties)` constructor was removed.
+* `search` query parameter for filtering  `/tasks/definitions` by task name has been removed.  Use the `taskName` query parameter.
+
+=== Breaking Changes
+Announce deprecated changes here
+
