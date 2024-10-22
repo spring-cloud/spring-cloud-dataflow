@@ -172,7 +172,6 @@ public class TaskDefinitionController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<? extends TaskDefinitionResource> list(
 			Pageable pageable,
-			@RequestParam(required = false) @Deprecated String search,
 			@RequestParam(required = false) String taskName,
 			@RequestParam(required = false) String description,
 			@RequestParam(required = false) boolean manifest,
@@ -181,14 +180,12 @@ public class TaskDefinitionController {
 	) {
 		final Page<TaskDefinition> taskDefinitions;
 
-		if (Stream.of(search, taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
-			throw new TaskQueryParamException(new String[]{"taskName (or search)", "description", "dslText"});
+		if (Stream.of(taskName, description, dslText).filter(Objects::nonNull).count() > 1L) {
+			throw new TaskQueryParamException(new String[]{"taskName", "description", "dslText"});
 		}
 
 		if (taskName != null) {
 			taskDefinitions = repository.findByTaskNameContains(taskName, pageable);
-		} else if (search != null) {
-			taskDefinitions = repository.findByTaskNameContains(search, pageable);
 		} else if (description != null) {
 			taskDefinitions = repository.findByDescriptionContains(description, pageable);
 		} else if (dslText != null) {

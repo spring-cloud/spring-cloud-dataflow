@@ -334,28 +334,28 @@ class TaskControllerTests {
 		assertThat(myTask2.getName()).isEqualTo("myTask-t2");
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {"search", "taskName"})
-	void findTaskNameContainsSubstring(String taskNameRequestParamName) throws Exception {
+	@Test
+	void findTaskNameContainsSubstring() throws Exception {
+		final String TASK_NAME_REQUEST_PARAMETER = "taskName";
 		repository.save(new TaskDefinition("foo", "task"));
 		repository.save(new TaskDefinition("foz", "task"));
 		repository.save(new TaskDefinition("ooz", "task"));
 
-		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "f")
+		mockMvc.perform(get("/tasks/definitions").param(TASK_NAME_REQUEST_PARAMETER, "f")
 						.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foo")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("foz")));
 
-		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "oz")
+		mockMvc.perform(get("/tasks/definitions").param(TASK_NAME_REQUEST_PARAMETER, "oz")
 						.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(2)))
 
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[0].name", is("foz")))
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList[1].name", is("ooz")));
 
-		mockMvc.perform(get("/tasks/definitions").param(taskNameRequestParamName, "o")
+		mockMvc.perform(get("/tasks/definitions").param(TASK_NAME_REQUEST_PARAMETER, "o")
 						.accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$._embedded.taskDefinitionResourceList.*", hasSize(3)))
 
@@ -411,7 +411,7 @@ class TaskControllerTests {
 
 	@Test
 	void findByDslTextAndNameBadRequest() throws Exception {
-		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo").param("search", "f")
+		mockMvc.perform(get("/tasks/definitions").param("dslText", "fo").param("taskName", "f")
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 
