@@ -191,10 +191,10 @@ public class ComposedTaskProperties {
 	/**
 	 * Allows a single ComposedTaskRunner instance to be re-executed without
 	 * changing the parameters. It does this by applying a {@code run.id} with a UUid.
-	 * Default is false.
+	 * Default is true.
 	 * Set this option to `true` when running multiple instances of the same composed task definition at the same time.
 	 */
-	private boolean uuidInstanceEnabled = false;
+	private boolean uuidInstanceEnabled = true;
 
 	/**
 	 * The platform property that will be used for each task in the workflow when it is launched.

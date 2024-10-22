@@ -109,7 +109,9 @@ public class ComposedRunnerJobFactory implements FactoryBean<Job> {
 						.start(createFlow())
 						.end())
 				.end();
-		builder.incrementer(new UuidIncrementer());
+		if(this.composedTaskProperties.isUuidInstanceEnabled()) {
+			builder.incrementer(new UuidIncrementer());
+		}
 		return builder.build();
 	}
 
