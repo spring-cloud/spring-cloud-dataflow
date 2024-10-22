@@ -40,6 +40,10 @@ data:
               kubernetes:
                 accounts:
                   default:
+                    secretRefs:
+                      - scdf-datasource
+                    configMapRefs:
+                      - scdf-datasource
                     environmentVariables: 'JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=-1'
                     imagePullPolicy: IfNotPresent
                     imagePullSecret: registry-key
