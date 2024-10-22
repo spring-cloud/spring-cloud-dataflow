@@ -1542,7 +1542,7 @@ include::{snippets}/task-definitions-documentation/list-all-task-definitions/htt
 [[api-guide-resources-stream-task-definitions-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-definitions-documentation/list-all-task-definitions/request-parameters.adoc[]
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/query-parameters.adoc[]
 
 
 

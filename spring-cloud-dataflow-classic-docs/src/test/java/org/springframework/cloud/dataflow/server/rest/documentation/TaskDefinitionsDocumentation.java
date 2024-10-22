@@ -98,7 +98,7 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.queryParam("page", "0")
 				.queryParam("size", "10")
 				.queryParam("sort", "taskName,ASC")
-				.queryParam("search", "")
+				.queryParam("taskName", "")
 				.queryParam("manifest", "true")
 			)
 			.andExpect(status().isOk())
@@ -106,7 +106,7 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 				queryParameters(
 					parameterWithName("page").description("The zero-based page number (optional)"),
 					parameterWithName("size").description("The requested page size (optional)"),
-					parameterWithName("search").description("The search string performed on the name (optional)"),
+					parameterWithName("taskName").description("Search for a specific taskName (optional)"),
 					parameterWithName("sort").description("The sort on the list (optional)"),
 					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
 				),
