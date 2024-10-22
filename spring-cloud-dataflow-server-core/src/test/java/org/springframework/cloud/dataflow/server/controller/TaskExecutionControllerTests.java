@@ -420,7 +420,7 @@ class TaskExecutionControllerTests {
 		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andDo(print())
-			.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(1)));
+			.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(2)));
 	}
 	@Test
 	void getExecutionsByNameNotFound() throws Exception {
