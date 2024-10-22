@@ -1526,7 +1526,7 @@ The task definition endpoint lets you get all task definitions.
 The following topics provide more details:
 
 * <<api-guide-resources-stream-task-definitions-list-request-structure>>
-* <<api-guide-resources-stream-task-definitions-list-request-parameters>>
+* <<api-guide-resources-stream-task-definitions-list-query-parameters>>
 * <<api-guide-resources-stream-task-definitions-list-example-request>>
 * <<api-guide-resources-stream-task-definitions-list-response-structure>>
 
@@ -1539,10 +1539,10 @@ include::{snippets}/task-definitions-documentation/list-all-task-definitions/htt
 
 
 
-[[api-guide-resources-stream-task-definitions-list-request-parameters]]
-===== Request Parameters
+[[api-guide-resources-stream-task-definitions-list-query-parameters]]
+===== Query Parameters
 
-include::{snippets}/task-definitions-documentation/list-all-task-definitions/request-parameters.adoc[]
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/query-parameters.adoc[]
 
 
 
