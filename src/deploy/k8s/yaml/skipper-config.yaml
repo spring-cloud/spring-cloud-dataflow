@@ -27,11 +27,7 @@ data:
               kubernetes:
                 accounts:
                   default:
-                    secretRefs:
-                      - default-binder
-                      - scdf-datasource
-                    configMapRefs:
-                      - scdf-datasource
+                    secretRefs: [ default-binder ]
                     imagePullPolicy: IfNotPresent
                     imagePullSecret:
                       - name: registry-key
