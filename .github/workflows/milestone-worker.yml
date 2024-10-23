@@ -95,7 +95,7 @@ jobs:
         jfrog rt build-clean
         ./spring-cloud-dataflow-package/set-package-version.sh
         ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress
-        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,full,deploymentfiles,docs -B install -DskipTests --no-transfer-progress 
+        jfrog rt mvn -gs .github/settings.xml -Pstagingmilestone,deploymentfiles,docs -B install -DskipTests --no-transfer-progress 
         jfrog rt build-publish
         PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingmilestone help:evaluate -Dexpression=project.version -q -DforceStdout)
         echo BUILD_ZOO_HANDLER_spring_cloud_dataflow_version=$PROJECT_VERSION >> $GITHUB_ENV

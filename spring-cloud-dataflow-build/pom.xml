@@ -49,6 +49,7 @@
 		<sonar.language>java</sonar.language>
 		<!-- Plugins -->
 		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+		<maven-surefire-report-plugin.version>3.5.0</maven-surefire-report-plugin.version>
 		<maven-eclipse-plugin.version>2.10</maven-eclipse-plugin.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
 		<!-- for backwards compatibility, use maven-checkstyle-plugin.version -->

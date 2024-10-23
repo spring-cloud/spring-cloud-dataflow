@@ -100,7 +100,7 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>full</id>
+			<id>docs</id>
 			<build>
 				<plugins>
 					<plugin>

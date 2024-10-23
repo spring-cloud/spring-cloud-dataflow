@@ -41,6 +41,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.ScaleRequest;
+import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -111,12 +112,12 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = install(installRequest);
 		installRequest.setPackageIdentifier(packageIdentifier);
 		assertThat(release).isNotNull();
-		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("4.0.0");
 		Info info = this.releaseService.status(releaseName);
 		assertThat(info).isNotNull();
 
@@ -149,12 +150,12 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = install(installRequest);
 		installRequest.setPackageIdentifier(packageIdentifier);
 		assertThat(release).isNotNull();
-		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("4.0.0");
 
 		Info info = this.releaseService.status(releaseName);
 		assertThat(info).isNotNull();
@@ -182,12 +183,12 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = install(installRequest);
 		installRequest.setPackageIdentifier(packageIdentifier);
 		assertThat(release).isNotNull();
-		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("4.0.0");
 		LogInfo logContent = this.releaseService.getLog(releaseName);
 		assertThat(logContent).isNotNull();
 	}
@@ -224,7 +225,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = install(installRequest);
 		assertThat(release).isNotNull();
-		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("2.0.0");
+		assertThat(release.getPkg().getMetadata().getVersion()).isEqualTo("4.0.0");
 		delete(release.getName());
 
 	}
@@ -281,7 +282,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		Release release = install(installRequest);
 		assertThat(release).isNotNull();
@@ -304,7 +305,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		// Install
 		Release release = install(installRequest);
@@ -328,7 +329,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 
 		List<PackageMetadata> releasePackage = this.packageMetadataRepository.findByNameAndVersionOrderByApiVersionDesc(
@@ -338,7 +339,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 				.isNotNull()
 				.hasSize(1);
 
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(5);
 
 		// Install
 		Release release = install(installRequest);
@@ -361,10 +362,10 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(5);
 
 		// Install
 		Release release = install(installRequest);
@@ -379,7 +380,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		catch (SkipperException se) {
 		}
 		assertReleaseStatus(releaseName, StatusCode.DEPLOYED);
-		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(packageIdentifier.getPackageName())).hasSize(5);
 	}
 
 	@Test
@@ -397,14 +398,14 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		// 3 versions of package "log" exists
 		PackageIdentifier logPackageIdentifier = new PackageIdentifier();
 		logPackageIdentifier.setPackageName("log");
-		logPackageIdentifier.setPackageVersion("1.0.0");
+		logPackageIdentifier.setPackageVersion("4.0.0");
 
 		List<PackageMetadata> releasePackage = this.packageMetadataRepository.findByNameAndVersionOrderByApiVersionDesc(
 				logPackageIdentifier.getPackageName(), logPackageIdentifier.getPackageVersion());
 		assertThat(releasePackage)
 				.isNotNull()
 				.hasSize(1);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(5);
 
 		// Install 2 releases (RELEASE_ONE, RELEASE_TWO) from the same "log" package
 		install(RELEASE_ONE, logPackageIdentifier);
@@ -419,14 +420,14 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 			fail("Attempt to delete a package with other deployed releases should fail");
 		}
 		catch (PackageDeleteException se) {
-			assertThat(se.getMessage()).isEqualTo("Can not delete Package Metadata [log:1.0.0] in Repository [test]. " +
+			assertThat(se.getMessage()).isEqualTo("Can not delete Package Metadata [log:4.0.0] in Repository [test]. " +
 					"Not all releases of this package have the status DELETED. Active Releases [RELEASE_TWO]");
 		}
 
 		// Verify that neither the releases nor the package have been deleted
 		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
 		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(5);
 
 		// Install a third release (RELEASE_THREE) from the same package (log)
 		install(RELEASE_THREE, logPackageIdentifier);
@@ -438,7 +439,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 			fail("Attempt to delete a package with other deployed releases must fail.");
 		}
 		catch (PackageDeleteException se) {
-			assertThat(se.getMessage()).isEqualTo("Can not delete Package Metadata [log:1.0.0] in Repository [test]. " +
+			assertThat(se.getMessage()).isEqualTo("Can not delete Package Metadata [log:4.0.0] in Repository [test]. " +
 					"Not all releases of this package have the status DELETED. Active Releases [RELEASE_THREE,RELEASE_TWO]");
 		}
 
@@ -446,7 +447,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		assertReleaseStatus(RELEASE_ONE, StatusCode.DEPLOYED);
 		assertReleaseStatus(RELEASE_TWO, StatusCode.DEPLOYED);
 		assertReleaseStatus(RELEASE_THREE, StatusCode.DEPLOYED);
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(5);
 
 		// Delete releases two and three without without deleting their package.
 		delete(RELEASE_TWO, !DELETE_RELEASE_PACKAGE);
@@ -460,7 +461,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		assertReleaseStatus(RELEASE_THREE, StatusCode.DELETED);
 
 		// Package "log" still has 3 registered versions
-		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(3);
+		assertThat(this.packageMetadataRepository.findByName(logPackageIdentifier.getPackageName())).hasSize(5);
 
 		// Attempt to delete release one together with its package
 		delete(RELEASE_ONE, DELETE_RELEASE_PACKAGE);
@@ -491,15 +492,15 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		InstallRequest installRequest = new InstallRequest();
 		InstallProperties installProperties = createInstallProperties(releaseName);
 		ConfigValues installConfig = new ConfigValues();
-		installConfig.setRaw("log:\n  version: 1.2.0.RC1\ntime:\n  version: 1.2.0.RC1\n");
+		installConfig.setRaw("log:\n  version: 4.0.0\ntime:\n  version: 4.0.0\n");
 		installProperties.setConfigValues(installConfig);
 		installRequest.setInstallProperties(installProperties);
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 		// Install
-		logger.info("Installing log 1.0.0 package");
+		logger.info("Installing log 4.0.0 package");
 		Release release = install(installRequest);
 		assertThat(release).isNotNull();
 		assertThat(release.getVersion()).isEqualTo(1);
@@ -509,17 +510,17 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
 		ConfigValues upgradeConfig = new ConfigValues();
-		upgradeConfig.setRaw("log:\n  version: 1.2.0.RELEASE\ntime:\n  version: 1.2.0.RELEASE\n");
+		upgradeConfig.setRaw("log:\n  version: 3.2.1\ntime:\n  version: 3.2.1\n");
 		upgradeProperties.setConfigValues(upgradeConfig);
 		UpgradeRequest upgradeRequest = new UpgradeRequest();
 		upgradeRequest.setUpgradeProperties(upgradeProperties);
 		packageIdentifier = new PackageIdentifier();
 		String packageName = "log";
-		String packageVersion = "2.0.0";
+		String packageVersion = "3.2.1";
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
-		logger.info("Upgrading to log 2.0.0 package");
+		logger.info("Upgrading to log 3.2.1 package");
 		Release upgradedRelease = upgrade(upgradeRequest);
 
 		assertThat(upgradedRelease.getVersion()).isEqualTo(2);
@@ -562,19 +563,21 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 
 		PackageIdentifier packageIdentifier = new PackageIdentifier();
 		packageIdentifier.setPackageName("log");
-		packageIdentifier.setPackageVersion("1.0.0");
+		packageIdentifier.setPackageVersion("4.0.0");
 		installRequest.setPackageIdentifier(packageIdentifier);
 
 		Release release1 = install(installRequest);
 		assertThat(release1).isNotNull();
-		assertThat(release1.getPkg().getMetadata().getVersion()).isEqualTo("1.0.0");
+		assertThat(release1.getPkg().getMetadata().getVersion()).isEqualTo("4.0.0");
 
-		await().atMost(Duration.ofSeconds(30)).until(() ->
-			this.releaseService.status(releaseName, release1.getVersion()).getStatus().getStatusCode() == StatusCode.DEPLOYED);
-
+		await().atMost(Duration.ofSeconds(30))
+				.untilAsserted(() -> {
+					Status status = this.releaseService.status(releaseName, release1.getVersion()).getStatus();
+					logger.info("failedUpdate:deployed:{}:{}={}", releaseName, release1.getVersion(), status);
+					assertThat(status.getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
+				});
 		ConfigValues upgradeConfig = new ConfigValues();
-		upgradeConfig.setRaw("spec:\n  applicationProperties:\n    server.port: 8082\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator/fake\n");
-
+		upgradeConfig.setRaw("spec:\n  applicationProperties:\n    server.port: 8082\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator2/fake\n");
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
 		upgradeProperties.setConfigValues(upgradeConfig);
@@ -585,15 +588,20 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 
 		packageIdentifier = new PackageIdentifier();
 		String packageName = "log";
-		String packageVersion = "1.0.0";
+		String packageVersion = "3.2.1";
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
 		Release release2 = upgrade(upgradeRequest, false);
 		assertThat(release2).isNotNull();
 
-		await().atMost(Duration.ofSeconds(60)).pollInterval(Duration.ofSeconds(1)).until(() ->
-			this.releaseService.status(releaseName, release2.getVersion()).getStatus().getStatusCode() == StatusCode.FAILED);
+		await().atMost(Duration.ofSeconds(90))
+				.pollInterval(Duration.ofSeconds(5))
+				.untilAsserted(() -> {
+					Status status = this.releaseService.status(releaseName, release2.getVersion()).getStatus();
+					logger.info("failedUpdate:deployed2:{}:{}={}", releaseName, release2.getVersion(), status);
+					assertThat(status.getStatusCode()).isNotEqualTo(StatusCode.DEPLOYED);
+				});
 
 		delete(release1.getName());
 	}

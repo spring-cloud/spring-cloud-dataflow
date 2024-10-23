@@ -72,7 +72,7 @@ jobs:
         export spring_cloud_dataflow_version
         ./spring-cloud-dataflow-package/set-package-version.sh
         ./mvnw -s .settings.xml package -DskipTests -T 1C --no-transfer-progress 
-        jfrog rt mvn -s .settings.xml install -Pfull,docs -B --no-transfer-progress
+        jfrog rt mvn -s .settings.xml install -Pdocs -B --no-transfer-progress
         jfrog rt mvn -s .settings.xml install -pl spring-cloud-dataflow-package -B --no-transfer-progress
         jfrog rt build-publish
         export JFROG_CLI_BUILD_NAME="${JFROG_CLI_BUILD_NAME/spring-cloud-dataflow/spring-cloud-skipper}"

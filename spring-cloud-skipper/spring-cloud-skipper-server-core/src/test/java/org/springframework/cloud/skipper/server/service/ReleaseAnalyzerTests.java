@@ -41,7 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ActiveProfiles({"repo-test", "local"})
 @TestPropertySource(properties = {
-		"maven.remote-repositories.repo1.url=https://repo.spring.io/snapshot"
+		"maven.remote-repositories.repo1.url=https://repo.spring.io/snapshot",
+		"maven.remote-repositories.repo2.url=https://repo.spring.io/milestone"
 })
 class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 
@@ -58,7 +59,7 @@ class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		// NOTE must be a release that exists in a maven repo....
 		String releaseName = "logreleaseAnalyzer";
 		String packageName = "ticktock";
-		String packageVersion = "1.0.0";
+		String packageVersion = "4.0.0";
 		InstallRequest installRequest = new InstallRequest();
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 

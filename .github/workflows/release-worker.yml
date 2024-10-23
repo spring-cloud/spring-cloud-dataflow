@@ -105,7 +105,7 @@ jobs:
           ./spring-cloud-dataflow-package/set-package-version.sh
           echo "::notice ::install"
           ./mvnw -s .settings.xml package -Pstagingrelease -DskipTests -T 1C --no-transfer-progress
-          jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,full,deploymentfiles,docs -B install -DskipTests --no-transfer-progress
+          jfrog rt mvn -gs .github/settings.xml -Pstagingrelease,deploymentfiles,docs -B install -DskipTests --no-transfer-progress
           echo "::notice ::build-publish"
           jfrog rt build-publish
           PROJECT_VERSION=$(./mvnw -gs .github/settings.xml -Pstagingrelease help:evaluate -Dexpression=project.version -q -DforceStdout)

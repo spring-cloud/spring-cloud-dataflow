@@ -39,6 +39,7 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.skipper.domain.CancelResponse;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.Release;
@@ -100,8 +101,9 @@ public abstract class AbstractMockMvcTests extends AbstractAssertReleaseDeployed
 			Info info = convertContentToInfo(result.getResponse().getContentAsString());
 
 			logger.info("Status = " + info.getStatus());
-			return info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED) &&
-					allAppsDeployed(info.getStatus().getAppStatusList());
+			List<AppStatus> appStatusList = info.getStatus().getAppStatusList();
+			logger.info("appStatusList = " + appStatusList);
+			return info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED) && allAppsDeployed(appStatusList);
 		}
 		catch (Exception e) {
 			logger.error("Exception getting status", e);

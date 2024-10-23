@@ -168,7 +168,7 @@ class ReleaseControllerTests extends AbstractControllerTests {
 
 		// Deploy
 		String releaseName = "test2";
-		Release release = install("log", "5.0.0", releaseName);
+		Release release = install("log", "3.2.1", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Check manifest
@@ -207,7 +207,7 @@ class ReleaseControllerTests extends AbstractControllerTests {
 	@Test
 	void packageDeployAndUpgrade() throws Exception {
 		String releaseName = "myLog";
-		Release release = install("log", "5.0.0", releaseName);
+		Release release = install("log", "3.2.1", releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 
 		// Upgrade
@@ -250,7 +250,7 @@ class ReleaseControllerTests extends AbstractControllerTests {
 	void packageUpgradeWithNoDifference() throws Exception {
 		String releaseName = "myPackage";
 		String packageName = "log";
-		String packageVersion = "5.0.0";
+		String packageVersion = "4.0.0";
 		Release release = install(packageName, packageVersion, releaseName);
 		assertThat(release.getVersion()).isEqualTo(1);
 

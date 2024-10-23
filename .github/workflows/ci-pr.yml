@@ -17,7 +17,15 @@ jobs:
       shell: bash
       timeout-minutes: 75
       run: |
-        ./mvnw -B -s .github/settings.xml -Pdocs clean install --no-transfer-progress
+        ./mvnw -s .github/settings.xml -B -Pdocs clean install --no-transfer-progress -T 1C
+    - name: Install XML Utils
+      if: ${{ failure() }}
+      uses: ./.github/actions/install-xmlutils
+    - name: Test Errors Report
+      if: ${{ failure() }}
+      shell: bash
+      run: ./src/scripts/print-test-errors.sh
+
   scan:
     runs-on: ubuntu-latest
     steps:

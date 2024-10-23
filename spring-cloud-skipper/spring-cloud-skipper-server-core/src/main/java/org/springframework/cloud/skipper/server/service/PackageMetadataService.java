@@ -253,9 +253,17 @@ public class PackageMetadataService implements ResourceLoaderAware {
 		if (scheme.equals("file")) {
 			stringBuilder.append("file");
 			if (uri.getPath() != null) {
+				if(uri.getPath().startsWith("/")) {
+					stringBuilder.append("_root");
+				}
 				stringBuilder.append(uri.getPath().replaceAll("/", "_"));
 			}
 			else {
+				if(uri.getSchemeSpecificPart().startsWith("/")) {
+					stringBuilder.append("_root_");
+				} else if(!uri.getSchemeSpecificPart().startsWith(".")) {
+					stringBuilder.append("_");
+				}
 				String relativeFilename = uri.getSchemeSpecificPart().replaceAll("^./", "/dot/");
 				stringBuilder.append(relativeFilename.replaceAll("/", "_"));
 			}
