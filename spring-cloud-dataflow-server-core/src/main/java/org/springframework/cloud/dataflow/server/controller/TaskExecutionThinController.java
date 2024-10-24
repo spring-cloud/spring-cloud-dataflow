@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 
 import org.springframework.cloud.dataflow.core.ThinTaskExecution;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.task.DataflowTaskExplorer;
 import org.springframework.cloud.task.repository.TaskExecution;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ import org.springframework.hateoas.server.mvc.RepresentationModelAssemblerSuppor
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,10 +49,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TaskExecutionThinController {
 
 	private final DataflowTaskExplorer explorer;
+	private final TaskDefinitionRepository taskDefinitionRepository;
 	private final TaskExecutionThinResourceAssembler resourceAssembler;
 
-	public TaskExecutionThinController(DataflowTaskExplorer explorer) {
+	public TaskExecutionThinController(DataflowTaskExplorer explorer, TaskDefinitionRepository taskDefinitionRepository) {
 		this.explorer = explorer;
+		this.taskDefinitionRepository = taskDefinitionRepository;
 		this.resourceAssembler = new TaskExecutionThinResourceAssembler();
 	}
 
@@ -57,6 +62,23 @@ public class TaskExecutionThinController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionThinResource> listTasks(Pageable pageable, PagedResourcesAssembler<ThinTaskExecution> pagedAssembler) {
 		Page<TaskExecution> page = explorer.findAll(pageable);
+		Page<ThinTaskExecution> thinTaskExecutions = new PageImpl<>(page.stream().map(ThinTaskExecution::new).toList(), pageable, page.getTotalElements());
+		explorer.populateCtrStatus(thinTaskExecutions.getContent());
+		return pagedAssembler.toModel(thinTaskExecutions, resourceAssembler);
+	}
+
+	@GetMapping(value = "", params = "name")
+	@ResponseStatus(HttpStatus.OK)
+	public PagedModel<TaskExecutionThinResource> retrieveTasksByName(
+		@RequestParam("name") String taskName,
+		Pageable pageable,
+		PagedResourcesAssembler<ThinTaskExecution> pagedAssembler
+	) {
+		long tasks = this.taskDefinitionRepository.countByTaskName(taskName);
+		if(tasks == 0) {
+			throw new NoSuchTaskDefinitionException(taskName);
+		}
+		Page<TaskExecution> page = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<ThinTaskExecution> thinTaskExecutions = new PageImpl<>(page.stream().map(ThinTaskExecution::new).toList(), pageable, page.getTotalElements());
 		explorer.populateCtrStatus(thinTaskExecutions.getContent());
 		return pagedAssembler.toModel(thinTaskExecutions, resourceAssembler);

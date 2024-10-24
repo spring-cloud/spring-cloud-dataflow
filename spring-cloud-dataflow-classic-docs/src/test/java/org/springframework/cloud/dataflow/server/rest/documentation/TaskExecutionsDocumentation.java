@@ -312,9 +312,9 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
-	void listTaskExecutionsByName() throws Exception {
+	void listTaskThinExecutionsByName() throws Exception {
 		this.mockMvc.perform(
-						get("/tasks/executions")
+						get("/tasks/thinexecutions")
 								.queryParam("name", "taskB")
 								.queryParam("page", "0")
 								.queryParam("size", "10")
@@ -328,10 +328,32 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 								parameterWithName("name")
 										.description("The name associated with the task execution")),
 						responseFields(
-								subsectionWithPath("_embedded.taskExecutionResourceList")
-										.description("Contains a collection of Task Executions/"),
+							subsectionWithPath("_embedded.taskExecutionThinResourceList")
+								.description("Contains a collection of thin Task Executions/"),
 								subsectionWithPath("_links.self").description("Link to the task execution resource"),
 								subsectionWithPath("page").description("Pagination properties"))));
+	}
+	@Test
+	void listTaskExecutionsByName() throws Exception {
+		this.mockMvc.perform(
+				get("/tasks/executions")
+					.queryParam("name", "taskB")
+					.queryParam("page", "0")
+					.queryParam("size", "10")
+			)
+			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+				queryParameters(
+					parameterWithName("page")
+						.description("The zero-based page number (optional)"),
+					parameterWithName("size")
+						.description("The requested page size (optional)"),
+					parameterWithName("name")
+						.description("The name associated with the task execution")),
+				responseFields(
+					subsectionWithPath("_embedded.taskExecutionResourceList")
+						.description("Contains a collection of Task Executions/"),
+					subsectionWithPath("_links.self").description("Link to the task execution resource"),
+					subsectionWithPath("page").description("Pagination properties"))));
 	}
 
 	@Test

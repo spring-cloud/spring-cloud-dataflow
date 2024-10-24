@@ -28,7 +28,9 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -110,35 +112,69 @@ abstract class AbstractLargeTaskExecutionDatabaseBase {
 
 	@Test
 	void queryWithLargeNumberOfTaskExecutions() throws Exception {
+		mockMvc.perform(post("/apps/task/nope/1.0").param("uri", "maven:io.spring:timestamp-task:3.0.0"))
+			.andExpect(status().is2xxSuccessful());
+		mockMvc.perform(post("/tasks/definitions").param("name", "nope").param("definition", "nope"))
+			.andExpect(status().is2xxSuccessful());
+		mockMvc.perform(post("/tasks/definitions").param("name", "ts-batch").param("definition", "nope"))
+			.andExpect(status().is2xxSuccessful());
 		long startTime = System.currentTimeMillis();
 		mockMvc
-			.perform(get("/tasks/executions").accept(MediaType.APPLICATION_JSON).param("size", "20").param("page", "1"))
+			.perform(get("/tasks/executions").param("size", "20").param("page", "1").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(greaterThanOrEqualTo(20))));
 		long totalTime = System.currentTimeMillis() - startTime;
 		long startTime2 = System.currentTimeMillis();
 		mockMvc
 			.perform(
-					get("/tasks/executions").accept(MediaType.APPLICATION_JSON).param("size", "200").param("page", "2"))
+					get("/tasks/executions").param("size", "200").param("page", "2").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.taskExecutionResourceList", hasSize(greaterThanOrEqualTo(200))));
 		long totalTime2 = System.currentTimeMillis() - startTime2;
 		long startTime3 = System.currentTimeMillis();
 		mockMvc.perform(
-				get("/tasks/thinexecutions").accept(MediaType.APPLICATION_JSON).param("size", "20").param("page", "3"))
+				get("/tasks/thinexecutions").param("size", "20").param("page", "3").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(greaterThanOrEqualTo(20))));
 		long totalTime3 = System.currentTimeMillis() - startTime3;
 		long startTime4 = System.currentTimeMillis();
 		mockMvc.perform(
-				get("/tasks/thinexecutions").accept(MediaType.APPLICATION_JSON).param("size", "200").param("page", "2"))
+				get("/tasks/thinexecutions").param("size", "200").param("page", "2").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(greaterThanOrEqualTo(200))));
 		long totalTime4 = System.currentTimeMillis() - startTime4;
+		long startTime5 = System.currentTimeMillis();
+		mockMvc.perform(
+				get("/tasks/executions").param("name", "nope").param("page", "0").param("size", "200").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.page.totalElements", is(0)));
+		long totalTime5 = System.currentTimeMillis() - startTime5;
+		long startTime6 = System.currentTimeMillis();
+		mockMvc.perform(
+				get("/tasks/thinexecutions").param("name", "nope").param("page", "0").param("size", "200").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.page.totalElements", is(0)));
+		long totalTime6 = System.currentTimeMillis() - startTime6;
+		long startTime7 = System.currentTimeMillis();
+		mockMvc.perform(
+				get("/tasks/executions").param("name", "ts-batch").param("page", "0").param("size", "200").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.page.totalElements", is(83)));
+		long totalTime7 = System.currentTimeMillis() - startTime7;
+		long startTime8 = System.currentTimeMillis();
+		mockMvc.perform(
+				get("/tasks/thinexecutions").param("name", "ts-batch").param("page", "0").param("size", "200").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.page.totalElements", is(83)));
+		long totalTime8 = System.currentTimeMillis() - startTime8;
 		logger.info("result:totalTime={}ms", totalTime);
 		logger.info("result:totalTime2={}ms", totalTime2);
 		logger.info("result:totalTime3={}ms", totalTime3);
 		logger.info("result:totalTime4={}ms", totalTime4);
+		logger.info("result:totalTime5={}ms", totalTime5);
+		logger.info("result:totalTime6={}ms", totalTime6);
+		logger.info("result:totalTime7={}ms", totalTime7);
+		logger.info("result:totalTime8={}ms", totalTime8);
 		double ratioExecution = (double) totalTime / (double) totalTime2;
 		double ratioThinExecution = (double) totalTime3 / (double) totalTime4;
 		double ratioThinToExecution = (double) totalTime2 / (double) totalTime4;

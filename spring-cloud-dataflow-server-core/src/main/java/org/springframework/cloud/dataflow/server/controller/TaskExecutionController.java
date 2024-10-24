@@ -185,9 +185,11 @@ public class TaskExecutionController {
 			Pageable pageable,
 			PagedResourcesAssembler<TaskJobExecutionRel> assembler
 	) {
+		long tasks = this.taskDefinitionRepository.countByTaskName(taskName);
+		if(tasks == 0) {
+			throw new NoSuchTaskDefinitionException(taskName);
+		}
 		validatePageable(pageable);
-		this.taskDefinitionRepository.findById(taskName)
-				.orElseThrow(() -> new NoSuchTaskDefinitionException(taskName));
 		Page<TaskExecution> taskExecutions = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		Page<TaskJobExecutionRel> result = getPageableRelationships(taskExecutions, pageable);
 		return assembler.toModel(result, this.taskAssembler);
