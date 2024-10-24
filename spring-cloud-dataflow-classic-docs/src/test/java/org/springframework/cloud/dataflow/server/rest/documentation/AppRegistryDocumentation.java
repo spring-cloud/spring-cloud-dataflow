@@ -78,8 +78,8 @@ class AppRegistryDocumentation extends BaseDocumentation {
 				.andDo(
 						this.documentationHandler.document(
 								pathParameters(
-										parameterWithName("type")
-												.description("The type of application to register. One of " + Arrays.asList(ApplicationType.values()) + " (optional)"),
+										parameterWithName("type").optional()
+												.description("The type of application to register. One of " + Arrays.asList(ApplicationType.values())),
 										parameterWithName("name").description("The name of the application to register"),
 										parameterWithName("version").description("The version of the application to register")
 								),
@@ -101,8 +101,9 @@ class AppRegistryDocumentation extends BaseDocumentation {
 	void bulkRegisteringApps() throws Exception {
 		this.mockMvc.perform(
 						post("/apps")
-					.param("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
-								.param("force", "false"))
+							.queryParam("apps", "source.http=maven://org.springframework.cloud.stream.app:http-source-rabbit:4.0.0")
+							.queryParam("force", "false")
+				)
 				.andExpect(status().isCreated())
 				.andDo(
 						this.documentationHandler.document(
@@ -132,13 +133,14 @@ class AppRegistryDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("search").description("The search string performed on the name (optional)"),
+								parameterWithName("search").optional()
+										.description("The search string performed on the name"),
 								parameterWithName("type")
 										.description("Restrict the returned apps to the type of the app. One of " + Arrays.asList(ApplicationType.values())),
-								parameterWithName("defaultVersion").description("The boolean flag to set to retrieve only the apps of the default versions (optional)"),
-								parameterWithName("page").description("The zero-based page number (optional)"),
-								parameterWithName("sort").description("The sort on the list (optional)"),
-								parameterWithName("size").description("The requested page size (optional)")
+								parameterWithName("defaultVersion").optional().description("The boolean flag to set to retrieve only the apps of the default versions"),
+								parameterWithName("page").optional().description("The zero-based page number"),
+								parameterWithName("sort").optional().description("The sort on the list"),
+								parameterWithName("size").optional().description("The requested page size")
 						),
 						responseFields(
 								subsectionWithPath("_embedded.appRegistrationResourceList")
@@ -192,7 +194,7 @@ class AppRegistryDocumentation extends BaseDocumentation {
 	void registeringAnApplication() throws Exception {
 		this.mockMvc.perform(
 						post("/apps/{type}/{name}", ApplicationType.source, "http")
-					.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0")
+							.queryParam("uri", "maven://org.springframework.cloud.stream.app:http-source-rabbit:5.0.0")
 				)
 				.andExpect(status().isCreated())
 				.andDo(
@@ -224,7 +226,7 @@ class AppRegistryDocumentation extends BaseDocumentation {
 								pathParameters(
 										parameterWithName("type").description("The type of application to unregister. One of " + Arrays.asList(ApplicationType.values())),
 										parameterWithName("name").description("The name of the application to unregister"),
-										parameterWithName("version").description("The version of the application to unregister (optional)")
+										parameterWithName("version").optional().description("The version of the application to unregister")
 								)
 						)
 				);

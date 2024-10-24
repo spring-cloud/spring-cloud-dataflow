@@ -309,7 +309,7 @@ include::{snippets}/app-registry-documentation/get-applications-filtered/http-re
 [[api-guide-resources-app-registry-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/app-registry-documentation/get-applications-filtered/request-parameters.adoc[]
+include::{snippets}/app-registry-documentation/get-applications-filtered/query-parameters.adoc[]
 
 
 
@@ -350,7 +350,7 @@ include::{snippets}/app-registry-documentation/get-single-application/http-reque
 [[api-guide-resources-app-registry-get-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/app-registry-documentation/get-single-application/request-parameters.adoc[]
+include::{snippets}/app-registry-documentation/get-single-application/query-parameters.adoc[]
 
 
 
@@ -399,7 +399,7 @@ include::{snippets}/app-registry-documentation/registering-an-application/http-r
 [[api-guide-resources-app-registry-post-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/app-registry-documentation/registering-an-application/request-parameters.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application/query-parameters.adoc[]
 
 
 
@@ -445,7 +445,7 @@ include::{snippets}/app-registry-documentation/registering-an-application-versio
 [[api-guide-resources-app-registry-post-versioned-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/app-registry-documentation/registering-an-application-version/request-parameters.adoc[]
+include::{snippets}/app-registry-documentation/registering-an-application-version/query-parameters.adoc[]
 
 
 
@@ -493,7 +493,7 @@ include::{snippets}/app-registry-documentation/bulk-registering-apps/http-reques
 [[api-guide-resources-app-registry-bulk-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/app-registry-documentation/bulk-registering-apps/request-parameters.adoc[]
+include::{snippets}/app-registry-documentation/bulk-registering-apps/query-parameters.adoc[]
 
 
 
@@ -717,7 +717,7 @@ include::{snippets}/audit-records-documentation/list-all-audit-records/http-requ
 [[api-guide-resources-audit-records-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/audit-records-documentation/list-all-audit-records/request-parameters.adoc[]
+include::{snippets}/audit-records-documentation/list-all-audit-records/query-parameters.adoc[]
 
 [[api-guide-resources-audit-records-list-example-request]]
 ===== Example Request
@@ -864,7 +864,7 @@ include::{snippets}/stream-definitions-documentation/create-definition/http-requ
 [[api-guide-resources-stream-definitions-create-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/stream-definitions-documentation/create-definition/request-parameters.adoc[]
+include::{snippets}/stream-definitions-documentation/create-definition/query-parameters.adoc[]
 
 
 
@@ -904,7 +904,7 @@ include::{snippets}/stream-definitions-documentation/list-all-stream-definitions
 [[api-guide-resources-stream-definitions-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/request-parameters.adoc[]
+include::{snippets}/stream-definitions-documentation/list-all-stream-definitions/query-parameters.adoc[]
 
 
 [[api-guide-resources-stream-definitions-list-example-request]]
@@ -944,7 +944,7 @@ include::{snippets}/stream-definitions-documentation/list-related-stream-definit
 [[api-guide-resources-stream-definitions-list-related-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/request-parameters.adoc[]
+include::{snippets}/stream-definitions-documentation/list-related-stream-definitions/query-parameters.adoc[]
 
 
 
@@ -1501,7 +1501,7 @@ include::{snippets}/task-definitions-documentation/create-definition/http-reques
 [[api-guide-resources-stream-task-definitions-creating-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-definitions-documentation/create-definition/request-parameters.adoc[]
+include::{snippets}/task-definitions-documentation/create-definition/query-parameters.adoc[]
 
 
 
@@ -1542,7 +1542,7 @@ include::{snippets}/task-definitions-documentation/list-all-task-definitions/htt
 [[api-guide-resources-stream-task-definitions-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-definitions-documentation/list-all-task-definitions/request-parameters.adoc[]
+include::{snippets}/task-definitions-documentation/list-all-task-definitions/query-parameters.adoc[]
 
 
 
@@ -1679,7 +1679,7 @@ include::{snippets}/task-scheduler-documentation/create-schedule/http-request.ad
 [[api-guide-resources-stream-task-schedule-creating-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-scheduler-documentation/create-schedule/request-parameters.adoc[]
+include::{snippets}/task-scheduler-documentation/create-schedule/query-parameters.adoc[]
 
 
 
@@ -1720,7 +1720,7 @@ include::{snippets}/task-scheduler-documentation/list-all-schedules/http-request
 [[api-guide-resources-stream-task-schedule-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-scheduler-documentation/list-all-schedules/request-parameters.adoc[]
+include::{snippets}/task-scheduler-documentation/list-all-schedules/query-parameters.adoc[]
 
 
 
@@ -1760,7 +1760,7 @@ include::{snippets}/task-scheduler-documentation/list-filtered-schedules/path-pa
 [[api-guide-resources-stream-task-schedule-list-filtered-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-scheduler-documentation/list-filtered-schedules/request-parameters.adoc[]
+include::{snippets}/task-scheduler-documentation/list-filtered-schedules/query-parameters.adoc[]
 
 
 
@@ -1890,7 +1890,7 @@ include::{snippets}/task-executions-documentation/launch-task/http-request.adoc[
 [[api-guide-resources-task-executions-launching-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-executions-documentation/launch-task/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/launch-task/query-parameters.adoc[]
 
 
 
@@ -1928,7 +1928,7 @@ include::{snippets}/task-executions-documentation/launch-task-boot3/http-request
 [[api-guide-resources-task-executions-launching-boot3-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-executions-documentation/launch-task-boot3/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/launch-task-boot3/query-parameters.adoc[]
 
 
 
@@ -1973,7 +1973,7 @@ include::{snippets}/task-executions-documentation/stop-task/path-parameters.adoc
 [[api-guide-resources-task-executions-stopping-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-executions-documentation/stop-task/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/stop-task/query-parameters.adoc[]
 
 [[api-guide-resources-task-executions-stopping-example-request]]
 ===== Example Request
@@ -2009,7 +2009,7 @@ include::{snippets}/task-executions-documentation/list-task-executions/http-requ
 [[api-guide-resources-task-executions-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-executions-documentation/list-task-executions/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/list-task-executions/query-parameters.adoc[]
 
 
 
@@ -2050,7 +2050,7 @@ include::{snippets}/task-executions-documentation/list-task-executions-by-name/h
 [[api-guide-resources-task-executions-list-by-name-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-executions-documentation/list-task-executions-by-name/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/list-task-executions-by-name/query-parameters.adoc[]
 
 
 
@@ -2079,6 +2079,85 @@ The following topics provide more details:
 * <<api-guide-resources-task-thin-executions-list-response-structure>>
 
 
+[[api-guide-resources-task-thin-executions-list]]
+==== List All Task Thin Executions
+
+The task executions endpoint lets you list all task executions with only top-level data.
+The following topics provide more details:
+
+* <<api-guide-resources-task-thin-executions-list-request-structure>>
+* <<api-guide-resources-task-thin-executions-list-request-parameters>>
+* <<api-guide-resources-task-thin-executions-list-example-request>>
+* <<api-guide-resources-task-thin-executions-list-response-structure>>
+
+
+
+[[api-guide-resources-task-thin-executions-list-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/query-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/curl-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/http-response.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name]]
+==== List All Task Thin Executions With a Specified Task Name
+
+The task thin executions endpoint lets you list task executions with a specified task name.
+The following topics provide more details:
+
+* <<api-guide-resources-task-thin-executions-list-by-name-request-structure>>
+* <<api-guide-resources-task-thin-executions-list-by-name-request-parameters>>
+* <<api-guide-resources-task-thin-executions-list-by-name-example-request>>
+* <<api-guide-resources-task-thin-executions-list-by-name-response-structure>>
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/query-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/curl-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/http-response.adoc[]
 
 [[api-guide-resources-task-thin-executions-list-request-structure]]
 ===== Request Structure
@@ -2273,7 +2352,7 @@ values:
 - CLEANUP
 - REMOVE_DATA
 
-include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/query-parameters.adoc[]
 
 [[api-guide-resources-task-executions-delete-example-request]]
 ===== Example Request
@@ -2298,7 +2377,7 @@ include::{snippets}/task-executions-documentation/task-execution-remove-and-task
 
 include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/path-parameters.adoc[]
 
-include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/request-parameters.adoc[]
+include::{snippets}/task-executions-documentation/task-execution-remove-and-task-data-remove/query-parameters.adoc[]
 
 IMPORTANT: When deleting data from the persistence store by using the `REMOVE_DATA` action parameter, you must provide
 task execution IDs that represent parent task executions. When you provide child task executions (executed as part of a composed task),
@@ -2384,7 +2463,7 @@ include::{snippets}/job-executions-documentation/list-job-executions/http-reques
 [[api-guide-resources-job-executions-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-job-executions/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-job-executions/query-parameters.adoc[]
 
 
 
@@ -2423,7 +2502,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions/http-r
 [[api-guide-resources-job-executions-thin-job-execution-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-thin-job-executions/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions/query-parameters.adoc[]
 
 
 
@@ -2462,7 +2541,7 @@ include::{snippets}/job-executions-documentation/list-job-executions-by-name/htt
 [[api-guide-resources-job-executions-list-by-name-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-job-executions-by-name/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-job-executions-by-name/query-parameters.adoc[]
 
 
 
@@ -2501,7 +2580,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-nam
 [[api-guide-resources-job-executions-thin-list-by-name-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-thin-job-executions-by-name/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-name/query-parameters.adoc[]
 
 
 
@@ -2540,7 +2619,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-dat
 [[api-guide-resources-job-executions-thin-list-by-date-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-date/query-parameters.adoc[]
 
 
 
@@ -2579,7 +2658,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job
 [[api-guide-resources-job-executions-thin-list-by-job-instance-id-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job-instance-id/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-job-instance-id/query-parameters.adoc[]
 
 
 
@@ -2618,7 +2697,7 @@ include::{snippets}/job-executions-documentation/list-thin-job-executions-by-tas
 [[api-guide-resources-job-executions-thin-list-by-task-execution-id-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-executions-documentation/list-thin-job-executions-by-task-execution-id/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/list-thin-job-executions-by-task-execution-id/query-parameters.adoc[]
 
 
 
@@ -2702,7 +2781,7 @@ include::{snippets}/job-executions-documentation/job-stop/path-parameters.adoc[]
 [[api-guide-resources-job-executions-stop-request-parameters]]
 ===== Request parameters
 
-include::{snippets}/job-executions-documentation/job-stop/request-parameters.adoc[]
+include::{snippets}/job-executions-documentation/job-stop/query-parameters.adoc[]
 
 
 
@@ -2797,7 +2876,7 @@ include::{snippets}/job-instances-documentation/list-job-instances/http-request.
 [[api-guide-resources-job-instances-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-instances-documentation/list-job-instances/request-parameters.adoc[]
+include::{snippets}/job-instances-documentation/list-job-instances/query-parameters.adoc[]
 
 
 
@@ -2893,7 +2972,7 @@ include::{snippets}/job-step-executions-documentation/list-step-executions-for-j
 [[api-guide-resources-job-step-executions-list-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/request-parameters.adoc[]
+include::{snippets}/job-step-executions-documentation/list-step-executions-for-job/query-parameters.adoc[]
 
 
 
@@ -3207,7 +3286,7 @@ include::{snippets}/task-logs-documentation/get-logs-by-task-id/http-request.ado
 [[api-guide-resources-task-logs-by-task-id-request-parameters]]
 ===== Request Parameters
 
-include::{snippets}/task-logs-documentation/get-logs-by-task-id/request-parameters.adoc[]
+include::{snippets}/task-logs-documentation/get-logs-by-task-id/query-parameters.adoc[]
 
 [[api-guide-resources-task-logs-by-task-id-example-request]]
 ===== Example Request

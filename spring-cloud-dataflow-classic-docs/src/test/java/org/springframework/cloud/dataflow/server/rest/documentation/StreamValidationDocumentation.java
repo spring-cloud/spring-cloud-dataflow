@@ -40,8 +40,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class StreamValidationDocumentation extends BaseDocumentation {
 
-	private static boolean setUpIsDone = false;
-
 	@BeforeEach
 	void setup() throws Exception {
 		this.mockMvc.perform(
@@ -71,7 +69,7 @@ class StreamValidationDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
-					parameterWithName("name").description("The name of a stream definition to be validated (required)")
+					parameterWithName("name").description("The name of a stream definition to be validated")
 				),
 				responseFields(
 					fieldWithPath("appName").description("The name of a stream definition"),

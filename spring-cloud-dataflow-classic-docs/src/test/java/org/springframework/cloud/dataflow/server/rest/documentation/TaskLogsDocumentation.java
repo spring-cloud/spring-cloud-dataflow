@@ -68,7 +68,7 @@ class TaskLogsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("platformName").description("The name of the platform the task is launched."))
+								parameterWithName("platformName").optional().description("The name of the platform the task is launched."))
 				));
 	}
 

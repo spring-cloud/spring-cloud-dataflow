@@ -69,7 +69,7 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 				queryParameters(
 					parameterWithName("name").description("The name for the created task definition"),
 					parameterWithName("definition").description("The definition for the task, using Data Flow DSL"),
-					parameterWithName("description").description("The description of the task definition")
+					parameterWithName("description").optional().description("The description of the task definition")
 				),
 				responseFields(
 					fieldWithPath("name").description("The name of the created task definition"),
@@ -104,11 +104,11 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				queryParameters(
-					parameterWithName("page").description("The zero-based page number (optional)"),
-					parameterWithName("size").description("The requested page size (optional)"),
-					parameterWithName("search").description("The search string performed on the name (optional)"),
-					parameterWithName("sort").description("The sort on the list (optional)"),
-					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
+					parameterWithName("page").optional().description("The zero-based page number"),
+					parameterWithName("size").optional().description("The requested page size"),
+					parameterWithName("search").optional().description("The search string performed on the name"),
+					parameterWithName("sort").optional().description("The sort on the list"),
+					parameterWithName("manifest").optional().description("The flag to include the task manifest into the latest task execution")
 				),
 				responseFields(
 					subsectionWithPath("_embedded.taskDefinitionResourceList")
@@ -132,10 +132,10 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
-					parameterWithName("my-task").description("The name of an existing task definition (required)")
+					parameterWithName("my-task").description("The name of an existing task definition")
 				),
 				queryParameters(
-					parameterWithName("manifest").description("The flag to include the task manifest into the latest task execution (optional)")
+					parameterWithName("manifest").optional().description("The flag to include the task manifest into the latest task execution")
 				),
 				responseFields(
 					fieldWithPath("name").description("The name of the created task definition"),
@@ -166,9 +166,9 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
-					parameterWithName("my-task").description("The name of an existing task definition (required)")),
+					parameterWithName("my-task").description("The name of an existing task definition")),
 				queryParameters(
-						parameterWithName("cleanup").description("The flag to indicate if the associated task executions needed to be cleaned up")
+						parameterWithName("cleanup").optional().description("The flag to indicate if the associated task executions needed to be cleaned up")
 				)
 			));
 	}

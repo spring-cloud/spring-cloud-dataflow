@@ -63,7 +63,7 @@ class TaskValidationDocumentation extends BaseDocumentation {
             .andExpect(status().isOk())
             .andDo(this.documentationHandler.document(
                 pathParameters(
-                    parameterWithName("name").description("The name of a task definition to be validated (required)")
+                    parameterWithName("name").description("The name of a task definition to be validated")
                 ),
                 responseFields(
                     fieldWithPath("appName").description("The name of a task definition"),

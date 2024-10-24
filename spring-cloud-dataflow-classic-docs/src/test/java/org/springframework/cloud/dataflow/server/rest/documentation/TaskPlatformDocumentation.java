@@ -46,10 +46,10 @@ class TaskPlatformDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size")),
 						responseFields(
 								subsectionWithPath("_embedded.launcherResourceList")
 										.description("Contains a collection of Platform accounts for tasks"),

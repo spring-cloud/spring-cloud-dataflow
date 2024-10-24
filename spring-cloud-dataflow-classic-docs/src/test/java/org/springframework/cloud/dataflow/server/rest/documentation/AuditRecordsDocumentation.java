@@ -74,14 +74,14 @@ class AuditRecordsDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				queryParameters(
-					parameterWithName("page").description("The zero-based page number (optional)"),
-					parameterWithName("size").description("The requested page size (optional)"),
-					parameterWithName("operations").description("Comma-separated list of Audit Operations (optional)"),
-					parameterWithName("actions").description("Comma-separated list of Audit Actions (optional)"),
-					parameterWithName("fromDate")
-							.description("From date filter (ex.: 2019-02-03T00:00:30) (optional)"),
-					parameterWithName("toDate")
-							.description("To date filter (ex.: 2019-02-03T00:00:30) (optional)")
+					parameterWithName("page").optional().description("The zero-based page number"),
+					parameterWithName("size").optional().description("The requested page size"),
+					parameterWithName("operations").optional().description("Comma-separated list of Audit Operations"),
+					parameterWithName("actions").optional().description("Comma-separated list of Audit Actions"),
+					parameterWithName("fromDate").optional()
+							.description("From date filter (ex.: 2019-02-03T00:00:30)"),
+					parameterWithName("toDate").optional()
+							.description("To date filter (ex.: 2019-02-03T00:00:30)")
 				),
 				responseFields(
 					subsectionWithPath("_embedded.auditRecordResourceList")
@@ -97,11 +97,11 @@ class AuditRecordsDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
-					parameterWithName("id").description("The id of the audit record to query (required)")
+					parameterWithName("id").description("The id of the audit record to query")
 				),
 				responseFields(
 					fieldWithPath("auditRecordId").description("The id of the audit record"),
-					fieldWithPath("createdBy").description("The author of the audit record (optional)"),
+					fieldWithPath("createdBy").optional().description("The author of the audit record"),
 					fieldWithPath("correlationId").description("The correlation ID of the audit record"),
 					fieldWithPath("auditData").description("The data of the audit record"),
 					fieldWithPath("createdOn").description("The creation date of the audit record"),
