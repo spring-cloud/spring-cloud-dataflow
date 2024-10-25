@@ -98,7 +98,7 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 				.queryParam("page", "0")
 				.queryParam("size", "10")
 				.queryParam("sort", "taskName,ASC")
-				.queryParam("search", "")
+				.queryParam("taskName", "")
 				.queryParam("manifest", "true")
 			)
 			.andExpect(status().isOk())
