@@ -33,8 +33,9 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -47,9 +48,11 @@ class RollbackDocumentation extends BaseDocumentation {
 		Release release = createTestRelease();
 		when(this.skipperStateMachineService.rollbackRelease(any(RollbackRequest.class))).thenReturn(release);
 		MvcResult result = this.mockMvc.perform(
-				post("/api/release/rollback/{releaseName}/{releaseVersion}",
-						release.getName(), release.getVersion())).andExpect(status().isCreated())
+				post("/api/release/rollback/{releaseName}/{releaseVersion}", release.getName(), release.getVersion())
+				).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("releaseName").description("The name of the release to rollback"),
+								parameterWithName("releaseVersion").description("The release version to rollback")),
 						responseFields(
 								subsectionWithPath("_links").ignored(),
 								fieldWithPath("name").description("Name of the release"),

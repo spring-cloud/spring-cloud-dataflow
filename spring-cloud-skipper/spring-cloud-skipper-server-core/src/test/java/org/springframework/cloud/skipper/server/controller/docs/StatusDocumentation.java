@@ -27,8 +27,9 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -41,8 +42,11 @@ class StatusDocumentation extends BaseDocumentation {
 		Release release = createTestRelease();
 		when(this.releaseService.status(release.getName())).thenReturn(release.getInfo());
 		this.mockMvc.perform(
-				get("/api/release/status/{releaseName}", release.getName())).andExpect(status().isOk())
+					get("/api/release/status/{releaseName}", release.getName())
+				)
+				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("releaseName").description("The name of the release")),
 						responseFields(
 								subsectionWithPath("_links").ignored(),
 								fieldWithPath("status.statusCode").description(
@@ -62,10 +66,14 @@ class StatusDocumentation extends BaseDocumentation {
 		Release release = createTestRelease();
 		when(this.releaseService.status(release.getName(), release.getVersion())).thenReturn(release.getInfo());
 		this.mockMvc.perform(
-				get("/api/release/status/{releaseName}/{releaseVersion}",
-						release.getName(), release.getVersion()))
+					get("/api/release/status/{releaseName}/{releaseVersion}", release.getName(), release.getVersion())
+				)
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(
+							parameterWithName("releaseName").description("The name of the release"),
+							parameterWithName("releaseVersion").description("The version of the release")
+						),
 						responseFields(
 								subsectionWithPath("_links").ignored(),
 								fieldWithPath("status.statusCode").description(

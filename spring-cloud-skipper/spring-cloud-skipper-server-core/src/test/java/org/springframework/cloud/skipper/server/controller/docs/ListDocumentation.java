@@ -30,8 +30,9 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -115,6 +116,7 @@ class ListDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/release/list/{releaseName}", release.getName())).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("releaseName").description("Name of the releases to list")),
 						responseFields(
 								subsectionWithPath("_embedded.releases[]._links").ignored(),
 								fieldWithPath("_embedded.releases[].name").description("Name of the release"),

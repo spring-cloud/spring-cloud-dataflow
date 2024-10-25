@@ -153,7 +153,7 @@ class PackageMetadataDocumentation extends BaseDocumentation {
 		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
 		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
-				get("/api/packageMetadata/search/findByName?name=log"))
+				get("/api/packageMetadata/search/findByName").queryParam("name", "log"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(parameterWithName("name").description("The name of the Package")),
@@ -197,7 +197,7 @@ class PackageMetadataDocumentation extends BaseDocumentation {
 		packageMetadata.setRepositoryId(this.repositoryRepository.findByName("local").getId());
 		PackageMetadata saved = this.packageMetadataRepository.save(pkg.getMetadata());
 		this.mockMvc.perform(
-				get("/api/packageMetadata/search/findByNameContainingIgnoreCase?name=LO"))
+				get("/api/packageMetadata/search/findByNameContainingIgnoreCase").queryParam("name","LO"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(parameterWithName("name").description("The name of the Package")),

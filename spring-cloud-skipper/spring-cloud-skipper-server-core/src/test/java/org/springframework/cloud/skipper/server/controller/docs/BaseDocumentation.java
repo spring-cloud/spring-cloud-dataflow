@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,6 +67,8 @@ import org.springframework.restdocs.payload.ResponseFieldsSnippet;
 import org.springframework.restdocs.request.QueryParametersSnippet;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -110,6 +113,7 @@ public abstract class BaseDocumentation {
 	@Autowired
 	public WebApplicationContext context;
 
+	protected RestDocs documentation;
 
 	@Autowired
 	protected RepositoryRepository repositoryRepository;
@@ -186,13 +190,13 @@ public abstract class BaseDocumentation {
 		this.documentationHandler = document("{class-name}/{method-name}",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()));
-
+		this.documentation = new ToggleableResultHandler(documentationHandler);
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context)
 				.apply(this.restDocumentationConfigurer.uris()
 						.withScheme("http")
 						.withHost("localhost")
 						.withPort(7577))
-				.alwaysDo(this.documentationHandler)
+				.alwaysDo((ToggleableResultHandler) this.documentation)
 				.build();
 	}
 
@@ -268,6 +272,39 @@ public abstract class BaseDocumentation {
 		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		String json = mapper.writeValueAsString(object);
 		return json;
+	}
+	@FunctionalInterface
+	public interface RestDocs {
+		void dontDocument(Callable action) throws Exception;
+	}
+	private static class ToggleableResultHandler implements ResultHandler, RestDocs {
+		private final ResultHandler delegate;
+
+		private boolean off = false;
+
+		private ToggleableResultHandler(ResultHandler delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public void handle(MvcResult result) throws Exception {
+			if (!off) {
+				delegate.handle(result);
+			}
+		}
+
+		/**
+		 * Perform the given action while turning off the delegate handler.
+		 */
+		@Override
+		public void dontDocument(Callable action) throws Exception {
+			off = true;
+			try {
+				action.call();
+			} finally {
+				off = false;
+			}
+		}
 	}
 
 }
