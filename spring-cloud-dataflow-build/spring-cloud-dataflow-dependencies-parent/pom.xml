@@ -37,7 +37,12 @@
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<!-- NOTE: this needs to be updated and kept in sync w/ the project.version -->
+		<!-- =========================================================================
+		Keep dataflow version in sync with project.version in the following locations:
+			- spring-cloud-dataflow-build property
+			- spring-cloud-dataflow-parent property
+			- spring-cloud-dataflow-dependencies-parent property (here)
+		========================================================================== -->
 		<dataflow.version>3.0.0-SNAPSHOT</dataflow.version>
 	</properties>
 	<profiles>
