@@ -34,7 +34,6 @@ import org.springframework.batch.core.launch.NoSuchJobExecutionException;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.core.step.NoSuchStepException;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -52,53 +51,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 public interface JobService {
 
 	/**
-	 * Launch a job with the parameters provided. If an instance with the parameters provided
-	 * has already failed (and is not abandoned) it will be restarted.
-	 * 
-	 * @param jobName the job name
-	 * @param params the {@link JobParameters}
-	 * @return the resulting {@link JobExecution} if successful
-	 * 
-	 * @throws NoSuchJobException thrown if job specified does not exist
-	 * @throws JobExecutionAlreadyRunningException thrown if job is already executing
-	 * @throws JobRestartException thrown if job failed to restart
-	 * @throws JobInstanceAlreadyCompleteException thrown if job was already complete
-	 * @throws JobParametersInvalidException thrown if job parameters are invalid
-	 */
-	@Deprecated
-	JobExecution launch(String jobName, JobParameters params) throws NoSuchJobException,
-			JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-			JobParametersInvalidException;
-
-	/**
-	 * Get the last {@link JobParameters} used to execute a job successfully.
-	 * 
-	 * @param jobName the name of the job
-	 * @return the last parameters used to execute this job or empty if there are none
-	 * 
-	 * @throws NoSuchJobException thrown if job specified does not exist
-	 */
-	@Deprecated
-	JobParameters getLastJobParameters(String jobName) throws NoSuchJobException;
-
-	/**
-	 * Launch a job with the parameters provided.
-	 * 
-	 * @param jobExecutionId the job execution to restart
-	 * @return the resulting {@link JobExecution} if successful
-	 * 
-	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
-	 * @throws NoSuchJobException thrown if job specified does not exist
-	 * @throws JobExecutionAlreadyRunningException thrown if job is already executing
-	 * @throws JobRestartException thrown if job failed to restart
-	 * @throws JobInstanceAlreadyCompleteException thrown if job was already complete
-	 * @throws JobParametersInvalidException thrown if job parameters are invalid
-	 */
-	@Deprecated
-	JobExecution restart(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException,
-			JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException;
-
-	/**
 	 * Launch a job with the parameters provided. JSR-352 supports restarting of jobs with a
 	 * new set of parameters. This method exposes this functionality
 	 *
@@ -113,7 +65,6 @@ public interface JobService {
 	 * @throws JobInstanceAlreadyCompleteException thrown if job was already complete
 	 * @throws JobParametersInvalidException thrown if job parameters are invalid
 	 */
-	@Deprecated
 	JobExecution restart(Long jobExecutionId, JobParameters params)
 			throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException,
 			JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException, JobParametersInvalidException;
@@ -132,40 +83,6 @@ public interface JobService {
 	 *     running
 	 */
 	JobExecution stop(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionNotRunningException;
-
-	/**
-	 * Mark the {@link JobExecution} as ABANDONED. If a stop signal is ignored because the
-	 * process died this is the best way to mark a job as finished with (as opposed to
-	 * STOPPED). An abandoned job execution can be restarted, but a stopping one cannot.
-	 * 
-	 * @param jobExecutionId the job execution id to abort
-	 * @return the {@link JobExecution} that was aborted
-	 * @throws NoSuchJobExecutionException thrown if job execution specified does not exist
-	 * @throws JobExecutionAlreadyRunningException thrown if the job is running (it should be
-	 *     stopped first)
-	 */
-	@Deprecated
-	JobExecution abandon(Long jobExecutionId) throws NoSuchJobExecutionException, JobExecutionAlreadyRunningException;
-
-	/**
-	 * Query the job names in the system, either launchable or not. If not launchable, then
-	 * there must be a history of the job having been launched previously in the
-	 * {@link JobRepository}.
-	 * 
-	 * @param start the start index of the job names to return
-	 * @param count the maximum number of job names to return
-	 * @return a collection of job names
-	 */
-	@Deprecated
-	Collection<String> listJobs(int start, int count);
-
-	/**
-	 * Count the total number of jobs that can be returned by {@link #listJobs(int, int)}.
-	 * 
-	 * @return the total number of jobs
-	 */
-	@Deprecated
-	int countJobs();
 
 	/**
 	 * Get a {@link JobInstance job instance} by id.
@@ -187,19 +104,7 @@ public interface JobService {
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
 
-	@Deprecated
 	Collection<JobInstance> listJobInstances(String jobName, int start, int count) throws NoSuchJobException;
-
-	/**
-	 * Count the number of {@link JobInstance job instances} in the repository for a given job
-	 * name.
-	 * 
-	 * @param jobName the name of the job
-	 * @return the number of job instances available
-	 * @throws NoSuchJobException thrown if job specified does not exist
-	 */
-	@Deprecated
-	int countJobInstances(String jobName) throws NoSuchJobException;
 
 	/**
 	 * List the {@link JobExecutionWithStepCount job executions} for a job in descending order
@@ -211,7 +116,6 @@ public interface JobService {
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
-	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(String jobName, int start, int count)
 			throws NoSuchJobException;
 
@@ -223,7 +127,6 @@ public interface JobService {
 	 * @return the number of executions
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
-	@Deprecated
 	int countJobExecutionsForJob(String jobName, BatchStatus status) throws NoSuchJobException;
 
 	/**
@@ -236,7 +139,6 @@ public interface JobService {
 	 * @return all the job executions
 	 * @throws NoSuchJobException thrown if job specified does not exist
 	 */
-	@Deprecated
 	Collection<JobExecution> getJobExecutionsForJobInstance(String jobName, Long jobInstanceId)
 			throws NoSuchJobException;
 
@@ -248,7 +150,6 @@ public interface JobService {
 	 * @param count the maximum number of executions
 	 * @return a collection of {@link JobExecution}
 	 */
-	@Deprecated
 	Collection<JobExecution> listJobExecutions(int start, int count);
 
 	/**
@@ -259,7 +160,6 @@ public interface JobService {
 	 * @param count the maximum number of executions
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
-	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsWithStepCount(int start, int count);
 
 	/**
@@ -268,7 +168,6 @@ public interface JobService {
 	 * 
 	 * @return the number of job executions in the job repository
 	 */
-	@Deprecated
 	int countJobExecutions();
 
 	/**
@@ -318,15 +217,6 @@ public interface JobService {
 	int countStepExecutionsForStep(String jobName, String stepName) throws NoSuchStepException;
 
 	/**
-	 * Count the step executions in the repository for a given job execution.
-	 * @param jobExecutionId the id of the job execution.
-	 *
-	 * @return the number of executions.
-	 */
-	@Deprecated
-	int countStepExecutionsForJobExecution(long jobExecutionId);
-
-	/**
 	 * Locate a {@link StepExecution} from its id and that of its parent {@link JobExecution}.
 	 * 
 	 * @param jobExecutionId the job execution id
@@ -340,25 +230,6 @@ public interface JobService {
 	StepExecution getStepExecution(Long jobExecutionId, Long stepExecutionId) throws NoSuchStepExecutionException,
 			NoSuchJobExecutionException;
 	StepExecution getStepExecution(JobExecution jobExecution, Long stepExecutionId) throws NoSuchStepExecutionException;
-
-	/**
-	 * Send a stop signal to all running job executions.
-	 * 
-	 * @return the number of executions affected
-	 */
-	@Deprecated
-	int stopAll();
-
-	/**
-	 * Get the names of the steps in a job (or a historical list of recent execution names if
-	 * the Job is not launchable).
-	 * 
-	 * @param jobName the name of the job
-	 * @return {@link Collection} of step names.
-	 * @throws NoSuchJobException thrown if the job name cannot be located
-	 */
-	@Deprecated
-	Collection<String> getStepNamesForJob(String jobName) throws NoSuchJobException;
 
 	/**
 	 * List the {@link JobExecution job executions} for a job in descending order of creation
@@ -384,7 +255,6 @@ public interface JobService {
 	 * @param count    the maximum number of executions to return
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
-	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCount(Date fromDate,
 			Date toDate, int start, int count);
 
@@ -397,7 +267,6 @@ public interface JobService {
 	 * @param count    the maximum number of executions to return
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
-	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByJobInstanceId(int jobInstanceId, int start, int count);
 
 	/**
@@ -409,13 +278,12 @@ public interface JobService {
 	 * @param count    the maximum number of executions to return
 	 * @return a collection of {@link JobExecutionWithStepCount}
 	 */
-	@Deprecated
 	Collection<JobExecutionWithStepCount> listJobExecutionsForJobWithStepCountFilteredByTaskExecutionId(int taskExecutionId, int start, int count);
 
 	/**
 	 * Returns a collection job execution ids given a collection of task execution ids that is mapped by id.
-	 * @param taskExecutionId
-	 * @return
+	 * @param taskExecutionId Collection of  task execution ids that requestor to search for associated Job Ids.
+	 * @return Map with the task execution id as the key and the set of job execution ids as values.
 	 */
 	Map<Long, Set<Long>> getJobExecutionIdsByTaskExecutionIds(Collection<Long> taskExecutionId);
 }

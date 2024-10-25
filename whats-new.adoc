@@ -24,6 +24,17 @@ Deprecated methods, properties, and features that have been removed in this rele
 * `AboutController(StreamDeployer streamDeployer, LauncherRepository launcherRepository, FeaturesProperties featuresProperties,
 VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean, DataflowMetricsProperties monitoringProperties)` constructor was removed.
 * `search` query parameter for filtering  `/tasks/definitions` by task name has been removed.  Use the `taskName` query parameter.
+* The following deprecated methods for `JobService` have been removed:
+** launch
+** getLastJobParameters
+** restart
+** abandon
+** listJobs(int start, int count)
+** countJobs
+** countJobInstances
+** countStepExecutionsForJobExecution
+** stopAll
+** getStepNamesForJob
 
 === Breaking Changes
 Announce deprecated changes here
