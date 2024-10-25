@@ -111,7 +111,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/executions")
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -132,7 +131,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/thinexecutions")
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -154,7 +152,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("page", "0")
 								.queryParam("size", "10")
 								.queryParam("jobInstanceId", "1"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -178,7 +175,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("page", "0")
 								.queryParam("size", "10")
 								.queryParam("taskExecutionId", "1"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -203,7 +199,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("size", "10")
 								.queryParam("fromDate", "2000-09-24T17:00:45,000")
 								.queryParam("toDate", "2050-09-24T18:00:45,000"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -229,7 +224,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("name", JOB_NAME)
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -253,7 +247,6 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("name", JOB_NAME)
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()

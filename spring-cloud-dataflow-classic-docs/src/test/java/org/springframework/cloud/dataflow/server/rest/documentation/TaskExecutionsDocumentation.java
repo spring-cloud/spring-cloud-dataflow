@@ -236,7 +236,6 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("page", "0")
 								.queryParam("size", "10")
 								.queryParam("sort", "END_TIME,desc"))
-			.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
@@ -285,7 +284,6 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 					.queryParam("size", "10")
 					.queryParam("sort", "END_TIME,desc")
 				)
-			.andDo(print())
 			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 				queryParameters(
 					parameterWithName("page").optional()

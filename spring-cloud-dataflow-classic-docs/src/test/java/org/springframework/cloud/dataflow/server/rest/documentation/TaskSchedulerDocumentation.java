@@ -94,7 +94,6 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 				get("/tasks/schedules/instances/{task-definition-name}", "FOO")
 						.queryParam("page", "0")
 						.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("task-definition-name")
@@ -117,13 +116,12 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 				get("/tasks/schedules")
 						.queryParam("page", "0")
 						.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("page").optional()
 										.description("The zero-based page number"),
-								parameterWithName("size")
+								parameterWithName("size").optional()
 										.description("The requested page size")),
 						responseFields(
 								subsectionWithPath("_embedded.scheduleInfoResourceList")

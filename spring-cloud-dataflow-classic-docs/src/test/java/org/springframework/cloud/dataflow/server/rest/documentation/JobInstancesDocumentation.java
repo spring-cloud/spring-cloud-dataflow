@@ -98,7 +98,6 @@ class JobInstancesDocumentation extends BaseDocumentation {
 	void jobDisplayDetail() throws Exception {
 		this.mockMvc.perform(
 				get("/jobs/instances/{id}", "1"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 					pathParameters(

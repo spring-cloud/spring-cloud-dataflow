@@ -128,7 +128,6 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			get("/tasks/definitions/{my-task}","my-task")
 			.queryParam("manifest", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(
@@ -162,7 +161,6 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 			delete("/tasks/definitions/{my-task}", "my-task")
 			.queryParam("cleanup", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(

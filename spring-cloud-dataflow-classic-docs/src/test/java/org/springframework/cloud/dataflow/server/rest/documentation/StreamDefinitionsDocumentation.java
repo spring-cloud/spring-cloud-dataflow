@@ -105,7 +105,6 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
 				.queryParam("sort", "name,ASC")
 				.queryParam("search", "")
 				.queryParam("size", "10"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				queryParameters(
@@ -188,7 +187,6 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
                     .queryParam("search", "")
                     .queryParam("size", "10")
 					.queryParam("nested", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
                 queryParameters(
