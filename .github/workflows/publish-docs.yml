@@ -84,7 +84,7 @@ jobs:
           echo "::notice ::install"
           ./mvnw -gs .github/settings.xml -am -pl :spring-cloud-skipper-server-core install -DskipTests -T 1C  -B --no-transfer-progress
           jfrog rt mvn -gs .github/settings.xml \
-            -Pstagingrelease,full,deploymentfiles,docs \
+            -Pstagingrelease,deploymentfiles,docs \
             -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-docs \
             -B install -DskipTests --no-transfer-progress
           echo "::notice ::build-publish"
