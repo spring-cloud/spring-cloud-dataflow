@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2023 the original author or authors.
+ * Copyright 2015-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,7 +65,9 @@ import org.springframework.web.filter.ForwardedHeaderFilter;
 		WebConfiguration.class,
 		H2ServerConfiguration.class,
 		DataflowTaskExplorerConfiguration.class,
-		DataFlowTaskConfiguration.class
+		DataFlowTaskConfiguration.class,
+   	    SecurityConfiguration.class
+
 })
 @EnableConfigurationProperties({ BatchProperties.class, CommonApplicationProperties.class })
 public class DataFlowServerConfiguration {
