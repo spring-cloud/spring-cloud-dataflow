@@ -92,11 +92,11 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(pathParameters(
 						parameterWithName("streamName")
-								.description("the name of an existing stream definition (required)"),
-						parameterWithName("appName")
+								.description("the name of an existing stream definition"),
+						parameterWithName("appName").optional()
 								.description("in stream application name to scale"),
 						parameterWithName("count")
-								.description("number of instances for the selected stream application (required)"))
+								.description("number of instances for the selected stream application"))
 				));
 	}
 
@@ -107,7 +107,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
-								.description("The name of an existing stream definition (required)"))
+								.description("The name of an existing stream definition"))
 				));
 	}
 
@@ -130,8 +130,8 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
-								.description("The name of an existing stream definition (required)")),
-						queryParameters(parameterWithName("reuse-deployment-properties")
+								.description("The name of an existing stream definition")),
+						queryParameters(parameterWithName("reuse-deployment-properties").optional()
 								.description(parameterWithName("The name of the flag to reuse the deployment properties")))
 				));
 	}
@@ -146,7 +146,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog")
-								.description("The name of an existing stream definition (required)"))
+								.description("The name of an existing stream definition"))
 				));
 	}
 
@@ -160,7 +160,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog1")
-								.description("The name of an existing stream definition (required)"))
+								.description("The name of an existing stream definition"))
 				));
 		UpdateStreamRequest updateStreamRequest = new UpdateStreamRequest();
 		updateStreamRequest.setReleaseName("timelog1");
@@ -181,7 +181,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("timelog1")
-								.description("The name of an existing stream definition (required)"))
+								.description("The name of an existing stream definition"))
 				));
 	}
 
@@ -195,7 +195,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
-										.description("The name of an existing stream definition (required)"),
+										.description("The name of an existing stream definition"),
 								parameterWithName("version").description("The version to rollback to"))));
 	}
 
@@ -210,7 +210,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
-								.description("The name of an existing stream definition (required)"))));
+								.description("The name of an existing stream definition"))));
 	}
 
 	@Test
@@ -221,7 +221,7 @@ public class StreamDeploymentsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("name")
-										.description("The name of an existing stream definition (required)"),
+										.description("The name of an existing stream definition"),
 								parameterWithName("version").description("The version of the stream"))));
 	}
 

@@ -111,13 +111,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/executions")
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size")),
 						responseFields(
 								subsectionWithPath("_embedded.jobExecutionResourceList")
 										.description("Contains a collection of Job Executions/"),
@@ -132,13 +131,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/thinexecutions")
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size")),
 						responseFields(
 								subsectionWithPath("_embedded.jobExecutionThinResourceList")
 										.description("Contains a collection of Job Executions without step executions included/"),
@@ -154,13 +152,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("page", "0")
 								.queryParam("size", "10")
 								.queryParam("jobInstanceId", "1"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)"),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
 								parameterWithName("jobInstanceId")
 										.description("Filter result by the job instance id")),
 						responseFields(
@@ -178,13 +175,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("page", "0")
 								.queryParam("size", "10")
 								.queryParam("taskExecutionId", "1"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)"),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
 								parameterWithName("taskExecutionId")
 										.description("Filter result by the task execution id")),
 						responseFields(
@@ -203,13 +199,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("size", "10")
 								.queryParam("fromDate", "2000-09-24T17:00:45,000")
 								.queryParam("toDate", "2050-09-24T18:00:45,000"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)"),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
 								parameterWithName("fromDate")
 										.description("Filter result from a starting date in the format 'yyyy-MM-dd'T'HH:mm:ss,SSS'"),
 								parameterWithName("toDate")
@@ -229,13 +224,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("name", JOB_NAME)
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)"),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
 								parameterWithName("name")
 										.description("The name associated with the job execution")),
 						responseFields(
@@ -253,13 +247,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("name", JOB_NAME)
 								.queryParam("page", "0")
 								.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)"),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
 								parameterWithName("name")
 										.description("The name associated with the job execution")),
 						responseFields(
@@ -278,7 +271,7 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("id").description("The id of an existing job execution (required)")
+								parameterWithName("id").description("The id of an existing job execution")
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The execution ID of the job execution"),
@@ -313,9 +306,9 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("id")
-								.description("The id of an existing job execution (required)"))
+								.description("The id of an existing job execution"))
 						, queryParameters(
-								parameterWithName("stop")
+								parameterWithName("stop").optional()
 										.description("Sends signal to stop the job if set to true"))));
 	}
 
@@ -328,12 +321,12 @@ class JobExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 								pathParameters(parameterWithName("id")
-										.description("The id of an existing job execution (required)"))
+										.description("The id of an existing job execution"))
 								, queryParameters(
 										parameterWithName("useJsonJobParameters").description("If true dataflow will " +
 											"serialize job parameters as JSON.  Default is null, and the default " +
 											"configuration will be used to determine serialization method.").optional(),
-										parameterWithName("restart")
+										parameterWithName("restart").optional()
 												.description("Sends signal to restart the job if set to true")
 								)
 						)

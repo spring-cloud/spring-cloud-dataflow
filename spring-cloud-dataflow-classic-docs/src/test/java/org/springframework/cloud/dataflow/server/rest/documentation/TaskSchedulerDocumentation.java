@@ -70,12 +70,12 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 				.andDo(this.documentationHandler.document(
 						queryParameters(
 								parameterWithName("scheduleName").description("The name for the created schedule"),
-								parameterWithName("platform").description("The name of the platform the task is launched"),
+								parameterWithName("platform").optional().description("The name of the platform the task is launched"),
 								parameterWithName("taskDefinitionName")
 										.description("The name of the task definition to be scheduled"),
 								parameterWithName("properties")
 										.description("the properties that are required to schedule and launch the task"),
-								parameterWithName("arguments").description("the command line arguments to be used for launching the task"))));
+								parameterWithName("arguments").optional().description("the command line arguments to be used for launching the task"))));
 	}
 
 	@Test
@@ -85,7 +85,7 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("scheduleName")
-								.description("The name of an existing schedule (required)"))));
+								.description("The name of an existing schedule"))));
 	}
 
 	@Test
@@ -94,16 +94,15 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 				get("/tasks/schedules/instances/{task-definition-name}", "FOO")
 						.queryParam("page", "0")
 						.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(parameterWithName("task-definition-name")
-								.description("Filter schedules based on the specified task definition (required)")),
+								.description("Filter schedules based on the specified task definition")),
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size")),
 						responseFields(
 								subsectionWithPath("_embedded.scheduleInfoResourceList")
 										.description("Contains a collection of Schedules/"),
@@ -117,14 +116,13 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 				get("/tasks/schedules")
 						.queryParam("page", "0")
 						.queryParam("size", "10"))
-				.andDo(print())
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size")),
 						responseFields(
 								subsectionWithPath("_embedded.scheduleInfoResourceList")
 										.description("Contains a collection of Schedules/"),

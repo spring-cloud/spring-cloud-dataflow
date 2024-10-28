@@ -90,12 +90,12 @@ class JobStepExecutionsDocumentation extends BaseDocumentation {
 								.param("size", "10"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size")),
 						pathParameters(parameterWithName("id")
-								.description("The id of an existing job execution (required)")),
+								.description("The id of an existing job execution")),
 						responseFields(
 								subsectionWithPath("_embedded.stepExecutionResourceList")
 										.description("Contains a collection of Step Executions/"),
@@ -109,9 +109,9 @@ class JobStepExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/executions/{id}/steps/{stepid}", "1", "1"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("id").description("The id of an existing job execution (required)"),
+								parameterWithName("id").description("The id of an existing job execution"),
 								parameterWithName("stepid")
-										.description("The id of an existing step execution for a specific job execution (required)")
+										.description("The id of an existing step execution for a specific job execution")
 						),
 						responseFields(
 								fieldWithPath("jobExecutionId").description("The ID of the job step execution"),
@@ -129,9 +129,9 @@ class JobStepExecutionsDocumentation extends BaseDocumentation {
 						get("/jobs/executions/{id}/steps/{stepid}/progress", "1", "1"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("id").description("The id of an existing job execution (required)"),
+								parameterWithName("id").description("The id of an existing job execution"),
 								parameterWithName("stepid")
-										.description("The id of an existing step execution for a specific job execution (required)")
+										.description("The id of an existing step execution for a specific job execution")
 						),
 						responseFields(
 								subsectionWithPath("stepExecution").description("The detailed step details of the job step execution"),

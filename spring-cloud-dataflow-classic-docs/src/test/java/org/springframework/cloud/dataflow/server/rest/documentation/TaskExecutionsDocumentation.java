@@ -85,10 +85,10 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andDo(this.documentationHandler.document(
 								queryParameters(
 										parameterWithName("name").description("The name of the task definition to launch"),
-										parameterWithName("properties")
-												.description("Application and Deployer properties to use while launching. (optional)"),
-										parameterWithName("arguments")
-												.description("Command line arguments to pass to the task. (optional)")),
+										parameterWithName("properties").optional()
+												.description("Application and Deployer properties to use while launching."),
+										parameterWithName("arguments").optional()
+												.description("Command line arguments to pass to the task.")),
 								responseFields(
 										fieldWithPath("executionId").description("The id of the task execution"),
 										subsectionWithPath("_links.self").description("Link to the task execution resource"),
@@ -110,10 +110,10 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andDo(this.documentationHandler.document(
 								queryParameters(
 										parameterWithName("name").description("The name of the task definition to launch"),
-										parameterWithName("properties")
-												.description("Application and Deployer properties to use while launching. (optional)"),
-										parameterWithName("arguments")
-												.description("Command line arguments to pass to the task. (optional)")
+										parameterWithName("properties").optional()
+												.description("Application and Deployer properties to use while launching."),
+										parameterWithName("arguments").optional()
+												.description("Command line arguments to pass to the task.")
 								)
 						)
 				);
@@ -143,7 +143,7 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("id").description("The id of an existing task execution (required)")
+								parameterWithName("id").description("The id of an existing task execution")
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The id of the task execution"),
@@ -192,10 +192,10 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("externalExecutionId").description("The external ExecutionId of an existing task execution (required)")
+								parameterWithName("externalExecutionId").description("The external ExecutionId of an existing task execution")
 						),
 						queryParameters(
-								parameterWithName("platform").description("The name of the platform.")
+								parameterWithName("platform").optional().description("The name of the platform.")
 						),
 						responseFields(
 								fieldWithPath("executionId").description("The id of the task execution"),
@@ -233,15 +233,17 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 
 		this.mockMvc.perform(
 						get("/tasks/executions")
-								.queryParam("page", "1")
-								.queryParam("size", "2"))
-			.andDo(print())
+								.queryParam("page", "0")
+								.queryParam("size", "10")
+								.queryParam("sort", "END_TIME,desc"))
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)")
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
+								parameterWithName("sort").optional()
+										.description("The sort criteria. column name and optional sort direction. Example: END_TIME,desc")
 						),
 						responseFields(
 								subsectionWithPath("_embedded.taskExecutionResourceList")
@@ -278,15 +280,18 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 
 		this.mockMvc.perform(
 				get("/tasks/thinexecutions")
-					.queryParam("page", "1")
-					.queryParam("size", "2"))
-			.andDo(print())
+					.queryParam("page", "0")
+					.queryParam("size", "10")
+					.queryParam("sort", "END_TIME,desc")
+				)
 			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 				queryParameters(
-					parameterWithName("page")
-						.description("The zero-based page number (optional)"),
-					parameterWithName("size")
-						.description("The requested page size (optional)")
+					parameterWithName("page").optional()
+						.description("The zero-based page number"),
+					parameterWithName("size").optional()
+						.description("The requested page size"),
+					parameterWithName("sort").optional()
+						.description("The sort criteria. column name and optional sort direction (optional). Example: END_TIME,desc")
 				),
 				responseFields(
 					subsectionWithPath("_embedded.taskExecutionThinResourceList")
@@ -318,15 +323,19 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 								.queryParam("name", "taskB")
 								.queryParam("page", "0")
 								.queryParam("size", "10")
+								.queryParam("sort", "END_TIME,desc")
 				)
 				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("page")
-										.description("The zero-based page number (optional)"),
-								parameterWithName("size")
-										.description("The requested page size (optional)"),
+								parameterWithName("page").optional()
+										.description("The zero-based page number"),
+								parameterWithName("size").optional()
+										.description("The requested page size"),
 								parameterWithName("name")
-										.description("The name associated with the task execution")),
+										.description("The name associated with the task execution"),
+								parameterWithName("sort").optional()
+										.description("The sort criteria. column name and optional sort direction (optional). Example: END_TIME,desc")
+						),
 						responseFields(
 							subsectionWithPath("_embedded.taskExecutionThinResourceList")
 								.description("Contains a collection of thin Task Executions/"),
@@ -340,15 +349,18 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 					.queryParam("name", "taskB")
 					.queryParam("page", "0")
 					.queryParam("size", "10")
+					.queryParam("sort", "END_TIME,desc")
 			)
 			.andExpect(status().isOk()).andDo(this.documentationHandler.document(
 				queryParameters(
-					parameterWithName("page")
-						.description("The zero-based page number (optional)"),
-					parameterWithName("size")
-						.description("The requested page size (optional)"),
+					parameterWithName("page").optional()
+						.description("The zero-based page number"),
+					parameterWithName("size").optional()
+						.description("The requested page size"),
 					parameterWithName("name")
-						.description("The name associated with the task execution")),
+						.description("The name associated with the task execution"),
+					parameterWithName("sort").optional()
+						.description("The sort criteria. column name and optional sort direction (optional). Example: END_TIME,desc")),
 				responseFields(
 					subsectionWithPath("_embedded.taskExecutionResourceList")
 						.description("Contains a collection of Task Executions/"),
@@ -371,7 +383,7 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 								pathParameters(
-										parameterWithName("id").description("The ids of an existing task execution (required)")
+										parameterWithName("id").description("The ids of an existing task execution")
 								)
 						)
 				);
@@ -391,9 +403,9 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 						delete("/tasks/executions/{ids}?action=CLEANUP", "1"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
-						queryParameters(parameterWithName("action").description("Optional. Defaults to: CLEANUP.")),
+						queryParameters(parameterWithName("action").optional().description("Defaults to: CLEANUP.")),
 						pathParameters(parameterWithName("ids")
-								.description("The id of an existing task execution (required). Multiple comma separated values are accepted."))
+								.description("The id of an existing task execution. Multiple comma separated values are accepted."))
 				));
 	}
 
@@ -404,7 +416,7 @@ class TaskExecutionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						queryParameters(
-								parameterWithName("action").description("Using both actions CLEANUP and REMOVE_DATA simultaneously.")
+								parameterWithName("action").optional().description("Using both actions CLEANUP and REMOVE_DATA simultaneously.")
 						),
 						pathParameters(parameterWithName("ids")
 								.description("Providing 2 comma separated task execution id values.")

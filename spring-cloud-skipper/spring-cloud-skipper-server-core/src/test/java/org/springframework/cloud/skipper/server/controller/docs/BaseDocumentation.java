@@ -159,8 +159,8 @@ public abstract class BaseDocumentation {
 	 * Snippet for common pagination-related request parameters.
 	 */
 	protected final QueryParametersSnippet paginationRequestParameterProperties = queryParameters(
-			parameterWithName("page").description("The zero-based page number (optional)"),
-			parameterWithName("size").description("The requested page size (optional)"));
+			parameterWithName("page").optional().description("The zero-based page number"),
+			parameterWithName("size").optional().description("The requested page size"));
 	protected RestDocumentationResultHandler documentationHandler;
 
 	/**
