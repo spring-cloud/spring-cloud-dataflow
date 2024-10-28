@@ -593,8 +593,8 @@ public class TestDependencies implements WebMvcConfigurer {
 	}
 
 	@Bean
-	public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer dataflowTaskExplorer) {
-		return new TaskExecutionThinController(dataflowTaskExplorer);
+	public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer dataflowTaskExplorer, TaskDefinitionRepository taskDefinitionRepository) {
+		return new TaskExecutionThinController(dataflowTaskExplorer, taskDefinitionRepository);
 	}
 	@Bean
 	public TasksInfoController taskExecutionsInfoController(TaskExecutionService taskExecutionService) {

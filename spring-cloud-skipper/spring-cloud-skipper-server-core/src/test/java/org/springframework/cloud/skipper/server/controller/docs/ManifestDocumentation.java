@@ -26,8 +26,9 @@ import org.springframework.http.MediaType;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseBody;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -47,6 +48,7 @@ class ManifestDocumentation extends BaseDocumentation {
 						.contentType(contentType))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("releaseName").description("The name of the release")),
 						responseBody()));
 	}
 
@@ -61,6 +63,10 @@ class ManifestDocumentation extends BaseDocumentation {
 						release.getName(), release.getVersion()))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(
+							parameterWithName("releaseName").description("The name of the release"),
+							parameterWithName("releaseVersion").description("The version of the release")
+						),
 						responseBody()));
 	}
 }

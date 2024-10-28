@@ -28,7 +28,6 @@
 		<spring-cloud-deployer.version>3.0.0-SNAPSHOT</spring-cloud-deployer.version>
 
 		<zeroturnaround.version>1.17</zeroturnaround.version>
-		<spring-restdocs.version>3.0.1</spring-restdocs.version>
 		<java-semver.version>0.10.2</java-semver.version>
 
 		<equalverifier.version>3.15.8</equalverifier.version>
@@ -39,7 +38,6 @@
 
 		<jmockit.version>1.24</jmockit.version>
 
-		<commons-compress.version>1.26.1</commons-compress.version>
 		<asciidoctor.maven.plugin.version>2.2.4</asciidoctor.maven.plugin.version>
 		<asciidoctorj.pdf.version>2.3.7</asciidoctorj.pdf.version>
 		<asciidoctorj.version>2.5.7</asciidoctorj.version>
@@ -183,16 +181,6 @@
 				<version>${java-semver.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework.restdocs</groupId>
-				<artifactId>spring-restdocs-mockmvc</artifactId>
-				<version>${spring-restdocs.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.restdocs</groupId>
-				<artifactId>spring-restdocs-core</artifactId>
-				<version>${spring-restdocs.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>nl.jqno.equalsverifier</groupId>
 				<artifactId>equalsverifier</artifactId>
 				<version>${equalverifier.version}</version>
@@ -201,11 +189,6 @@
 				<groupId>org.jmockit</groupId>
 				<artifactId>jmockit</artifactId>
 				<version>${jmockit.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-compress</artifactId>
-				<version>${commons-compress.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

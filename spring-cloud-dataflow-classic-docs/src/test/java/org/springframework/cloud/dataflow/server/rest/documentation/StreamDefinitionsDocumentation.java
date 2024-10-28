@@ -17,7 +17,6 @@
 package org.springframework.cloud.dataflow.server.rest.documentation;
 
 import java.util.Arrays;
-import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.MethodName;
@@ -76,7 +75,7 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
 					parameterWithName("name").description("The name for the created task definitions"),
 					parameterWithName("definition").description("The definition for the stream, using Data Flow DSL"),
 					parameterWithName("description").description("The description of the stream definition"),
-					parameterWithName("deploy")
+					parameterWithName("deploy").optional()
 						.description("If true, the stream is deployed upon creation (default is false)")),
 				responseFields(
 						fieldWithPath("name").description("The name of the created stream definition"),
@@ -106,14 +105,13 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
 				.queryParam("sort", "name,ASC")
 				.queryParam("search", "")
 				.queryParam("size", "10"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				queryParameters(
-					parameterWithName("page").description("The zero-based page number (optional)"),
-					parameterWithName("search").description("The search string performed on the name (optional)"),
-					parameterWithName("sort").description("The sort on the list (optional)"),
-					parameterWithName("size").description("The requested page size (optional)")),
+					parameterWithName("page").optional().description("The zero-based page number"),
+					parameterWithName("search").optional().description("The search string performed on the name"),
+					parameterWithName("sort").optional().description("The sort on the list"),
+					parameterWithName("size").optional().description("The requested page size")),
 				responseFields(
 					subsectionWithPath("_embedded.streamDefinitionResourceList")
 						.description("Contains a collection of Stream Definitions"),
@@ -135,7 +133,7 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("name").description("The name of the stream definition to query (required)")
+								parameterWithName("name").description("The name of the stream definition to query")
 						),
 						responseFields(
 								fieldWithPath("name").description("The name of the stream definition"),
@@ -157,7 +155,7 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
 						pathParameters(
-								parameterWithName("name").description("The name of the stream definition to query (required)")
+								parameterWithName("name").description("The name of the stream definition to query")
 						),
 						responseFields(
 								fieldWithPath("[]").description("An array of applications"),
@@ -189,18 +187,17 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
                     .queryParam("search", "")
                     .queryParam("size", "10")
 					.queryParam("nested", "true"))
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
                 queryParameters(
-                    parameterWithName("nested")
-                        .description("Should we recursively findByTaskNameContains for related stream definitions (optional)"),
-                    parameterWithName("page").description("The zero-based page number (optional)"),
-                    parameterWithName("search").description("The search string performed on the name (optional)"),
-                    parameterWithName("sort").description("The sort on the list (optional)"),
-                    parameterWithName("size").description("The requested page size (optional)")),
+                    parameterWithName("nested").optional()
+                        .description("Should we recursively findByTaskNameContains for related stream definitions"),
+                    parameterWithName("page").optional().description("The zero-based page number"),
+                    parameterWithName("search").optional().description("The search string performed on the name"),
+                    parameterWithName("sort").optional().description("The sort on the list"),
+                    parameterWithName("size").optional().description("The requested page size")),
                 pathParameters(parameterWithName("name")
-                    .description("The name of an existing stream definition (required)")),
+                    .description("The name of an existing stream definition")),
                 responseFields(
                     subsectionWithPath("_embedded.streamDefinitionResourceList")
                         .description("Contains a collection of Stream Definitions"),
@@ -223,7 +220,7 @@ class StreamDefinitionsDocumentation extends BaseDocumentation {
 			.andExpect(status().isOk())
 			.andDo(this.documentationHandler.document(
 				pathParameters(parameterWithName("name")
-					.description("The name of an existing stream definition (required)"))
+					.description("The name of an existing stream definition"))
 			));
 	}
 

@@ -286,8 +286,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer taskExplorer) {
-			return new TaskExecutionThinController(taskExplorer);
+		public TaskExecutionThinController taskExecutionThinController(DataflowTaskExplorer taskExplorer, TaskDefinitionRepository taskDefinitionRepository) {
+			return new TaskExecutionThinController(taskExplorer, taskDefinitionRepository);
 		}
 
 		@Bean

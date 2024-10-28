@@ -28,8 +28,9 @@ import org.springframework.http.MediaType;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseBody;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
@@ -48,6 +49,7 @@ class LogsDocumentation extends BaseDocumentation {
 						.contentType(contentType))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("releaseName").description("The name of the release to show logs")),
 						responseBody()));
 	}
 
@@ -61,6 +63,10 @@ class LogsDocumentation extends BaseDocumentation {
 						release.getName(), "myapp"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(
+							parameterWithName("releaseName").description("The name of the release to show logs"),
+							parameterWithName("appName").description("The name of the app to show logs")
+						),
 						responseBody()));
 	}
 }

@@ -26,8 +26,9 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -43,6 +44,7 @@ class HistoryDocumentation extends BaseDocumentation {
 		this.mockMvc.perform(
 				get("/api/releases/search/findByNameIgnoreCaseContainingOrderByNameAscVersionDesc?name={name}", "test")).andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						queryParameters(parameterWithName("name").description("Name of release")),
 						responseFields(
 								subsectionWithPath("_links").ignored(),
 								subsectionWithPath("_embedded.releases[]._links").ignored(),
