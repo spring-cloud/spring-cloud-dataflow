@@ -148,15 +148,37 @@ public class ContainerImageRestTemplateFactory {
 		return initRestTemplate(client, withHttpProxy, extra);
 	}
 
-	private static void removeAuthorization(HttpHeaders headers) {
-		for(Map.Entry<String,String> entry: headers.entries()) {
-			if(entry.getKey().equalsIgnoreCase(org.springframework.http.HttpHeaders.AUTHORIZATION)) {
-				headers.remove(entry.getKey());
-				break;
-			}
-		}
-	}
-
+	/**
+	 * Amazon, Azure and Custom Container Registry services require special treatment for the Authorization headers when the
+	 * HTTP request are forwarded to 3rd party services.
+	 *
+	 * Amazon:
+	 *   The Amazon S3 API supports two Authentication Methods (https://amzn.to/2Dg9sga):
+	 *   (1) HTTP Authorization header and (2) Query string parameters (often referred to as a pre-signed URL).
+	 *
+	 *   But only one auth mechanism is allowed at a time. If the http request contains both an Authorization header and
+	 *   an pre-signed URL parameters then an error is thrown.
+	 *
+	 *   Container Registries often use AmazonS3 as a backend object store. If HTTP Authorization header
+	 *   is used to authenticate with the Container Registry and then this registry redirect the request to a S3 storage
+	 *   using pre-signed URL authentication, the redirection will fail.
+	 *
+	 *   Solution is to implement a HTTP redirect strategy that removes the original Authorization headers when the request is
+	 *   redirected toward an Amazon signed URL.
+	 *
+	 * Azure:
+	 *   Azure have same type of issues as S3 so header needs to be dropped as well.
+	 *   (https://docs.microsoft.com/en-us/azure/container-registry/container-registry-faq#authentication-information-is-not-given-in-the-correct-format-on-direct-rest-api-calls)
+	 *
+	 * Custom:
+	 *   Custom Container Registry may have same type of issues as S3 so header needs to be dropped as well.
+	 *
+	 * @author Adam J. Weigold
+	 * @author Janne Valkealahti
+	 * @author Christian Tzolov
+	 * @author Cheng Guan Poh
+	 * @author Corneil du Plessis
+	 */
 	private HttpClient httpClientBuilder(boolean skipSslVerification) {
 
         try {
@@ -173,8 +195,17 @@ public class ContainerImageRestTemplateFactory {
         } catch (SSLException e) {
             throw new RuntimeException(e);
         }
-
 	}
+
+	private static void removeAuthorization(HttpHeaders headers) {
+		for(Map.Entry<String,String> entry: headers.entries()) {
+			if(entry.getKey().equalsIgnoreCase(org.springframework.http.HttpHeaders.AUTHORIZATION)) {
+				headers.remove(entry.getKey());
+				break;
+			}
+		}
+	}
+
 	private RestTemplate initRestTemplate(HttpClient client, boolean withHttpProxy, Map<String, String> extra) {
 
 		// Set the HTTP proxy if configured.
