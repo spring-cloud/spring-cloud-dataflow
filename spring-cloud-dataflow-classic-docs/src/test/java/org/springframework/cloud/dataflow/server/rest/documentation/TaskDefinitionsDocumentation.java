@@ -106,7 +106,7 @@ class TaskDefinitionsDocumentation extends BaseDocumentation {
 				queryParameters(
 					parameterWithName("page").optional().description("The zero-based page number"),
 					parameterWithName("size").optional().description("The requested page size"),
-					parameterWithName("search").optional().description("The search string performed on the name"),
+					parameterWithName("taskName").optional().description("The task name to limit the results"),
 					parameterWithName("sort").optional().description("The sort on the list"),
 					parameterWithName("manifest").optional().description("The flag to include the task manifest into the latest task execution")
 				),
