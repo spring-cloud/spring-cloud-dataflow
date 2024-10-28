@@ -23,8 +23,9 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Corneil du Plessis
@@ -62,9 +63,10 @@ class RepositoriesDocumentation extends BaseDocumentation {
 	void getSingleRepository() throws Exception {
 
 		this.mockMvc.perform(
-				get("/api/repositories/search/findByName?name={name}", "local"))
+				get("/api/repositories/search/findByName").queryParam("name", "local"))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						queryParameters(parameterWithName("name").description("Name of the Repository")),
 						responseFields(
 								fieldWithPath("name").description("Name of the Repository"),
 								fieldWithPath("url").description("URL of the Repository"),

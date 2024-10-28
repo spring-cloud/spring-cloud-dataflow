@@ -32,8 +32,9 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -44,12 +45,16 @@ class DeleteDocumentation extends BaseDocumentation {
 	@Test
 	void deleteRelease() throws Exception {
 		Release release = createTestRelease("test", StatusCode.DELETED);
+
 		when(this.skipperStateMachineService.deleteRelease(any(String.class), any(DeleteProperties.class))).thenReturn(release);
 		this.mockMvc.perform(
 				delete("/api/release/{releaseName}/package", release.getName())
 						.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(
+								parameterWithName("releaseName").description("The name of the release to be deleted")
+						),
 						responseFields(
 								subsectionWithPath("links").ignored(),
 								fieldWithPath("name").description("Name of the release"),
@@ -117,6 +122,7 @@ class DeleteDocumentation extends BaseDocumentation {
 						.accept(MediaType.APPLICATION_JSON).contentType(contentType))
 				.andExpect(status().isOk())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("releaseName").description("Name of the release to be deleted")),
 						responseFields(
 								subsectionWithPath("links").ignored(),
 								fieldWithPath("name").description("Name of the release"),

@@ -158,6 +158,10 @@ A `GET` request returns a paginated list for all the Spring Cloud Skipper platfo
 
 include::{snippets}/deployers-documentation/get-all-deployers/http-request.adoc[]
 
+===== Request parameters
+
+include::{snippets}/deployers-documentation/get-all-deployers/query-parameters.adoc[]
+
 ===== Example request
 
 include::{snippets}/deployers-documentation/get-all-deployers/curl-request.adoc[]
@@ -183,6 +187,10 @@ A `GET` request will return a paginated list for all Spring Cloud Skipper packag
 ===== Request structure
 
 include::{snippets}/package-metadata-documentation/get-all-package-metadata/http-request.adoc[]
+
+===== Path parameters
+
+include::{snippets}/package-metadata-documentation/get-all-package-metadata/query-parameters.adoc[]
 
 ===== Example request
 
@@ -227,6 +235,11 @@ A `GET` request returns the details of a package using the `id` of the package.
 
 include::{snippets}/package-metadata-documentation/get-package-metadata-details/http-request.adoc[]
 
+===== Path parameters
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-details/path-parameters.adoc[]
+
+
 ===== Example request
 
 include::{snippets}/package-metadata-documentation/get-package-metadata-details/curl-request.adoc[]
@@ -248,6 +261,10 @@ A `GET` request returns a list of all the Spring Cloud Skipper package metadata 
 getPackageMetadataSearchFindByName
 include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/http-request.adoc[]
 
+===== Request parameters
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/query-parameters.adoc[]
+
 ===== Example request
 
 include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name/curl-request.adoc[]
@@ -267,7 +284,11 @@ A `GET` request returns a list for all Spring Cloud Skipper package metadata by 
 
 ===== Request structure
 
-include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case//http-request.adoc[]
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/http-request.adoc[]
+
+===== Request parameters
+
+include::{snippets}/package-metadata-documentation/get-package-metadata-search-find-by-name-containing-ignore-case/query-parameters.adoc[]
 
 ===== Example request
 
@@ -337,6 +358,10 @@ The `install` link can install a package identified by its ID into the target pl
 ===== Request structure
 
 include::{snippets}/install-documentation/install-package-with-id/http-request.adoc[]
+
+===== Path parameters
+
+include::{snippets}/install-documentation/install-package-with-id/path-parameters.adoc[]
 
 ===== Example request
 
@@ -458,6 +483,10 @@ given release name.
 
 include::{snippets}/list-documentation/list-releases-by-release-name/http-request.adoc[]
 
+====== Path parameters
+
+include::{snippets}/list-documentation/list-releases-by-release-name/path-parameters.adoc[]
+
 ====== Example request
 
 include::{snippets}/list-documentation/list-releases-by-release-name/curl-request.adoc[]
@@ -481,6 +510,10 @@ The `status` REST endpoint provides the status for the last known release versio
 
 include::{snippets}/status-documentation/get-status-of-release/http-request.adoc[]
 
+====== Path parameters
+
+include::{snippets}/status-documentation/get-status-of-release/path-parameters.adoc[]
+
 ====== Example request
 
 include::{snippets}/status-documentation/get-status-of-release/curl-request.adoc[]
@@ -500,6 +533,10 @@ The `status` REST endpoint can provide the status for a specific release version
 ====== Request structure
 
 include::{snippets}/status-documentation/get-status-of-release-for-version/http-request.adoc[]
+
+====== Path parameters
+
+include::{snippets}/status-documentation/get-status-of-release-for-version/path-parameters.adoc[]
 
 ====== Example request
 
@@ -554,6 +591,10 @@ This part of the api is deprecated, please use
 
 include::{snippets}/rollback-documentation/rollback-release/http-request.adoc[]
 
+====== Path parameters
+
+include::{snippets}/rollback-documentation/rollback-release/path-parameters.adoc[]
+
 ====== Example request
 
 include::{snippets}/rollback-documentation/rollback-release/curl-request.adoc[]
@@ -598,6 +639,10 @@ The `manifest` REST endpoint returns the manifest for the last known release ver
 
 include::{snippets}/manifest-documentation/get-manifest-of-release/http-request.adoc[]
 
+====== Path parameters
+
+include::{snippets}/manifest-documentation/get-manifest-of-release/path-parameters.adoc[]
+
 ====== Example request
 
 include::{snippets}/manifest-documentation/get-manifest-of-release/curl-request.adoc[]
@@ -613,6 +658,10 @@ The `manifest` REST endpoint can return the manifest for a specific release vers
 ====== Request structure
 
 include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/http-request.adoc[]
+
+====== Path parameters
+
+include::{snippets}/manifest-documentation/get-manifest-of-release-for-version/path-parameters.adoc[]
 
 ====== Example request
 
@@ -635,6 +684,10 @@ The delete operation does not uninstall the uploaded packages corresponding to t
 
 include::{snippets}/delete-documentation/delete-release-default/http-request.adoc[]
 
+====== Path Parameters
+
+include::{snippets}/delete-documentation/delete-release-default/path-parameters.adoc[]
+
 ====== Example request
 
 include::{snippets}/delete-documentation/delete-release-default/curl-request.adoc[]
@@ -654,6 +707,10 @@ You can use a DELETE request to delete an existing release and uninstall the pac
 ====== Request structure
 
 include::{snippets}/delete-documentation/delete-release/http-request.adoc[]
+
+====== Path Parameters
+
+include::{snippets}/delete-documentation/delete-release-default/path-parameters.adoc[]
 
 ====== Example request
 

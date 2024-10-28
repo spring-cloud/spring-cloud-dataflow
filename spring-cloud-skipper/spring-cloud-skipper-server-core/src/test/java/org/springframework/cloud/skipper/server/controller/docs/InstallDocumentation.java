@@ -33,8 +33,9 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.payload.PayloadDocumentation.subsectionWithPath;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 /**
  * @author Gunnar Hillert
  * @author Ilayaperumal Gopinathan
@@ -143,6 +144,7 @@ class InstallDocumentation extends BaseDocumentation {
 				.contentType(contentType)
 				.content(convertObjectToJson(installProperties2))).andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(
+						pathParameters(parameterWithName("packageMetaDataId").description("Id of package to install")),
 						responseFields(
 								subsectionWithPath("links").ignored(),
 								fieldWithPath("name").description("Name of the release"),
