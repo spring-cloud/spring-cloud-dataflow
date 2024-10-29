@@ -30,6 +30,7 @@ services:
       - LC_ALL=en_US.utf8
       - JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
       # Set CLOSECONTEXTENABLED=true to ensure that the CRT launcher is closed.
+      - SPRING_CLOUD_KUBERNETES_ENABLED=false
       - SPRING_CLOUD_DATAFLOW_APPLICATIONPROPERTIES_TASK_SPRING_CLOUD_TASK_CLOSECONTEXTENABLED=true
       - SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI=${SKIPPER_URI:-http://skipper-server:7577}/api
       # (Optionally) authenticate the default Docker Hub access for the App Metadata access.
@@ -74,6 +75,7 @@ services:
       - LC_ALL=en_US.utf8
       - JDK_JAVA_OPTIONS=-Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8
       - SERVER_PORT=7577
+      - SPRING_CLOUD_KUBERNETES_ENABLED=false
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_LOW=20000
       - SPRING_CLOUD_SKIPPER_SERVER_PLATFORM_LOCAL_ACCOUNTS_DEFAULT_PORTRANGE_HIGH=20190
       - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_CLOUD_SKIPPER_SERVER_DEPLOYER=ERROR
