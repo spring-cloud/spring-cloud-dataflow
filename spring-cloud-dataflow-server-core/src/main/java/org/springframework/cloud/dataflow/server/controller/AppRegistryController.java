@@ -223,7 +223,7 @@ public class AppRegistryController {
 	 * @param type module type
 	 * @param name module name
 	 * @param version module version
-	 * @param bootVersion module boot version or {@code null} to use the default.  Deprecated: bootVersion is no longer needed when registering an app.
+	 * @param bootVersion module boot version or {@code null} to use the default.  Deprecated: bootVersion parameter is ignored.
 	 * @param uri URI for the module artifact (e.g. {@literal maven://group:artifact:version})
 	 * @param metadataUri URI for the metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
