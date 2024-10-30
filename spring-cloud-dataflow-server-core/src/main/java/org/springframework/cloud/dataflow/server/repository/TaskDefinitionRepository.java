@@ -36,9 +36,6 @@ public interface TaskDefinitionRepository extends KeyValueRepository<TaskDefinit
 
 	Page<TaskDefinition> findByDslTextContains(String dslText, Pageable pageable);
 
-	@Deprecated
-	Page<TaskDefinition> findByTaskNameContainsAndDslTextContains(String taskName, String dslText, Pageable pageable);
-
 	/**
 	 * Performs a findByName query and throws an exception if the name is not found.
 	 * @param name the name of the task definition

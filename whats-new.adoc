@@ -36,7 +36,7 @@ VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean
 ** stopAll
 ** getStepNamesForJob
 * The following deprecated `Converters` have been removed from SCDF: `AbstractDateTimeConverter`, `DateToStringConverter`, and `StringToDateConverter`.  Use the converters provided by Spring Batch.
-
+* `findByTaskNameContainsAndDslTextContains` deprecated method has been removed from `TaskDefinitionRepository`.
 
 === Breaking Changes
 Announce deprecated changes here
