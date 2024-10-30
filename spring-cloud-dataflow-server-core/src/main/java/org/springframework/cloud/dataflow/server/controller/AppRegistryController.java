@@ -170,7 +170,6 @@ public class AppRegistryController {
 		return getInfo(type, name, version, exhaustive);
 	}
 
-	@Deprecated
 	@GetMapping("/{type}/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public DetailedAppRegistrationResource info(
@@ -224,7 +223,7 @@ public class AppRegistryController {
 	 * @param type module type
 	 * @param name module name
 	 * @param version module version
-	 * @param bootVersion module boot version or {@code null} to use the default
+	 * @param bootVersion module boot version or {@code null} to use the default.  Deprecated: bootVersion is no longer needed when registering an app.
 	 * @param uri URI for the module artifact (e.g. {@literal maven://group:artifact:version})
 	 * @param metadataUri URI for the metadata artifact
 	 * @param force if {@code true}, overwrites a pre-existing registration
@@ -235,7 +234,7 @@ public class AppRegistryController {
 			@PathVariable ApplicationType type,
 			@PathVariable String name,
 			@PathVariable String version,
-			@RequestParam(required = false) String bootVersion,
+			@RequestParam(required = false) @Deprecated String bootVersion,
 			@RequestParam String uri,
 			@RequestParam(name = "metadata-uri", required = false) String metadataUri,
 			@RequestParam(defaultValue = "false") boolean force) {
@@ -260,7 +259,6 @@ public class AppRegistryController {
 		}
 	}
 
-	@Deprecated
 	@PostMapping("/{type}/{name}")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void register(
@@ -375,7 +373,6 @@ public class AppRegistryController {
 		return null;
 	}
 
-	@Deprecated
 	@DeleteMapping("/{type}/{name}")
 	@ResponseStatus(HttpStatus.OK)
 	public void unregister(@PathVariable ApplicationType type, @PathVariable String name) {
