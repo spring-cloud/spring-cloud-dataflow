@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StringUtils;
 
 import static org.awaitility.Awaitility.with;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Oauth
 @ActiveProfiles({TagNames.PROFILE_OAUTH})
@@ -58,23 +59,31 @@ class DataflowOAuthIT extends AbstractDataflowTests {
 				.await()
 				.ignoreExceptions()
 				.atMost(90, TimeUnit.SECONDS)
-				.until(() -> {
-					log.debug("Checking auth using curl");
+				.untilAsserted(() -> {
+					log.info("Checking auth using curl");
 					ExecResult cmdResult = execInToolsContainer("curl", "-v", "-u", "janne:janne", "http://dataflow:9393/about");
 					String response = cmdResult.getStdout();
 					if (StringUtils.hasText(response)) {
-						log.debug("Response is {}", response);
+						log.info("Response is {}", response);
 					}
-					boolean ok = response.contains("\"authenticated\":true") && response.contains("\"username\":\"janne\"");
-					log.info("Check for oauth {}", ok);
-					if (!ok) {
-						stderr.set(cmdResult.getStderr());
-					}
-					else {
-						stderr.set("");
-					}
-					return ok;
+					stderr.set(cmdResult.getStderr());
+					assertThat(response).contains("\"authenticated\":true");
+					assertThat(response).contains("\"username\":\"janne\"");
+					stderr.set("");
 				});
+				log.info("Checking without credentials using curl");
+				ExecResult cmdResult = execInToolsContainer("curl", "-v", "-f", "http://dataflow:9393/about");
+				String response = cmdResult.getStdout();
+				if (StringUtils.hasText(response)) {
+					log.info("Response is {}", response);
+				}
+				response = cmdResult.getStderr();
+				if(StringUtils.hasText(response)) {
+					log.warn("Error is {}", response);
+				}
+				stderr.set(cmdResult.getStderr());
+				assertThat(cmdResult.getExitCode()).isNotZero();
+				stderr.set("");
 		}
 		finally {
 			String msg = stderr.get();
