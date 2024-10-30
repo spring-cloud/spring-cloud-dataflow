@@ -38,11 +38,11 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameter;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.converter.StringToLocalDateTimeConverter;
 import org.springframework.batch.core.repository.dao.JdbcJobExecutionDao;
 import org.springframework.batch.item.database.Order;
 import org.springframework.cloud.dataflow.core.database.support.DatabaseType;
 import org.springframework.cloud.dataflow.server.batch.support.SqlPagingQueryProviderFactoryBean;
-import org.springframework.cloud.dataflow.server.converter.StringToDateConverter;
 import org.springframework.cloud.dataflow.server.repository.support.SchemaUtilities;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -148,7 +148,7 @@ public class JdbcSearchableJobExecutionDao extends JdbcJobExecutionDao implement
 
 	public JdbcSearchableJobExecutionDao() {
 		conversionService = new DefaultConversionService();
-		conversionService.addConverter(new StringToDateConverter());
+		conversionService.addConverter(new StringToLocalDateTimeConverter());
 	}
 
 	/**
