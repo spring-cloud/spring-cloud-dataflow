@@ -98,7 +98,7 @@ public class DockerComposeManager {
 			Builder<?> builder = DockerComposeRule.builder();
 			builder.files(DockerComposeFiles.from(locations.toArray(new String[0])));
 			for (String service : services) {
-				builder.waitingForService(service, toHaveAllPortsOpen());
+				builder.waitingForService(service, toHaveAllPortsOpen(), DockerComposeRule.DEFAULT_TIMEOUT);
 			}
 			builder.saveLogsTo("build/test-docker-logs/" + log + classKey + "-" + methodKey);
 			DockerComposeRule rule = builder.build();
@@ -132,7 +132,7 @@ public class DockerComposeManager {
 			Builder<?> builder = DockerComposeRule.builder();
 			builder.files(DockerComposeFiles.from(locations.toArray(new String[0])));
 			for (String service : services) {
-				builder.waitingForService(service, toHaveAllPortsOpen());
+				builder.waitingForService(service, toHaveAllPortsOpen(), DockerComposeRule.DEFAULT_TIMEOUT);
 			}
 			builder.saveLogsTo("build/test-docker-logs/" + log + classKey + "-" + methodKey);
 			DockerComposeRule rule = builder.build();
