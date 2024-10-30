@@ -290,16 +290,25 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
-							<threadCount>1</threadCount>
-							<forkCount>1</forkCount>
-							<failIfNoTests>true</failIfNoTests>
-							<skipTests>false</skipTests>
-							<includes>
-								<include>**/*Documentation.java</include>
-							</includes>
-						</configuration>
+						<executions>
+							<execution>
+								<id>docs</id>
+								<goals>
+									<goal>test</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<argLine>--add-opens java.base/java.util=ALL-UNNAMED</argLine>
+									<threadCount>1</threadCount>
+									<forkCount>1</forkCount>
+									<failIfNoTests>true</failIfNoTests>
+									<skipTests>false</skipTests>
+									<includes>
+										<include>**/*Documentation.java</include>
+									</includes>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>
