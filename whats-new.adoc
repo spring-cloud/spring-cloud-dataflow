@@ -13,7 +13,7 @@ Announce New Feature Here
 Announce Next New Feature Here
 
 === Deprecations
-Announce new deprecations here
+* `bootVersion` query parameter for `POST` `/{type}/{name}/{version:.+}` has been deprecated.  This query parameter will be ignored when registering a new application.
 
 === Removals
 Deprecated methods, properties, and features that have been removed in this release.
@@ -35,7 +35,7 @@ VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean
 ** countStepExecutionsForJobExecution
 ** stopAll
 ** getStepNamesForJob
-* The following deprecated `Converters` have been removed from SCDF: `AbstractDateTimeConverter`, `DateToStringConverter`, and `StringToDateConverter`.   : Use the converters provided by Spring Batch.
+* The following deprecated `Converters` have been removed from SCDF: `AbstractDateTimeConverter`, `DateToStringConverter`, and `StringToDateConverter`.  Use the converters provided by Spring Batch.
 
 
 === Breaking Changes
