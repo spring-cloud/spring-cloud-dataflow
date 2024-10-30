@@ -236,11 +236,6 @@ public class DockerComposeRule {
 			return self();
 		}
 
-		@Deprecated
-		public T waitingForService(String serviceName, HealthCheck<Container> healthCheck) {
-			return waitingForService(serviceName, healthCheck, DEFAULT_TIMEOUT);
-		}
-
 		public T waitingForService(String serviceName, HealthCheck<Container> healthCheck, ReadableDuration timeout) {
 			ClusterHealthCheck clusterHealthCheck = serviceHealthCheck(serviceName, healthCheck);
 			return addClusterWait(new ClusterWait(clusterHealthCheck, timeout));
