@@ -41,6 +41,7 @@ VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean
 * The deprecated `rollback(String releaseName, int releaseVersion)` method in SkipperClient has been removed.  Use  `rollback(RollbackRequest rollbackRequest).
 * Removed the `DefaultTaskExecutionService` constructor that does not take the `composedTaskRunnerConfigurationProperties` parameter.  Use the constructor that offers the `composedTaskRunnerConfigurationProperties` parameter.
 * * Removed the `DefaultTaskExecutionInfoService` constructor that does not take the `composedTaskRunnerConfigurationProperties` parameter.  Use the constructor that offers the `composedTaskRunnerConfigurationProperties` parameter.
-=== Breaking Changes
+* AggressiveShutdownStrategy & AggressiveShutdownWithNetworkCleanupStrategy deprecated classes have been removed.   Use the KillDownShutdownStrategy class.
+== Breaking Changes
 Announce deprecated changes here
 
