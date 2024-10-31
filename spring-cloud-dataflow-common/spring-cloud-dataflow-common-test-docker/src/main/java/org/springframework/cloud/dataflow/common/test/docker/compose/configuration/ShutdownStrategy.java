@@ -17,8 +17,6 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.configurat
 
 import java.io.IOException;
 
-import org.springframework.cloud.dataflow.common.test.docker.compose.execution.AggressiveShutdownStrategy;
-import org.springframework.cloud.dataflow.common.test.docker.compose.execution.AggressiveShutdownWithNetworkCleanupStrategy;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.Docker;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.DockerCompose;
 import org.springframework.cloud.dataflow.common.test.docker.compose.execution.GracefulShutdownStrategy;
@@ -31,20 +29,6 @@ import org.springframework.cloud.dataflow.common.test.docker.compose.execution.S
  */
 public interface ShutdownStrategy {
 
-    /**
-     * Call rm on all containers, working around btrfs bug on CircleCI.
-     *
-     * @deprecated Use {@link #KILL_DOWN} (the default strategy)
-     */
-    @Deprecated
-    ShutdownStrategy AGGRESSIVE = new AggressiveShutdownStrategy();
-    /**
-     * Call rm on all containers, then call docker-compose down.
-     *
-     * @deprecated Use {@link #KILL_DOWN} (the default strategy)
-     */
-    @Deprecated
-    ShutdownStrategy AGGRESSIVE_WITH_NETWORK_CLEANUP = new AggressiveShutdownWithNetworkCleanupStrategy();
     /**
      * Call docker-compose down, kill, then rm. Allows containers up to 10 seconds to shut down
      * gracefully.

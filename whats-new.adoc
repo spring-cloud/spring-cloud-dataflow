@@ -38,6 +38,7 @@ VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean
 * The following deprecated `Converters` have been removed from SCDF: `AbstractDateTimeConverter`, `DateToStringConverter`, and `StringToDateConverter`.  Use the converters provided by Spring Batch.
 * `findByTaskNameContainsAndDslTextContains` deprecated method has been removed from `TaskDefinitionRepository`.
 * `DockerComposeRule.waitingForService(String serviceName, HealthCheck<Container> healthCheck)` has been replaced by `DockerComposeRule.waitingForService(String serviceName, HealthCheck<Container> healthCheck, ReadableDuration timeout)`.
+* AggressiveShutdownStrategy & AggressiveShutdownWithNetworkCleanupStrategy deprecated classes have been removed.   Use the KillDownShutdownStrategy class.
 
 === Breaking Changes
 Announce deprecated changes here
