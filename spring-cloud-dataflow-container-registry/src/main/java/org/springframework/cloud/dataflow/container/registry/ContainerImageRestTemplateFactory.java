@@ -25,11 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.net.ssl.SSLException;
 
 import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import reactor.netty.http.Http11SslContextSpec;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientRequest;
 import reactor.netty.transport.ProxyProvider;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -39,20 +40,20 @@ import org.springframework.http.client.ReactorNettyClientRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-
 /**
- * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the Container Registry access.
- * Created RestTemplates can be configured to use Http Proxy and/or bypassing the SSL verification.
+ * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the
+ * Container Registry access. Created RestTemplates can be configured to use Http Proxy
+ * and/or bypassing the SSL verification.
  *
- * For configuring a Http Proxy in need to:
- *  1. Add http proxy configuration using the spring.cloud.dataflow.container.httpProxy.* properties.
- *  2. For every {@link ContainerRegistryConfiguration} that has to interact via the http proxy set the use-http-proxy
- *     flag to true. For example:
- *     <code>spring.cloud.dataflow.container.registry-configurations[reg-name].use-http-proxy=ture</code>
+ * For configuring a Http Proxy in need to: 1. Add http proxy configuration using the
+ * spring.cloud.dataflow.container.httpProxy.* properties. 2. For every
+ * {@link ContainerRegistryConfiguration} that has to interact via the http proxy set the
+ * use-http-proxy flag to true. For example:
+ * <code>spring.cloud.dataflow.container.registry-configurations[reg-name].use-http-proxy=ture</code>
  *
- * Following example configures the default (e.g. DockerHub) registry to use the HTTP Proxy (my-proxy.test:8080)
- * while the dockerhub-mirror and the private-snapshots registry configurations allow direct communication:
- * <code>
+ * Following example configures the default (e.g. DockerHub) registry to use the HTTP
+ * Proxy (my-proxy.test:8080) while the dockerhub-mirror and the private-snapshots
+ * registry configurations allow direct communication: <code>
  *     spring:
  *   cloud:
  *     dataflow:
@@ -75,6 +76,12 @@ import org.springframework.web.client.RestTemplate;
  * @author Cheng Guan Poh
  */
 public class ContainerImageRestTemplateFactory {
+
+	private static final String CUSTOM_REGISTRY = "custom-registry";
+	private static final String AMZ_CREDENTIAL = "X-Amz-Credential";
+	private static final String AUTHORIZATION_HEADER = "Authorization";
+	private static final String AZURECR_URI_SUFFIX = "azurecr.io";
+	private static final String BASIC_AUTH = "Basic";
 
 	private final RestTemplateBuilder restTemplateBuilder;
 
@@ -144,7 +151,7 @@ public class ContainerImageRestTemplateFactory {
 	}
 
 	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {
-		HttpClient client = httpClientBuilder(skipSslVerification);
+		HttpClient client = httpClientBuilder(skipSslVerification, extra);
 		return initRestTemplate(client, withHttpProxy, extra);
 	}
 
@@ -179,22 +186,45 @@ public class ContainerImageRestTemplateFactory {
 	 * @author Cheng Guan Poh
 	 * @author Corneil du Plessis
 	 */
-	private HttpClient httpClientBuilder(boolean skipSslVerification) {
+	private HttpClient httpClientBuilder(boolean skipSslVerification, Map<String, String> extra) {
 
-        try {
-			SslContextBuilder builder = skipSslVerification ? SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE) : SslContextBuilder.forClient();
+		try {
+			SslContextBuilder builder = skipSslVerification
+					? SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
+					: SslContextBuilder.forClient();
 			SslContext sslContext = builder.build();
 			HttpClient client = HttpClient.create().secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
 
 			return client.followRedirect(true, (entries, httpClientRequest) -> {
-						HttpHeaders httpHeaders = httpClientRequest.requestHeaders();
-						removeAuthorization(httpHeaders);
-						removeAuthorization(entries);
-						httpClientRequest.headers(httpHeaders);
-					});
-        } catch (SSLException e) {
-            throw new RuntimeException(e);
-        }
+				if (shouldRemoveAuthorization(httpClientRequest, extra)) {
+					HttpHeaders httpHeaders = httpClientRequest.requestHeaders();
+					removeAuthorization(httpHeaders);
+					removeAuthorization(entries);
+					httpClientRequest.headers(httpHeaders);
+				}
+			});
+		}
+		catch (SSLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private boolean shouldRemoveAuthorization(HttpClientRequest request, Map<String, String> extra) {
+		HttpMethod method = request.method();
+		if(method.equals(HttpMethod.GET) || method.equals(HttpMethod.HEAD)) {
+			if (request.uri().contains(AMZ_CREDENTIAL)) {
+				return true;
+			}
+			if (request.uri().contains(AZURECR_URI_SUFFIX)) {
+				return request.requestHeaders()
+					.entries()
+					.stream()
+					.anyMatch(entry -> entry.getKey().equalsIgnoreCase(AUTHORIZATION_HEADER)
+							&& entry.getValue().contains(BASIC_AUTH));
+			}
+			return extra.containsKey(CUSTOM_REGISTRY) && request.uri().contains(extra.get(CUSTOM_REGISTRY));
+		}
+		return false;
 	}
 
 	private static void removeAuthorization(HttpHeaders headers) {
