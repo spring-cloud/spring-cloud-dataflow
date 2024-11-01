@@ -41,7 +41,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ActiveProfiles({"repo-test", "local"})
 @TestPropertySource(properties = {
-		"maven.remote-repositories.repo1.url=https://repo.spring.io/snapshot"
+		"maven.remote-repositories.repo1.url=https://repo.spring.io/snapshot",
+		"maven.remote-repositories.repo2.url=https://repo.spring.io/milestone"
 })
 class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 

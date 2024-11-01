@@ -261,7 +261,7 @@ public abstract class BaseDocumentation {
 	protected Release updateReleaseStatus(Release release, StatusCode statusCode) {
 		Info releaseInfo = new Info();
 		Status status = new Status();
-		status.setStatusCode(StatusCode.DELETED);
+		status.setStatusCode(statusCode);
 		releaseInfo.setStatus(status);
 		release.setInfo(releaseInfo);
 		return release;

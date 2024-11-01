@@ -15,6 +15,7 @@
  */
 package org.springframework.cloud.skipper.server.controller.docs;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
@@ -24,7 +25,7 @@ import org.junit.platform.suite.api.Suite;
  * @author Ilayaperumal Gopinathan
  * @author Corneil du Plessis
  */
-
+@Disabled("we don't need to run suites for docs")
 @Suite
 @SelectClasses({ ApiDocumentation.class, DeployersDocumentation.class, PackageMetadataDocumentation.class,
 		RepositoriesDocumentation.class, ReleasesDocumentation.class })

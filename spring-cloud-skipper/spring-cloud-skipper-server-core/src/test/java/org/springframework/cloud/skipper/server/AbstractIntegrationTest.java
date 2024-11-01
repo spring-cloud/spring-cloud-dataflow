@@ -17,6 +17,7 @@ package org.springframework.cloud.skipper.server;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -33,6 +34,7 @@ import org.springframework.boot.autoconfigure.jdbc.EmbeddedDataSourceConfigurati
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.deployer.autoconfigure.ResourceLoadingAutoConfiguration;
+import org.springframework.cloud.deployer.spi.app.AppStatus;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.skipper.domain.Info;
 import org.springframework.cloud.skipper.domain.InstallRequest;
@@ -139,8 +141,11 @@ public abstract class AbstractIntegrationTest extends AbstractAssertReleaseDeplo
 			Info info = release.getInfo();
 
 			logger.info("Status = " + info.getStatus());
-			return info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED) &&
-					allAppsDeployed(info.getStatus().getAppStatusList());
+			boolean deployedStatus = info.getStatus().getStatusCode().equals(StatusCode.DEPLOYED);
+			List<AppStatus> appStatusList = info.getStatus().getAppStatusList();
+			logger.info("allAppStatus = " + appStatusList);
+			boolean allAppsDeployed = allAppsDeployed(appStatusList);
+			return deployedStatus && allAppsDeployed;
 		}
 		catch (Exception e) {
 			logger.error("Exception getting status", e);

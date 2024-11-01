@@ -267,9 +267,12 @@
 					<forkCount>1</forkCount>
 					<failIfNoTests>true</failIfNoTests>
 					<includes>
-						<include>**/*Tests.java</include>
-						<include>**/*Test.java</include>
+						<include>**/*Tests.*</include>
+						<include>**/*Test.*</include>
 					</includes>
+					<excludes>
+						<exclude>**/*Documentation.*</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -304,7 +307,7 @@
 									<failIfNoTests>true</failIfNoTests>
 									<skipTests>false</skipTests>
 									<includes>
-										<include>**/*Documentation.java</include>
+										<include>**/*Documentation.*</include>
 									</includes>
 								</configuration>
 							</execution>

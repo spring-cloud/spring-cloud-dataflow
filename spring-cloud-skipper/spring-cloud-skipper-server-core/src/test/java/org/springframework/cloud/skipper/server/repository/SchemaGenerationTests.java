@@ -62,9 +62,9 @@ class SchemaGenerationTests extends AbstractIntegrationTest {
 		final List<String> supportedHibernateDialects = new ArrayList<>();
 
 		supportedHibernateDialects.add("H2");
-		supportedHibernateDialects.add("MySQL5");
-		supportedHibernateDialects.add("Oracle10g");
-		supportedHibernateDialects.add("PostgreSQL94");
+		supportedHibernateDialects.add("MySQL");
+		supportedHibernateDialects.add("Oracle");
+		supportedHibernateDialects.add("PostgreSQL");
 		supportedHibernateDialects.add("DB2");
 		supportedHibernateDialects.add("SQLServer2012");
 

@@ -10,3 +10,10 @@ spring:
             url: "http://localhost:7577"
             local: true
             description: Default local database backed repository
+
+maven:
+  remote-repositories:
+    repo1:
+      url: 'https://repo.spring.io/snapshot'
+    repo2:
+      url: 'https://repo.spring.io/milestone'
