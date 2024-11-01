@@ -328,7 +328,7 @@ public abstract class BaseDocumentation {
 		scheduleInfo.setScheduleName("FOO");
 		scheduleInfo.setTaskDefinitionName("BAR");
 		Map<String, String> props = new HashMap<>(1);
-		props.put("scheduler.AAA.spring.cloud.scheduler.cron.expression", "00 41 17 ? * *");
+		props.put("deployer.AAA.spring.cloud.scheduler.cron.expression", "00 41 17 ? * *");
 		scheduleInfo.setScheduleProperties(props);
 		result.add(scheduleInfo);
 		return result;

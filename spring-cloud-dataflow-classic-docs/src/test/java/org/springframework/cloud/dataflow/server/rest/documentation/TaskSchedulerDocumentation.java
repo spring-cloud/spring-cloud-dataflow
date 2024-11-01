@@ -64,7 +64,7 @@ class TaskSchedulerDocumentation extends BaseDocumentation {
 						.queryParam("scheduleName", "myschedule")
 						.queryParam("taskDefinitionName", "mytaskname")
 						.queryParam("platform", "default")
-						.queryParam("properties", "scheduler.cron.expression=00 22 17 ? *")
+						.queryParam("properties", "deployer.cron.expression=00 22 17 ? *")
 						.queryParam("arguments", "--foo=bar"))
 				.andExpect(status().isCreated())
 				.andDo(this.documentationHandler.document(

@@ -1346,7 +1346,7 @@ dataflow:>task schedule list
 ╔══════════════════════════╤════════════════════╤════════════════════════════════════════════════════╗
 ║      Schedule Name       │Task Definition Name│                     Properties                     ║
 ╠══════════════════════════╪════════════════════╪════════════════════════════════════════════════════╣
-║mytaskschedule            │mytask              │spring.cloud.scheduler.cron.expression = */1 * * * *║
+║mytaskschedule            │mytask              │spring.cloud.deployer.cron.expression = */1 * * * * ║
 ╚══════════════════════════╧════════════════════╧════════════════════════════════════════════════════╝
 ----
 ====

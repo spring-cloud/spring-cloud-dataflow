@@ -94,9 +94,9 @@ import static org.springframework.cloud.dataflow.server.service.impl.DefaultSche
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class DefaultSchedulerServiceTests {
 
-	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";
+	private static final String DATA_FLOW_DEPLOYER_PREFIX = "deployer.demo.";
 
-	private static final String SCHEDULER_PREFIX = "spring.cloud.deployer.";
+	private static final String DEPLOYER_PREFIX = "spring.cloud.deployer.";
 
 	private static final String BASE_SCHEDULE_NAME = "myTaskSchedule";
 
@@ -161,11 +161,11 @@ public class DefaultSchedulerServiceTests {
 		initializeSuccessfulRegistry();
 
 		this.testProperties = new HashMap<>();
-		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "AAAA", "* * * * *");
-		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "AAAA", "* * * * *");
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
 		this.resolvedProperties = new HashMap<>();
-		this.resolvedProperties.put(SCHEDULER_PREFIX + "AAAA", "* * * * *");
-		this.resolvedProperties.put(SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
+		this.resolvedProperties.put(DEPLOYER_PREFIX + "AAAA", "* * * * *");
+		this.resolvedProperties.put(DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
 		this.commandLineArgs = new ArrayList<>();
 	}
 
@@ -241,6 +241,11 @@ public class DefaultSchedulerServiceTests {
 
 	@Test
 	void scheduleCTR(){
+		this.testProperties = new HashMap<>();
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "AAAA", "* * * * *");
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
+		this.testProperties.put("deployer.composed-task-runner." + "AAAA", "* * * * *");
+		this.testProperties.put("deployer.composed-task-runner." + "EXPRESSION", "* * * * *");
 		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, Collections.singletonList("app.demo.0=foo=bar"));
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
 		AuditActionType[] createActions = {AuditActionType.CREATE};

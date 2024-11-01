@@ -52,13 +52,13 @@ class DeploymentPropertiesUtilsTests {
 	@Test
 	void deploymentPropertiesParsing() {
 		Map<String, String> props = DeploymentPropertiesUtils.parse("app.foo.bar=v, app.foo.wizz=v2  , deployer.foo"
-				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww, scheduler.other.key = baz");
+				+ ".pot=fern, app.other.key = value  , deployer.other.cow = meww, deployer.other.key = baz");
 		assertThat(props.entrySet()).contains(entry("app.foo.bar", "v"));
 		assertThat(props.entrySet()).contains(entry("app.other.key", "value"));
 		assertThat(props.entrySet()).contains(entry("app.foo.wizz", "v2"));
 		assertThat(props.entrySet()).contains(entry("deployer.foo.pot", "fern"));
 		assertThat(props.entrySet()).contains(entry("deployer.other.cow", "meww"));
-		assertThat(props.entrySet()).contains(entry("scheduler.other.key", "baz"));
+		assertThat(props.entrySet()).contains(entry("deployer.other.key", "baz"));
 
 		props = DeploymentPropertiesUtils.parse("app.f=v");
 		assertThat(props.entrySet()).contains(entry("app.f", "v"));
@@ -87,7 +87,7 @@ class DeploymentPropertiesUtilsTests {
 			fail("Illegal Argument Exception expected.");
 		}
 		catch (Exception e) {
-			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'scheduler' or 'deployer.'  or 'version.' allowed. Not invalidkeyvalue");
+			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.' allowed. Not invalidkeyvalue");
 		}
 
 		props = DeploymentPropertiesUtils.parse("deployer.foo=bar,invalidkeyvalue2");
@@ -125,7 +125,7 @@ class DeploymentPropertiesUtilsTests {
 			fail("Illegal Argument Exception expected.");
 		}
 		catch (Exception e) {
-			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'scheduler' or 'deployer.'  or 'version.' allowed. Not a=b");
+			assertThat(e.getMessage()).isEqualTo("Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.' allowed. Not a=b");
 		}
 
 		props = DeploymentPropertiesUtils.parseArgumentList("a=b c=d", " ");

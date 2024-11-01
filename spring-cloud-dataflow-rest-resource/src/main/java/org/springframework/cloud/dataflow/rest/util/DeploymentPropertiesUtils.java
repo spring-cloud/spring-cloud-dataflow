@@ -61,7 +61,7 @@ public final class DeploymentPropertiesUtils {
 			.compile("(\\s(?=" + "([^\\\"']*[\\\"'][^\\\"']*[\\\"'])*[^\\\"']*$))");
 
 
-	private static final String[] DEPLOYMENT_PROPERTIES_PREFIX ={"deployer", "app", "version", "scheduler", "spring.cloud.dataflow.task"};
+	private static final String[] DEPLOYMENT_PROPERTIES_PREFIX ={"deployer", "app", "version", "spring.cloud.dataflow.task"};
 
 	private DeploymentPropertiesUtils() {
 		// prevent instantiation
@@ -127,7 +127,7 @@ public final class DeploymentPropertiesUtils {
 					// we have a key/value pair having '=', or malformed first pair
 					if (!startsWithDeploymentPropertyPrefix(candidate)) {
 						throw new IllegalArgumentException(
-								"Only deployment property keys starting with 'app.' or 'scheduler' or 'deployer.'  or 'version.'" +
+								"Only deployment property keys starting with 'app.' or 'deployer.'  or 'version.'" +
 										" allowed. Not " + candidate);
 					}
 					pairs.add(candidate);
@@ -286,9 +286,9 @@ public final class DeploymentPropertiesUtils {
 		for (Entry<String, String> property : properties.entrySet()) {
 			String key = property.getKey();
 			if (!key.startsWith("app.") && !key.startsWith("deployer.")
-					&& !key.startsWith("scheduler.") && !key.startsWith("version.")) {
+					&& !key.startsWith("version.")) {
 				throw new IllegalArgumentException(
-						"Only deployment property keys starting with 'app.', 'deployer.' or, 'scheduler.' allowed, got '" + key + "'");
+						"Only deployment property keys starting with 'app.' or 'deployer.' allowed, got '" + key + "'");
 			}
 		}
 	}

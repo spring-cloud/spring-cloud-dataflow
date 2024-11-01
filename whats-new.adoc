@@ -43,5 +43,6 @@ VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean
 * * Removed the `DefaultTaskExecutionInfoService` constructor that does not take the `composedTaskRunnerConfigurationProperties` parameter.  Use the constructor that offers the `composedTaskRunnerConfigurationProperties` parameter.
 * AggressiveShutdownStrategy & AggressiveShutdownWithNetworkCleanupStrategy deprecated classes have been removed.   Use the KillDownShutdownStrategy class.
 == Breaking Changes
-Announce deprecated changes here
+* Deprecated property prefix `scheduler.`  has been removed when setting schedule properties for task applications.  Use `deployer.` instead.
+
 
