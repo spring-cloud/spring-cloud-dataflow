@@ -93,7 +93,7 @@ import static org.springframework.cloud.dataflow.server.service.impl.DefaultSche
 @AutoConfigureTestDatabase(replace = Replace.ANY)
 public class DefaultSchedulerServiceMultiplatformTests {
 
-	private static final String DATA_FLOW_SCHEDULER_PREFIX = "scheduler.";
+	private static final String DATA_FLOW_DEPLOYER_PREFIX = "deployer.demo.";
 
 	private static final String DEPLOYER_PREFIX = "spring.cloud.deployer.";
 
@@ -166,8 +166,8 @@ public class DefaultSchedulerServiceMultiplatformTests {
 		initializeSuccessfulRegistry();
 
 		this.testProperties = new HashMap<>();
-		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "AAAA", "* * * * *");
-		this.testProperties.put(DATA_FLOW_SCHEDULER_PREFIX + "EXPRESSION", "* * * * *");
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "AAAA", "* * * * *");
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
 		this.testProperties.put("version." + BASE_DEFINITION_NAME, "1.0.0");
 		this.resolvedProperties = new HashMap<>();
 		this.resolvedProperties.put(DEPLOYER_PREFIX + "AAAA", "* * * * *");
@@ -243,6 +243,11 @@ public class DefaultSchedulerServiceMultiplatformTests {
 
 	@Test
 	void scheduleCTR() {
+		this.testProperties = new HashMap<>();
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "AAAA", "* * * * *");
+		this.testProperties.put(DATA_FLOW_DEPLOYER_PREFIX + "EXPRESSION", "* * * * *");
+		this.testProperties.put("deployer.composed-task-runner." + "AAAA", "* * * * *");
+		this.testProperties.put("deployer.composed-task-runner." + "EXPRESSION", "* * * * *");
 		schedulerService.schedule(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME, this.testProperties, this.commandLineArgs, KUBERNETES_PLATFORM);
 		verifyScheduleExistsInScheduler(createScheduleInfo(BASE_SCHEDULE_NAME, CTR_DEFINITION_NAME));
 	}

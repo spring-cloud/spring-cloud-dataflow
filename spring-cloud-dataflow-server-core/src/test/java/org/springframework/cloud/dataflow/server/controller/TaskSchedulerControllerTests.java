@@ -189,7 +189,7 @@ class TaskSchedulerControllerTests {
 
 		repository.save(new TaskDefinition("testDefinition", "testApp"));
 		mockMvc.perform(post("/tasks/schedules").param("taskDefinitionName", "testDefinition")
-				.param("scheduleName", scheduleName).param("properties", "scheduler.cron.expression=* * * * *")
+				.param("scheduleName", scheduleName).param("properties", "deployer.testApp.cron.expression=* * * * *")
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertThat(simpleTestScheduler.list()).hasSize(1);
 		ScheduleInfo scheduleInfo = simpleTestScheduler.list().get(0);
@@ -253,7 +253,7 @@ class TaskSchedulerControllerTests {
 		mockMvc.perform(post("/tasks/schedules").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", "mySchedule")
 				.param("properties",
-						"scheduler.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle")
+						"deployer.testApp.cron.expression=* * * * *,app.testApp.prop1=foo,app.testApp.prop2.secret=kenny,deployer.*.prop1.secret=cartman,deployer.*.prop2.password=kyle")
 				.param("arguments", arguments)
 				.accept(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isCreated());
 		assertThat(simpleTestScheduler.list()).hasSize(1);
@@ -283,7 +283,7 @@ class TaskSchedulerControllerTests {
 		mockMvc.perform(post("/tasks/schedules").param("taskDefinitionName", "testDefinition")
 				.param("scheduleName", "myScheduleBadCron")
 				.param("properties",
-						"scheduler.cron.expression=" + SimpleTestScheduler.INVALID_CRON_EXPRESSION)
+						"deployer.testApp.cron.expression=" + SimpleTestScheduler.INVALID_CRON_EXPRESSION)
 				.accept(MediaType.APPLICATION_JSON)).andExpect(status().isBadRequest());
 	}
 
@@ -339,7 +339,7 @@ class TaskSchedulerControllerTests {
 
 	private void createSampleSchedule(String taskDefinitionName, String scheduleName) {
 		Map<String, String> properties = new HashMap<>();
-		properties.put("scheduler.testApp." + SchedulerPropertyKeys.CRON_EXPRESSION, "* * * * *");
+		properties.put("deployer.testApp." + SchedulerPropertyKeys.CRON_EXPRESSION, "* * * * *");
 		schedulerService.schedule(scheduleName, taskDefinitionName, properties, new ArrayList<>(), null);
 	}
 

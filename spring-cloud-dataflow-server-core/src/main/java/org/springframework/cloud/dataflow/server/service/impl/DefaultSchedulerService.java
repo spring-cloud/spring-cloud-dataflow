@@ -283,7 +283,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		AppDefinition revisedDefinition = TaskServiceUtils.mergeAndExpandAppProperties(taskDefinition, metadataResource,
 				appDeploymentProperties, visibleProperties);
 		DeploymentPropertiesUtils.validateDeploymentProperties(taskDeploymentProperties);
-		taskDeploymentProperties = extractAndQualifySchedulerProperties(taskDeploymentProperties);
+		taskDeploymentProperties = filterPrefixedProperties(taskDeploymentProperties);
 		deployerDeploymentProperties.putAll(taskDeploymentProperties);
 		scheduleName = validateScheduleNameForPlatform(launcher.getType(), scheduleName);
 		ScheduleRequest scheduleRequest = new ScheduleRequest(revisedDefinition,
@@ -501,22 +501,15 @@ public class DefaultSchedulerService implements SchedulerService {
 	}
 
 	/**
-	 * Retain only properties that are meant for the <em>scheduler</em> of a given task(those
-	 * that start with {@code scheduler.}and qualify all
-	 * property values with the {@code spring.cloud.scheduler.} prefix.
+	 * Provided a filtered Map that removes entries prefixed with "app." or "deployer.".
 	 *
-	 * @param input the scheduler properties
-	 * @return scheduler properties for the task
+	 * @param input the properties
+	 * @return deployer properties for the schedule
 	 */
-	@Deprecated
-	private static Map<String, String> extractAndQualifySchedulerProperties(Map<String, String> input) {
-		final String prefix = "scheduler.";
-		final int prefixLength = prefix.length();
-
+	private static Map<String, String> filterPrefixedProperties(Map<String, String> input) {
 		return new TreeMap<>(input).entrySet().stream()
-				.filter(kv -> kv.getKey().startsWith(prefix))
-				.collect(Collectors.toMap(kv -> "spring.cloud.deployer." + kv.getKey().substring(prefixLength), Map.Entry::getValue,
-						(fromWildcard, fromApp) -> fromApp));
+				.filter(kv -> (!kv.getKey().startsWith("deployer.") && !kv.getKey().startsWith("app.")))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	protected Resource getTaskResource(String taskDefinitionName, String version) {
