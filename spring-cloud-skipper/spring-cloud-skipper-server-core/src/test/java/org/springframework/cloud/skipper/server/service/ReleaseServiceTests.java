@@ -573,7 +573,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 			this.releaseService.status(releaseName, release1.getVersion()).getStatus().getStatusCode() == StatusCode.DEPLOYED);
 
 		ConfigValues upgradeConfig = new ConfigValues();
-		upgradeConfig.setRaw("spec:\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator/fake\n");
+		upgradeConfig.setRaw("spec:\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator2/fake\n");
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
 		upgradeProperties.setConfigValues(upgradeConfig);

@@ -59,7 +59,7 @@ class ReleaseAnalyzerTests extends AbstractIntegrationTest {
 		// NOTE must be a release that exists in a maven repo....
 		String releaseName = "logreleaseAnalyzer";
 		String packageName = "ticktock";
-		String packageVersion = "1.0.0";
+		String packageVersion = "4.0.0";
 		InstallRequest installRequest = new InstallRequest();
 		installRequest.setInstallProperties(createInstallProperties(releaseName));
 
