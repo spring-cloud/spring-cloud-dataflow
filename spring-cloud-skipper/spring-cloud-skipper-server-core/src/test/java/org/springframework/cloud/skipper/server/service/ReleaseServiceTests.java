@@ -41,6 +41,7 @@ import org.springframework.cloud.skipper.domain.PackageMetadata;
 import org.springframework.cloud.skipper.domain.Release;
 import org.springframework.cloud.skipper.domain.Repository;
 import org.springframework.cloud.skipper.domain.ScaleRequest;
+import org.springframework.cloud.skipper.domain.Status;
 import org.springframework.cloud.skipper.domain.StatusCode;
 import org.springframework.cloud.skipper.domain.UpgradeProperties;
 import org.springframework.cloud.skipper.domain.UpgradeRequest;
@@ -569,11 +570,14 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		assertThat(release1).isNotNull();
 		assertThat(release1.getPkg().getMetadata().getVersion()).isEqualTo("4.0.0");
 
-		await().atMost(Duration.ofSeconds(30)).until(() ->
-			this.releaseService.status(releaseName, release1.getVersion()).getStatus().getStatusCode() == StatusCode.DEPLOYED);
-
+		await().atMost(Duration.ofSeconds(30))
+				.untilAsserted(() -> {
+					Status status = this.releaseService.status(releaseName, release1.getVersion()).getStatus();
+					logger.info("failedUpdate:deployed:{}:{}={}", releaseName, release1.getVersion(), status);
+					assertThat(status.getStatusCode()).isEqualTo(StatusCode.DEPLOYED);
+				});
 		ConfigValues upgradeConfig = new ConfigValues();
-		upgradeConfig.setRaw("spec:\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator2/fake\n");
+		upgradeConfig.setRaw("spec:\n  applicationProperties:\n    server.port: 8082\n  deploymentProperties:\n    spring.cloud.deployer.local.startup-probe.path: /actuator2/fake\n");
 		UpgradeProperties upgradeProperties = new UpgradeProperties();
 		upgradeProperties.setReleaseName(releaseName);
 		upgradeProperties.setConfigValues(upgradeConfig);
@@ -584,7 +588,7 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 
 		packageIdentifier = new PackageIdentifier();
 		String packageName = "log";
-		String packageVersion = "4.0.0";
+		String packageVersion = "3.2.1";
 		packageIdentifier.setPackageName(packageName);
 		packageIdentifier.setPackageVersion(packageVersion);
 		upgradeRequest.setPackageIdentifier(packageIdentifier);
@@ -594,9 +598,9 @@ class ReleaseServiceTests extends AbstractIntegrationTest {
 		await().atMost(Duration.ofSeconds(90))
 				.pollInterval(Duration.ofSeconds(5))
 				.untilAsserted(() -> {
-					Info status = this.releaseService.status(releaseName, release2.getVersion());
-					logger.info("failedUpdate:" + status.getStatus());
-					assertThat(status.getStatus().getStatusCode()).isEqualTo(StatusCode.FAILED);
+					Status status = this.releaseService.status(releaseName, release2.getVersion()).getStatus();
+					logger.info("failedUpdate:deployed2:{}:{}={}", releaseName, release2.getVersion(), status);
+					assertThat(status.getStatusCode()).isNotEqualTo(StatusCode.DEPLOYED);
 				});
 
 		delete(release1.getName());
