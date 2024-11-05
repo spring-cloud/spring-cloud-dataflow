@@ -393,11 +393,6 @@ public class DefaultSkipperClient implements SkipperClient {
 	}
 
 	@Override
-	public Release rollback(String releaseName, int releaseVersion) {
-		return rollback(new RollbackRequest(releaseName, releaseVersion));
-	}
-
-	@Override
 	public List<Release> list(String releaseNameLike) {
 		ParameterizedTypeReference<HateoasResponseWrapper<ReleasesResponseWrapper>> typeReference =
 			new ParameterizedTypeReference<HateoasResponseWrapper<ReleasesResponseWrapper>>() { };

@@ -114,18 +114,6 @@ public interface SkipperClient {
 	Release rollback(RollbackRequest rollbackRequest);
 
 	/**
-	 * Rollback a specific release.
-	 *
-	 * @param releaseName the release name
-	 * @param releaseVersion the release version
-	 * @return the rolled back {@link Release}
-	 * @see #rollback(RollbackRequest)
-	 * @deprecated use rollback method taking a rollback request
-	 */
-	@Deprecated
-	Release rollback(String releaseName, int releaseVersion);
-
-	/**
 	 * Sends a cancel request for current release operation
 	 *
 	 * @param cancelRequest the cancel request
