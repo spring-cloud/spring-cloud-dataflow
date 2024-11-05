@@ -172,64 +172,6 @@ public class DefaultTaskExecutionService implements TaskExecutionService {
 	 * @param propertyResolver                          the spring application context
 	 * @param launcherRepository                        the repository of task launcher used to launch task apps.
 	 * @param auditRecordService                        the audit record service
-	 * @param taskRepository                 			the repository to use for accessing and updating task executions
-	 * @param taskExecutionInfoService                  the service used to setup a task execution
-	 * @param taskDeploymentRepository                  the repository to track task deployment
-	 * @param taskDefinitionRepository                  the repository to query the task definition
-	 * @param taskExecutionRepositoryService            the service used to create the task execution
-	 * @param taskAppDeploymentRequestCreator           the task app deployment request creator
-	 * @param taskExplorer                              the task explorer
-	 * @param dataflowTaskExecutionDao			        the dataflow task execution dao
-	 * @param dataflowTaskExecutionMetadataDao          repository used to manipulate task manifests
-	 * @param dataflowTaskExecutionQueryDao             repository to query aggregate TaskExecution data
-	 * @param oauth2TokenUtilsService                   the oauth2 token server
-	 * @param taskSaveService                           the task save service
-	 * @param taskConfigurationProperties               task configuration properties.
-	 */
-	@Deprecated
-	public DefaultTaskExecutionService(
-		PropertyResolver propertyResolver,
-		LauncherRepository launcherRepository,
-		AuditRecordService auditRecordService,
-		TaskRepository taskRepository,
-		TaskExecutionInfoService taskExecutionInfoService,
-		TaskDeploymentRepository taskDeploymentRepository,
-		TaskDefinitionRepository taskDefinitionRepository,
-		TaskExecutionCreationService taskExecutionRepositoryService,
-		TaskAppDeploymentRequestCreator taskAppDeploymentRequestCreator,
-		DataflowTaskExplorer taskExplorer,
-		DataflowTaskExecutionDao dataflowTaskExecutionDao,
-		DataflowTaskExecutionMetadataDao dataflowTaskExecutionMetadataDao,
-		DataflowTaskExecutionQueryDao dataflowTaskExecutionQueryDao,
-		OAuth2TokenUtilsService oauth2TokenUtilsService,
-		TaskSaveService taskSaveService,
-		TaskConfigurationProperties taskConfigurationProperties
-	) {
-		this(propertyResolver,
-			launcherRepository,
-			auditRecordService,
-			taskRepository,
-			taskExecutionInfoService,
-			taskDeploymentRepository,
-			taskDefinitionRepository,
-			taskExecutionRepositoryService,
-			taskAppDeploymentRequestCreator,
-			taskExplorer,
-			dataflowTaskExecutionDao,
-			dataflowTaskExecutionMetadataDao,
-			dataflowTaskExecutionQueryDao,
-			oauth2TokenUtilsService,
-			taskSaveService,
-			taskConfigurationProperties,
-			null);
-	}
-
-	/**
-	 * Initializes the {@link DefaultTaskExecutionService}.
-	 *
-	 * @param propertyResolver                          the spring application context
-	 * @param launcherRepository                        the repository of task launcher used to launch task apps.
-	 * @param auditRecordService                        the audit record service
 	 * @param taskRepository		                  	the repository to use for accessing and updating task executions
 	 * @param taskExecutionInfoService                  the task execution info service
 	 * @param taskDeploymentRepository                  the repository to track task deployment
