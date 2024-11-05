@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class LauncherInitializationService {
 
 	private List<ConfigurationMetadataPropertyEntity> createMetadataPropertyEntities(
 			List<ConfigurationMetadataProperty> metadataProperties, String type) {
-		String prefix = KEY_PREFIX + type.toLowerCase();
+		String prefix = KEY_PREFIX + type.toLowerCase(Locale.ROOT);
 		return metadataProperties.stream()
 			.filter(p -> p.getId().startsWith(prefix))
 			.map(ConfigurationMetadataPropertyEntity::new)

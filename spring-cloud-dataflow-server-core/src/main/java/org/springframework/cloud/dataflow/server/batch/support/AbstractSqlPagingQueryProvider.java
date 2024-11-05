@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.batch.support;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -226,7 +227,7 @@ public abstract class AbstractSqlPagingQueryProvider implements DataflowSqlPagin
 	private String removeKeyWord(String keyWord, String clause) {
 		String temp = clause.trim();
 		int length = keyWord.length();
-		if (temp.toLowerCase().startsWith(keyWord) && Character.isWhitespace(temp.charAt(length))
+		if (temp.toLowerCase(Locale.ROOT).startsWith(keyWord) && Character.isWhitespace(temp.charAt(length))
 			&& temp.length() > length + 1) {
 			return temp.substring(length + 1);
 		}

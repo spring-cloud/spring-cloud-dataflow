@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.controller;
 
+import java.util.Locale;
+
 import org.springframework.cloud.dataflow.core.Launcher;
 import org.springframework.cloud.dataflow.rest.resource.LauncherResource;
 import org.springframework.cloud.dataflow.server.service.LauncherService;
@@ -64,7 +66,7 @@ public class TaskPlatformController {
 			PagedResourcesAssembler<Launcher> assembler
 	) {
 		PagedModel<LauncherResource> result;
-		if(StringUtils.hasText(schedulesEnabled) && schedulesEnabled.toLowerCase().equals("true")) {
+		if(StringUtils.hasText(schedulesEnabled) && schedulesEnabled.toLowerCase(Locale.ROOT).equals("true")) {
 			result = assembler.toModel(this.launcherService.getLaunchersWithSchedules(pageable), this.launcherAssembler);
 		} else {
 			result = assembler.toModel(this.launcherService.getAllLaunchers(pageable), this.launcherAssembler);

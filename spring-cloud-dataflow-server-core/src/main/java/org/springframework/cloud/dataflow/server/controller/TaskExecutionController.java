@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -398,7 +399,7 @@ public class TaskExecutionController {
 			if (sort != null) {
 				for (Sort.Order order : sort) {
 					String property = order.getProperty();
-					if (property != null && !allowedSorts.contains(property.toUpperCase())) {
+					if (property != null && !allowedSorts.contains(property.toUpperCase(Locale.ROOT))) {
 						throw new IllegalArgumentException("Sorting column " + order.getProperty() + " not allowed");
 					}
 				}

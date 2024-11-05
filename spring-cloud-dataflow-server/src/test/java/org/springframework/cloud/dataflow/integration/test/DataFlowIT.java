@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -434,7 +435,7 @@ public class DataFlowIT {
 
 			runtimeApps.httpPost(stream.getName(), "http", message);
 			final AwaitUtils.StreamLog logOffset = AwaitUtils.logOffset(stream, "log");
-			Awaitility.await().until(() -> logOffset.logs().contains(message.toUpperCase()));
+			Awaitility.await().until(() -> logOffset.logs().contains(message.toUpperCase(Locale.ROOT)));
 		}
 	}
 

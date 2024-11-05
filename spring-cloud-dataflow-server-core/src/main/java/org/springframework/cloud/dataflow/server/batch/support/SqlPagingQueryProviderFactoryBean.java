@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.server.batch.support;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -158,7 +159,7 @@ public class SqlPagingQueryProviderFactoryBean implements FactoryBean<DataflowSq
 
 		DatabaseType type;
 		try {
-			type = databaseType != null ? DatabaseType.valueOf(databaseType.toUpperCase()) : DatabaseType
+			type = databaseType != null ? DatabaseType.valueOf(databaseType.toUpperCase(Locale.ROOT)) : DatabaseType
 					.fromMetaData(dataSource);
 		}
 		catch (MetaDataAccessException e) {

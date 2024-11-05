@@ -29,10 +29,10 @@ public final class ContainerSupport {
 	}
 
 	public static boolean runningOnMacArm64() {
-		String osName = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-		String osArchitecture = System.getProperty("os.arch").toLowerCase(Locale.ENGLISH);
+		String osName = System.getProperty("os.name").toLowerCase(Locale.ROOT);
+		String osArchitecture = System.getProperty("os.arch").toLowerCase(Locale.ROOT);
 		// When using Colima, the 'os.arch' property will report 'x86', therefore also look at the arch data model
-		String osArchDataModel = System.getProperty("sun.arch.data.model", "unknown").toLowerCase(Locale.ENGLISH);
+		String osArchDataModel = System.getProperty("sun.arch.data.model", "unknown").toLowerCase(Locale.ROOT);
 		return osName.contains("mac") && (osArchitecture.equals("aarch64") || osArchDataModel.equals("64"));
 	}
 }

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -359,7 +360,7 @@ public class TaskServiceUtils {
 	 */
 	public static void contributeCommonProperties(Optional<Properties> defaultProperties,
 			Map<String, String> appDeploymentProperties, String taskPlatformType) {
-		String taskPlatformTypePrefix = taskPlatformType.toLowerCase() + ".";
+		String taskPlatformTypePrefix = taskPlatformType.toLowerCase(Locale.ROOT) + ".";
 		defaultProperties.ifPresent(defaults -> defaults.entrySet().stream()
 				.filter(e -> e.getValue() != null)
 				.filter(e -> e.getKey().toString().startsWith(taskPlatformTypePrefix))

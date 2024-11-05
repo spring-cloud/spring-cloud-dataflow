@@ -3,6 +3,7 @@ package org.springframework.cloud.dataflow.integration.test.tasks;
 import java.nio.charset.StandardCharsets;
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -76,7 +77,7 @@ abstract class AbstractLargeTaskExecutionDatabaseBase {
 			logger.info("loading:{}", tableName);
 			Map<String, Integer> tableColumnTypes = columnTypes.get(tableName);
 			CSVLoader.DeriveType deriveType = columnName -> {
-				String col = columnName.toUpperCase();
+				String col = columnName.toUpperCase(Locale.ROOT);
 				Integer type = tableColumnTypes != null ? tableColumnTypes.get(col) : null;
 				if (type != null) {
 					return type;

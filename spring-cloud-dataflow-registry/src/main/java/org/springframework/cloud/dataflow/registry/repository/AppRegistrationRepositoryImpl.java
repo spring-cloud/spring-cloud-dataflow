@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.registry.repository;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
@@ -70,10 +71,10 @@ public class AppRegistrationRepositoryImpl implements AppRegistrationRepositoryC
 			predicates.add(cb.equal(appRegistrationRoot.get("type"), type));
 		}
 		if (StringUtils.hasText(name)) {
-			predicates.add(cb.like(cb.lower(appRegistrationRoot.get("name")), "%" + name.toLowerCase() + "%"));
+			predicates.add(cb.like(cb.lower(appRegistrationRoot.get("name")), "%" + name.toLowerCase(Locale.ROOT) + "%"));
 		}
 		if (StringUtils.hasText(version)) {
-			predicates.add(cb.equal(cb.lower(appRegistrationRoot.get("version")), version.toLowerCase()));
+			predicates.add(cb.equal(cb.lower(appRegistrationRoot.get("version")), version.toLowerCase(Locale.ROOT)));
 		}
 		if (defaultVersion) {
 			predicates.add(cb.isTrue(appRegistrationRoot.get("defaultVersion")));

@@ -16,6 +16,7 @@
 package org.springframework.cloud.dataflow.server.batch;
 
 import java.sql.Types;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -286,7 +287,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	}
 
 	private int determineClobTypeToUse(String databaseType) {
-		if (DatabaseType.SYBASE == DatabaseType.valueOf(databaseType.toUpperCase())) {
+		if (DatabaseType.SYBASE == DatabaseType.valueOf(databaseType.toUpperCase(Locale.ROOT))) {
 			return Types.LONGVARCHAR;
 		}
 		else {

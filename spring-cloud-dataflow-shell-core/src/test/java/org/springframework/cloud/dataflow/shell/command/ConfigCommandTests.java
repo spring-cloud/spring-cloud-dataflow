@@ -22,6 +22,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -187,7 +188,7 @@ class ConfigCommandTests {
 
 
 	private boolean isWindows() {
-		return System.getProperty("os.name", "null").toLowerCase().startsWith("windows");
+		return System.getProperty("os.name", "null").toLowerCase(Locale.ROOT).startsWith("windows");
 	}
 
 	private DataFlowShellProperties shellProperties() {

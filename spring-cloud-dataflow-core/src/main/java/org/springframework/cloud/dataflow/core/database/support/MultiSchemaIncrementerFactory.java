@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -73,7 +74,7 @@ public class MultiSchemaIncrementerFactory extends DefaultDataFieldMaxValueIncre
 					if (tableName.equalsIgnoreCase(incrementerName)) {
 						String tableType = tables.getString("TABLE_TYPE");
 						logger.debug("Found Table:{}:{}", incrementerName, tableType);
-						if (tableType != null && tableType.toUpperCase().contains("SEQUENCE")) {
+						if (tableType != null && tableType.toUpperCase(Locale.ROOT).contains("SEQUENCE")) {
 							return IncrementerType.SEQUENCE;
 						}
 						return IncrementerType.TABLE;

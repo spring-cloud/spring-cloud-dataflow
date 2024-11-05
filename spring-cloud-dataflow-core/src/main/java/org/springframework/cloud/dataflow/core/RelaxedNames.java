@@ -90,7 +90,7 @@ public final class RelaxedNames implements Iterable<String> {
 
 			@Override
 			public String apply(String value) {
-				return (value.isEmpty() ? value : value.toLowerCase(Locale.ENGLISH));
+				return (value.isEmpty() ? value : value.toLowerCase(Locale.ROOT));
 			}
 
 		},
@@ -99,7 +99,7 @@ public final class RelaxedNames implements Iterable<String> {
 
 			@Override
 			public String apply(String value) {
-				return (value.isEmpty() ? value : value.toUpperCase(Locale.ENGLISH));
+				return (value.isEmpty() ? value : value.toUpperCase(Locale.ROOT));
 			}
 
 		};
@@ -224,7 +224,7 @@ public final class RelaxedNames implements Iterable<String> {
 			}
 			StringBuilder builder = new StringBuilder();
 			for (String field : SEPARATED_TO_CAMEL_CASE_PATTERN.split(value)) {
-				field = (caseInsensitive ? field.toLowerCase(Locale.ENGLISH) : field);
+				field = (caseInsensitive ? field.toLowerCase(Locale.ROOT) : field);
 				builder.append(
 						builder.length() != 0 ? StringUtils.capitalize(field) : field);
 			}

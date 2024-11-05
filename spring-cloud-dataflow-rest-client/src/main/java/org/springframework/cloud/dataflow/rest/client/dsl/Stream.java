@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -178,7 +179,7 @@ public class Stream implements AutoCloseable {
 		Collection<Release> history = this.client.streamOperations().history(this.name);
 		return history.stream().collect(Collectors.toMap(
 				Release::getVersion,
-				r -> r.getInfo().getStatus().getStatusCode().toString().toLowerCase()));
+				r -> r.getInfo().getStatus().getStatusCode().toString().toLowerCase(Locale.ROOT)));
 	}
 
 	/**

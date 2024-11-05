@@ -17,6 +17,7 @@ package org.springframework.cloud.common.security.support;
 
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class ExternalOauth2ResourceAuthoritiesMapper implements AuthoritiesMappe
 			if (!StringUtils.hasText(permission)) {
 				logger.warn("Received an empty permission from {}", roleProviderUri);
 			} else {
-				final CoreSecurityRoles securityRole = CoreSecurityRoles.fromKey(permission.toUpperCase());
+				final CoreSecurityRoles securityRole = CoreSecurityRoles.fromKey(permission.toUpperCase(Locale.ROOT));
 				if (securityRole == null) {
 					logger.warn("Invalid role {} provided by {}", permission, roleProviderUri);
 				} else {

@@ -15,6 +15,8 @@
  */
 package org.springframework.cloud.dataflow.server.support;
 
+import java.util.Locale;
+
 /**
  * @author Mark Pollack
  */
@@ -23,6 +25,6 @@ public class PlatformUtils {
 	public static boolean isWindows() {
 		String osName = System.getProperty("os.name");
 
-		return osName != null && osName.toLowerCase().startsWith("windows");
+		return osName != null && osName.toLowerCase(Locale.ROOT).startsWith("windows");
 	}
 }

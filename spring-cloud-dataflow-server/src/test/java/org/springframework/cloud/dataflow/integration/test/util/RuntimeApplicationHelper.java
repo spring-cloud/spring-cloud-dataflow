@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.integration.test.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -200,7 +201,7 @@ public class RuntimeApplicationHelper {
 	}
 
 	private String cloudFoundryApplicationInstanceUrl(Map<String, String> instanceAttributes) {
-		return instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL).replace("http:", "https:").toLowerCase();
+		return instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL).replace("http:", "https:").toLowerCase(Locale.ROOT);
 	}
 
 	/**
@@ -210,7 +211,7 @@ public class RuntimeApplicationHelper {
 	private String kubernetesApplicationInstanceUrl(Map<String, String> instanceAttributes) {
 		String appInstanceUrl = instanceAttributes.get(StreamRuntimePropertyKeys.ATTRIBUTE_URL);
 		if (httpsStreamApplications) {
-			appInstanceUrl = appInstanceUrl.replace("http:", "https:").toLowerCase();
+			appInstanceUrl = appInstanceUrl.replace("http:", "https:").toLowerCase(Locale.ROOT);
 		}
 		return appInstanceUrl;
 	}

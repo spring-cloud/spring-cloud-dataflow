@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -272,7 +273,7 @@ public class DefaultSchedulerService implements SchedulerService {
 		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
 				appDeploymentProperties, "common");
 		TaskServiceUtils.contributeCommonProperties(this.commonApplicationProperties.getTaskResourceProperties(),
-				appDeploymentProperties, launcher.getType().toLowerCase());
+				appDeploymentProperties, launcher.getType().toLowerCase(Locale.ROOT));
 
 		Map<String, String> deployerDeploymentProperties = DeploymentPropertiesUtils
 				.extractAndQualifyDeployerProperties(taskDeploymentProperties, taskDefinition.getRegisteredAppName());
@@ -333,7 +334,7 @@ public class DefaultSchedulerService implements SchedulerService {
 				throw new IllegalArgumentException(String.format("the name specified " +
 						"exceeds the maximum schedule name length of %s.", MAX_SCHEDULE_NAME_LEN));
 			}
-			scheduleName = scheduleName.toLowerCase();
+			scheduleName = scheduleName.toLowerCase(Locale.ROOT);
 		}
 		return scheduleName;
 	}

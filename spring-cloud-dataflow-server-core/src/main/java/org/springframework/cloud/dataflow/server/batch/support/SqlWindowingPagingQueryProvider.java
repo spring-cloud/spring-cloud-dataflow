@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.server.batch.support;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.batch.item.database.Order;
@@ -59,7 +60,7 @@ public class SqlWindowingPagingQueryProvider extends AbstractSqlPagingQueryProvi
 
 	protected Object extractTableAlias() {
 		String alias = "" + getSubQueryAlias();
-		if (StringUtils.hasText(alias) && alias.toUpperCase().startsWith("AS")) {
+		if (StringUtils.hasText(alias) && alias.toUpperCase(Locale.ROOT).startsWith("AS")) {
 			alias = alias.substring(3).trim() + ".";
 		}
 		return alias;

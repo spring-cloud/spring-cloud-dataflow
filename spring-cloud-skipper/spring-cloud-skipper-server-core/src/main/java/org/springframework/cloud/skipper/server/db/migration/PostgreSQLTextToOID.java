@@ -21,6 +21,7 @@ import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -52,7 +53,7 @@ public class PostgreSQLTextToOID {
 	public static void convertColumnToOID(String table, String id, String column, DataSource dataSource) {
 
 		try (Connection connection = dataSource.getConnection()) {
-			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(), column.toUpperCase())) {
+			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(Locale.ROOT), column.toUpperCase(Locale.ROOT))) {
 				while (resultSet.next()) {
 					int dataType = resultSet.getInt("DATA_TYPE");
 					logger.info("Found {}:{}:{}", table, column, JDBCType.valueOf(dataType));
@@ -90,7 +91,7 @@ public class PostgreSQLTextToOID {
 
 	public static void convertColumnFromOID(String table, String id, String column, DataSource dataSource) {
 		try (Connection connection = dataSource.getConnection()) {
-			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(), column.toUpperCase())) {
+			try (ResultSet resultSet = connection.getMetaData().getColumns(null, null, table.toUpperCase(Locale.ROOT), column.toUpperCase(Locale.ROOT))) {
 				while (resultSet.next()) {
 					int dataType = resultSet.getInt("DATA_TYPE");
 					logger.info("Found {}:{}:{}", table, column, JDBCType.valueOf(dataType));

@@ -16,6 +16,8 @@
 
 package org.springframework.cloud.dataflow.rest.resource.about;
 
+import java.util.Locale;
+
 import org.springframework.util.StringUtils;
 
 /**
@@ -76,7 +78,7 @@ public class MonitoringDashboardInfo {
 	}
 
 	public String getSource() {
-		return StringUtils.isEmpty(source) ? source : source.toLowerCase();
+		return StringUtils.isEmpty(source) ? source : source.toLowerCase(Locale.ROOT);
 	}
 
 	public void setSource(String source) {

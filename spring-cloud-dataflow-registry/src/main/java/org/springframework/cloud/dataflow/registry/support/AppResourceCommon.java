@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -156,7 +157,7 @@ public class AppResourceCommon {
 				throw new IllegalArgumentException("Invalid URI schema for resource: " + resourceUri
 						+ " Expected URI schema prefix like file://, http:// or classpath:// but got none");
 			}
-			scheme = scheme.toLowerCase();
+			scheme = scheme.toLowerCase(Locale.ROOT);
 			Assert.notNull(scheme, "a scheme (prefix) is required");
 
 			switch (scheme) {

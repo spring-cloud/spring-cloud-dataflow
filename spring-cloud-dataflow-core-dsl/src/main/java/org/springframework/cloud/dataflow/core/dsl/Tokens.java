@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.core.dsl;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Class that converts an expression into a list of {@link Token tokens}. Furthermore,
@@ -218,8 +219,8 @@ public class Tokens {
 			raiseException(expression.length(), DSLMessage.OOD);
 		}
 		if (t.kind != expectedKind) {
-			raiseException(t.startPos, DSLMessage.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(),
-					(t.data == null) ? new String(t.getKind().tokenChars).toLowerCase() : t.data);
+			raiseException(t.startPos, DSLMessage.NOT_EXPECTED_TOKEN, expectedKind.toString().toLowerCase(Locale.ROOT),
+					(t.data == null) ? new String(t.getKind().tokenChars).toLowerCase(Locale.ROOT) : t.data);
 		}
 		return t;
 	}

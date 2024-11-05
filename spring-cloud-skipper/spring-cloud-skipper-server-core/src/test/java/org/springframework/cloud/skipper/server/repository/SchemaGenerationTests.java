@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.spi.PersistenceUnitInfo;
@@ -100,7 +101,7 @@ class SchemaGenerationTests extends AbstractIntegrationTest {
 			export = new SchemaExport();
 			export.setDelimiter(";");
 			export.setFormat(true);
-			export.setOutputFile(new File(tempDir, "schema-" + dialect.toLowerCase() + ".sql").getAbsolutePath());
+			export.setOutputFile(new File(tempDir, "schema-" + dialect.toLowerCase(Locale.ROOT) + ".sql").getAbsolutePath());
 		}
 		catch (HibernateException e) {
 			throw new IllegalStateException(e);

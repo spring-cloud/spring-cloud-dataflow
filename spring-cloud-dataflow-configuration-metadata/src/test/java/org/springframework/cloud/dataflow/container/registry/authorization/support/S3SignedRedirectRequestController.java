@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.container.registry.authorization.support;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.cloud.dataflow.container.registry.ContainerRegistryProperties;
@@ -43,7 +44,7 @@ public class S3SignedRedirectRequestController {
 
 	@RequestMapping("/v2/test/s3-redirect-image/manifests/1.0.0")
 	public ResponseEntity<Resource> getManifests(@RequestHeader("Authorization") String token) {
-		if (!"bearer my_token_999".equals(token.trim().toLowerCase())) {
+		if (!"bearer my_token_999".equals(token.trim().toLowerCase(Locale.ROOT))) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		return buildFromString("{\"config\": {\"digest\": \"signed_redirect_digest\"} }");
@@ -51,7 +52,7 @@ public class S3SignedRedirectRequestController {
 
 	@RequestMapping("/v2/test/s3-redirect-image/blobs/signed_redirect_digest")
 	public ResponseEntity<Map<String, String>> getBlobRedirect(@RequestHeader("Authorization") String token) {
-		if (!"bearer my_token_999".equals(token.trim().toLowerCase())) {
+		if (!"bearer my_token_999".equals(token.trim().toLowerCase(Locale.ROOT))) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		HttpHeaders redirectHeaders = new HttpHeaders();

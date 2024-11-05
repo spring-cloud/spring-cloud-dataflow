@@ -17,6 +17,7 @@
 package org.springframework.cloud.dataflow.integration.test.util;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -150,7 +151,7 @@ public class DockerComposeFactoryProperties {
 	 * For example test.docker.compose.paths would be converted into TEST_DOCKER_COMPOSE_PATHS.
 	 */
 	private static String toEnv(String property) {
-		return property.trim().toUpperCase().replace(".", "_");
+		return property.trim().toUpperCase(Locale.ROOT).replace(".", "_");
 	}
 
 	/**

@@ -19,6 +19,7 @@ package org.springframework.cloud.dataflow.server.repository.support;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -155,7 +156,7 @@ public abstract class AbstractSqlPagingQueryProvider implements PagingQueryProvi
 	private String removeKeyWord(String keyWord, String clause) {
 		String temp = clause.trim();
 		String keyWordString = keyWord + " ";
-		if (temp.toLowerCase().startsWith(keyWordString) && temp.length() > keyWordString.length()) {
+		if (temp.toLowerCase(Locale.ROOT).startsWith(keyWordString) && temp.length() > keyWordString.length()) {
 			return temp.substring(keyWordString.length());
 		}
 		else {
