@@ -40,7 +40,7 @@ VersionInfoProperties versionInfoProperties, SecurityStateBean securityStateBean
 * `DockerComposeRule.waitingForService(String serviceName, HealthCheck<Container> healthCheck)` has been replaced by `DockerComposeRule.waitingForService(String serviceName, HealthCheck<Container> healthCheck, ReadableDuration timeout)`.
 * The deprecated `rollback(String releaseName, int releaseVersion)` method in SkipperClient has been removed.  Use  `rollback(RollbackRequest rollbackRequest).
 * Removed the `DefaultTaskExecutionService` constructor that does not take the `composedTaskRunnerConfigurationProperties` parameter.  Use the constructor that offers the `composedTaskRunnerConfigurationProperties` parameter.
-
+* * Removed the `DefaultTaskExecutionInfoService` constructor that does not take the `composedTaskRunnerConfigurationProperties` parameter.  Use the constructor that offers the `composedTaskRunnerConfigurationProperties` parameter.
 === Breaking Changes
 Announce deprecated changes here
 

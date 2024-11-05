@@ -95,38 +95,6 @@ public class DefaultTaskExecutionInfoService implements TaskExecutionInfoService
 	/**
 	 * Initializes the {@link DefaultTaskExecutionInfoService}.
 	 *
-	 * @param dataSourceProperties        the data source properties.
-	 * @param appRegistryService          URI registry this service will use to look up app URIs.
-	 * @param taskExplorer                the explorer this service will use to lookup task executions
-	 * @param taskDefinitionRepository    the {@link TaskDefinitionRepository} this service will
-	 *                                    use for task CRUD operations.
-	 * @param taskConfigurationProperties the properties used to define the behavior of tasks
-	 * @param launcherRepository          the launcher repository
-	 * @param taskPlatforms               the task platforms
-	 */
-	@Deprecated
-	public DefaultTaskExecutionInfoService(
-		DataSourceProperties dataSourceProperties,
-		AppRegistryService appRegistryService,
-		DataflowTaskExplorer taskExplorer,
-		TaskDefinitionRepository taskDefinitionRepository,
-		TaskConfigurationProperties taskConfigurationProperties,
-		LauncherRepository launcherRepository,
-		List<TaskPlatform> taskPlatforms
-	) {
-		this(dataSourceProperties,
-			appRegistryService,
-			taskExplorer,
-			taskDefinitionRepository,
-			taskConfigurationProperties,
-			launcherRepository,
-			taskPlatforms,
-			null);
-	}
-
-	/**
-	 * Initializes the {@link DefaultTaskExecutionInfoService}.
-	 *
 	 * @param dataSourceProperties                      the data source properties.
 	 * @param appRegistryService                        URI registry this service will use to look up app URIs.
 	 * @param taskExplorer                              the explorer this service will use to lookup task executions
