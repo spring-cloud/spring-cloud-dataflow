@@ -23,7 +23,7 @@ import org.springframework.batch.core.StepExecution;
 
 /**
  * Stores the cumulative information for a specific {@link StepExecution}'s history.
- * }
+ *
  * @author Glenn Renfro
  */
 public class StepExecutionHistory {
@@ -84,7 +84,6 @@ public class StepExecutionHistory {
 
 	/**
 	 * Returns the number of {@link StepExecution}s are being used for history calculations.
-	 *
 	 * The id of an existing step execution for a specific job execution (required)
 	 * @return the number of {@link StepExecution}s.
 	 */
@@ -92,12 +91,10 @@ public class StepExecutionHistory {
 		return count;
 	}
 
-	@Deprecated
 	public CumulativeHistory getCommitCount() {
 		return commitCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getRollbackCount() {
 		return rollbackCount;
 	}
@@ -106,27 +103,22 @@ public class StepExecutionHistory {
 		return readCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getWriteCount() {
 		return writeCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getFilterCount() {
 		return filterCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getReadSkipCount() {
 		return readSkipCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getWriteSkipCount() {
 		return writeSkipCount;
 	}
 
-	@Deprecated
 	public CumulativeHistory getProcessSkipCount() {
 		return processSkipCount;
 	}
@@ -139,7 +131,6 @@ public class StepExecutionHistory {
 		return duration;
 	}
 
-	@Deprecated
 	public CumulativeHistory getDurationPerRead() {
 		return durationPerRead;
 	}

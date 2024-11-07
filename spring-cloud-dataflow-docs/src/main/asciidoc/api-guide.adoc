@@ -3072,9 +3072,6 @@ include::{snippets}/job-step-executions-documentation/step-progress/curl-request
 
 include::{snippets}/job-step-executions-documentation/step-progress/http-response.adoc[]
 
-NOTE: The following fields in the stepExecutionHistory are deprecated and will be removed in a future release: rollbackCount, readCount, writeCount, filterCount, readSkipCount, writeSkipCount, processSkipCount, durationPerRead.
-
-
 [[api-guide-resources-runtime-information-applications]]
 === Runtime Information about Applications
 
