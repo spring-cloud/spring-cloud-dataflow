@@ -47,7 +47,7 @@ import org.springframework.util.Assert;
  */
 public class TaskSchedule implements AutoCloseable {
 
-	public static final String CRON_EXPRESSION_KEY = "scheduler.cron.expression";
+	public static final String CRON_EXPRESSION_KEY = "deployer.cron.expression";
 
 	private final String scheduleName;
 
