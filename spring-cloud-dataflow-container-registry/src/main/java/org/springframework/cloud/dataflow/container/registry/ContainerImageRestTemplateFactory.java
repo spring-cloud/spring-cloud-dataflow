@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,11 @@ package org.springframework.cloud.dataflow.container.registry;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLException;
 
@@ -41,19 +43,18 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.RestTemplate;
 
 /**
- * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the
- * Container Registry access. Created RestTemplates can be configured to use Http Proxy
- * and/or bypassing the SSL verification.
+ * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the Container Registry access.
+ * Created RestTemplates can be configured to use Http Proxy and/or bypassing the SSL verification.
  *
- * For configuring a Http Proxy in need to: 1. Add http proxy configuration using the
- * spring.cloud.dataflow.container.httpProxy.* properties. 2. For every
- * {@link ContainerRegistryConfiguration} that has to interact via the http proxy set the
- * use-http-proxy flag to true. For example:
- * <code>spring.cloud.dataflow.container.registry-configurations[reg-name].use-http-proxy=ture</code>
+ * For configuring a Http Proxy in need to:
+ *  1. Add http proxy configuration using the spring.cloud.dataflow.container.httpProxy.* properties.
+ *  2. For every {@link ContainerRegistryConfiguration} that has to interact via the http proxy set the use-http-proxy
+ *     flag to true. For example:
+ *     <code>spring.cloud.dataflow.container.registry-configurations[reg-name].use-http-proxy=ture</code>
  *
- * Following example configures the default (e.g. DockerHub) registry to use the HTTP
- * Proxy (my-proxy.test:8080) while the dockerhub-mirror and the private-snapshots
- * registry configurations allow direct communication: <code>
+ * Following example configures the default (e.g. DockerHub) registry to use the HTTP Proxy (my-proxy.test:8080)
+ * while the dockerhub-mirror and the private-snapshots registry configurations allow direct communication:
+ * <code>
  *     spring:
  *   cloud:
  *     dataflow:
@@ -74,6 +75,7 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Christian Tzolov
  * @author Cheng Guan Poh
+ * @author Corneil du Plessis
  */
 public class ContainerImageRestTemplateFactory {
 
@@ -88,41 +90,16 @@ public class ContainerImageRestTemplateFactory {
 	private final ContainerRegistryProperties properties;
 
 	/**
-	 * Depends on the disablesSslVerification and useHttpProxy a 4 different RestTemplate configurations might be
+	 * Depends on the skipSslVerification and withHttpProxy and extra map with multiple configurations might be
 	 * used at the same time for interacting with different container registries.
-	 * The cache map allows reusing the RestTemplates for given useHttpProxy and disablesSslVerification combination.
+	 * The cache map allows reusing the RestTemplates for given withHttpProxy and skipSslVerification and extra map combination.
 	 */
 	private final ConcurrentHashMap<CacheKey, RestTemplate> restTemplateCache;
 
 	/**
-	 * Unique key for any useHttpProxy and disablesSslVerification combination.
+	 * Unique key for any withHttpProxy and skipSslVerification combination.
 	 */
-	private static class CacheKey {
-		private final boolean disablesSslVerification;
-		private final boolean useHttpProxy;
-
-		public CacheKey(boolean disablesSslVerification, boolean useHttpProxy) {
-			this.disablesSslVerification = disablesSslVerification;
-			this.useHttpProxy = useHttpProxy;
-		}
-
-		static CacheKey of(boolean disablesSslVerification, boolean useHttpProxy) {
-			return new CacheKey(disablesSslVerification, useHttpProxy);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			CacheKey cacheKey = (CacheKey) o;
-			return disablesSslVerification == cacheKey.disablesSslVerification && useHttpProxy == cacheKey.useHttpProxy;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(disablesSslVerification, useHttpProxy);
-		}
-	}
+	record CacheKey(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {};
 
 	public ContainerImageRestTemplateFactory(RestTemplateBuilder restTemplateBuilder, ContainerRegistryProperties properties) {
 		this.restTemplateBuilder = restTemplateBuilder;
@@ -130,23 +107,30 @@ public class ContainerImageRestTemplateFactory {
 		this.restTemplateCache = new ConcurrentHashMap();
 	}
 
+	/**
+	 * Obtain a configured RestTemplate for interacting with container registry.
+	 * @param skipSslVerification indicates we want to trust all certificates.
+	 * @param withHttpProxy indicates we want to use configured proxy.
+	 * @return A configured RestTemplate with the given ssl and proxy settings.
+	 */
 	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy) {
 		return this.getContainerRestTemplate(skipSslVerification, withHttpProxy, Collections.emptyMap());
 	}
 
+	/**
+	 * Obtain a configured RestTemplate for interacting with container registry.
+	 * @param skipSslVerification indicates that we want to trust all certificates.
+	 * @param withHttpProxy indicates we want to use the configure proxy host and port.
+	 * @param extra by adding entry custom-registry=registry-domain we expect to remove Authorization headers.
+	 * @return A configured RestTemplate with the given ssl and proxy and extra settings.
+	 */
 	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {
+		var cacheKey = new CacheKey(skipSslVerification, withHttpProxy, new HashMap<>(extra));
 		try {
-			CacheKey cacheKey = CacheKey.of(skipSslVerification, withHttpProxy);
-			if (!this.restTemplateCache.containsKey(cacheKey)) {
-				RestTemplate restTemplate = createContainerRestTemplate(skipSslVerification, withHttpProxy, extra);
-				this.restTemplateCache.putIfAbsent(cacheKey, restTemplate);
-			}
-			return this.restTemplateCache.get(cacheKey);
+			return this.restTemplateCache.computeIfAbsent(cacheKey, (key) -> createContainerRestTemplate(key.skipSslVerification(), key.withHttpProxy(), key.extra()));
 		}
 		catch (Exception e) {
-			throw new ContainerRegistryException(
-					"Failed to create Container Image RestTemplate for disableSsl:"
-							+ skipSslVerification + ", httpProxy:" + withHttpProxy, e);
+			throw new ContainerRegistryException("Failed to create Container Image RestTemplate for disableSsl:" + skipSslVerification + ", httpProxy:" + withHttpProxy, e);
 		}
 	}
 
@@ -179,12 +163,6 @@ public class ContainerImageRestTemplateFactory {
 	 *
 	 * Custom:
 	 *   Custom Container Registry may have same type of issues as S3 so header needs to be dropped as well.
-	 *
-	 * @author Adam J. Weigold
-	 * @author Janne Valkealahti
-	 * @author Christian Tzolov
-	 * @author Cheng Guan Poh
-	 * @author Corneil du Plessis
 	 */
 	private HttpClient httpClientBuilder(boolean skipSslVerification, Map<String, String> extra) {
 
@@ -211,29 +189,27 @@ public class ContainerImageRestTemplateFactory {
 
 	private boolean shouldRemoveAuthorization(HttpClientRequest request, Map<String, String> extra) {
 		HttpMethod method = request.method();
-		if(method.equals(HttpMethod.GET) || method.equals(HttpMethod.HEAD)) {
-			if (request.uri().contains(AMZ_CREDENTIAL)) {
-				return true;
-			}
-			if (request.uri().contains(AZURECR_URI_SUFFIX)) {
-				return request.requestHeaders()
-					.entries()
-					.stream()
-					.anyMatch(entry -> entry.getKey().equalsIgnoreCase(AUTHORIZATION_HEADER)
-							&& entry.getValue().contains(BASIC_AUTH));
-			}
-			return extra.containsKey(CUSTOM_REGISTRY) && request.uri().contains(extra.get(CUSTOM_REGISTRY));
+		if(!method.equals(HttpMethod.GET) && !method.equals(HttpMethod.HEAD)) {
+			return false;
 		}
-		return false;
+		if (request.uri().contains(AMZ_CREDENTIAL)) {
+			return true;
+		}
+		if (request.uri().contains(AZURECR_URI_SUFFIX)) {
+			return request.requestHeaders()
+				.entries()
+				.stream()
+				.anyMatch(entry -> entry.getKey().equalsIgnoreCase(AUTHORIZATION_HEADER)
+						&& entry.getValue().contains(BASIC_AUTH));
+		}
+		return extra.containsKey(CUSTOM_REGISTRY) && request.uri().contains(extra.get(CUSTOM_REGISTRY));
 	}
 
 	private static void removeAuthorization(HttpHeaders headers) {
-		for(Map.Entry<String,String> entry: headers.entries()) {
-			if(entry.getKey().equalsIgnoreCase(org.springframework.http.HttpHeaders.AUTHORIZATION)) {
-				headers.remove(entry.getKey());
-				break;
-			}
-		}
+		Set<String> authHeaders = headers.entries()
+				.stream()
+				.filter(entry -> entry.getKey().equalsIgnoreCase(AUTHORIZATION_HEADER)).map(Map.Entry::getKey).collect(Collectors.toSet());
+		authHeaders.forEach(authHeader -> headers.remove(authHeader));
 	}
 
 	private RestTemplate initRestTemplate(HttpClient client, boolean withHttpProxy, Map<String, String> extra) {
@@ -243,10 +219,13 @@ public class ContainerImageRestTemplateFactory {
 			if (!properties.getHttpProxy().isEnabled()) {
 				throw new ContainerRegistryException("Registry Configuration uses a HttpProxy but non is configured!");
 			}
-			ProxyProvider.Builder builder = ProxyProvider.builder().type(ProxyProvider.Proxy.HTTP).host(properties.getHttpProxy().getHost()).port(properties.getHttpProxy().getPort());
+			ProxyProvider.Builder builder = ProxyProvider.builder()
+					.type(ProxyProvider.Proxy.HTTP)
+					.host(properties.getHttpProxy().getHost())
+					.port(properties.getHttpProxy().getPort());
 			client.proxy(typeSpec -> builder.build());
 		}
-		// TODO what do we do with extra?
+
 		ClientHttpRequestFactory customRequestFactory = new ReactorNettyClientRequestFactory(client);
 
 		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
@@ -255,6 +234,7 @@ public class ContainerImageRestTemplateFactory {
 		// include application/octet-stream and text/plain.
 		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
 		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
+		mediaTypeList.add(MediaType.APPLICATION_JSON);
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		mediaTypeList.add(MediaType.TEXT_PLAIN);
 		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);
