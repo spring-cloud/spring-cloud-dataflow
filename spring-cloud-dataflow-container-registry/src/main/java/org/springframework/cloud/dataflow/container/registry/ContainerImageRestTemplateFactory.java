@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 the original author or authors.
+ * Copyright 2021-2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +16,31 @@
 
 package org.springframework.cloud.dataflow.container.registry;
 
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.SSLException;
 
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.StandardCookieSpec;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
-import org.apache.hc.client5.http.socket.ConnectionSocketFactory;
-import org.apache.hc.client5.http.socket.PlainConnectionSocketFactory;
-import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.config.Lookup;
-import org.apache.hc.core5.http.config.RegistryBuilder;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientRequest;
+import reactor.netty.transport.ProxyProvider;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.cloud.dataflow.container.registry.authorization.DropAuthorizationHeaderRequestRedirectStrategy;
 import org.springframework.http.MediaType;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ReactorNettyClientRequestFactory;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-
 
 /**
  * On demand creates a cacheable {@link RestTemplate} instances for the purpose of the Container Registry access.
@@ -83,49 +75,31 @@ import org.springframework.web.client.RestTemplate;
  *
  * @author Christian Tzolov
  * @author Cheng Guan Poh
+ * @author Corneil du Plessis
  */
 public class ContainerImageRestTemplateFactory {
+
+	private static final String CUSTOM_REGISTRY = "custom-registry";
+	private static final String AMZ_CREDENTIAL = "X-Amz-Credential";
+	private static final String AUTHORIZATION_HEADER = "Authorization";
+	private static final String AZURECR_URI_SUFFIX = "azurecr.io";
+	private static final String BASIC_AUTH = "Basic";
 
 	private final RestTemplateBuilder restTemplateBuilder;
 
 	private final ContainerRegistryProperties properties;
 
 	/**
-	 * Depends on the disablesSslVerification and useHttpProxy a 4 different RestTemplate configurations might be
+	 * Depends on the skipSslVerification and withHttpProxy and extra map with multiple configurations might be
 	 * used at the same time for interacting with different container registries.
-	 * The cache map allows reusing the RestTemplates for given useHttpProxy and disablesSslVerification combination.
+	 * The cache map allows reusing the RestTemplates for given withHttpProxy and skipSslVerification and extra map combination.
 	 */
 	private final ConcurrentHashMap<CacheKey, RestTemplate> restTemplateCache;
 
 	/**
-	 * Unique key for any useHttpProxy and disablesSslVerification combination.
+	 * Unique key for any withHttpProxy and skipSslVerification combination.
 	 */
-	private static class CacheKey {
-		private final boolean disablesSslVerification;
-		private final boolean useHttpProxy;
-
-		public CacheKey(boolean disablesSslVerification, boolean useHttpProxy) {
-			this.disablesSslVerification = disablesSslVerification;
-			this.useHttpProxy = useHttpProxy;
-		}
-
-		static CacheKey of(boolean disablesSslVerification, boolean useHttpProxy) {
-			return new CacheKey(disablesSslVerification, useHttpProxy);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			CacheKey cacheKey = (CacheKey) o;
-			return disablesSslVerification == cacheKey.disablesSslVerification && useHttpProxy == cacheKey.useHttpProxy;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(disablesSslVerification, useHttpProxy);
-		}
-	}
+	record CacheKey(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {};
 
 	public ContainerImageRestTemplateFactory(RestTemplateBuilder restTemplateBuilder, ContainerRegistryProperties properties) {
 		this.restTemplateBuilder = restTemplateBuilder;
@@ -133,87 +107,126 @@ public class ContainerImageRestTemplateFactory {
 		this.restTemplateCache = new ConcurrentHashMap();
 	}
 
+	/**
+	 * Obtain a configured RestTemplate for interacting with container registry.
+	 * @param skipSslVerification indicates we want to trust all certificates.
+	 * @param withHttpProxy indicates we want to use configured proxy.
+	 * @return A configured RestTemplate with the given ssl and proxy settings.
+	 */
 	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy) {
 		return this.getContainerRestTemplate(skipSslVerification, withHttpProxy, Collections.emptyMap());
 	}
 
+	/**
+	 * Obtain a configured RestTemplate for interacting with container registry.
+	 * @param skipSslVerification indicates that we want to trust all certificates.
+	 * @param withHttpProxy indicates we want to use the configure proxy host and port.
+	 * @param extra by adding entry custom-registry=registry-domain we expect to remove Authorization headers.
+	 * @return A configured RestTemplate with the given ssl and proxy and extra settings.
+	 */
 	public RestTemplate getContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {
+		var cacheKey = new CacheKey(skipSslVerification, withHttpProxy, new HashMap<>(extra));
 		try {
-			CacheKey cacheKey = CacheKey.of(skipSslVerification, withHttpProxy);
-			if (!this.restTemplateCache.containsKey(cacheKey)) {
-				RestTemplate restTemplate = createContainerRestTemplate(skipSslVerification, withHttpProxy, extra);
-				this.restTemplateCache.putIfAbsent(cacheKey, restTemplate);
-			}
-			return this.restTemplateCache.get(cacheKey);
+			return this.restTemplateCache.computeIfAbsent(cacheKey, (key) -> createContainerRestTemplate(key.skipSslVerification(), key.withHttpProxy(), key.extra()));
 		}
 		catch (Exception e) {
-			throw new ContainerRegistryException(
-					"Failed to create Container Image RestTemplate for disableSsl:"
-							+ skipSslVerification + ", httpProxy:" + withHttpProxy, e);
+			throw new ContainerRegistryException("Failed to create Container Image RestTemplate for disableSsl:" + skipSslVerification + ", httpProxy:" + withHttpProxy, e);
 		}
 	}
 
-	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra)
-			throws NoSuchAlgorithmException, KeyManagementException {
+	private RestTemplate createContainerRestTemplate(boolean skipSslVerification, boolean withHttpProxy, Map<String, String> extra) {
+		HttpClient client = httpClientBuilder(skipSslVerification, extra);
+		return initRestTemplate(client, withHttpProxy, extra);
+	}
 
-		if (!skipSslVerification) {
-			// Create a RestTemplate that uses custom request factory
-			return this.initRestTemplate(HttpClients.custom(), withHttpProxy, extra);
-		}
+	/**
+	 * Amazon, Azure and Custom Container Registry services require special treatment for the Authorization headers when the
+	 * HTTP request are forwarded to 3rd party services.
+	 *
+	 * Amazon:
+	 *   The Amazon S3 API supports two Authentication Methods (https://amzn.to/2Dg9sga):
+	 *   (1) HTTP Authorization header and (2) Query string parameters (often referred to as a pre-signed URL).
+	 *
+	 *   But only one auth mechanism is allowed at a time. If the http request contains both an Authorization header and
+	 *   an pre-signed URL parameters then an error is thrown.
+	 *
+	 *   Container Registries often use AmazonS3 as a backend object store. If HTTP Authorization header
+	 *   is used to authenticate with the Container Registry and then this registry redirect the request to a S3 storage
+	 *   using pre-signed URL authentication, the redirection will fail.
+	 *
+	 *   Solution is to implement a HTTP redirect strategy that removes the original Authorization headers when the request is
+	 *   redirected toward an Amazon signed URL.
+	 *
+	 * Azure:
+	 *   Azure have same type of issues as S3 so header needs to be dropped as well.
+	 *   (https://docs.microsoft.com/en-us/azure/container-registry/container-registry-faq#authentication-information-is-not-given-in-the-correct-format-on-direct-rest-api-calls)
+	 *
+	 * Custom:
+	 *   Custom Container Registry may have same type of issues as S3 so header needs to be dropped as well.
+	 */
+	private HttpClient httpClientBuilder(boolean skipSslVerification, Map<String, String> extra) {
 
-		// Trust manager that blindly trusts all SSL certificates.
-		TrustManager[] trustAllCerts = new TrustManager[] {
-				new X509TrustManager() {
-					public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-						return new X509Certificate[0];
-					}
+		try {
+			SslContextBuilder builder = skipSslVerification
+					? SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE)
+					: SslContextBuilder.forClient();
+			SslContext sslContext = builder.build();
+			HttpClient client = HttpClient.create().secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
 
-					public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-					}
-
-					public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {
-					}
+			return client.followRedirect(true, (entries, httpClientRequest) -> {
+				if (shouldRemoveAuthorization(httpClientRequest, extra)) {
+					HttpHeaders httpHeaders = httpClientRequest.requestHeaders();
+					removeAuthorization(httpHeaders);
+					removeAuthorization(entries);
+					httpClientRequest.headers(httpHeaders);
 				}
-		};
-		SSLContext sslContext = SSLContext.getInstance("SSL");
-		// Install trust manager to SSL Context.
-		sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-
-		// Create a RestTemplate that uses custom request factory
-		return initRestTemplate(
-				httpClientBuilder(sslContext),
-				withHttpProxy,
-				extra);
+			});
+		}
+		catch (SSLException e) {
+			throw new RuntimeException(e);
+		}
 	}
-	private HttpClientBuilder httpClientBuilder(SSLContext sslContext) {
-		// Register http/s connection factories
-		Lookup<ConnectionSocketFactory> connSocketFactoryLookup = RegistryBuilder.<ConnectionSocketFactory> create()
-			.register("https", new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
-			.register("http", new PlainConnectionSocketFactory())
-			.build();
-		return HttpClients.custom()
-			.setConnectionManager(new BasicHttpClientConnectionManager(connSocketFactoryLookup));
-	}
-	private RestTemplate initRestTemplate(HttpClientBuilder clientBuilder, boolean withHttpProxy, Map<String, String> extra) {
 
-		clientBuilder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.RELAXED).build());
+	private boolean shouldRemoveAuthorization(HttpClientRequest request, Map<String, String> extra) {
+		HttpMethod method = request.method();
+		if(!method.equals(HttpMethod.GET) && !method.equals(HttpMethod.HEAD)) {
+			return false;
+		}
+		if (request.uri().contains(AMZ_CREDENTIAL)) {
+			return true;
+		}
+		if (request.uri().contains(AZURECR_URI_SUFFIX)) {
+			return request.requestHeaders()
+				.entries()
+				.stream()
+				.anyMatch(entry -> entry.getKey().equalsIgnoreCase(AUTHORIZATION_HEADER)
+						&& entry.getValue().contains(BASIC_AUTH));
+		}
+		return extra.containsKey(CUSTOM_REGISTRY) && request.uri().contains(extra.get(CUSTOM_REGISTRY));
+	}
+
+	private static void removeAuthorization(HttpHeaders headers) {
+		Set<String> authHeaders = headers.entries()
+				.stream()
+				.filter(entry -> entry.getKey().equalsIgnoreCase(AUTHORIZATION_HEADER)).map(Map.Entry::getKey).collect(Collectors.toSet());
+		authHeaders.forEach(authHeader -> headers.remove(authHeader));
+	}
+
+	private RestTemplate initRestTemplate(HttpClient client, boolean withHttpProxy, Map<String, String> extra) {
 
 		// Set the HTTP proxy if configured.
 		if (withHttpProxy) {
 			if (!properties.getHttpProxy().isEnabled()) {
 				throw new ContainerRegistryException("Registry Configuration uses a HttpProxy but non is configured!");
 			}
-			HttpHost proxy = new HttpHost(properties.getHttpProxy().getHost(), properties.getHttpProxy().getPort());
-			clientBuilder.setProxy(proxy);
+			ProxyProvider.Builder builder = ProxyProvider.builder()
+					.type(ProxyProvider.Proxy.HTTP)
+					.host(properties.getHttpProxy().getHost())
+					.port(properties.getHttpProxy().getPort());
+			client.proxy(typeSpec -> builder.build());
 		}
 
-		HttpComponentsClientHttpRequestFactory customRequestFactory =
-				new HttpComponentsClientHttpRequestFactory(
-						clientBuilder
-								.setRedirectStrategy(new DropAuthorizationHeaderRequestRedirectStrategy(extra))
-								// Azure redirects may contain double slashes and on default those are normilised
-								.setDefaultRequestConfig(RequestConfig.custom().build())
-								.build());
+		ClientHttpRequestFactory customRequestFactory = new ReactorNettyClientRequestFactory(client);
 
 		// DockerHub response's media-type is application/octet-stream although the content is in JSON.
 		// Similarly the Github CR response's media-type is always text/plain although the content is in JSON.
@@ -221,6 +234,7 @@ public class ContainerImageRestTemplateFactory {
 		// include application/octet-stream and text/plain.
 		MappingJackson2HttpMessageConverter octetSupportJsonConverter = new MappingJackson2HttpMessageConverter();
 		ArrayList<MediaType> mediaTypeList = new ArrayList(octetSupportJsonConverter.getSupportedMediaTypes());
+		mediaTypeList.add(MediaType.APPLICATION_JSON);
 		mediaTypeList.add(MediaType.APPLICATION_OCTET_STREAM);
 		mediaTypeList.add(MediaType.TEXT_PLAIN);
 		octetSupportJsonConverter.setSupportedMediaTypes(mediaTypeList);

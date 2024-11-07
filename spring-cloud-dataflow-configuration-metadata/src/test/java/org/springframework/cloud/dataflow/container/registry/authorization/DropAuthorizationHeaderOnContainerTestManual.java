@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2020 the original author or authors.
+ * Copyright 2024 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.cloud.dataflow.configuration.metadata.ApplicationConfigurationMetadataResolverAutoConfiguration;
@@ -36,16 +34,27 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 
 /**
- * @author Adam J. Weigold
+ * This test is aimed at performing a manual test against a deployed container registry;
+ * In order to invoke this test populate the fields of DropAuthorizationHeaderOnContainerTestManual.TestApplication
+ * named registryDomainName, registryUser, registrySecret and imageNameAndTag
+ *
+ * The image should be one built with spring-boot:build-image or paketo so that is has a label named 'org.springframework.boot.version'
+ * For docker hub use:
+ *   registryDomainName="registry-1.docker.io",
+ *   registryUser="docker user"
+ *   registrySecret="docker access token"
+ *   imageNameAndTag="springcloudstream/s3-sink-rabbit:5.0.0"
+ *
  * @author Corneil du Plessis
  */
-public class DropAuthorizationHeaderOnSignedS3RequestRedirectStrategyTest {
-	@RegisterExtension
-	public final static S3SignedRedirectRequestServerResource s3SignedRedirectRequestServerResource =
-		new S3SignedRedirectRequestServerResource();
+public class DropAuthorizationHeaderOnContainerTestManual {
+
+	private static final String registryDomainName = "registry-1.docker.io";
+	private static final String registryUser = "<docker-user>";
+	private static final String registrySecret = "<docker-access-token>";
+	private static final String imageNameAndTag = "springcloudstream/s3-sink-rabbit:5.0.0";
 
 	private AnnotationConfigApplicationContext context;
 
@@ -58,36 +67,28 @@ public class DropAuthorizationHeaderOnSignedS3RequestRedirectStrategyTest {
 	}
 
 	@Test
-	void redirect() {
+	void testContainerImageLabels() {
 		context = new AnnotationConfigApplicationContext(TestApplication.class);
-
-		final DefaultContainerImageMetadataResolver imageMetadataResolver =
-			context.getBean(DefaultContainerImageMetadataResolver.class);
-
-		Map<String, String> imageLabels = imageMetadataResolver.getImageLabels("localhost:" +
-			s3SignedRedirectRequestServerResource.getS3SignedRedirectServerPort() + "/test/s3-redirect-image:1.0.0");
-
-		assertThat(imageLabels).containsOnly(entry("foo", "bar"));
+		DefaultContainerImageMetadataResolver imageMetadataResolver = context.getBean(DefaultContainerImageMetadataResolver.class);
+		Map<String, String> imageLabels = imageMetadataResolver.getImageLabels(registryDomainName + "/" + imageNameAndTag);
+		System.out.println("imageLabels:" + imageLabels.keySet());
+		assertThat(imageLabels).containsKey("org.springframework.boot.version");
 	}
 
 	@Import({ContainerRegistryAutoConfiguration.class, ApplicationConfigurationMetadataResolverAutoConfiguration.class})
 	@AutoConfigureWebClient
 	static class TestApplication {
+
 		@Bean
 		@Primary
 		ContainerRegistryProperties containerRegistryProperties() {
 			ContainerRegistryProperties properties = new ContainerRegistryProperties();
 			ContainerRegistryConfiguration registryConfiguration = new ContainerRegistryConfiguration();
-			registryConfiguration.setRegistryHost(
-				String.format("localhost:%s", s3SignedRedirectRequestServerResource.getS3SignedRedirectServerPort()));
+			registryConfiguration.setRegistryHost(registryDomainName);
 			registryConfiguration.setAuthorizationType(ContainerRegistryConfiguration.AuthorizationType.dockeroauth2);
-			registryConfiguration.setUser("admin");
-			registryConfiguration.setSecret("Harbor12345");
-			registryConfiguration.setDisableSslVerification(true);
-			registryConfiguration.setExtra(Collections.singletonMap(
-				DockerOAuth2RegistryAuthorizer.DOCKER_REGISTRY_AUTH_URI_KEY,
-				"https://localhost:" + s3SignedRedirectRequestServerResource.getS3SignedRedirectServerPort() + "/service/token"));
-			properties.setRegistryConfigurations(Collections.singletonMap("goharbor", registryConfiguration));
+			registryConfiguration.setUser(registryUser);
+			registryConfiguration.setSecret(registrySecret);
+			properties.setRegistryConfigurations(Collections.singletonMap(registryDomainName, registryConfiguration));
 
 			return properties;
 		}
