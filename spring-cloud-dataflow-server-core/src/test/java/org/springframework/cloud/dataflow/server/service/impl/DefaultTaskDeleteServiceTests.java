@@ -32,7 +32,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersIncrementer;
 import org.springframework.batch.core.JobParametersValidator;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,7 +185,7 @@ public abstract class DefaultTaskDeleteServiceTests {
 	}
 
 	JobLauncher jobLauncher(JobRepository jobRepository) {
-		SimpleJobLauncher launcher = new SimpleJobLauncher();
+		TaskExecutorJobLauncher launcher = new TaskExecutorJobLauncher();
 		launcher.setJobRepository(jobRepository);
 		launcher.setTaskExecutor(task -> {
 		});

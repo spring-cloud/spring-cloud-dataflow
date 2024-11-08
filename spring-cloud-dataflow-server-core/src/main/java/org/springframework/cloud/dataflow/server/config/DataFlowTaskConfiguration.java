@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
+import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.database.support.DataFieldMaxValueIncrementerFactory;
 import org.springframework.beans.BeanUtils;
@@ -115,7 +115,7 @@ public class DataFlowTaskConfiguration {
 		factoryBean.setEnvironment(environment);
 		factoryBean.setDataSource(dataSource);
 		factoryBean.setTransactionManager(platformTransactionManager);
-		factoryBean.setJobLauncher(new SimpleJobLauncher());
+		factoryBean.setJobLauncher(new TaskExecutorJobLauncher());
 		factoryBean.setJobExplorer(jobExplorer);
 		factoryBean.setJobRepository(jobRepository);
 		factoryBean.setSerializer(new AllInOneExecutionContextSerializer());
