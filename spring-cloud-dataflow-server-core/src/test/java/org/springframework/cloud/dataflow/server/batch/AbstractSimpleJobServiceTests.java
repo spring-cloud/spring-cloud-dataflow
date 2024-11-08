@@ -30,6 +30,7 @@ import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.launch.JobExecutionNotRunningException;
 import org.springframework.batch.core.launch.NoSuchJobExecutionException;
+import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 
 import org.springframework.batch.core.BatchStatus;
@@ -40,7 +41,6 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.explore.support.JobExplorerFactoryBean;
 import org.springframework.batch.core.launch.NoSuchJobInstanceException;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.dao.JdbcStepExecutionDao;
 import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
@@ -374,7 +374,7 @@ public abstract class AbstractSimpleJobServiceTests extends AbstractDaoTests {
 			factoryBean.setEnvironment(environment);
 			factoryBean.setDataSource(dataSource);
 			factoryBean.setTransactionManager(platformTransactionManager);
-			factoryBean.setJobLauncher(new SimpleJobLauncher());
+			factoryBean.setJobLauncher(new TaskExecutorJobLauncher());
 			factoryBean.setJobExplorer(jobExplorer);
 			factoryBean.setJobRepository(jobRepository);
 			factoryBean.setSerializer(new AllInOneExecutionContextSerializer());
