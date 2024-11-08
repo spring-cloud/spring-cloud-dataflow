@@ -34,7 +34,7 @@ public class JdbcSearchableJobInstanceDao extends JdbcJobInstanceDao implements 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 
-		setJobIncrementer(new AbstractDataFieldMaxValueIncrementer() {
+		setJobInstanceIncrementer(new AbstractDataFieldMaxValueIncrementer() {
 			@Override
 			protected long getNextKey() {
 				return 0;
