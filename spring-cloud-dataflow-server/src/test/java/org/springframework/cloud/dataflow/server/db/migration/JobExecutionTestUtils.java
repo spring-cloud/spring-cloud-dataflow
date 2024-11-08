@@ -75,7 +75,7 @@ class JobExecutionTestUtils
 
 		JdbcJobInstanceDao jobInstanceDao = new JdbcJobInstanceDao();
 		jobInstanceDao.setJdbcTemplate(jdbcTemplate);
-		jobInstanceDao.setJobIncrementer(incrementerFactory.getIncrementer(incrementerFallbackType.name(), "BATCH_JOB_SEQ"));
+		jobInstanceDao.setJobInstanceIncrementer(incrementerFactory.getIncrementer(incrementerFallbackType.name(), "BATCH_JOB_SEQ"));
 
 		// BATCH_JOB_EXECUTION differs and the DAO can not be used for BATCH4/5 inserting
 		DataFieldMaxValueIncrementer jobExecutionIncrementer = incrementerFactory.getIncrementer(incrementerFallbackType.name(), "BATCH_JOB_EXECUTION_SEQ");

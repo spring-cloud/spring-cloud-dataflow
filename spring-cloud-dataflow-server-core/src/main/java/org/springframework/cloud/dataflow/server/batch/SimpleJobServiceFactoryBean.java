@@ -240,7 +240,7 @@ public class SimpleJobServiceFactoryBean implements FactoryBean<JobService>, Ini
 	protected SearchableJobInstanceDao createJobInstanceDao() throws Exception {
 		JdbcSearchableJobInstanceDao dao = new JdbcSearchableJobInstanceDao();
 		dao.setJdbcTemplate(jdbcTemplate);
-		dao.setJobIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix + "JOB_SEQ"));
+		dao.setJobInstanceIncrementer(incrementerFactory.getIncrementer(databaseType, tablePrefix + "JOB_SEQ"));
 		dao.setTablePrefix(tablePrefix);
 		dao.afterPropertiesSet();
 		return dao;
