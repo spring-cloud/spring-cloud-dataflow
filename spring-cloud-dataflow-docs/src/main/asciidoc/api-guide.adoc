@@ -146,7 +146,6 @@ The API includes the following resources:
 
 * <<api-guide-resources-index>>
 * <<resources-about>>
-* <<api-guide-resources-schema-info>>
 * <<api-guide-resources-audit-records>>
 * <<resources-registered-applications>>
 * <<api-guide-resources-stream-definitions>>
@@ -625,67 +624,6 @@ include::{snippets}/app-registry-documentation/unregistering-all-applications/cu
 
 include::{snippets}/app-registry-documentation/unregistering-all-applications/http-response.adoc[]
 
-[[api-guide-resources-schema-info]]
-=== Schema Information
-
-The schema information endpoint provides information about the supported Spring Boot schema versions for Task and Batch applications and the available Schema Targets.
-
-The following topics provide more details:
-
-* <<api-guide-resources-schema-info-versions>>
-* <<api-guide-resources-schema-info-targets>>
-
-[[api-guide-resources-schema-info-versions]]
-==== List All Schema Versions
-
-The schema endpoint provides for listing supported Spring Boot versions.
-
-The following topics provide more details:
-
-* <<api-guide-resources-schema-info-versions-request-structure>>
-* <<api-guide-resources-schema-info-versions-example-request>>
-* <<api-guide-resources-schema-info-versions-response-structure>>
-
-[[api-guide-resources-schema-info-versions-request-structure]]
-===== Request Structure
-
-include::{snippets}/schema-documentation/schema-versions/http-request.adoc[]
-
-[[api-guide-resources-schema-info-versions-example-request]]
-===== Example Request
-
-include::{snippets}/schema-documentation/schema-versions/curl-request.adoc[]
-
-[[api-guide-resources-schema-info-versions-response-structure]]
-===== Response Structure
-
-include::{snippets}/schema-documentation/schema-versions/http-response.adoc[]
-
-[[api-guide-resources-schema-info-targets]]
-==== List All Schema Targets
-
-The schema endpoint provides for listing supported Schema Targets.
-
-The following topics provide more details:
-
-* <<api-guide-resources-schema-info-targets-request-structure>>
-* <<api-guide-resources-schema-info-targets-example-request>>
-* <<api-guide-resources-schema-info-targets-response-structure>>
-
-[[api-guide-resources-schema-info-targets-request-structure]]
-===== Request Structure
-
-include::{snippets}/schema-documentation/schema-targets/http-request.adoc[]
-
-[[api-guide-resources-schema-info-targets-example-request]]
-===== Example Request
-
-include::{snippets}/schema-documentation/schema-targets/curl-request.adoc[]
-
-[[api-guide-resources-schema-info-targets-response-structure]]
-===== Response Structure
-
-include::{snippets}/schema-documentation/schema-targets/http-response.adoc[]
 
 [[api-guide-resources-audit-records]]
 === Audit Records
