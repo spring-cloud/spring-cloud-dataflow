@@ -28,6 +28,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -46,22 +47,19 @@ class TaskTemplateTests {
 	void setup() {
 		restTemplate = mock(RestTemplate.class);
 	}
-
 	@Test
-	void oldDataFlow() {
-		validateExecutionLinkNotPresent("1.6.0");
+	void invalidVersion() {
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> validateExecutionLinkPresent("2.11.5"));
 	}
-
 	@Test
 	void minDataFlow() {
-		validateExecutionLinkPresent("1.7.0");
+		validateExecutionLinkPresent("3.0.0");
 	}
 
 	@Test
 	void futureDataFlow() {
-		validateExecutionLinkPresent("1.8.0");
-		validateExecutionLinkPresent("1.9.0");
-		validateExecutionLinkPresent("2.0.0");
+		validateExecutionLinkPresent("3.0.0");
 	}
 
 
@@ -69,12 +67,6 @@ class TaskTemplateTests {
 		TestResource testResource = new TestResource();
 		new TaskTemplate(this.restTemplate, testResource, dataFlowVersion);
 		assertThat(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK)).isTrue();
-	}
-
-	private void validateExecutionLinkNotPresent(String version) {
-		TestResource testResource = new TestResource();
-		new TaskTemplate(this.restTemplate, testResource, version);
-		assertThat(testResource.isLinkRequested(CURRENT_TASK_EXECUTION_LINK)).isFalse();
 	}
 
 	public static class TestResource extends RepresentationModel<TestResource> {

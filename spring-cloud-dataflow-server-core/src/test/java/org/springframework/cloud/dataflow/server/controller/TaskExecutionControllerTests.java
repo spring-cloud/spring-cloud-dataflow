@@ -343,6 +343,12 @@ class TaskExecutionControllerTests {
 	}
 	@Test
 	void getThinExecutionsByName() throws Exception {
+		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].executionId", containsInAnyOrder(2, 1)))
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].parentExecutionId", containsInAnyOrder(null, 1)))
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].taskExecutionStatus", containsInAnyOrder("RUNNING", "RUNNING")))
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(2)));
 		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", "nope").accept(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.page.totalElements", is(0)));
 		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", "none").accept(MediaType.APPLICATION_JSON))

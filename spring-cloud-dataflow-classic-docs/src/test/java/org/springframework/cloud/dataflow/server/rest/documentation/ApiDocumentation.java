@@ -222,7 +222,7 @@ class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/thinexecutions.href").description("Link to the tasks/thinexecutions"),
 
 						fieldWithPath("_links.tasks/thinexecutions/name.href").description("Link to the tasks/thinexecutions/name"),
-						fieldWithPath("_links.tasks/thinexecutions/name.templated").description("Link to the tasks/thinexecutions/name is templated"),
+						fieldWithPath("_links.tasks/thinexecutions/name.templated").type(JsonFieldType.BOOLEAN).optional().description("Link to the tasks/thinexecutions/name is templated"),
 
 						fieldWithPath("_links.tasks/info/executions.href").description("Link to the tasks/info/executions"),
 						fieldWithPath("_links.tasks/info/executions.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/info is templated"),
