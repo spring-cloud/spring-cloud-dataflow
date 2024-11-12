@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +53,10 @@ public class CloudFoundryApplicationManifestReader implements SkipperManifestRea
 	public List<CloudFoundryApplicationSkipperManifest> read(String manifest) {
 		if (canSupport(manifest)) {
 			List<CloudFoundryApplicationSkipperManifest> applicationSpecs = new ArrayList<>();
-			YAMLMapper mapper = new YAMLMapper();
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-			mapper.setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE);
+			YAMLMapper mapper = YAMLMapper.builder().
+				configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).
+				configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true).build();
+			mapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
 			try {
 				MappingIterator<CloudFoundryApplicationSkipperManifest> it = mapper
 																	.readerFor(CloudFoundryApplicationSkipperManifest.class)
