@@ -146,12 +146,6 @@ public class TaskTemplate implements TaskOperations {
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_RELATION_VERSION)) {
 			Assert.notNull(resources.getLink(VALIDATION_REL), ()-> VALIDATION_REL + " relation is required");
 		}
-		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, EXECUTIONS_CURRENT_RELATION_VERSION)) {
-			Assert.isTrue(resources.getLink(EXECUTIONS_CURRENT_RELATION).isPresent(), ()-> EXECUTIONS_CURRENT_RELATION + " relation is required");
-			this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
-		} else {
-			this.executionsCurrentLink = null;
-		}
 
 		this.aboutLink = resources.getLink("about").get();
 
@@ -159,22 +153,10 @@ public class TaskTemplate implements TaskOperations {
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
-		if(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent()) {
-			this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
-		} else {
-			this.thinExecutionsLink = null;
-		}
-		if(resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).isPresent()) {
-			this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).get();
-		} else {
-			this.thinExecutionsByNameLink = null;
-		}
-
-		if(resources.getLink(EXECUTION_LAUNCH_RELATION).isPresent()) {
-			this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
-		} else {
-			this.executionLaunchLink = null;
-		}
+		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).orElse(null);
+		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).orElse(null);
+		this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).orElse(null);
+		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).orElse(null);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
 		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
 			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
