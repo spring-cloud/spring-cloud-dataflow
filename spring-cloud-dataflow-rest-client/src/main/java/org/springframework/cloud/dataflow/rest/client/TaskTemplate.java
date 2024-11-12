@@ -142,7 +142,12 @@ public class TaskTemplate implements TaskOperations {
 		this.restTemplate = restTemplate;
 
 		String version = VersionUtils.getThreePartVersion(dataFlowServerVersion);
-		Assert.isTrue(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_MIN_VERSION), () -> "Minimum Data Flow version required is " + VALIDATION_MIN_VERSION + " but got " + version);
+		if (StringUtils.hasText(version)) {
+			Assert.isTrue(
+					VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version,
+							VALIDATION_MIN_VERSION),
+					() -> "Minimum Data Flow version required is " + VALIDATION_MIN_VERSION + " but got " + version);
+		}
 
 		this.aboutLink = resources.getLink("about").get();
 
