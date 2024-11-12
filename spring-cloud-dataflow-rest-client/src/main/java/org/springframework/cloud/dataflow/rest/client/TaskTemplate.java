@@ -63,10 +63,8 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
-	private static final String EXECUTIONS_CURRENT_RELATION_VERSION = "1.7.0";
+	private static final String VALIDATION_MIN_VERSION = "3.0.0";
 
-	private static final String VALIDATION_RELATION_VERSION = "1.7.0";
-	private static final String VALIDATION_THIN_TASK_VERSION = "2.11.3";
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
@@ -135,7 +133,8 @@ public class TaskTemplate implements TaskOperations {
 			EXECUTIONS_INFO_RELATION,
 			PLATFORM_LIST_RELATION,
 			RETRIEVE_LOG,
-			VALIDATION_REL
+			VALIDATION_REL,
+			EXECUTIONS_CURRENT_RELATION
 		).forEach(relation -> {
 			Assert.isTrue(resources.getLink(relation).isPresent(), () -> relation + " relation is required");
 		});
@@ -143,9 +142,7 @@ public class TaskTemplate implements TaskOperations {
 		this.restTemplate = restTemplate;
 
 		String version = VersionUtils.getThreePartVersion(dataFlowServerVersion);
-		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_RELATION_VERSION)) {
-			Assert.notNull(resources.getLink(VALIDATION_REL), ()-> VALIDATION_REL + " relation is required");
-		}
+		Assert.isTrue(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_MIN_VERSION), () -> "Minimum Data Flow version required is " + VALIDATION_MIN_VERSION + " but got " + version);
 
 		this.aboutLink = resources.getLink("about").get();
 
@@ -158,9 +155,7 @@ public class TaskTemplate implements TaskOperations {
 		this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).orElse(null);
 		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).orElse(null);
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
-		if (resources.getLink(EXECUTIONS_INFO_RELATION).isPresent()) {
-			this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
-		}
+		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).orElse(null);
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
@@ -189,16 +184,7 @@ public class TaskTemplate implements TaskOperations {
 		return restTemplate.postForObject(definitionsLink.expand().getHref(), values,
 			TaskDefinitionResource.class);
 	}
-	private boolean isNewServer() {
-		if(this.actualDataFlowServerCoreVersion == null) {
-			AboutResource aboutResource = restTemplate.getForObject(aboutLink.expand().getHref(), AboutResource.class);
-			Assert.notNull(aboutResource, "Expected about");
-			this.actualDataFlowServerCoreVersion = aboutResource.getVersionInfo().getCore().getVersion();
-		}
-		String v2_11_0 = VersionUtils.getThreePartVersion("2.11.0-SNAPSHOT");
-		String serverVersion = VersionUtils.getThreePartVersion(this.actualDataFlowServerCoreVersion);
-		return VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(serverVersion, v2_11_0);
-	}
+
 	@Override
 	public LaunchResponseResource launch(String name, Map<String, String> properties, List<String> arguments) {
 		MultiValueMap<String, Object> values = new LinkedMultiValueMap<>();
@@ -206,22 +192,8 @@ public class TaskTemplate implements TaskOperations {
 		String commandLineArguments = StringUtils.collectionToDelimitedString(arguments, " ");
 		values.add("properties", formattedProperties);
 		values.add("arguments", commandLineArguments);
-		if(isNewServer()) {
-			Assert.notNull(executionLaunchLink, "This version of SCDF doesn't support tasks/executions/launch");
-			values.add("name", name);
-			String url = executionLaunchLink.expand(name).getHref();
-			values.remove("name");
-			return restTemplate.postForObject(url, values, LaunchResponseResource.class);
-		} else {
-			Long id = restTemplate.postForObject(executionByNameLink.expand(name).getHref(), values, Long.class, name);
-			if(id != null) {
-				LaunchResponseResource response = new LaunchResponseResource();
-				response.setExecutionId(id);
-				return response;
-			} else {
-				throw new RuntimeException("Expected id");
-			}
-		}
+		String url = executionLaunchLink.expand(name).getHref();
+		return restTemplate.postForObject(url, values, LaunchResponseResource.class);
 	}
 
 	@Override
