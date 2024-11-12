@@ -63,7 +63,7 @@ public class TaskTemplate implements TaskOperations {
 
 	private static final String DEFINITION_RELATION = "tasks/definitions/definition";
 
-	private static final String VALIDATION_MIN_VERSION = "3.0.0";
+	private static final String VALIDATION_MIN_VERSION = "3.0.0-SNAPSHOT";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
