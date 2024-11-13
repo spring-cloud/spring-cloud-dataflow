@@ -4,7 +4,7 @@ if [ -z "$BASH_VERSION" ]; then
     exit 1
 fi
 SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-SCDIR=$(realpath $SCDIR)
-pushd "$SCDIR" > /dev/null || exit
-    ./mvnw install -DskipTests -am -pl :spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs,:spring-cloud-skipper-server-core,:spring-cloud-skipper-docs -Pfull,docs
+SCDIR=$(realpath "$SCDIR/../..")
+pushd "$SCDIR" || exit
+    ./mvnw install -DskipTests -Pdocs -B --no-transfer-progress -pl :spring-cloud-skipper-server-core,:spring-cloud-skipper,:spring-cloud-skipper-docs,:spring-cloud-dataflow-classic-docs,:spring-cloud-dataflow-docs -T 1C
 popd > /dev/null || exit
