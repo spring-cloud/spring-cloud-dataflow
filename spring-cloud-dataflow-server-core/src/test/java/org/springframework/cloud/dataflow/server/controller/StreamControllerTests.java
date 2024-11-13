@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -251,7 +252,7 @@ class StreamControllerTests {
 				assertThat(sd.getName()).isEqualTo(streamName);
 				assertThat(sd.getDslText()).isEqualTo(definition);
 			})
-			.map(this.streamDefinitionService::getAppDefinitions).get().asList()
+			.map(this.streamDefinitionService::getAppDefinitions).get().asInstanceOf(InstanceOfAssertFactories.LIST)
 			.extracting("name").containsExactly("time", "log");
 
 		ArgumentCaptor<UploadRequest> uploadRequestCaptor = ArgumentCaptor.forClass(UploadRequest.class);
