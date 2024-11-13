@@ -55,8 +55,8 @@ public class CloudFoundryApplicationManifestReader implements SkipperManifestRea
 			List<CloudFoundryApplicationSkipperManifest> applicationSpecs = new ArrayList<>();
 			YAMLMapper mapper = YAMLMapper.builder().
 				configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).
-				configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true).build();
-			mapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
+				configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true).
+				propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE).build();
 			try {
 				MappingIterator<CloudFoundryApplicationSkipperManifest> it = mapper
 																	.readerFor(CloudFoundryApplicationSkipperManifest.class)
