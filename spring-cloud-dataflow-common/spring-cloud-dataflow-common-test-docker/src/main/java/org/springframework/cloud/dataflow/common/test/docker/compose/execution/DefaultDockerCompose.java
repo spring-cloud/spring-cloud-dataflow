@@ -225,7 +225,7 @@ public class DefaultDockerCompose implements DockerCompose {
 	}
 
 	private Process followLogs(String container) throws IOException, InterruptedException {
-		if (version().greaterThanOrEqualTo(VERSION_1_7_0)) {
+		if (version().isHigherThanOrEquivalentTo(VERSION_1_7_0)) {
 			return rawExecutable.execute(true, "logs", "--no-color", "--follow", container);
 		}
 

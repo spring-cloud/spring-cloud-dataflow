@@ -42,7 +42,10 @@ public class CSVLoader {
 	}
 
 	public static int loadCSV(String tableName, DataSource dataSource, Resource cvsResource, DeriveType deriveType) throws IOException {
-		CSVParser parser = CSVFormat.RFC4180.withFirstRecordAsHeader()
+		CSVParser parser = CSVFormat.RFC4180.builder()
+			.setHeader()
+			.setSkipHeaderRecord(true)
+			.build()
 			.parse(new InputStreamReader(cvsResource.getInputStream()));
 		List<String> headerNames = parser.getHeaderNames();
 		final List<CSVRecord> records = parser.getRecords();

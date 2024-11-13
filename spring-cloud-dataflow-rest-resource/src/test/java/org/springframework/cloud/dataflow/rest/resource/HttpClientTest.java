@@ -21,6 +21,7 @@ import java.net.URI;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.boot.SpringBootConfiguration;
@@ -61,14 +62,12 @@ class HttpClientTest {
 					throw new Passed();
 				})
 				.buildHttpClient()) {
-			assertThatExceptionOfType(Passed.class).isThrownBy(() -> client.execute(new HttpGet(targetHost)));
+			assertThatExceptionOfType(Passed.class).isThrownBy(() -> client.execute(new HttpGet(targetHost), getNoOpResponseHandler()));
 		}
 	}
 
-	static final class TestException extends IOException {
-		TestException() {
-			super("It broke");
-		}
+	private HttpClientResponseHandler<String> getNoOpResponseHandler() {
+		return response -> "noOp";
 	}
 
 	static final class ByteArrayCheckableResource extends ByteArrayResource implements CheckableResource {
