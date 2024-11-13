@@ -20,7 +20,7 @@ services:
       #- SPRING_APPLICATION_JSON={"spring.jpa.properties.hibernate.generate_statistics":true}
 
   prometheus-rsocket-proxy:
-    image: micrometermetrics/prometheus-rsocket-proxy:2.0.0-M1
+    image: micrometermetrics/prometheus-rsocket-proxy:2.0.0-M2
     container_name: prometheus-rsocket-proxy
     expose:
       - '9096'
