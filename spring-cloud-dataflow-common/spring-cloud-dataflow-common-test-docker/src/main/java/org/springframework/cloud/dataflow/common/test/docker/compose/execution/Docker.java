@@ -52,7 +52,7 @@ public class Docker {
 		String versionString = command.execute(Command.throwingOnError(), false, "-v");
 		Matcher matcher = VERSION_PATTERN.matcher(versionString);
 		Assert.state(matcher.matches(), "Unexpected output of docker -v: " + versionString);
-		return Version.forIntegers(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
+		return Version.of(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2)),
 				Integer.parseInt(matcher.group(3)));
 	}
 

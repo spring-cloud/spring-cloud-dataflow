@@ -193,7 +193,7 @@ public class DockerConfigJsonSecretToRegistryConfigurationConverter implements C
 			return Optional.empty();
 		} catch (HttpClientErrorException httpError) {
 
-			if (httpError.getRawStatusCode() != 401) {
+			if (httpError.getStatusCode().value() != 401) {
 				return Optional.empty();
 			}
 			if (httpError.getResponseHeaders() == null

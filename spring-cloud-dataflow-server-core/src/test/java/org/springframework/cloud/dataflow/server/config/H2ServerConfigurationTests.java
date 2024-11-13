@@ -93,21 +93,21 @@ class H2ServerConfigurationTests {
 						"spring.datasource.url=jdbc:h2:tcp://localhost:-1/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
-						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
+						.getFailure().rootCause().isInstanceOf(IllegalArgumentException.class)
 						.hasMessageMatching("DataSource URL .* does not match regex pattern: .*"));
 
 		runner.withPropertyValues(
 						"spring.datasource.url=jdbc:h2:tcp://localhost:port/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
-						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
+						.getFailure().rootCause().isInstanceOf(IllegalArgumentException.class)
 						.hasMessageMatching("DataSource URL .* does not match regex pattern: .*"));
 
 		runner.withPropertyValues(
 						"spring.datasource.url=jdbc:h2:tcp://localhost:99999/mem:dataflow;DATABASE_TO_UPPER=FALSE",
 						"spring.dataflow.embedded.database.enabled=true")
 				.run(context -> assertThat(context)
-						.getFailure().getRootCause().isInstanceOf(IllegalArgumentException.class)
+						.getFailure().rootCause().isInstanceOf(IllegalArgumentException.class)
 						.hasMessage("Port value out of range: 99999"));
 	}
 
