@@ -134,7 +134,10 @@ public class TaskTemplate implements TaskOperations {
 			PLATFORM_LIST_RELATION,
 			RETRIEVE_LOG,
 			VALIDATION_REL,
-			EXECUTIONS_CURRENT_RELATION
+			EXECUTIONS_CURRENT_RELATION,
+			THIN_EXECUTIONS_RELATION,
+			THIN_EXECUTIONS_BY_NAME_RELATION,
+			EXECUTION_LAUNCH_RELATION
 		).forEach(relation -> {
 			Assert.isTrue(resources.getLink(relation).isPresent(), () -> relation + " relation is required");
 		});
@@ -148,19 +151,19 @@ public class TaskTemplate implements TaskOperations {
 							VALIDATION_MIN_VERSION),
 					() -> "Minimum Data Flow version required is " + VALIDATION_MIN_VERSION + " but got " + version);
 		}
-
+		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).get();
 		this.aboutLink = resources.getLink("about").get();
 
 		this.definitionsLink = resources.getLink(DEFINITIONS_RELATION).get();
 		this.definitionLink = resources.getLink(DEFINITION_RELATION).get();
 		this.executionsLink = resources.getLink(EXECUTIONS_RELATION).get();
 		this.executionLink = resources.getLink(EXECUTION_RELATION).get();
-		this.executionsCurrentLink = resources.getLink(EXECUTIONS_CURRENT_RELATION).orElse(null);
-		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).orElse(null);
-		this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).orElse(null);
-		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).orElse(null);
+
+		this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
+		this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).get();
+		this.executionLaunchLink = resources.getLink(EXECUTION_LAUNCH_RELATION).get();
 		this.executionByNameLink = resources.getLink(EXECUTION_RELATION_BY_NAME).get();
-		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).orElse(null);
+		this.executionsInfoLink = resources.getLink(EXECUTIONS_INFO_RELATION).get();
 		this.validationLink = resources.getLink(VALIDATION_REL).get();
 		this.platformListLink = resources.getLink(PLATFORM_LIST_RELATION).get();
 		this.retrieveLogLink = resources.getLink(RETRIEVE_LOG).get();
