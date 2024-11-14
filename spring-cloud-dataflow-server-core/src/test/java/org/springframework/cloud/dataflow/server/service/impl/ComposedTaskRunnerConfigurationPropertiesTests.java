@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class ComposedTaskRunnerConfigurationPropertiesTests {
 
@@ -43,7 +44,16 @@ public class ComposedTaskRunnerConfigurationPropertiesTests {
 	void useUserAccessTokenFromCTRPropNotSet() {
 		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
 			new ComposedTaskRunnerConfigurationProperties();
-		assertThat(composedTaskRunnerConfigurationProperties.isUseUserAccessToken()).as("Use user access token should be false").isNull();
+		assertThat(composedTaskRunnerConfigurationProperties.isUseUserAccessToken()).as("Use user access token should be false").isFalse();
+	}
+
+	@Test
+	void setUserAccessTokenFromCTRToNull() {
+		ComposedTaskRunnerConfigurationProperties composedTaskRunnerConfigurationProperties =
+			new ComposedTaskRunnerConfigurationProperties();
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> composedTaskRunnerConfigurationProperties.setUseUserAccessToken(null)).
+			withMessageContaining("'useUserAccessToken' cannot be null")
+		;
 	}
 
 	@Test
