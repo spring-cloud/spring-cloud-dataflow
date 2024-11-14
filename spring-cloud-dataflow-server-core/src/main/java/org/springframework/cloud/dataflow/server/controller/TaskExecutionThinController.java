@@ -18,6 +18,8 @@ package org.springframework.cloud.dataflow.server.controller;
 import org.springframework.cloud.dataflow.aggregate.task.AggregateTaskExplorer;
 import org.springframework.cloud.dataflow.rest.resource.TaskExecutionThinResource;
 import org.springframework.cloud.dataflow.schema.AggregateTaskExecution;
+import org.springframework.cloud.dataflow.server.repository.NoSuchTaskDefinitionException;
+import org.springframework.cloud.dataflow.server.repository.TaskDefinitionRepository;
 import org.springframework.cloud.dataflow.server.service.TaskJobService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -46,13 +48,15 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TaskExecutionThinController {
 
 	private final AggregateTaskExplorer explorer;
+	private final TaskDefinitionRepository taskDefinitionRepository;
 	private final TaskExecutionThinResourceAssembler resourceAssembler;
 
 	private final TaskJobService taskJobService;
 
-	public TaskExecutionThinController(AggregateTaskExplorer explorer, TaskJobService taskJobService) {
+	public TaskExecutionThinController(AggregateTaskExplorer explorer, TaskDefinitionRepository taskDefinitionRepository, TaskJobService taskJobService) {
 		this.explorer = explorer;
-		this.taskJobService = taskJobService;
+        this.taskDefinitionRepository = taskDefinitionRepository;
+        this.taskJobService = taskJobService;
 		this.resourceAssembler = new TaskExecutionThinResourceAssembler();
 	}
 
@@ -68,6 +72,10 @@ public class TaskExecutionThinController {
 	@ResponseStatus(HttpStatus.OK)
 	public PagedModel<TaskExecutionThinResource> retrieveTasksByName(@RequestParam("name") String taskName,
 			Pageable pageable, PagedResourcesAssembler<AggregateTaskExecution> pagedAssembler) {
+		long tasks = this.taskDefinitionRepository.countByTaskName(taskName);
+		if(tasks == 0) {
+			throw new NoSuchTaskDefinitionException(taskName);
+		}
 		Page<AggregateTaskExecution> page = this.explorer.findTaskExecutionsByName(taskName, pageable);
 		taskJobService.populateComposeTaskRunnerStatus(page.getContent());
 		return pagedAssembler.toModel(page, resourceAssembler);

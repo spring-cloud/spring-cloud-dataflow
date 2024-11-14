@@ -124,6 +124,7 @@ public class ApiDocumentation extends BaseDocumentation {
 				linkWithRel("tasks/platforms").description("Provides platform accounts for launching tasks.  The results can be filtered to show the platforms that support scheduling by adding a request parameter of 'schedulesEnabled=true"),
 				linkWithRel("tasks/logs").description("Retrieve the task application log"),
 				linkWithRel("tasks/thinexecutions").description("Returns thin Task executions"),
+				linkWithRel("tasks/thinexecutions/name").description("Returns all thin Task executions for a given Task name"),
 
 				linkWithRel("schema/versions").description("List of Spring Boot related schemas"),
 				linkWithRel("schema/targets").description("List of schema targets"),
@@ -233,6 +234,9 @@ public class ApiDocumentation extends BaseDocumentation {
 						fieldWithPath("_links.tasks/logs.templated").type(JsonFieldType.BOOLEAN).optional().description("Link tasks/logs is templated"),
 
 						fieldWithPath("_links.tasks/thinexecutions.href").description("Link to the tasks/thinexecutions"),
+
+						fieldWithPath("_links.tasks/thinexecutions/name.href").description("Link to the tasks/thinexecutions/name"),
+						fieldWithPath("_links.tasks/thinexecutions/name.templated").type(JsonFieldType.BOOLEAN).optional().description("Link to the tasks/thinexecutions/name is templated"),
 
 						fieldWithPath("_links.tasks/schedules.href").description("Link to the tasks/executions/schedules"),
 						fieldWithPath("_links.tasks/schedules/instances.href").description("Link to the tasks/schedules/instances"),

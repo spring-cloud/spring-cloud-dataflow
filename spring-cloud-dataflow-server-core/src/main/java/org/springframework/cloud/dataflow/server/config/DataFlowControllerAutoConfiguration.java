@@ -300,8 +300,8 @@ public class DataFlowControllerAutoConfiguration {
 		}
 
 		@Bean
-		public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer, TaskJobService taskJobService) {
-			return new TaskExecutionThinController(aggregateTaskExplorer, taskJobService);
+		public TaskExecutionThinController taskExecutionThinController(AggregateTaskExplorer aggregateTaskExplorer, TaskDefinitionRepository taskDefinitionRepository, TaskJobService taskJobService) {
+			return new TaskExecutionThinController(aggregateTaskExplorer, taskDefinitionRepository, taskJobService);
 		}
 
 		@Bean

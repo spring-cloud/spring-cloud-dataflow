@@ -54,14 +54,12 @@ public class TaskTemplateTests {
 
 	@Test
 	public void testMinDataFlow() {
-		validateExecutionLinkPresent("1.7.0");
+		validateExecutionLinkPresent("2.10.0");
 	}
 
 	@Test
 	public void testFutureDataFlow() {
-		validateExecutionLinkPresent("1.8.0");
-		validateExecutionLinkPresent("1.9.0");
-		validateExecutionLinkPresent("2.0.0");
+		validateExecutionLinkPresent("2.11.6");
 	}
 
 

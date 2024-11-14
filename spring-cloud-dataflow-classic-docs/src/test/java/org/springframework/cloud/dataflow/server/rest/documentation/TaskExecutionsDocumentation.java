@@ -315,6 +315,29 @@ public class TaskExecutionsDocumentation extends BaseDocumentation {
 	}
 
 	@Test
+	public void listTaskThinExecutionsByName() throws Exception {
+		this.mockMvc.perform(
+						get("/tasks/thinexecutions")
+								.param("name", "taskB")
+								.param("page", "0")
+								.param("size", "10")
+				)
+				.andExpect(status().isOk()).andDo(this.documentationHandler.document(
+						requestParameters(
+								parameterWithName("page")
+										.description("The zero-based page number (optional)"),
+								parameterWithName("size")
+										.description("The requested page size (optional)"),
+								parameterWithName("name")
+										.description("The name associated with the task execution")),
+						responseFields(
+								subsectionWithPath("_embedded.taskExecutionThinResourceList")
+										.description("Contains a collection of Task Executions/"),
+								subsectionWithPath("_links.self").description("Link to the task execution resource"),
+								subsectionWithPath("page").description("Pagination properties"))));
+	}
+
+	@Test
 	public void stopTask() throws Exception {
 		this.mockMvc.perform(
 						post("/tasks/executions")
