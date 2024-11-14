@@ -156,6 +156,10 @@
     "tasks/thinexecutions": {
       "href":"http://localhost/tasks/thinexecutions"
     },
+    "tasks/thinexecutions/name": {
+      "href":"http://localhost/tasks/thinexecutions/?name={name}",
+      "templated": true
+    },
     "jobs/executions": {
       "href": "http://localhost/jobs/executions"
     },

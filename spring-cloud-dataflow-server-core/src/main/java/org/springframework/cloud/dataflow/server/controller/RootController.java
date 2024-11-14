@@ -159,6 +159,7 @@ public class RootController {
 			root.add(linkTo(methodOn(TasksInfoController.class).getInfo(null, null, null)).withRel("tasks/info/executions"));
 			root.add(linkTo(methodOn(TaskLogsController.class).getLog(null, null, null)).withRel("tasks/logs"));
 			root.add(linkTo(methodOn(TaskExecutionThinController.class).listTasks(null, null)).withRel("tasks/thinexecutions"));
+			root.add(linkTo(methodOn(TaskExecutionThinController.class).retrieveTasksByName(null, null, null)).withRel("tasks/thinexecutions/name"));
 			if (featuresProperties.isSchedulesEnabled()) {
 				root.add(entityLinks.linkToCollectionResource(ScheduleInfoResource.class).withRel("tasks/schedules"));
 				String scheduleTemplated = entityLinks.linkToCollectionResource(ScheduleInfoResource.class).getHref()

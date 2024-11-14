@@ -124,6 +124,14 @@ public interface TaskOperations {
 	PagedModel<TaskExecutionResource> executionListByTaskName(String taskName);
 
 	/**
+	 * List task thin executions known to the system filtered by task name.
+	 *
+	 * @param taskName of the executions.
+	 * @return the list of thin task executions known to the system.
+	 */
+	PagedModel<TaskExecutionThinResource> thinExecutionListByTaskName(String taskName);
+
+	/**
 	 * Return the {@link TaskExecutionResource} for the id specified.
 	 *
 	 * @param id           identifier of the task execution

@@ -1862,6 +1862,8 @@ The following topics provide more details:
 * <<api-guide-resources-task-executions-stopping>>
 * <<api-guide-resources-task-executions-list>>
 * <<api-guide-resources-task-executions-list-by-name>>
+* <<api-guide-resources-task-thin-executions-list>>
+* <<api-guide-resources-task-thin-executions-list-by-name>>
 * <<api-guide-resources-task-executions-detail>>
 * <<api-guide-resources-task-executions-delete>>
 * <<api-guide-resources-task-executions-current-count>>
@@ -2066,7 +2068,132 @@ include::{snippets}/task-executions-documentation/list-task-executions-by-name/c
 
 include::{snippets}/task-executions-documentation/list-task-executions-by-name/http-response.adoc[]
 
+[[api-guide-resources-task-thin-executions-list]]
+==== List All Task Thin Executions
 
+The task executions endpoint lets you list all task executions with only top-level data.
+The following topics provide more details:
+
+* <<api-guide-resources-task-thin-executions-list-request-structure>>
+* <<api-guide-resources-task-thin-executions-list-request-parameters>>
+* <<api-guide-resources-task-thin-executions-list-example-request>>
+* <<api-guide-resources-task-thin-executions-list-response-structure>>
+
+[[api-guide-resources-task-thin-executions-list-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/http-request.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/query-parameters.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/curl-request.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/http-response.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-by-name]]
+==== List All Task Thin Executions With a Specified Task Name
+
+The task thin executions endpoint lets you list task executions with a specified task name.
+The following topics provide more details:
+
+* <<api-guide-resources-task-thin-executions-list-by-name-request-structure>>
+* <<api-guide-resources-task-thin-executions-list-by-name-request-parameters>>
+* <<api-guide-resources-task-thin-executions-list-by-name-example-request>>
+* <<api-guide-resources-task-thin-executions-list-by-name-response-structure>>
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/query-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/curl-request.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-by-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/http-response.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/http-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/request-parameters.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/curl-request.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions/http-response.adoc[]
+
+
+
+[[api-guide-resources-task-thin-executions-list-by-name]]
+==== List All Task Thin Executions With a Specified Task Name
+
+The task thin executions endpoint lets you list task executions with a specified task name.
+The following topics provide more details:
+
+* <<api-guide-resources-task-thin-executions-list-by-name-request-structure>>
+* <<api-guide-resources-task-thin-executions-list-by-name-request-parameters>>
+* <<api-guide-resources-task-thin-executions-list-by-name-example-request>>
+* <<api-guide-resources-task-thin-executions-list-by-name-response-structure>>
+
+[[api-guide-resources-task-thin-executions-list-by-name-request-structure]]
+===== Request Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/http-request.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-by-name-request-parameters]]
+===== Request Parameters
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/request-parameters.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-by-name-example-request]]
+===== Example Request
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/curl-request.adoc[]
+
+[[api-guide-resources-task-thin-executions-list-by-name-response-structure]]
+===== Response Structure
+
+include::{snippets}/task-executions-documentation/list-task-thin-executions-by-name/http-response.adoc[]
 
 [[api-guide-resources-task-executions-detail]]
 ==== Task Execution Detail

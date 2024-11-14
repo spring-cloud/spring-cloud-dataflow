@@ -39,7 +39,6 @@ import org.springframework.cloud.dataflow.rest.util.DeploymentPropertiesUtils;
 import org.springframework.cloud.dataflow.schema.SchemaVersionTarget;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -71,10 +70,13 @@ public class TaskTemplate implements TaskOperations {
 	private static final String VALIDATION_THIN_TASK_VERSION = "2.11.3";
 
 	private static final String VALIDATION_TASK_LAUNCH_VERSION = "2.11.0";
+	private static final String VALIDATION_TASK_THIN_BY_NAME = "2.11.6";
 
 	private static final String EXECUTIONS_RELATION = "tasks/executions";
 
 	private static final String THIN_EXECUTIONS_RELATION = "tasks/thinexecutions";
+
+	private static final String THIN_EXECUTIONS_BY_NAME_RELATION = "tasks/thinexecutions/name";
 
 	private static final String EXECUTIONS_CURRENT_RELATION = "tasks/executions/current";
 
@@ -101,6 +103,8 @@ public class TaskTemplate implements TaskOperations {
 	private final Link executionsLink;
 
 	private final Link thinExecutionsLink;
+
+	private final Link thinExecutionsByNameLink;
 
 	private final Link executionLink;
 
@@ -150,12 +154,17 @@ public class TaskTemplate implements TaskOperations {
 			this.validationLink = null;
 		}
 
-		// TODO early 2.11.3-SNAPSHOT version didn't have this. Remove && resources.getLink(THIN_EXECUTIONS_RELATION).isPresent() when releasing 2.11.3
-		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_THIN_TASK_VERSION) && resources.getLink(THIN_EXECUTIONS_RELATION).isPresent()) {
+		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_THIN_TASK_VERSION)) {
 			Assert.isTrue(resources.getLink(THIN_EXECUTIONS_RELATION).isPresent(), () -> THIN_EXECUTIONS_RELATION + " relation is required");
 			this.thinExecutionsLink = resources.getLink(THIN_EXECUTIONS_RELATION).get();
 		} else {
 			this.thinExecutionsLink = null;
+		}
+		if(VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_TASK_THIN_BY_NAME)) {
+			Assert.isTrue(resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).isPresent(), () -> THIN_EXECUTIONS_BY_NAME_RELATION + " relation is required");
+			this.thinExecutionsByNameLink = resources.getLink(THIN_EXECUTIONS_BY_NAME_RELATION).get();
+		} else {
+			this.thinExecutionsByNameLink = null;
 		}
 
 		if (VersionUtils.isDataFlowServerVersionGreaterThanOrEqualToRequiredVersion(version, VALIDATION_TASK_LAUNCH_VERSION)) {
@@ -283,7 +292,7 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
-	public PagedModel<TaskExecutionThinResource> thinExecutionList() {
+	public TaskExecutionThinResource.Page thinExecutionList() {
 		if(thinExecutionsLink != null) {
 			return restTemplate.getForObject(thinExecutionsLink.getHref(), TaskExecutionThinResource.Page.class);
 		} else {
@@ -292,9 +301,17 @@ public class TaskTemplate implements TaskOperations {
 	}
 
 	@Override
+	public TaskExecutionThinResource.Page thinExecutionListByTaskName(String taskName) {
+		if(thinExecutionsByNameLink != null) {
+			return restTemplate.getForObject(thinExecutionsByNameLink.expand(taskName).getHref(), TaskExecutionThinResource.Page.class);
+		} else {
+			return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(), TaskExecutionThinResource.Page.class);
+		}
+	}
+
+	@Override
 	public TaskExecutionResource.Page executionListByTaskName(String taskName) {
-		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(),
-			TaskExecutionResource.Page.class);
+		return restTemplate.getForObject(executionByNameLink.expand(taskName).getHref(), TaskExecutionResource.Page.class);
 	}
 
 	@Override

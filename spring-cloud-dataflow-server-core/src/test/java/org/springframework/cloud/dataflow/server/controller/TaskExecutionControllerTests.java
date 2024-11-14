@@ -224,6 +224,7 @@ public class TaskExecutionControllerTests {
 			SAMPLE_CLEANSED_ARGUMENT_LIST.add("spring.datasource.password=******");
 
 			taskDefinitionRepository.save(new TaskDefinition(TASK_NAME_ORIG, "demo"));
+			taskDefinitionRepository.save(new TaskDefinition("nope", "demo"));
 			SchemaVersionTarget schemaVersionTarget = aggregateExecutionSupport.findSchemaVersionTarget(TASK_NAME_ORIG, taskDefinitionReader);
 			TaskExecutionDao dao = daoContainer.get(schemaVersionTarget.getName());
 			TaskExecution taskExecution1 =
@@ -374,6 +375,21 @@ public class TaskExecutionControllerTests {
 			.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(4)));
 	}
 
+
+	@Test
+	void getThinExecutionsByTaskName() throws Exception {
+		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", TASK_NAME_ORIG).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].executionId", containsInAnyOrder(2, 1)))
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].parentExecutionId", containsInAnyOrder(null, 1)))
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList[*].taskExecutionStatus", containsInAnyOrder("RUNNING", "RUNNING")))
+				.andExpect(jsonPath("$._embedded.taskExecutionThinResourceList", hasSize(2)));
+		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", "nope").accept(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.page.totalElements", is(0)));
+		mockMvc.perform(get("/tasks/thinexecutions").queryParam("name", "none").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
 	@Test
 	void getCurrentExecutions() throws Exception {
 		when(taskLauncher.getRunningTaskExecutionCount()).thenReturn(4);
@@ -520,7 +536,7 @@ public class TaskExecutionControllerTests {
 		mockMvc.perform(get("/tasks/definitions").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andDo(print())
-			.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(1)));
+			.andExpect(jsonPath("$._embedded.taskDefinitionResourceList", hasSize(2)));
 	}
 	@Test
 	void getExecutionsByNameNotFound() throws Exception {
