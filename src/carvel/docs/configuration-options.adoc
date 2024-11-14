@@ -597,7 +597,7 @@ No
   Type:::
 String
    Default Value:::
-1.0.0
+2.0.0-M2
 
 [[configuration-options-scdf.feature.monitoring.prometheusRsocketProxy.image.digest]]`scdf.feature.monitoring.prometheusRsocketProxy.image.digest`::
   Description:::
@@ -618,4 +618,3 @@ No
 Boolean
    Default Value:::
 False
-

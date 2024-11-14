@@ -1,2 +1,2 @@
 #!/bin/bash
-docker pull "micrometermetrics/prometheus-rsocket-proxy:2.0.0-M1"
+docker pull "micrometermetrics/prometheus-rsocket-proxy:2.0.0-M2"
