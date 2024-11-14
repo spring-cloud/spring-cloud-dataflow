@@ -28,6 +28,7 @@ import org.springframework.hateoas.RepresentationModel;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -46,7 +47,11 @@ class TaskTemplateTests {
 	void setup() {
 		restTemplate = mock(RestTemplate.class);
 	}
-
+	@Test
+	void invalidVersion() {
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> validateExecutionLinkPresent("2.11.5"));
+	}
 	@Test
 	void minDataFlow() {
 		validateExecutionLinkPresent("3.0.0");
