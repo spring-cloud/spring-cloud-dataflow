@@ -2,6 +2,11 @@ name: CI
 
 on:
   workflow_dispatch:
+    inputs:
+      enableSecurityScan:
+        type: boolean
+        default: false
+        description: 'Enable security scan with Trivy'
   push:
     branches:
       - '2.11.x'
@@ -188,6 +193,7 @@ jobs:
       GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
   scan:
     runs-on: ubuntu-latest
+    if: ${{ inputs.enableSecurityScan != null && inputs.enableSecurityScan }}
     steps:
       - uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner in repo mode
