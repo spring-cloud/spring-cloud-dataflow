@@ -18,6 +18,7 @@ package org.springframework.cloud.dataflow.server.service.impl;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.dataflow.core.DataFlowPropertyKeys;
+import org.springframework.util.Assert;
 
 /**
  * Properties used to define the behavior of the composed task runner.
@@ -44,7 +45,7 @@ public class ComposedTaskRunnerConfigurationProperties {
 	 * If true SCDF will set the dataflow-server-access-token for the composed
 	 * task runner to the user's token when launching composed tasks.
 	 */
-	private Boolean useUserAccessToken;
+	private Boolean useUserAccessToken = false;
 
 	public String getUri() {
 		return uri;
@@ -67,6 +68,7 @@ public class ComposedTaskRunnerConfigurationProperties {
 	}
 
 	public void setUseUserAccessToken(Boolean useUserAccessToken) {
+		Assert.notNull(useUserAccessToken, "'useUserAccessToken' cannot be null");
 		this.useUserAccessToken = useUserAccessToken;
 	}
 }
