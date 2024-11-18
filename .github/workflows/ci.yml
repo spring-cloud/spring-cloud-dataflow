@@ -5,7 +5,7 @@ on:
     inputs:
       enableSecurityScan:
         type: boolean
-        default: false
+        default: true
         description: 'Enable security scan with Trivy'
   push:
     branches:
@@ -15,6 +15,8 @@ on:
 
 env:
   MAVEN_THREADS: '-T 1'
+  TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db
+  TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db,aquasec/trivy-java-db,ghcr.io/aquasecurity/trivy-java-db
 
 jobs:
   build:
@@ -193,7 +195,7 @@ jobs:
       GCR_JSON_KEY: ${{ secrets.GCR_JSON_KEY }}
   scan:
     runs-on: ubuntu-latest
-    if: ${{ inputs.enableSecurityScan != null && inputs.enableSecurityScan }}
+    if: ${{ inputs.enableSecurityScan == null || inputs.enableSecurityScan }}
     steps:
       - uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner in repo mode
