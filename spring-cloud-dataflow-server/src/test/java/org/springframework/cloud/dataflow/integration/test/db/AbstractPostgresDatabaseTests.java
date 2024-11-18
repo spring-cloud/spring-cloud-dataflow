@@ -79,15 +79,15 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 	@SuppressWarnings("deprecation")
 	@Test
 	@DataflowMain
-	public void migration210211() throws URISyntaxException {
+	public void migration211_30() throws URISyntaxException {
 		log.info("Running testMigrationError()");
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
 
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_2_9);
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_2_11);
 		assertSkipperServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_2_10);
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_2_11);
 		assertDataflowServerRunning(this.dataflowCluster);
 
 		ObjectMapper objectMapper = new ObjectMapper();
