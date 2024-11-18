@@ -18,15 +18,14 @@ package org.springframework.cloud.dataflow.common.test.docker.compose.configurat
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-
+import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 public class AdditionalEnvironmentValidatorTests {
 
 	@Test
-	public void throw_exception_when_additional_environment_variables_contain_docker_variables() {
+	public void throwExceptionWhenAdditionalEnvironmentVariablesContainDockerVariables() {
 		Map<String, String> variables = new HashMap<>();
 		variables.put("DOCKER_HOST", "tcp://some-host:2376");
 		variables.put("SOME_VARIABLE", "Some Value");
