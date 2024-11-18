@@ -5,7 +5,7 @@ on:
     inputs:
       enableSecurityScan:
         type: boolean
-        default: false
+        default: true
         description: 'Enable security scan with Trivy'
   push:
     branches:
@@ -16,6 +16,8 @@ on:
 env:
   ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
   ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+  TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db,aquasec/trivy-db,ghcr.io/aquasecurity/trivy-db
+  TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db,aquasec/trivy-java-db,ghcr.io/aquasecurity/trivy-java-db
 
 jobs:
   build:
@@ -177,7 +179,7 @@ jobs:
     secrets: inherit
   scan:
     runs-on: ubuntu-latest
-    if: ${{ inputs.enableSecurityScan != null && inputs.enableSecurityScan }}
+    if: ${{ inputs.enableSecurityScan == null || inputs.enableSecurityScan }}
     steps:
       - uses: actions/checkout@v4
       - name: Run Trivy vulnerability scanner in repo mode
