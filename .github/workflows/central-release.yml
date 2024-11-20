@@ -17,11 +17,10 @@ jobs:
     - uses: actions/checkout@v4
 
     # Setup jfrog cli
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.46.4
+    - uses: jfrog/setup-jfrog-cli@v3
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_URL: 'https://repo.spring.io'
+        JF_ENV_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     # zoo extract and ensure
     - name: Extract Zoo Context Properties
       uses: jvalkeal/build-zoo-handler@v0.0.4
