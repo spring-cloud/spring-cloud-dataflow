@@ -5,7 +5,7 @@ on:
     inputs:
       enableSecurityScan:
         type: boolean
-        default: false
+        default: ${{ vars.ENABLE_SECURITY_SCAN == 'true' }}
         description: 'Enable security scan with Trivy'
   push:
     branches:
