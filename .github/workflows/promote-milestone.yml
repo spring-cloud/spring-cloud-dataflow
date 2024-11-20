@@ -26,11 +26,10 @@ jobs:
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_ui_buildnumber
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildname
           BUILD_ZOO_HANDLER_spring_cloud_dataflow_buildnumber
-    - uses: jfrog/setup-jfrog-cli@v1
-      with:
-        version: 1.54.0
+    - uses: jfrog/setup-jfrog-cli@v3
       env:
-        JF_ARTIFACTORY_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
+        JF_URL: 'https://repo.spring.io'
+        JF_ENV_SPRING: ${{ secrets.JF_ARTIFACTORY_SPRING }}
     - name: Promote Build
       run: |
         jfrog rt build-promote $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildname $BUILD_ZOO_HANDLER_spring_cloud_deployer_buildnumber libs-milestone-local
