@@ -40,8 +40,8 @@ class DataflowOAuthIT extends AbstractDataflowTests {
 	private final Logger log = LoggerFactory.getLogger(DataflowOAuthIT.class);
 
 	@Test
-	void securedSetup() throws Exception {
-		log.info("Running testSecuredSetup()");
+	void securedSetupUAA() throws Exception {
+		log.info("Running securedSetupUAA()");
 		this.dataflowCluster.startIdentityProvider(TagNames.UAA_4_32);
 		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);
 		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main);
@@ -84,6 +84,62 @@ class DataflowOAuthIT extends AbstractDataflowTests {
 				stderr.set(cmdResult.getStderr());
 				assertThat(cmdResult.getExitCode()).isNotZero();
 				stderr.set("");
+		}
+		finally {
+			String msg = stderr.get();
+			if (StringUtils.hasText(msg)) {
+				log.error("curl error: {}", msg);
+			}
+		}
+	}
+
+	@Test
+	void securedSetupKeycloak() throws Exception {
+		log.info("Running securedSetupKeycloak()");
+		this.dataflowCluster.startIdentityProvider(TagNames.KEYCLOAK_26);
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main);
+
+		// we can't do oauth flow from host due to how oauth works as we
+		// need proper networking, so use separate tools container to run
+		// curl command as we support basic auth and if we get good response
+		// oauth is working with dataflow and skipper.
+
+		AtomicReference<String> stderr = new AtomicReference<>();
+		try {
+			with().pollInterval(5, TimeUnit.SECONDS)
+					.and()
+					.await()
+					.ignoreExceptions()
+					.atMost(90, TimeUnit.SECONDS)
+					.untilAsserted(() -> {
+						log.info("Checking auth using curl");
+						ExecResult cmdResult = execInToolsContainer("curl", "-v", "-u", "joe:password", "http://dataflow:9393/about");
+						String response = cmdResult.getStdout();
+						if (StringUtils.hasText(response)) {
+							log.info("Response is {}", response);
+						}
+						if(StringUtils.hasText(cmdResult.getStderr())) {
+							log.error(cmdResult.getStderr());
+						}
+						stderr.set(cmdResult.getStderr());
+						assertThat(response).contains("\"authenticated\":true");
+						assertThat(response).contains("\"username\":\"joe\"");
+						stderr.set("");
+					});
+			log.info("Checking without credentials using curl");
+			ExecResult cmdResult = execInToolsContainer("curl", "-v", "-f", "http://dataflow:9393/about");
+			String response = cmdResult.getStdout();
+			if (StringUtils.hasText(response)) {
+				log.info("Response is {}", response);
+			}
+			response = cmdResult.getStderr();
+			if(StringUtils.hasText(response)) {
+				log.warn("Error is {}", response);
+			}
+			stderr.set(cmdResult.getStderr());
+			assertThat(cmdResult.getExitCode()).isNotZero();
+			stderr.set("");
 		}
 		finally {
 			String msg = stderr.get();

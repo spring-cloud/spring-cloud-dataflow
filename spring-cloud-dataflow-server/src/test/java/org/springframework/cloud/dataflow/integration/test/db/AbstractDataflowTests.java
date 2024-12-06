@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.integration.test.db;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,8 +90,10 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.DB2_11_5_8_0, "icr.io/db2_community/db2:11.5.8.0", TagNames.DB2)
 	);
 
-	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(
-		ClusterContainer.from(TagNames.UAA_4_32, "springcloud/scdf-uaa-test:4.32", TagNames.UAA)
+	public final static List<ClusterContainer> OAUTH_CONTAINERS = Arrays.asList(
+		ClusterContainer.from(TagNames.UAA_4_32, "springcloud/scdf-uaa-test:4.32", TagNames.UAA),
+		ClusterContainer.from(TagNames.KEYCLOAK_25, "quay.io/keycloak/keycloak:25.0", TagNames.KEYCLOAK),
+			ClusterContainer.from(TagNames.KEYCLOAK_26, "quay.io/keycloak/keycloak:26.0", TagNames.KEYCLOAK)
 	);
 
 	@Autowired
