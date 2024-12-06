@@ -93,6 +93,33 @@ public class DefaultAuthoritiesMapperTests {
 	}
 
 	@Test
+	public void testThat3MappedAuthoritiesAreReturned() throws Exception {
+		Map<String, String> roleMappings = new HashMap<>();
+		roleMappings.put("ROLE_MANAGE", "dataflow_manage");
+		roleMappings.put("ROLE_VIEW", "dataflow_view");
+		roleMappings.put("ROLE_CREATE", "dataflow_create");
+		roleMappings.put("ROLE_MODIFY", "dataflow_modify");
+		roleMappings.put("ROLE_DEPLOY", "dataflow_deploy");
+		roleMappings.put("ROLE_DESTROY", "dataflow_destroy");
+		roleMappings.put("ROLE_SCHEDULE", "dataflow_schedule");
+
+		ProviderRoleMapping providerRoleMapping = new ProviderRoleMapping();
+		providerRoleMapping.setMapOauthScopes(true);
+		providerRoleMapping.getRoleMappings().putAll(roleMappings);
+
+		Set<String> roles = new HashSet<>();
+		roles.add("dataflow_manage");
+		roles.add("dataflow_view");
+		roles.add("dataflow_deploy");
+
+		DefaultAuthoritiesMapper defaultAuthoritiesMapper = new DefaultAuthoritiesMapper("uaa", providerRoleMapping);
+		Collection<? extends GrantedAuthority> authorities = defaultAuthoritiesMapper.mapScopesToAuthorities("uaa",
+				roles, null);
+
+		assertThat(authorities).hasSize(3);
+		assertThat(authorities.stream().map(authority -> authority.getAuthority()).collect(Collectors.toList()))
+				.containsExactlyInAnyOrder("ROLE_DEPLOY", "ROLE_MANAGE", "ROLE_VIEW");
+	}
 	public void testThat7MappedAuthoritiesAreReturned() throws Exception {
 		Map<String, String> roleMappings = new HashMap<>();
 		roleMappings.put("ROLE_MANAGE", "foo-manage");

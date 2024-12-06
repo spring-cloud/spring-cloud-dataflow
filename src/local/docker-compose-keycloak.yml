@@ -1,0 +1,21 @@
+services:
+
+  keycloak:
+    profiles:
+      - keycloak
+    image: keycloak/keycloak:25.0
+    container_name: oauth
+    command: start-dev --import-realm --verbose
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: mariadb
+      KC_DB_URL: 'jdbc:mariadb://mariadb:3306/dataflow'
+      KC_DB_USERNAME: 'root'
+      KC_DB_PASSWORD: 'yourpassword'
+      KC_HOSTNAME: 'localhost'
+    ports:
+      - 8080:8080
+      - 9000:9000
+    volumes:
+      - ${SCDIR}/data:/opt/keycloak/data/import
