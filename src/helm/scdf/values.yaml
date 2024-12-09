@@ -126,7 +126,7 @@ serviceAccount:
 server:
   image:
     repository: 'springcloud/spring-cloud-dataflow-server'
-    tag: '2.11.5-SNAPSHOT'
+    tag: '2.11.5'
     digest: ""
     pullPolicy: IfNotPresent
     pullSecrets: [ ]
@@ -196,7 +196,7 @@ server:
 skipper:
   image:
     repository: 'springcloud/spring-cloud-skipper'
-    tag: '2.11.5-SNAPSHOT'
+    tag: '2.11.5'
     digest: ""
     pullPolicy: IfNotPresent
     pullSecrets: [ ]
@@ -282,5 +282,5 @@ skipper:
       validationQuery:
       dialect:
   service:
-    type: LoadBalancer
+    type: ClusterIP
     port: http
