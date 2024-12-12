@@ -62,6 +62,7 @@
 		<!-- database driver versions -->
 		<oracle-ojdbc8.version>21.9.0.0</oracle-ojdbc8.version>
 		<db2-jcc.version>11.5.9.0</db2-jcc.version>
+		<testcontainers-keycloak.version>3.4.0</testcontainers-keycloak.version>
 		<!-- questionable testing libs -->
 		<org-json.version>20240303</org-json.version>
 		<littleproxy.version>1.1.2</littleproxy.version>
@@ -256,6 +257,11 @@
 				<version>${spring-cloud-deployer.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.github.dasniko</groupId>
+				<artifactId>testcontainers-keycloak</artifactId>
+				<version>${testcontainers-keycloak.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

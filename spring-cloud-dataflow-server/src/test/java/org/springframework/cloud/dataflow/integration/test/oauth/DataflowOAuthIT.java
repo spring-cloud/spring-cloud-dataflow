@@ -16,6 +16,7 @@
 
 package org.springframework.cloud.dataflow.integration.test.oauth;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,14 +35,14 @@ import static org.awaitility.Awaitility.with;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Oauth
-@ActiveProfiles({TagNames.PROFILE_OAUTH})
+@ActiveProfiles(TagNames.PROFILE_OAUTH)
 class DataflowOAuthIT extends AbstractDataflowTests {
 
 	private final Logger log = LoggerFactory.getLogger(DataflowOAuthIT.class);
 
 	@Test
-	void securedSetup() throws Exception {
-		log.info("Running testSecuredSetup()");
+	void runningUAASecuredSetup() throws Exception {
+		log.info("Running UAASecuredSetup");
 		this.dataflowCluster.startIdentityProvider(TagNames.UAA_4_32);
 		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);
 		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main);
@@ -60,30 +61,10 @@ class DataflowOAuthIT extends AbstractDataflowTests {
 				.ignoreExceptions()
 				.atMost(90, TimeUnit.SECONDS)
 				.untilAsserted(() -> {
-					log.info("Checking auth using curl");
-					ExecResult cmdResult = execInToolsContainer("curl", "-v", "-u", "janne:janne", "http://dataflow:9393/about");
-					String response = cmdResult.getStdout();
-					if (StringUtils.hasText(response)) {
-						log.info("Response is {}", response);
-					}
-					stderr.set(cmdResult.getStderr());
-					assertThat(response).contains("\"authenticated\":true");
-					assertThat(response).contains("\"username\":\"janne\"");
-					stderr.set("");
+					assertGetAboutWithUser("janne", "janne", stderr);
 				});
-				log.info("Checking without credentials using curl");
-				ExecResult cmdResult = execInToolsContainer("curl", "-v", "-f", "http://dataflow:9393/about");
-				String response = cmdResult.getStdout();
-				if (StringUtils.hasText(response)) {
-					log.info("Response is {}", response);
-				}
-				response = cmdResult.getStderr();
-				if(StringUtils.hasText(response)) {
-					log.warn("Error is {}", response);
-				}
-				stderr.set(cmdResult.getStderr());
-				assertThat(cmdResult.getExitCode()).isNotZero();
-				stderr.set("");
+			log.info("Checking without credentials using curl");
+			assertAboutWithoutUser(stderr);
 		}
 		finally {
 			String msg = stderr.get();
@@ -91,5 +72,70 @@ class DataflowOAuthIT extends AbstractDataflowTests {
 				log.error("curl error: {}", msg);
 			}
 		}
+	}
+
+	@Test
+	void runningKeycloakSecuredSetup() throws Exception {
+		log.info("Running KeycloakSecuredSetup");
+		this.dataflowCluster.startIdentityProvider(TagNames.KEYCLOAK_26);
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_main);
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_main);
+
+		// we can't do oauth flow from host due to how oauth works as we
+		// need proper networking, so use separate tools container to run
+		// curl command as we support basic auth and if we get good response
+		// oauth is working with dataflow and skipper.
+
+		AtomicReference<String> stderr = new AtomicReference<>();
+		try {
+			with()
+				.pollInterval(5, TimeUnit.SECONDS)
+				.and()
+				.await()
+				.ignoreExceptions()
+				.atMost(90, TimeUnit.SECONDS)
+				.untilAsserted(() -> {
+					assertGetAboutWithUser("joe", "password", stderr);
+				});
+			log.info("Checking without credentials using curl");
+			assertAboutWithoutUser(stderr);
+		}
+		finally {
+			String msg = stderr.get();
+			if (StringUtils.hasText(msg)) {
+				log.error("curl error: {}", msg);
+			}
+		}
+	}
+
+	private void assertGetAboutWithUser(String username, String password, AtomicReference<String> stderr) throws IOException, InterruptedException {
+		log.info("Checking auth using curl");
+		ExecResult cmdResult = execInToolsContainer("curl", "-v", "-u", username + ":" + password, "http://dataflow:9393/about");
+		String response = cmdResult.getStdout();
+		if (StringUtils.hasText(response)) {
+			log.info("Response is {}", response);
+		}
+		if(StringUtils.hasText(cmdResult.getStderr())) {
+			log.error(cmdResult.getStderr());
+		}
+		stderr.set(cmdResult.getStderr());
+		assertThat(response).contains("\"authenticated\":true");
+		assertThat(response).contains("\"username\":\"" + username + "\"");
+		stderr.set("");
+	}
+
+	private void assertAboutWithoutUser(AtomicReference<String> stderr) throws IOException, InterruptedException {
+		ExecResult cmdResult = execInToolsContainer("curl", "-v", "-f", "http://dataflow:9393/about");
+		String response = cmdResult.getStdout();
+		if (StringUtils.hasText(response)) {
+			log.info("Response is {}", response);
+		}
+		response = cmdResult.getStderr();
+		if(StringUtils.hasText(response)) {
+			log.warn("Error is {}", response);
+		}
+		stderr.set(cmdResult.getStderr());
+		assertThat(cmdResult.getExitCode()).isNotZero();
+		stderr.set("");
 	}
 }

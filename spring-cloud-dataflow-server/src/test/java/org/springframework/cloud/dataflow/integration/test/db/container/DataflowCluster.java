@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import dasniko.testcontainers.keycloak.KeycloakContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.Db2Container;
@@ -30,7 +31,6 @@ import org.testcontainers.containers.MariaDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.OracleContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.lifecycle.Startable;
 
 import org.springframework.cloud.dataflow.integration.test.tags.TagNames;
@@ -56,6 +56,8 @@ public class DataflowCluster implements Startable {
 	private final int DB2_PORT = 50000;
 
 	private final int UAA_PORT = 8099;
+
+	private final int KEYCLOAK_PORT = 8080;
 
 	private final Map<String, ClusterContainer> dataflowImages;
 
@@ -190,11 +192,26 @@ public class DataflowCluster implements Startable {
 		ClusterContainer clusterContainer = this.oauthImages.get(id);
 		Assert.notNull(clusterContainer, String.format("Unknown oauth %s", id));
 
-		GenericContainer<?> oauthContainer = new GenericContainer<>(clusterContainer.image);
+		GenericContainer<?> oauthContainer;
+		if (id.startsWith(TagNames.KEYCLOAK)) {
+			KeycloakContainer keycloakContainer = new KeycloakContainer(clusterContainer.image)
+				.withRealmImportFiles("/dataflow-realm.json", "/dataflow-users-0.json")
+				.withAdminUsername("admin")
+				.withAdminPassword("admin")
+				.withExposedPorts(KEYCLOAK_PORT, 9000);
+			oauthContainer = keycloakContainer;
+		} else {
+			oauthContainer = new GenericContainer<>(clusterContainer.image);
+			oauthContainer.withExposedPorts(UAA_PORT);
+		}
 		oauthContainer.withNetworkAliases("oauth");
 		oauthContainer.withNetwork(network);
-		oauthContainer.withExposedPorts(UAA_PORT);
+		oauthContainer.withLogConsumer(outputFrame -> ContainerUtils.output("oauth", outputFrame));
 		oauthContainer.start();
+		if(id.startsWith(TagNames.KEYCLOAK)) {
+			String authServerUrl = ((KeycloakContainer) oauthContainer).getAuthServerUrl();
+			logger.info("keycloak using authServerUrl=" + authServerUrl);
+		}
 		runningOauth = oauthContainer;
 	}
 
@@ -396,35 +413,71 @@ public class DataflowCluster implements Startable {
 		}
 
 		if (oauthContainer != null) {
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.map-oauth-scopes", "true");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_CREATE", "dataflow.create");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DEPLOY", "dataflow.deploy");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DESTROY", "dataflow.destroy");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MANAGE", "dataflow.manage");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MODIFY", "dataflow.modify");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_SCHEDULE", "dataflow.schedule");
-			skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_VIEW", "dataflow.view");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_REDIRECT_URI", "{baseUrl}/login/oauth2/code/{registrationId}");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_AUTHORIZATION_GRANT_TYPE", "authorization_code");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_ID", "dataflow");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_SECRET", "secret");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_SCOPE",
-				"openid,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_JWK_SET_URI", "http://oauth:8099/uaa/token_keys");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_TOKEN_URI", "http://oauth:8099/uaa/oauth/token");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_INFO_URI", "http://oauth:8099/uaa/userinfo");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_NAME_ATTRIBUTE", "user_name");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_AUTHORIZATION_URI", "http://oauth:8099/uaa/oauth/authorize");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI", "http://oauth:8099/uaa/introspect");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID", "dataflow");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET", "secret");
-			skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECK_TOKEN_ACCESS", "isAuthenticated()");
+			if(oauthContainer.getDockerImageName().contains(TagNames.KEYCLOAK)) {
+				configureSkipperForKeycloak(skipperContainer);
+			} else {
+				configureSkipperForUAA(skipperContainer);
+			}
 		}
 
-		skipperContainer.withLogConsumer(new Slf4jLogConsumer(logger));
 		skipperContainer.withNetworkAliases("skipper");
 		skipperContainer.withNetwork(network);
 		return skipperContainer;
+	}
+
+	private static void configureSkipperForUAA(SkipperContainer<?> skipperContainer) {
+		String oauthUrlPrefix = "http://oauth:8099/uaa";
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.map-oauth-scopes", "true");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_CREATE", "dataflow.create");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DEPLOY", "dataflow.deploy");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DESTROY", "dataflow.destroy");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MANAGE", "dataflow.manage");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MODIFY", "dataflow.modify");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_SCHEDULE", "dataflow.schedule");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_VIEW", "dataflow.view");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_REDIRECT_URI", "{baseUrl}/login/oauth2/code/{registrationId}");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_AUTHORIZATION_GRANT_TYPE", "authorization_code");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_ID", "dataflow");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_SECRET", "secret");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_SCOPE", "openid,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_JWK_SET_URI", oauthUrlPrefix +  "/token_keys");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_TOKEN_URI", oauthUrlPrefix +  "/oauth/token");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_INFO_URI", oauthUrlPrefix +  "/userinfo");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_NAME_ATTRIBUTE", "user_name");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_AUTHORIZATION_URI", oauthUrlPrefix +  "/oauth/authorize");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI", oauthUrlPrefix +  "/introspect");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID", "dataflow");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET", "secret");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECK_TOKEN_ACCESS", "isAuthenticated()");
+	}
+
+	private static void configureSkipperForKeycloak(SkipperContainer<?> skipperContainer) {
+		String oauthUrlPrefix = "http://oauth:8080";
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.map-oauth-scopes", "false");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.map-group-claims", "false");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_CREATE", "dataflow_create");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_DEPLOY", "dataflow_deploy");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_DESTROY", "dataflow_destroy");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_MANAGE", "dataflow_manage");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_MODIFY", "dataflow_modify");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_SCHEDULE", "dataflow_schedule");
+		skipperContainer.withEnv("spring.cloud.skipper.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_VIEW", "dataflow_view");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECTURI", "{baseUrl}/login/oauth2/code/{registrationId}");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_AUTHORIZATIONGRANTTYPE", "authorization_code");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID", "dataflow");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTSECRET", "secret");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTAUTHENTICATIONMETHOD", "post");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_SCOPE", "openid, roles");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI", oauthUrlPrefix +  "/realms/dataflow");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWKSETURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/certs");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKENURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/token");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USERINFOURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/userinfo");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATIONURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/auth");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER_NAME_ATTRIBUTE", "user_name");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTIONURI", oauthUrlPrefix + "/realms/dataflow/protocol/openid-connect/token/introspect");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENTID", "dataflow");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENTSECRET", "090RucamvekrMLyGHMr4lkHX9xhAlsqK");
+		skipperContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECKTOKENACCESS", "isAuthenticated()");
 	}
 
 	private DataflowContainer<?> buildDataflowContainer(
@@ -460,40 +513,75 @@ public class DataflowCluster implements Startable {
 				dataflowContainer.withEnv("SPRING_DATASOURCE_URL", databaseContainer.getJdbcUrl());
 			}
 		}
-		dataflowContainer.withEnv("SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI",
-			String.format("http://%s:%s/api", "skipper", SKIPPER_PORT));
+		dataflowContainer.withEnv("SPRING_CLOUD_SKIPPER_CLIENT_SERVER_URI", String.format("http://skipper:%s/api", SKIPPER_PORT));
 
 		if (oauthContainer != null) {
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes", "true");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_CREATE", "dataflow.create");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DEPLOY", "dataflow.deploy");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DESTROY", "dataflow.destroy");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MANAGE", "dataflow.manage");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MODIFY", "dataflow.modify");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_SCHEDULE",
-				"dataflow.schedule");
-			dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_VIEW", "dataflow.view");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_REDIRECT_URI", "{baseUrl}/login/oauth2/code/{registrationId}");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_AUTHORIZATION_GRANT_TYPE", "authorization_code");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_ID", "dataflow");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_SECRET", "secret");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_SCOPE",
-				"openid,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_JWK_SET_URI", "http://oauth:8099/uaa/token_keys");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_TOKEN_URI", "http://oauth:8099/uaa/oauth/token");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_INFO_URI", "http://oauth:8099/uaa/userinfo");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_NAME_ATTRIBUTE", "user_name");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_AUTHORIZATION_URI", "http://oauth:8099/uaa/oauth/authorize");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI", "http://oauth:8099/uaa/introspect");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID", "dataflow");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET", "secret");
-			dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECK_TOKEN_ACCESS", "isAuthenticated()");
+			if(oauthContainer.getDockerImageName().contains(TagNames.KEYCLOAK)) {
+				configureDataflowForKeycloak(dataflowContainer);
+			} else {
+				configureDataflowForUAA(dataflowContainer);
+			}
 		}
 
-		dataflowContainer.withLogConsumer(new Slf4jLogConsumer(logger));
 		dataflowContainer.withNetworkAliases("dataflow");
 		dataflowContainer.withNetwork(network);
 		return dataflowContainer;
+	}
+
+	private void configureDataflowForKeycloak(DataflowContainer<?> dataflowContainer) {
+		String oauthUrlPrefix = "http://oauth:" + KEYCLOAK_PORT;
+		dataflowContainer.withEnv("LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY", "DEBUG");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.map-oauth-scopes", "false");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.map-group-claims", "false");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_CREATE", "dataflow_create");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_DEPLOY", "dataflow_deploy");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_DESTROY", "dataflow_destroy");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_MANAGE", "dataflow_manage");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_MODIFY", "dataflow_modify");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_SCHEDULE", "dataflow_schedule");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.keycloak.role-mappings.ROLE_VIEW", "dataflow_view");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECTURI", "{baseUrl}/login/oauth2/code/{registrationId}");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_AUTHORIZATIONGRANTTYPE", "authorization_code");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTID", "dataflow");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_CLIENTSECRET", "090RucamvekrMLyGHMr4lkHX9xhAlsqK");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_SCOPE", "openid,roles");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUERURI", oauthUrlPrefix +  "/realms/dataflow");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWKSETURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/certs");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKENURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/token");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USERINFOURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/userinfo");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATIONURI", oauthUrlPrefix +  "/realms/dataflow/protocol/openid-connect/auth");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USERNAMEATTRIBUTE", "user_name");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTIONURI", oauthUrlPrefix + "/realms/dataflow/protocol/openid-connect/token/introspect");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENTID", "dataflow");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENTSECRET", "090RucamvekrMLyGHMr4lkHX9xhAlsqK");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECKTOKENACCESS", "isAuthenticated()");
+	}
+
+	private void configureDataflowForUAA(DataflowContainer<?> dataflowContainer) {
+		String oauthUrlPrefix = "http://oauth:" + UAA_PORT + "/uaa";
+		dataflowContainer.withEnv("LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY", "DEBUG");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.map-oauth-scopes", "true");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_CREATE", "dataflow.create");
+		dataflowContainer.withEnv( "spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DEPLOY", "dataflow.deploy");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_DESTROY", "dataflow.destroy");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MANAGE", "dataflow.manage");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_MODIFY", "dataflow.modify");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_SCHEDULE", "dataflow.schedule");
+		dataflowContainer.withEnv("spring.cloud.dataflow.security.authorization.provider-role-mappings.uaa.role-mappings.ROLE_VIEW", "dataflow.view");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_REDIRECT_URI", "{baseUrl}/login/oauth2/code/{registrationId}");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_AUTHORIZATION_GRANT_TYPE", "authorization_code");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_ID", "dataflow");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_CLIENT_SECRET", "secret");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_UAA_SCOPE", "openid,dataflow.create,dataflow.deploy,dataflow.destroy,dataflow.manage,dataflow.modify,dataflow.schedule,dataflow.view");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_JWK_SET_URI", oauthUrlPrefix + "/token_keys");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_TOKEN_URI", oauthUrlPrefix + "/oauth/token");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_INFO_URI", oauthUrlPrefix + "/userinfo");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_USER_NAME_ATTRIBUTE", "user_name");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_UAA_AUTHORIZATION_URI", oauthUrlPrefix + "/oauth/authorize");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_INTROSPECTION_URI", oauthUrlPrefix + "/introspect");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_ID", "dataflow");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_RESOURCESERVER_OPAQUETOKEN_CLIENT_SECRET", "secret");
+		dataflowContainer.withEnv("SPRING_SECURITY_OAUTH2_AUTHORIZATION_CHECK_TOKEN_ACCESS", "isAuthenticated()");
 	}
 
 	public static class ClusterContainer {

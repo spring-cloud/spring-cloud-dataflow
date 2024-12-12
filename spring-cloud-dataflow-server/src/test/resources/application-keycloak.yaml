@@ -1,0 +1,65 @@
+spring:
+  cloud:
+    dataflow:
+      features:
+        schedules-enabled: false
+        streams-enabled: false
+      security:
+        authorization:
+          provider-role-mappings:
+            keycloak:
+              map-group-claims: true
+              role-mappings:
+                ROLE_VIEW: dataflow_view
+                ROLE_CREATE: dataflow_create
+                ROLE_MANAGE: dataflow_manage
+                ROLE_DEPLOY: dataflow_deploy
+                ROLE_DESTROY: dataflow_destroy
+                ROLE_MODIFY: dataflow_modify
+                ROLE_SCHEDULE: dataflow_schedule
+      client:
+        authentication:
+          client-id: 'dataflow'
+          client-secret: '090RucamvekrMLyGHMr4lkHX9xhAlsqK'
+          oauth2:
+            client-registration-id: keycloak
+          scope: openid, roles
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: '${keycloak.url}/realms/dataflow'
+            jwk-set-uri: '${keycloak.url}/realms/dataflow/protocol/openid-connect/certs'
+            token-uri: '${keycloak.url}/realms/dataflow/protocol/openid-connect/token'
+            user-info-uri: '${keycloak.url}/realms/dataflow/protocol/openid-connect/userinfo'
+            user-name-attribute: 'user_name'
+            authorization-uri: '${keycloak.url}/realms/dataflow/protocol/openid-connect/auth'
+        registration:
+          keycloak:
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            client-id: 'dataflow'
+            client-name: 'dataflow'
+            client-secret: '090RucamvekrMLyGHMr4lkHX9xhAlsqK'
+            provider: 'keycloak'
+            authorization-grant-type: 'authorization_code'
+            scope:
+              - openid
+              - roles
+      resourceserver:
+        opaquetoken:
+          introspection-uri: ${keycloak.url}/realms/dataflow/protocol/openid-connect/token/introspect
+          client-id: 'dataflow'
+          client-secret: '090RucamvekrMLyGHMr4lkHX9xhAlsqK'
+      authorization:
+        check-token-access: isAuthenticated()
+logging:
+  level:
+    org.springframework.security: debug
+    org.springframework.web: debug
+    org.springframework.cloud.dataflow: debug
+    org.springframework.cloud.common: debug
+    org.apache.hc: debug
+    org.apache.http: debug
+  threshold:
+    console: debug
