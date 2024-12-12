@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,15 +80,16 @@ public abstract class AbstractPostgresDatabaseTests extends AbstractDatabaseTest
 	@SuppressWarnings("deprecation")
 	@Test
 	@DataflowMain
-	public void migration210211() throws URISyntaxException {
+	@Disabled("Reactivate when 3.1 is released")
+	public void migration30_31() throws URISyntaxException {
 		log.info("Running testMigrationError()");
 		this.dataflowCluster.startSkipperDatabase(getDatabaseTag());
 		this.dataflowCluster.startDataflowDatabase(getDatabaseTag());
 
-		this.dataflowCluster.startSkipper(TagNames.SKIPPER_2_9);
+		this.dataflowCluster.startSkipper(TagNames.SKIPPER_3_0);
 		assertSkipperServerRunning(this.dataflowCluster);
 
-		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_2_10);
+		this.dataflowCluster.startDataflow(TagNames.DATAFLOW_3_0);
 		assertDataflowServerRunning(this.dataflowCluster);
 
 		ObjectMapper objectMapper = new ObjectMapper();
