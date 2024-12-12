@@ -164,6 +164,7 @@ public class DataflowOAuthSecurityConfiguration {
 			auth.userInfoEndpoint(customizer -> {
 				customizer.userService(plainOauth2UserService).oidcUserService(oidcUserService);
 			});
+			auth.defaultSuccessUrl(authorizationProperties.getDashboardUrl());
 		});
 
 		http.oauth2ResourceServer(resourceserver -> {

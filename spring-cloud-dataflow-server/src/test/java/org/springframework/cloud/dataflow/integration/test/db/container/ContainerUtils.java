@@ -33,11 +33,15 @@ public class ContainerUtils {
 	public static void output(String container, OutputFrame outputFrame) {
 		switch (outputFrame.getType()) {
 			case STDOUT:
-				logger.info("{}:{}", container, outputFrame.getUtf8String());
+				logger.info("{}:{}", container, outputFrame.getUtf8StringWithoutLineEnding());
+				break;
 			case STDERR:
-				logger.error("{}:{}", container, outputFrame.getUtf8String());
+				logger.error("{}:{}", container, outputFrame.getUtf8StringWithoutLineEnding());
+				break;
 			case END:
-				logger.info("{}:END:{}", container, outputFrame.getUtf8String());
+				// don't log logger.info("{}:END:{}", container, outputFrame.getUtf8StringWithoutLineEnding());
+				break;
+
 		}
 	}
 

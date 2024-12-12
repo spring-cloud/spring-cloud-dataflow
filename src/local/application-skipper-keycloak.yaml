@@ -1,0 +1,46 @@
+spring:
+  cloud:
+    skipper:
+      security:
+        authorization:
+          provider-role-mappings:
+            keycloak:
+              map-group-claims: false
+              map-oauth-scopes: false
+              role-mappings:
+                ROLE_VIEW: dataflow_view
+                ROLE_CREATE: dataflow_create
+                ROLE_MANAGE: dataflow_manage
+                ROLE_DEPLOY: dataflow_deploy
+                ROLE_DESTROY: dataflow_destroy
+                ROLE_MODIFY: dataflow_modify
+                ROLE_SCHEDULE: dataflow_schedule
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: 'http://localhost:8080/realms/dataflow'
+            jwk-set-uri: 'http://localhost:8080/realms/dataflow/protocol/openid-connect/certs'
+            token-uri: 'http://localhost:8080/realms/dataflow/protocol/openid-connect/token'
+            user-info-uri: 'http://localhost:8080/realms/dataflow/protocol/openid-connect/userinfo'
+            user-name-attribute: 'user_name'
+            authorization-uri: 'http://localhost:8080/realms/dataflow/protocol/openid-connect/auth'
+        registration:
+          keycloak:
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+            client-id: 'dataflow'
+            client-name: 'dataflow'
+            # aligns with the realm imported from the data directory
+            client-secret: '090RucamvekrMLyGHMr4lkHX9xhAlsqK'
+            provider: 'keycloak'
+            authorization-grant-type: 'authorization_code'
+            scope:
+              - openid
+              - roles
+      resourceserver:
+        opaquetoken:
+          introspection-uri: http://localhost:8080/realms/dataflow/protocol/openid-connect/token/introspect
+          client-id: 'dataflow'
+          # aligns with the realm imported from the data directory
+          client-secret: '090RucamvekrMLyGHMr4lkHX9xhAlsqK'

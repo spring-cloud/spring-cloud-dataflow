@@ -19,7 +19,6 @@ package org.springframework.cloud.dataflow.integration.test.db;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,7 +58,7 @@ public abstract class AbstractDataflowTests {
 
 	public final static String SKIPPER_IMAGE_PREFIX = "springcloud/spring-cloud-skipper-server:";
 
-	public final static List<ClusterContainer> DATAFLOW_CONTAINERS = Arrays.asList(
+	public final static List<ClusterContainer> DATAFLOW_CONTAINERS = List.of(
 		ClusterContainer.from(TagNames.DATAFLOW_2_7, DATAFLOW_IMAGE_PREFIX + "2.7.2"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_8, DATAFLOW_IMAGE_PREFIX + "2.8.4"),
 		ClusterContainer.from(TagNames.DATAFLOW_2_9, DATAFLOW_IMAGE_PREFIX + "2.9.6"),
@@ -68,7 +67,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.DATAFLOW_3_0, DATAFLOW_IMAGE_PREFIX + "3.0.0")
 	);
 
-	public final static List<ClusterContainer> SKIPPER_CONTAINERS = Arrays.asList(
+	public final static List<ClusterContainer> SKIPPER_CONTAINERS = List.of(
 		ClusterContainer.from(TagNames.SKIPPER_2_6, SKIPPER_IMAGE_PREFIX + "2.6.2"),
 		ClusterContainer.from(TagNames.SKIPPER_2_7, SKIPPER_IMAGE_PREFIX + "2.7.4"),
 		ClusterContainer.from(TagNames.SKIPPER_2_8, SKIPPER_IMAGE_PREFIX + "2.8.6"),
@@ -77,7 +76,7 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.SKIPPER_3_0, SKIPPER_IMAGE_PREFIX + "3.0.0")
 	);
 
-	public final static List<ClusterContainer> DATABASE_CONTAINERS = Arrays.asList(
+	public final static List<ClusterContainer> DATABASE_CONTAINERS = List.of(
 		ClusterContainer.from(TagNames.POSTGRES_10, "postgres:10", TagNames.POSTGRES),
 		ClusterContainer.from(TagNames.POSTGRES_14, "postgres:14", TagNames.POSTGRES_14),
 		ClusterContainer.from(TagNames.MARIADB_10_4, "mariadb:10.4", TagNames.MARIADB),
@@ -91,8 +90,10 @@ public abstract class AbstractDataflowTests {
 		ClusterContainer.from(TagNames.DB2_11_5_8_0, "icr.io/db2_community/db2:11.5.8.0", TagNames.DB2)
 	);
 
-	public final static List<ClusterContainer> OAUTH_CONTAINERS = Collections.singletonList(
-		ClusterContainer.from(TagNames.UAA_4_32, "springcloud/scdf-uaa-test:4.32", TagNames.UAA)
+	public final static List<ClusterContainer> OAUTH_CONTAINERS = List.of(
+		ClusterContainer.from(TagNames.UAA_4_32, "springcloud/scdf-uaa-test:4.32", TagNames.UAA),
+		ClusterContainer.from(TagNames.KEYCLOAK_25, "quay.io/keycloak/keycloak:25.0", TagNames.KEYCLOAK),
+		ClusterContainer.from(TagNames.KEYCLOAK_26, "quay.io/keycloak/keycloak:26.0", TagNames.KEYCLOAK)
 	);
 
 	@Autowired

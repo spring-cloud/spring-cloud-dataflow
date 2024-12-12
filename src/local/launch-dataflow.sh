@@ -16,7 +16,7 @@ SCDIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 SCDIR=$(realpath $SCDIR)
 PROJECT_DIR=$(realpath "$SCDIR/../..")
 if [ "$DATAFLOW_VERSION" = "" ]; then
-    DATAFLOW_VERSION=2.11.3-SNAPSHOT
+    DATAFLOW_VERSION=3.0.0-SNAPSHOT
 fi
 export PLATFORM_TYPE=local
 COMPOSE_PROFILE=
@@ -63,7 +63,7 @@ if [ "$SKIPPER_CLI" = "true" ]; then
         --spring.datasource.username=spring \
         --spring.datasource.password=spring \
         --spring.datasource.driver-class-name=org.mariadb.jdbc.Driver \
-        --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect &
+        --spring.jpa.database.platform=org.hibernate.dialect.MariaDB106Dialect | tee skipper.log &
     echo "$!" > skipper.pid
 fi
 if [ "$COMPOSE_PROFILE" == "skipper" ] || [ "$SKIPPER_CLI" == "true" ]; then
@@ -97,7 +97,7 @@ fi
 if [ "$START_DATAFLOW" == "true" ]; then
     echo "launching $SCDF_JAR with $DATAFLOW_ARGS"
     read -p "Press any key to launch Spring Cloud Data Flow..."
-    java -jar "$SCDF_JAR" $DATAFLOW_ARGS &
+    java -jar "$SCDF_JAR" $DATAFLOW_ARGS | tee server.log  &
     echo "$!" > dataflow.pid
 else
     echo "You may execute: java -jar $SCDF_JAR $DATAFLOW_ARGS"
