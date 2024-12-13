@@ -171,7 +171,7 @@ if [ "$PROMETHEUS" = "true" ] || [ "$METRICS" = "prometheus" ]; then
     if [ "$K8S_DRIVER" != "tmc" ] && [ "$K8S_DRIVER" != "gke" ]; then
         sh "$SCDIR/load-image.sh" "springcloud/spring-cloud-dataflow-grafana-prometheus:$DATAFLOW_VERSION" false
         sh "$SCDIR/load-image.sh" "prom/prometheus:v2.37.8"
-        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy:2.0.0-M2"
+        sh "$SCDIR/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy:2.0.0-M4"
     fi
     set +e
     kubectl create --namespace "$NS" serviceaccount prometheus-rsocket-proxy
