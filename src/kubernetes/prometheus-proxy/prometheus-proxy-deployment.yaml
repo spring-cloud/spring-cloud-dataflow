@@ -17,7 +17,7 @@ spec:
       serviceAccountName: prometheus-rsocket-proxy
       containers:
         - name: prometheus-rsocket-proxy
-          image: micrometermetrics/prometheus-rsocket-proxy:2.0.0-M2
+          image: micrometermetrics/prometheus-rsocket-proxy:2.0.0-M4
           imagePullPolicy: IfNotPresent
           ports:
             - name: scrape

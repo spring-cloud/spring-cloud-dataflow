@@ -67,7 +67,7 @@ else
     sh "$K8S/load-image.sh" "springcloud/spring-cloud-dataflow-server" "$DATAFLOW_VERSION" true
 fi
 if [ "$PROMETHEUS" = "true" ]; then
-    sh "$K8S/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "2.0.0-M2" false
+    sh "$K8S/load-image.sh" "micrometermetrics/prometheus-rsocket-proxy" "2.0.0-M4" false
 fi
 if [ "$REGISTRY" = "" ]; then
     REGISTRY=springcloud
