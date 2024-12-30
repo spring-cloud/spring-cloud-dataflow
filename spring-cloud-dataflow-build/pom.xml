@@ -26,7 +26,7 @@
 			- spring-cloud-dataflow-build-dependencies parent version
 			- spring-cloud-dataflow-parent property
 		========================================================================== -->
-		<spring-boot.version>3.3.5</spring-boot.version>
+		<spring-boot.version>3.3.7</spring-boot.version>
 		<!-- =========================================================================
 		Keep dataflow version in sync with project.version in the following locations:
 			- spring-cloud-dataflow-build property (here)
