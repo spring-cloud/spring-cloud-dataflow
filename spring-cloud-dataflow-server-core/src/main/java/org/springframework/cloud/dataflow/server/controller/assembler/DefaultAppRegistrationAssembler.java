@@ -44,12 +44,14 @@ public class DefaultAppRegistrationAssembler<R extends AppRegistrationResource> 
 						registration.getType().name(),
 						registration.getVersion(),
 						registration.getUri().toString(),
+						registration.getMetadataUri() != null ? registration.getMetadataUri().toString() : null,
 						registration.isDefaultVersion()
 				) : new AppRegistrationResource(
 						registration.getName(),
 						registration.getType().name(),
 						registration.getVersion(),
 						registration.getUri().toString(),
+						registration.getMetadataUri() != null ? registration.getMetadataUri().toString() : null,
 						registration.isDefaultVersion(),
 						registration.getVersions()
 				);
