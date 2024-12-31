@@ -48,6 +48,10 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	private String uri;
 
 	/**
+	 * URI for app metaData
+	 */
+	private String metaDataUri;
+	/**
 	 * App version.
 	 */
 	private String version;
@@ -74,7 +78,7 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	}
 
 	public AppRegistrationResource(String name, String type, String uri) {
-		this(name, type, null, uri, false);
+		this(name, type, null, uri, null, false);
 	}
 
 	/**
@@ -86,11 +90,12 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param uri uri for app resource
 	 * @param defaultVersion is this application selected to the be default version in DSL
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion) {
+	public AppRegistrationResource(String name, String type, String version, String uri, String metaDataUri, Boolean defaultVersion) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
 		this.uri = uri;
+		this.metaDataUri = metaDataUri;
 		this.defaultVersion = defaultVersion;
 	}
 
@@ -101,14 +106,16 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param type app type
 	 * @param version app version
 	 * @param uri uri for app resource
+	 * @param metaDataUri uri for app metadata
 	 * @param defaultVersion is this application selected to the be default version in DSL
 	 * @param versions all the registered versions of this application
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion, Set<String> versions) {
+	public AppRegistrationResource(String name, String type, String version, String uri, String metaDataUri, Boolean defaultVersion, Set<String> versions) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
 		this.uri = uri;
+		this.metaDataUri = metaDataUri;
 		this.defaultVersion = defaultVersion;
 		this.versions = versions;
 	}
@@ -120,15 +127,17 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 	 * @param type app type
 	 * @param version app version
 	 * @param uri uri for app resource
+	 * @param metaDataUri uri for app metadata
 	 * @param defaultVersion is this application selected to the be default version in DSL
 	 * @param versions all the registered versions of this application
 	 * @param label the label name of the application
 	 */
-	public AppRegistrationResource(String name, String type, String version, String uri, Boolean defaultVersion, Set<String> versions, String label) {
+	public AppRegistrationResource(String name, String type, String version, String uri, String metaDataUri, Boolean defaultVersion, Set<String> versions, String label) {
 		this.name = name;
 		this.type = type;
 		this.version = version;
 		this.uri = uri;
+		this.metaDataUri = metaDataUri;
 		this.defaultVersion = defaultVersion;
 		this.versions = versions;
 		this.label = label;
@@ -182,6 +191,10 @@ public class AppRegistrationResource extends RepresentationModel<AppRegistration
 
 	public void setLabel(String label) {
 		this.label = label;
+	}
+
+	public String getMetaDataUri() {
+		return metaDataUri;
 	}
 
 	/**

@@ -124,17 +124,35 @@ class AppRegistryControllerTests {
 	}
 
 	@Test
+	void findRegisteredAppNoMetadata() throws Exception {
+		// given
+		mockMvc.perform(
+			post("/apps/sink/log1/3.0.0")
+				.queryParam("bootVersion", "3")
+				.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0")
+				.accept(MediaType.APPLICATION_JSON)
+		).andExpect(status().isCreated());
+		// when
+		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
+		// then
+		assertThat(registration.getUri()).hasToString("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0");
+	}
+
+	@Test
 	void findRegisteredApp() throws Exception {
 		// given
 		mockMvc.perform(
 				post("/apps/sink/log1/3.0.0")
 						.queryParam("bootVersion", "3")
-						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0").accept(MediaType.APPLICATION_JSON)
+						.param("uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0")
+						.param("metadata-uri", "maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:3.0.0")
+						.accept(MediaType.APPLICATION_JSON)
 				).andExpect(status().isCreated());
 		// when
 		AppRegistration registration = this.appRegistryService.find("log1", ApplicationType.sink);
 		// then
 		assertThat(registration.getUri()).hasToString("maven://org.springframework.cloud.stream.app:log-sink-rabbit:3.0.0");
+		assertThat(registration.getMetadataUri()).hasToString("maven://org.springframework.cloud.stream.app:log-sink-rabbit:jar:metadata:3.0.0");
 	}
 
 	@Test

@@ -176,6 +176,7 @@ class AppRegistryDocumentation extends BaseDocumentation {
 										fieldWithPath("label").description("The label name of the application"),
 										fieldWithPath("type").description("The type of the application. One of " + Arrays.asList(ApplicationType.values())),
 										fieldWithPath("uri").description("The uri of the application"),
+										fieldWithPath("metaDataUri").description("The uri of the application metadata").optional(),
 										fieldWithPath("version").description("The version of the application"),
 										fieldWithPath("versions").description("All the registered versions of the application"),
 										fieldWithPath("defaultVersion").description("If true, the application is the default version"),

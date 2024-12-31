@@ -78,7 +78,7 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * @param isDefault is this the default app
 	 */
 	public DetailedAppRegistrationResource(String name, String type, String version, String coordinates,  Boolean isDefault) {
-		super(name, type, version, coordinates, isDefault);
+		super(name, type, version, coordinates, null, isDefault);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class DetailedAppRegistrationResource extends AppRegistrationResource {
 	 * data
 	 */
 	public DetailedAppRegistrationResource(AppRegistrationResource resource) {
-		super(resource.getName(), resource.getType(), resource.getVersion(), resource.getUri(), resource.getDefaultVersion());
+		super(resource.getName(), resource.getType(), resource.getVersion(), resource.getUri(), resource.getMetaDataUri(), resource.getDefaultVersion());
 	}
 
 	/**
