@@ -1,5 +1,3 @@
-version: '3'
-
 # Reconfigures the default docker-compose.yml to replace Kafka/Zookeeper by RabbitMQ
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-rabbitmq.yml up
 services:

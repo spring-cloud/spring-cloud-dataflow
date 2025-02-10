@@ -1,5 +1,3 @@
-version: '3'
-
 # Configuration environment variables:
 # - DATAFLOW_VERSION and SKIPPER_VERSION specify what DataFlow and Skipper image versions to use.
 # - STREAM_APPS_URI and TASK_APPS_URI are used to specify what Stream and Task applications to pre-register.

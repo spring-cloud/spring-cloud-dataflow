@@ -1,5 +1,3 @@
-version: '3'
-
 # Enables HTTPS for the SCDF and Skipper servers as well as all deployed stream and task applications.
 #
 # Before starting docker-compose you must alter the following URI variables to use the HTTPS instead of HTTP:
