@@ -1,5 +1,3 @@
-version: '3'
-
 # Reconfigures the default docker-compose.yml to replace MariaDB by Postgres
 # Usage: docker-compose -f ./docker-compose.yml -f ./docker-compose-postgres.yml up
 services:

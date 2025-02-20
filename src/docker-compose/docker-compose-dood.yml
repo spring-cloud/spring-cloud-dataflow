@@ -1,5 +1,3 @@
-version: '3'
-
 # Allows deploying docker (both Stream and Task) apps. The Docker-out-of-Docker (DooD) approach is used to allow Skipper
 # and DataFlow (running inside docker containers) to deploy stream and task docker apps in per-app docker containers.
 #
