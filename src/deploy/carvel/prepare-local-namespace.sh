@@ -49,6 +49,6 @@ $SCDIR/add-local-registry-secret.sh reg-creds-dockerhub index.docker.io "$DOCKER
 patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"}]}' "$SA"
 
 if [ "$SCDF_TYPE" = "pro" ]; then
-  $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry spring-scdf-docker-virtual.usw1.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
+  $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry spring-scdf-docker-prod-local.usw1.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
   patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dev-registry"}]}' "$SA"
 fi
