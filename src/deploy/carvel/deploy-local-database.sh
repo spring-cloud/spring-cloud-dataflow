@@ -12,13 +12,14 @@ if [ "$1" = "" ]; then
     echo "<database> must be provided. Choose one of postgresql or mariadb"
     exit 1
 fi
-JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
 case $1 in
 "postgresql" | "postgres")
     DATABASE=postgresql
+    JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
     ;;
 "mariadb" | "maria")
     DATABASE=mariadb
+    JDBC_URL="jdbc:$DATABASE://$DATABASE.$DATABASE/dataflow"
     ;;
 #"oracle")
 #    DATABASE=oracle
@@ -61,7 +62,7 @@ metadata:
 spec:
   toNamespace: '*'
 EOF
-echo "Create SecretExport $SECRET_NAME to $NS"
+echo "Create SecretExport $DATABASE to $NS"
 if [ "$DEBUG" = "true" ]; then
     cat $FILE
 fi

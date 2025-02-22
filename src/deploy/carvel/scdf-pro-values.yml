@@ -3,8 +3,8 @@ scdf:
     type: rabbit
   server:
     image:
-      repository: spring-scdf-docker-dev-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server
-      tag: 1.6.0
+      repository: spring-scdf-docker-prod-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-server
+      tag: 1.6.4
     service:
       type: LoadBalancer
     env:
@@ -16,8 +16,8 @@ scdf:
         value: "true"
   skipper:
     image:
-      repository: springcloud/spring-cloud-skipper-server
-      tag: 2.11.2
+      repository: spring-scdf-docker-prod-local.usw1.packages.broadcom.com/p-scdf-for-kubernetes/scdf-pro-skipper
+      tag: 1.6.4
   registry:
     secret:
       ref: "reg-creds-dev-registry"

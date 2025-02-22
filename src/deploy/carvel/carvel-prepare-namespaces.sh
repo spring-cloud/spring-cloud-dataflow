@@ -74,8 +74,7 @@ if [ "$SCDF_TYPE" = "pro" ]; then
     else
         check_env TANZU_DOCKER_PASSWORD
         # for production
-        # $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry registry.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
-        $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry spring-scdf-docker-virtual.usw1.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
+        $SCDIR/carvel-add-registry-secret.sh reg-creds-dev-registry spring-scdf-docker-prod-local.usw1.packages.broadcom.com "$TANZU_DOCKER_USERNAME" "$TANZU_DOCKER_PASSWORD"
         $SCDIR/carvel-import-secret.sh reg-creds-dev-registry $NS
         patch_serviceaccount '{"imagePullSecrets": [{"name": "reg-creds-dockerhub"},{"name":"scdfmetadata"},{"name": "reg-creds-dev-registry"}]}' $SA
     fi

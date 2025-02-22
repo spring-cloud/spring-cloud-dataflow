@@ -3,20 +3,10 @@ if [ "$2" = "" ]; then
     echo "Argument required: <secret-name> <target-namespace>"
     exit 1
 fi
-IMPORT_TYPE=placeholder
 SECRET_NAME=$1
 NAMESPACE=$2
-if [ "$3" != "" ] && [ "$3" != "--import" ] && [ "$3" != "--placeholder" ]; then
-    FROM_NAMESPACE=$3
-    shift
-else
-    FROM_NAMESPACE=secret-ns
-fi
-if [ "$3" == "--import" ]; then
-    IMPORT_TYPE=import
-elif [ "$3" == "--placeholder" ]; then
-    IMPORT_TYPE=placeholder
-fi
+[ "$3" != "" ] && IMPORT_TYPE=import || IMPORT_TYPE=placeholder
+[ "$3" != "" ] && FROM_NAMESPACE=$3 || FROM_NAMESPACE=secret-ns
 if [ "$SECRET_NAME" = "" ]; then
     echo "SECRET_NAME required"
     exit 2
