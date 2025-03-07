@@ -57,7 +57,7 @@ jobs:
         echo "::info ::Test report for ${{ matrix.group }} published at ${{ steps.test_report.outputs.url_html }}"
     - name: 'Action: Upload Unit Test Results'
       if: ${{ success() || failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.group }}-test-results-surefire
         path: './**/target/surefire-reports/**/*.*'
@@ -65,7 +65,7 @@ jobs:
         if-no-files-found: ignore
     - name: 'Action: Upload Integration Test Results'
       if: ${{ success() || failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.group }}-test-results-failsafe
         path: './**/target/failsafe-reports/**/*.*'
@@ -118,7 +118,7 @@ jobs:
           echo "::info ::Test report for ${{ matrix.database }} published at ${{ steps.test_report.outputs.url_html }}"
       - name: 'Action: Upload Unit Test Results'
         if: ${{ success() || failure() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.database }}-test-results-surefire
           path: './**/target/surefire-reports/**/*.*'
