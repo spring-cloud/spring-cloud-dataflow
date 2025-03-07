@@ -149,7 +149,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: ${{ matrix.db }}-test-results
           path: '**/target/surefire-reports/**/*.*'
           retention-days: 7
           if-no-files-found: ignore
