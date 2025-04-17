@@ -942,6 +942,11 @@ The majority of the deployment and application properties were set by Data Flow 
 
 You can roll back to a previous version of the stream by using the `stream rollback` command:
 
+When performing a rollback, Skipper creates a new version of the stream and attempts to deploy it. If all the applications in that version start up successfully Skipper marks the rollback as successful and the stream state is `DEPLOYED`.
+However, if any application fails to start, Skipper will terminate the associated rollback pods. Skipper still considers the latest, failed deployment as the current version of the stream. If all apps fail to start the state of the stream will be shown as "UNDEPLOYED". If at least one app starts then the stream state will be "PARTIAL".
+
+NOTE: In the case of a failed rollback, the previous version is running.
+
 ====
 [source,bash]
 ----
